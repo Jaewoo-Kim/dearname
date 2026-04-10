@@ -915,7 +915,7 @@
 
     <main class="report-main">
         <div class="report-card" id="self-saju-section" style="display:none;">
-            <span class="section-tag">Saju Destiny Code</span>
+            <span class="section-tag">사주 운명 분석</span>
             <h2 class="section-title">사주 원국 (四柱八字)</h2>
             <p style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:20px;" id="self-saju-meta-label"></p>
             <div class="saju-mingsik-wrap">
@@ -934,14 +934,14 @@
                     </tbody>
                 </table>
             </div>
-            <h3 style="font-size:1rem;font-weight:800;color:var(--bg-dark);margin:28px 0 14px;">오행(五行) 분포</h3>
+            <h3 style="font-size:1rem;font-weight:800;color:var(--bg-dark);margin:28px 0 14px;">오행(五行) 분포 <span id="self-oheng-balance-badge" style="display:inline-block;margin-left:8px;vertical-align:middle;"></span></h3>
             <div class="oheng-dist-wrap" id="self-oheng-dist">
                 <!-- JS로 동적 생성 -->
             </div>
         </div>
 
         <div class="report-card">
-            <span class="section-tag">Acoustic Analysis</span>
+            <span class="section-tag">발음 오행·음양</span>
             <h2 class="section-title">발음 오행 및 음양 분석</h2>
             <p style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 30px;">
                 이름을 부를 때 발생하는 소리의 파동은 아기의 평생 성격 형성에 관여합니다. 초성의 오행 흐름과 모음의 음양 밸런스를 분석합니다.
@@ -969,13 +969,13 @@
         </div>
 
         <div class="report-card">
-            <span class="section-tag">81 Numerology</span>
+            <span class="section-tag">수리 운세</span>
             <h2 class="section-title">81수리 사격(四格) 심층 분석</h2>
             <p style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 40px;">
                 선택하신 한자의 획수를 바탕으로 <b style="color:var(--bg-dark);">초년(원격), 청년(형격), 장년(이격), 말년(정격)</b>의 4단계 인생 운세를 도출했습니다.
             </p>
             
-         <div class="suri-grid">
+         <div class="suri-cards-wrap">
                 <div class="suri-card">
                     <div class="suri-badge"><span class="num" id="suri-cho-num">15</span><span class="txt">초년운</span></div>
                     <div class="suri-info">
@@ -1008,7 +1008,7 @@
         </div>
 
         <div class="report-card">
-            <span class="section-tag">Resource Element</span>
+            <span class="section-tag">자원 오행 평가</span>
             <h2 class="section-title">수리 및 자원 오행 평가</h2>
             
             <table class="tech-table">
@@ -1040,9 +1040,12 @@
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 80px;">
-            <button onclick="showMainView()" class="btn-navy" style="width: auto; padding: 18px 50px; font-size: 1.1rem;">
-                다시 메인으로 돌아가기
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 80px;">
+            <button onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView({behavior:'smooth'});}, 100);" class="btn btn-gold" style="width: auto; padding: 18px 36px; font-size: 1rem;">
+                AI 대가의 프리미엄 소견서 의뢰
+            </button>
+            <button onclick="window.print();" class="btn btn-navy" style="width: auto; padding: 18px 36px; font-size: 1rem;">
+                PDF로 출력하기
             </button>
         </div>
     </main>
@@ -2703,6 +2706,19 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         for (const p of pillars) {
             const go = _CG_OHENG[p.gan]; if (go) ohengCount[go]++;
             const jo = _JJ_OHENG[p.ji];  if (jo) ohengCount[jo]++;
+        }
+
+        // ── 오행 균형/불균형 뱃지 ────────────────────────────────────
+        const sajuScores = (typeof calcOhengScores === 'function') ? calcOhengScores(saju) : null;
+        const balanceBadge = document.getElementById('self-oheng-balance-badge');
+        if (balanceBadge && sajuScores) {
+            const vals = Object.values(sajuScores);
+            const hasExtremeWeak   = vals.some(s => s < 10);
+            const hasExtremeStrong = vals.some(s => s >= 50);
+            const isBalanced = !hasExtremeWeak && !hasExtremeStrong;
+            balanceBadge.innerHTML = isBalanced
+                ? `<span style="background:#dcfce7;color:#16a34a;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">균형</span>`
+                : `<span style="background:#fee2e2;color:#dc2626;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">불균형</span>`;
         }
 
         // ── 이름 한자 오행 기여 수집 ─────────────────────────────────
