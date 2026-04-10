@@ -32,7 +32,7 @@
 
 ### 공개 함수
 
-#### `calcSaju(dateStr, timeStr) → Object|null`
+#### `calcSaju(dateStr, timeStr, options) → Object|null`
 
 만세력 기반 사주 4주 계산. 핵심 진입점.
 
@@ -40,6 +40,14 @@
 |---|---|---|
 | `dateStr` | `string` | 양력 `'YYYY-MM-DD'` |
 | `timeStr` | `string` | `'HH:MM'` (기본 `'12:00'`) |
+| `options.apply30min` | `boolean` | 한국 실태양시 보정 +30분 적용 (기본 `true`) |
+| `options.yajasi` | `boolean` | 야자시(夜子時) 적용 (기본 `true`) |
+
+**-30분 보정 원리:** KST(UTC+9)는 한국 경도(127.5°E) 실태양시보다 30분 빠름.  
+출생 시각에 +30분을 적용한 뒤 절기·시주 경계와 비교.
+
+**야자시(夜子時):** 원래 입력 시각 23:00 이상이면 시주 天干 계산에 다음날 일간 사용.  
+일주(日柱)는 달력 날짜 기준 유지.
 
 **반환:**
 ```js
@@ -74,7 +82,7 @@
 | `< 50` | `'strong'` |
 | `>= 50` | `'extreme_strong'` |
 
-#### `calcSajuOhengGrade(hanjaOhengs, birthDate, birthTime) → Object`
+#### `calcSajuOhengGrade(hanjaOhengs, birthDate, birthTime, options) → Object`
 
 셀프작명 6번째 지표(사주오행) 전용.
 
@@ -83,6 +91,7 @@
 | `hanjaOhengs` | `string[]` | 선택된 한자들의 자원오행 배열 |
 | `birthDate` | `string` | 양력 `'YYYY-MM-DD'` |
 | `birthTime` | `string` | `'HH:MM'` |
+| `options` | `Object` | `calcSaju()` options와 동일 (apply30min, yajasi) |
 
 **반환:** `{ grade: '대길'|'길'|'평'|'흉', desc: string }`
 
@@ -96,11 +105,35 @@
 | `getTimePillar(dayGan, hour)` | 五子遁法으로 시주 계산 |
 | `parsePillar(str)` | `"己卯"` → `{gan:'己', ji:'卯'}` |
 
+### 내부 함수 변경 사항
+
+| 함수 | 변경 내용 |
+|---|---|
+| `getYearPillar(year)` | 내부 동일. `calcSaju`에서 입춘 이전 감지 후 `year-1` 전달로 간접 수정 |
+| `calcSaju` 내부 연주 보정 | 입춘(j['2']) 이전이면 `yearForPillar = adjY - 1` 적용 |
+| `calcSaju` 내부 월주 보정 | 입춘 이전이면 `MONTH_GAN_BASE` 五虎遁法으로 天干 재산출 |
+
+**五虎遁法 月干 산출표:**
+
+| 年干 | 子月干 시작 | base |
+|---|---|---|
+| 甲/己 | 甲 | 0 |
+| 乙/庚 | 丙 | 2 |
+| 丙/辛 | 戊 | 4 |
+| 丁/壬 | 庚 | 6 |
+| 戊/癸 | 壬 | 8 |
+
+`monthGan = CHEONGAN[(base + JIJI.indexOf(monthJi)) % 10]`
+
 ### 검증 케이스
 
-| 입력 | 기대값 |
-|---|---|
-| `calcSaju('2025-03-25', '16:29')` | 연乙巳 월己卯 일癸巳 시庚申 |
+| 입력 | 기대값 | 비고 |
+|---|---|---|
+| `calcSaju('2025-03-25', '16:29')` | 연乙巳 월己卯 일癸巳 시庚申 | 기준값 |
+| `calcSaju('2024-02-04', '17:20')` | 연甲辰 월丙寅 일戊戌 시辛酉 | 입춘 경계 (-30분 보정) |
+| `calcSaju('2024-05-10', '23:40')` | 연甲辰 월己巳 일甲戌 시丙子 | 야자시 |
+| `calcSaju('2024-01-15', '12:00')` | 연癸卯 월癸丑 | 입춘 이전 연주·월주 |
+| `calcSaju('2025-01-01', '00:00')` | 연甲辰 월甲子 | 입춘 이전 2025년 |
 
 ---
 

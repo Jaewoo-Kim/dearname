@@ -220,6 +220,40 @@ showReportViewWithoutLock()
 
 ---
 
+### 사주 엔진 정확도 개선 (만세력 버그 수정)
+
+#### 수정된 버그 3종
+
+**1. -30분 시간 보정 (`apply30min`):**  
+KST(UTC+9)는 한국 실태양시보다 30분 빠름. 절기·시주 경계 비교 전 출생 시각에 +30분 적용.
+
+**2. 야자시(`yajasi`):**  
+원래 입력 시각 23:00 이상 → 시주 天干 계산에 다음날 일간 사용 (일주는 달력 날짜 유지).
+
+**3. 연주·월주 입춘 경계 버그 (신규 발견·수정):**  
+- `getYearPillar()`가 달력 연도 기준 → 1~2월 초 입춘 이전 출생자 연주 오류  
+- 예: `2024-01-15` → ~~甲辰年 乙丑月~~ → **癸卯年 癸丑月**  
+- 입춘 이전이면 `yearForPillar = adjY - 1`  
+- 월주 天干은 五虎遁法(`MONTH_GAN_BASE`)으로 전년도 사이클 기준 재산출
+
+#### options 파라미터 (calcSaju에 추가)
+
+```js
+calcSaju(dateStr, timeStr, {
+  apply30min: true,  // 기본: true (한국 실태양시 보정)
+  yajasi:     true,  // 기본: true (야자시 적용)
+})
+```
+
+#### index.html UI 추가
+
+셀프작명 폼 / 프리미엄 폼 각각에 체크박스 추가:
+- `self-opt-yajasi`, `self-opt-30min`
+- `prem-opt-yajasi`, `prem-opt-30min`  
+(기본값 checked, 각 calcSaju 호출 시 options로 전달)
+
+---
+
 ### 모바일 반응형 개선
 
 `@media (max-width: 768px)`:

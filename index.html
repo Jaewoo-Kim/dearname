@@ -723,6 +723,10 @@
                         <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                             <input type="date" id="birth-date" style="flex: 1; min-width: 140px;" onchange="updateSelfLunarLabel()">
                             <input type="time" id="birth-time" style="flex: 1; min-width: 120px;">
+                            <div style="display:flex;flex-direction:column;gap:4px;justify-content:center;font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">
+                                <label style="cursor:pointer;display:flex;align-items:center;gap:5px;" title="야자시(夜子時): 밤 11시~자정은 당일 일주를 유지하되 시주 천간은 다음날 일간 기준으로 계산합니다."><input type="checkbox" id="self-opt-yajasi" checked> 야자시</label>
+                                <label style="cursor:pointer;display:flex;align-items:center;gap:5px;" title="한국 실태양시 보정: KST 기준 출생 시각에 +30분을 적용하여 절기·시주 경계를 비교합니다."><input type="checkbox" id="self-opt-30min" checked> −30분</label>
+                            </div>
                             <select style="flex: 1; min-width: 100px;"><option>양력</option><option>음력</option><option>윤달</option></select>
                             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                                 <label style="font-size:0.82rem;color:var(--text-secondary);font-weight:600;">달력:</label>
@@ -794,6 +798,10 @@
                             <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                                 <input type="date" id="prem-birth-date" class="compact-input" style="flex: 1; min-width: 140px; margin-bottom: 0;" onchange="updateLunarLabel()">
                                 <input type="time" id="prem-birth-time" class="compact-input" style="flex: 1; min-width: 120px; margin-bottom: 0;">
+                                <div style="display:flex;flex-direction:column;gap:4px;justify-content:center;font-size:0.8rem;color:rgba(255,255,255,0.55);white-space:nowrap;">
+                                    <label style="cursor:pointer;display:flex;align-items:center;gap:5px;" title="야자시(夜子時): 밤 11시~자정은 당일 일주를 유지하되 시주 천간은 다음날 일간 기준으로 계산합니다."><input type="checkbox" id="prem-opt-yajasi" checked> 야자시</label>
+                                    <label style="cursor:pointer;display:flex;align-items:center;gap:5px;" title="한국 실태양시 보정: KST 기준 출생 시각에 +30분을 적용하여 절기·시주 경계를 비교합니다."><input type="checkbox" id="prem-opt-30min" checked> −30분</label>
+                                </div>
                                 <div class="premium-pill-group" style="flex: 1.5; min-width: 250px;">
                                     <label class="premium-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="pill-label">양력</span></label>
                                     <label class="premium-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="pill-label">음력</span></label>
@@ -1764,8 +1772,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const birthDateVal  = (_selfCalType !== 'solar' && typeof normalizeToSolar === 'function')
             ? (normalizeToSolar(_birthDateRaw, _selfCalType) || _birthDateRaw)
             : _birthDateRaw;
+        const _sajuOpts0 = {
+            yajasi:     document.getElementById('self-opt-yajasi')?.checked !== false,
+            apply30min: document.getElementById('self-opt-30min')?.checked !== false
+        };
         const _sajuResult = (typeof calcSajuOhengGrade === 'function')
-            ? calcSajuOhengGrade(hanjaOhengs, birthDateVal, birthTimeVal)
+            ? calcSajuOhengGrade(hanjaOhengs, birthDateVal, birthTimeVal, _sajuOpts0)
             : { grade: '평', desc: '사주 엔진 로딩 중...' };
         const sajuGrade = _sajuResult.grade;
         const sajuDesc  = _sajuResult.desc;
@@ -2114,8 +2126,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             ? (normalizeToSolar(birthDateRaw, calType) || birthDateRaw)
             : birthDateRaw;
 
+        const _premSajuOpts = {
+            yajasi:     document.getElementById('prem-opt-yajasi')?.checked !== false,
+            apply30min: document.getElementById('prem-opt-30min')?.checked !== false
+        };
         const saju = (typeof calcSaju === 'function' && birthDate)
-            ? calcSaju(birthDate, birthTime) : null;
+            ? calcSaju(birthDate, birthTime, _premSajuOpts) : null;
         const scores    = (saju && typeof calcOhengScores === 'function') ? calcOhengScores(saju) : {'木':20,'火':20,'土':20,'金':20,'水':20};
         const nameSpec  = (typeof buildNameSpec === 'function') ? buildNameSpec(saju, scores) : {prefer:[],avoid:[],minCount:{},strategy:'balance',gridType:'general'};
 
@@ -2620,7 +2636,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             section.style.display = 'none';
             return;
         }
-        const saju = calcSaju(birthDate, birthTime || '12:00');
+        const _selfSajuOpts = {
+            yajasi:     document.getElementById('self-opt-yajasi')?.checked !== false,
+            apply30min: document.getElementById('self-opt-30min')?.checked !== false
+        };
+        const saju = calcSaju(birthDate, birthTime || '12:00', _selfSajuOpts);
         if (!saju || !saju.day.gan) {
             section.style.display = 'none';
             return;
