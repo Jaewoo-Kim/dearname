@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# 배포 무관 파일
+dearname_v2_final/
+dearname_v2_final.zip
+dearname_v2_latest/
+dearname_v2_latest.zip
+
+# 에디터
+.DS_Store
+Thumbs.db
+*.swp

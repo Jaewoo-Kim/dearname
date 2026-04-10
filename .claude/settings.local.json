@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip -l dearname_v2_latest.zip)",
+      "Bash(cd /tmp)",
+      "Bash(unzip -o /c/dearname/dearname_v2_latest.zip \"합본28_v2.html\" -d ./dearname_extract/)",
+      "Read(//tmp/dearname_extract/**)",
+      "Bash(unzip -o /c/dearname/dearname_v2_final.zip \"합본28_v2.html\" -d ./dearname_final/)",
+      "Read(//tmp/dearname_final/**)",
+      "Bash(python3 -c \":*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh auth:*)",
+      "Bash(git config:*)",
+      "Bash(git --version)"
+    ]
+  }
+}
