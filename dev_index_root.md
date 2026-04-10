@@ -290,65 +290,88 @@ openLoginModal()
   → (미설정)         → _loginAsGuest()        → _saveUser()
 ```
 
-### 인증 & 마이페이지 기획
+### 구독 플랜 (셀프작명 이용권)
 
-#### 사용자 여정
+| 플랜 | 가격 | 월 환산 | 할인율 |
+|---|---|---|---|
+| 1개월권 | ₩19,000 | ₩19,000 | - |
+| 3개월권 | ₩45,000 | ₩15,000 | 21% |
+| 6개월권 | ₩69,000 | ₩11,500 | 39% |
+| 12개월권 | ₩99,000 | ₩8,250 | 57% |
 
-| 유형 | 플로우 |
-|---|---|
-| 비회원 | 랜딩 → 프리미엄 신청 → 로그인 모달 → 게스트 선택 → 결제 → 보고서 (저장 안됨) |
-| 회원 | 랜딩 → 로그인 → 결제 → 보고서 자동 저장 → 마이페이지 재열람 |
-| 재방문 | 자동 로그인 복원 (localStorage) → 마이페이지 → 저장 보고서 클릭 |
+- 비회원도 이메일 입력 후 결제 가능 (UI 구현, 실결제 연동은 별도 스프린트)
+- 구독 상태 localStorage `dn_subscription` 키로 관리
+- `_isSubscribed()` → `expiresAt` 기준 유효성 체크
 
-#### 로그인 진입점
+### 구독 팝업 (`#subscribe-modal`)
 
-| 진입점 | 동작 |
-|---|---|
-| nav "로그인" 버튼 | 로그인 모달 바로 열기 |
-| 프리미엄 신청 버튼 | 비로그인 시 모달 먼저 → 로그인 후 결제 자동 재개 (`_pendingAction` 패턴) |
+- `openSubscribeModal()` / `closeSubscribeModal()`
+- `selectPlan(el, label, price)` — 플랜 선택
+- `_onSubscribePay()` — 회원 결제 (준비 중 토스트)
+- `_onSubscribePayGuest()` — 비회원 이메일 결제 (준비 중 토스트)
+- `showSelfReportView()` 진입 시 `_isSubscribed()` 체크 → 미구독 시 팝업 호출
 
-#### 마이페이지 (`#mypage-view`) 기능
+### 이메일 발송 팝업 (`#email-modal`)
 
-| 기능 | Phase 1 (localStorage) | Phase 2 (서버 DB) |
-|---|---|---|
-| 프로필 (이름/이메일/아바타) | ✅ | Supabase/Firebase |
-| 보고서 목록 | ✅ `dn_reports` | DB 조회 |
-| 보고서 재열람 | ✅ 저장 JSON → `_renderReportContent()` | DB 조회 |
-| 보고서 삭제 | ✅ | DB 삭제 |
-| 결제 내역 | ❌ | 토스 연동 |
-| 계정 탈퇴 | ❌ | 서버 처리 |
+- `openEmailModal()` / `closeEmailModal()` / `sendReportEmail()`
+- 보고서 하단 "이메일로 받기" 버튼 + 마이페이지 보고서 행 버튼에서 호출
+- 실발송은 별도 스프린트 (Firebase Functions + SendGrid)
+
+### 마이페이지 (`#mypage-view`) — 5섹션 구조
+
+| 섹션 | ID | 렌더 함수 | 데이터 소스 |
+|---|---|---|---|
+| 프로필 | - | `_renderMypageProfile()` | `_dnUser` |
+| 구독 현황 | `mypage-subscription` | `_renderMypageSubscription()` | `dn_subscription` (localStorage) |
+| 셀프작명 보고서 | `mypage-self-reports` | `_renderMypageSelfReports()` | `dn_self_reports` (localStorage) |
+| AI 프리미엄 보고서 | `mypage-ai-reports` | `_renderMypageAIReports()` | `dn_reports` (localStorage) |
+| 결제 내역 | `mypage-payments` | `_renderMypagePayments()` | 플레이스홀더 |
 
 #### 데이터 모델 (localStorage)
 
 ```js
-// dn_user (기존)
-{ uid, name, email, photo, provider: 'google'|'apple'|'guest', createdAt }
+// dn_user
+{ uid, name, email, provider: 'google'|'apple'|'guest', createdAt }
 
-// dn_reports (신규, 구현 완료) — 배열
+// dn_subscription
+{ label: '3개월권', price: 45000, expiresAt: '2025-07-01T00:00:00.000Z' }
+
+// dn_self_reports — 배열 (최대 20건)
 [{
-  id: 'rpt_1712800000000',   // 'rpt_' + Date.now()
-  uid,                        // dn_user.uid
+  id: 'sr_' + Date.now(),
   createdAt,
+  nameKr, nameHanja, gender, birthDate, birthTime
+}]
+
+// dn_reports — AI 프리미엄 보고서 배열 (최대 10건)
+[{
+  id: 'rpt_' + Date.now(),
+  uid, createdAt,
   familyKr, familyHanja,
-  candidates: [...],          // NameSearchEngine 결과 배열 (전체 candidate 객체)
-  reports:    [...],          // Claude 소견서 배열
-  saju, ohengScores,
-  constraints,                // gender 등 검색 조건
+  candidates: [...], reports: [...],
+  saju, ohengScores, constraints
 }]
 ```
 
-#### 구현 완료 (Phase 1) ✅
+#### 주요 함수 목록
 
-| Step | 작업 | 함수 |
-|---|---|---|
-| 1 ✅ | 보고서 자동 저장 (회원만) | `_saveReport(candidates, reports, state)` |
-| 2 ✅ | 마이페이지 뷰 HTML | `#mypage-view` (5번째 SPA 뷰) |
-| 3 ✅ | 마이페이지 렌더 | `showMypageView()`, `_renderMypageProfile()`, `_renderMypageReports()` |
-| 4 ✅ | 보고서 재열람 | `_openSavedReport(id)` → `_renderReportContent()` 재사용 |
-| 5 ✅ | 로그인 선행 로직 | `_pendingAction` 패턴, `_saveUser()` 완료 시 자동 재개 |
-| 6 ✅ | user-badge 연결 | `showMypageView()`, 로그아웃은 마이페이지 내 버튼으로 이동 |
+| 함수 | 역할 |
+|---|---|
+| `showMypageView()` | 마이페이지 뷰 전환 + 전체 렌더 |
+| `_renderMypageSubscription()` | 구독 현황 카드 |
+| `_renderMypageSelfReports()` | 셀프작명 보고서 목록 |
+| `_renderMypageAIReports()` | AI 보고서 목록 |
+| `_renderMypagePayments()` | 결제 내역 (플레이스홀더) |
+| `_openSavedSelfReport(id)` | 셀프 보고서 복원 (구독 체크 포함) |
+| `_openSavedReport(id)` | AI 보고서 복원 |
+| `_deleteSelfReportConfirm(id)` | 셀프 보고서 삭제 확인 |
+| `_showToast(msg)` | 하단 토스트 메시지 |
+| `showSelfReportViewDirect()` | 구독 체크 없이 셀프 보고서 직접 열기 (마이페이지 복원용) |
 
-보조 함수: `_getReports(uid)`, `_deleteReport(id)`, `_confirmDeleteReport(id)`
+#### 셀프작명 보고서 자동 저장
+
+`showSelfReportView()` 완료 시 `_saveSelfReport({ nameKr, nameHanja, gender, birthDate, birthTime })` 자동 호출.  
+`dn_self_reports` localStorage에 최대 20건 저장.
 
 ---
 

@@ -529,6 +529,37 @@
         .oheng-dist-count { font-size: 0.85rem; font-weight: 800; color: var(--bg-dark); margin-left: 2px; }
         .oheng-dist-item.weak .oheng-dist-count { color: #ef4444; }
         .oheng-dist-plus { font-size: 0.85rem; font-weight: 900; margin-left: 1px; opacity: 0.85; }
+
+        /* ── 구독 팝업 ── */
+        .plan-option { display:flex; align-items:center; gap:16px; padding:16px 20px; border:2px solid var(--border-light); border-radius:16px; cursor:pointer; margin-bottom:12px; transition:all 0.2s; }
+        .plan-option:hover { border-color:var(--gold-premium); }
+        .plan-option.selected { border-color:var(--gold-premium); background:rgba(212,175,55,0.06); }
+        .plan-radio { width:18px; height:18px; border:2px solid #cbd5e1; border-radius:50%; flex-shrink:0; transition:all 0.2s; }
+        .plan-option.selected .plan-radio { border-color:var(--gold-premium); background:var(--gold-premium); box-shadow:inset 0 0 0 4px white; }
+        .plan-badge { font-size:0.72rem; font-weight:800; padding:3px 9px; border-radius:20px; margin-left:8px; }
+        .plan-badge.popular { background:#fef3c7; color:#92400e; }
+        .plan-badge.best { background:#fee2e2; color:#991b1b; }
+        .plan-price { margin-left:auto; text-align:right; }
+        .plan-price-main { font-size:1.05rem; font-weight:800; color:var(--bg-dark); }
+        .plan-price-per { font-size:0.75rem; color:var(--text-secondary); }
+
+        /* ── 마이페이지 섹션 ── */
+        .mp-section-tag { color:var(--gold-premium); font-weight:800; font-size:0.78rem; letter-spacing:2px; display:block; margin-bottom:6px; }
+        .mp-section-title { font-size:1.2rem; font-weight:800; color:var(--bg-dark); margin:0 0 18px; }
+        .mp-empty { text-align:center; padding:36px 0; color:var(--text-secondary); font-size:0.92rem; }
+        .mp-report-row { display:flex; align-items:flex-start; gap:14px; padding:18px 0; border-bottom:1px solid var(--border-light); }
+        .mp-report-row:last-child { border-bottom:none; }
+        .mp-report-icon { width:50px; height:50px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:900; color:white; flex-shrink:0; }
+        .mp-btn { border:none; padding:7px 14px; border-radius:50px; font-size:0.78rem; font-weight:700; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+        .mp-btn-gold { background:var(--gold-premium); color:white; }
+        .mp-btn-gold:hover { background:var(--gold-dark); }
+        .mp-btn-blue { background:#0f172a; color:white; }
+        .mp-btn-blue:hover { background:#1e293b; }
+        .mp-btn-outline { background:transparent; border:1px solid var(--border-light); color:var(--text-secondary); }
+        .mp-btn-outline:hover { border-color:var(--bg-dark); color:var(--bg-dark); }
+        .mp-btn-danger { background:transparent; border:1px solid #fca5a5; color:#ef4444; }
+        .mp-sub-card { background:var(--bg-light); border-radius:16px; padding:20px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+        .mp-provider-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:20px; font-size:0.78rem; font-weight:700; background:#f1f5f9; color:#475569; }
 </style>
 </head>
 <body>
@@ -542,10 +573,9 @@
             <a onclick="showMainView(); setTimeout(()=>{document.getElementById('self-naming').scrollIntoView();}, 100);">셀프 작명</a>
             <a class="premium-link" onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 의뢰</a>
             <a class="login-link" onclick="openLoginModal()">로그인</a>
-            <div id="user-badge" style="display:none;align-items:center;gap:8px;cursor:pointer;" onclick="showMypageView()" title="마이페이지">
+            <div id="user-badge" style="display:none;align-items:center;gap:8px;cursor:pointer;margin-left:20px;" onclick="showMypageView()" title="마이페이지">
                 <img class="user-avatar" src="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:none;">
-                <span class="user-name" style="font-size:0.9rem;font-weight:700;color:var(--bg-dark);"></span>
-                <span style="font-size:0.75rem;color:var(--text-secondary);">마이페이지</span>
+                <span style="font-size:0.9rem;font-weight:700;color:var(--text-secondary);">마이페이지</span>
             </div>
         </div>
         <a onclick="showMainView()" class="report-back-link" id="report-nav">&larr; 메인으로 돌아가기</a>
@@ -1044,6 +1074,9 @@
             <button onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView({behavior:'smooth'});}, 100);" class="btn btn-gold" style="width: auto; padding: 18px 36px; font-size: 1rem;">
                 AI 대가의 프리미엄 소견서 의뢰
             </button>
+            <button onclick="openEmailModal('self-report')" class="btn btn-navy" style="width: auto; padding: 18px 36px; font-size: 1rem; background:#1e40af;">
+                이메일로 받기
+            </button>
             <button onclick="window.print();" class="btn btn-navy" style="width: auto; padding: 18px 36px; font-size: 1rem;">
                 PDF로 출력하기
             </button>
@@ -1054,36 +1087,53 @@
 <div id="mypage-view" style="display:none;">
     <header class="report-header" style="padding:80px 20px 40px;">
         <h1 style="font-size:2.4rem;font-weight:900;color:white;margin:0 0 8px;">마이페이지</h1>
-        <p style="color:rgba(255,255,255,0.6);font-size:1rem;margin:0;">내 작명 기록을 확인하세요</p>
+        <p style="color:rgba(255,255,255,0.6);font-size:1rem;margin:0;">내 작명 기록과 구독 현황을 확인하세요</p>
     </header>
     <main class="report-main">
-        <!-- 프로필 카드 -->
+
+        <!-- [1] 프로필 -->
         <div class="report-card" style="margin-bottom:24px;">
-            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                <div id="mypage-avatar-wrap" style="width:64px;height:64px;border-radius:50%;background:var(--gold-premium);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:900;color:white;overflow:hidden;flex-shrink:0;">
-                    <img id="mypage-avatar-img" src="" style="display:none;width:100%;height:100%;object-fit:cover;">
-                    <span id="mypage-avatar-initial">?</span>
+            <span class="mp-section-tag">PROFILE</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:8px;">
+                <div>
+                    <div id="mypage-name" style="font-size:1.25rem;font-weight:800;color:var(--bg-dark);"></div>
+                    <div id="mypage-email" style="font-size:0.88rem;color:var(--text-secondary);margin-top:3px;"></div>
+                    <div id="mypage-provider-badge" style="margin-top:10px;"></div>
                 </div>
-                <div style="flex:1;min-width:0;">
-                    <div id="mypage-name" style="font-size:1.3rem;font-weight:800;color:var(--bg-dark);"></div>
-                    <div id="mypage-email" style="font-size:0.9rem;color:var(--text-secondary);margin-top:2px;"></div>
-                    <div id="mypage-provider" style="font-size:0.78rem;color:var(--text-secondary);margin-top:4px;"></div>
-                </div>
-                <button onclick="_signOut()" style="background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:8px 18px;border-radius:50px;font-size:0.85rem;font-weight:600;cursor:pointer;white-space:nowrap;">로그아웃</button>
+                <button onclick="_signOut()" class="mp-btn mp-btn-outline" style="padding:9px 20px;font-size:0.85rem;">로그아웃</button>
             </div>
         </div>
 
-        <!-- 보고서 목록 -->
-        <div class="report-card">
-            <span class="section-tag">My Reports</span>
-            <h2 class="section-title">내 작명 보고서</h2>
-            <div id="mypage-reports-list">
-                <!-- JS 동적 생성 -->
-            </div>
+        <!-- [2] 구독 현황 -->
+        <div class="report-card" style="margin-bottom:24px;">
+            <span class="mp-section-tag">구독 현황</span>
+            <h2 class="mp-section-title" style="margin-top:8px;">셀프작명 이용권</h2>
+            <div id="mypage-subscription"><!-- JS 동적 생성 --></div>
+        </div>
+
+        <!-- [3] 셀프작명 보고서 기록 -->
+        <div class="report-card" style="margin-bottom:24px;">
+            <span class="mp-section-tag">셀프작명 보고서</span>
+            <h2 class="mp-section-title" style="margin-top:8px;">셀프작명 보고서 기록</h2>
+            <div id="mypage-self-reports"><!-- JS 동적 생성 --></div>
+        </div>
+
+        <!-- [4] AI 프리미엄 보고서 -->
+        <div class="report-card" style="margin-bottom:24px;">
+            <span class="mp-section-tag">AI 프리미엄 보고서</span>
+            <h2 class="mp-section-title" style="margin-top:8px;">AI 프리미엄 보고서 기록</h2>
+            <div id="mypage-ai-reports"><!-- JS 동적 생성 --></div>
+        </div>
+
+        <!-- [5] 결제 내역 -->
+        <div class="report-card" style="margin-bottom:24px;">
+            <span class="mp-section-tag">결제 내역</span>
+            <h2 class="mp-section-title" style="margin-top:8px;">결제 내역</h2>
+            <div id="mypage-payments"><!-- JS 동적 생성 --></div>
         </div>
 
         <div style="text-align:center;margin-top:60px;">
-            <button onclick="showMainView()" class="btn-navy" style="width:auto;padding:16px 48px;font-size:1rem;">
+            <button onclick="showMainView()" class="btn btn-navy" style="width:auto;padding:16px 48px;font-size:1rem;">
                 메인으로 돌아가기
             </button>
         </div>
@@ -1379,6 +1429,91 @@
         <div class="price-tag" id="total-price-display" style="color: #d4af37; font-size: 2.5rem; font-weight: 900; margin: 30px 0;">₩ 30,000</div>
         <button class="btn btn-gold" onclick="processPayment()">결제하고 리포트 보기</button>
         <button class="btn btn-navy" onclick="cancelPayment()" style="margin-top: 15px;">취소</button>
+    </div>
+</div>
+
+<!-- ── 구독 팝업 ── -->
+<div id="subscribe-modal" class="modal-overlay" style="z-index:10000;">
+    <div class="modal-content" style="max-width:480px;padding:44px 40px;text-align:left;">
+        <button class="close-modal" onclick="closeSubscribeModal()">&times;</button>
+        <div style="text-align:center;margin-bottom:28px;">
+            <div style="font-size:1.9rem;font-weight:900;color:var(--bg-dark);margin-bottom:6px;">셀프작명 이용권</div>
+            <p style="color:var(--text-secondary);font-size:0.95rem;margin:0;">분석 보고서를 열람하려면 이용권이 필요합니다.</p>
+        </div>
+
+        <div id="subscribe-plans">
+            <div class="plan-option" onclick="selectPlan(this,'1개월권',19000)">
+                <div class="plan-radio"></div>
+                <div style="flex:1;">
+                    <span style="font-weight:700;color:var(--bg-dark);">1개월권</span>
+                </div>
+                <div class="plan-price">
+                    <div class="plan-price-main">₩19,000</div>
+                    <div class="plan-price-per">월 19,000원</div>
+                </div>
+            </div>
+            <div class="plan-option selected" onclick="selectPlan(this,'3개월권',45000)">
+                <div class="plan-radio"></div>
+                <div style="flex:1;">
+                    <span style="font-weight:700;color:var(--bg-dark);">3개월권</span>
+                    <span class="plan-badge popular">인기 ★</span>
+                </div>
+                <div class="plan-price">
+                    <div class="plan-price-main">₩45,000</div>
+                    <div class="plan-price-per">월 15,000원 · 21% 할인</div>
+                </div>
+            </div>
+            <div class="plan-option" onclick="selectPlan(this,'6개월권',69000)">
+                <div class="plan-radio"></div>
+                <div style="flex:1;">
+                    <span style="font-weight:700;color:var(--bg-dark);">6개월권</span>
+                    <span class="plan-badge popular">39% 할인</span>
+                </div>
+                <div class="plan-price">
+                    <div class="plan-price-main">₩69,000</div>
+                    <div class="plan-price-per">월 11,500원</div>
+                </div>
+            </div>
+            <div class="plan-option" onclick="selectPlan(this,'12개월권',99000)">
+                <div class="plan-radio"></div>
+                <div style="flex:1;">
+                    <span style="font-weight:700;color:var(--bg-dark);">12개월권</span>
+                    <span class="plan-badge best">최저가 🔥</span>
+                </div>
+                <div class="plan-price">
+                    <div class="plan-price-main">₩99,000</div>
+                    <div class="plan-price-per">월 8,250원 · 57% 할인</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-gold" style="margin-top:20px;" onclick="_onSubscribePay()">
+            결제하고 보고서 보기
+        </button>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border-light);">
+            <p style="font-size:0.82rem;color:var(--text-secondary);text-align:center;margin:0 0 12px;">비회원도 이메일로 바로 결제 가능합니다</p>
+            <div style="display:flex;gap:10px;">
+                <input type="email" id="subscribe-email" placeholder="이메일 주소 입력" style="flex:1;border:1.5px solid var(--border-light);border-radius:12px;padding:12px 16px;font-size:0.9rem;outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--gold-premium)'" onblur="this.style.borderColor='var(--border-light)'">
+                <button onclick="_onSubscribePayGuest()" style="background:var(--bg-dark);color:white;border:none;border-radius:12px;padding:12px 18px;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap;">결제하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── 이메일 발송 팝업 ── -->
+<div id="email-modal" class="modal-overlay" style="z-index:10000;">
+    <div class="modal-content" style="max-width:400px;padding:44px 40px;">
+        <button class="close-modal" onclick="closeEmailModal()">&times;</button>
+        <div style="font-size:1.6rem;font-weight:900;color:var(--bg-dark);margin-bottom:8px;">보고서 이메일 발송</div>
+        <p style="color:var(--text-secondary);font-size:0.92rem;margin:0 0 28px;">보고서를 받으실 이메일 주소를 입력해주세요.</p>
+        <input type="email" id="email-send-input" placeholder="example@email.com"
+            style="width:100%;box-sizing:border-box;border:1.5px solid var(--border-light);border-radius:14px;padding:14px 18px;font-size:1rem;outline:none;margin-bottom:14px;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='var(--gold-premium)'" onblur="this.style.borderColor='var(--border-light)'">
+        <button class="btn btn-gold" onclick="sendReportEmail()">보내기</button>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:14px;text-align:center;">
+            ※ 이메일 발송 기능은 곧 서비스 예정입니다
+        </p>
     </div>
 </div>
 
@@ -1840,7 +1975,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // 셀프 리포트 뷰 오픈 이벤트
-    function showSelfReportView() { 
+    function showSelfReportView() {
+        // 구독 체크
+        if (!_isSubscribed()) { openSubscribeModal(); return; }
+
         const lastName = document.getElementById('kr-last-name').value.trim() || '홍';
         const firstName = document.getElementById('kr-first-name').value.trim() || '길동';
         const gender = document.getElementById('gender-type').value === 'M' ? '남자' : '여자';
@@ -1933,6 +2071,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const totalS = _scored.reduce((s, x) => s + (_g2s[x.g] ?? 50) * x.w, 0);
         const finalScore = Math.round(totalS / totalW);
         document.getElementById('self-score-badge').textContent = `스마트 셀프 진단 점수 : ${finalScore} / 100 점`;
+
+        // ── 셀프 보고서 자동 저장 (구독 중일 때) ─────────────────────
+        _saveSelfReport({
+            nameKr:    `${lastName}${firstName}`,
+            nameHanja: hanjaStr,
+            gender,
+            birthDate: bDate,
+            birthTime: bTime,
+        });
     }
 
     // Chart.js 렌더링
@@ -2816,7 +2963,103 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         } catch(e) { console.warn('보고서 삭제 실패:', e); }
     }
 
-    // ── 마이페이지 ──────────────────────────────────────────────────
+    // ================================================================
+    // 구독 상태 관리 (localStorage, UI-only)
+    // ================================================================
+    const _SUB_KEY = 'dn_subscription';
+    const _SELF_REPORTS_KEY = 'dn_self_reports';
+    const _MAX_SELF_REPORTS = 20;
+
+    function _getSubscription() {
+        try { return JSON.parse(localStorage.getItem(_SUB_KEY)) || null; } catch(e) { return null; }
+    }
+    function _isSubscribed() {
+        const sub = _getSubscription();
+        if (!sub || !sub.expiresAt) return false;
+        return new Date(sub.expiresAt) > new Date();
+    }
+
+    // 셀프작명 보고서 저장
+    function _saveSelfReport(data) {
+        try {
+            const raw  = localStorage.getItem(_SELF_REPORTS_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            list.unshift({ id: 'sr_' + Date.now(), createdAt: Date.now(), ...data });
+            if (list.length > _MAX_SELF_REPORTS) list.splice(_MAX_SELF_REPORTS);
+            localStorage.setItem(_SELF_REPORTS_KEY, JSON.stringify(list));
+        } catch(e) { console.warn('셀프 보고서 저장 실패:', e); }
+    }
+    function _getSelfReports() {
+        try { return JSON.parse(localStorage.getItem(_SELF_REPORTS_KEY)) || []; } catch(e) { return []; }
+    }
+    function _deleteSelfReport(id) {
+        try {
+            const list = _getSelfReports().filter(r => r.id !== id);
+            localStorage.setItem(_SELF_REPORTS_KEY, JSON.stringify(list));
+        } catch(e) {}
+    }
+
+    // ================================================================
+    // 구독 팝업
+    // ================================================================
+    let _selectedPlan = { label: '3개월권', price: 45000 };
+
+    function openSubscribeModal() {
+        document.getElementById('subscribe-modal').style.display = 'flex';
+    }
+    function closeSubscribeModal() {
+        document.getElementById('subscribe-modal').style.display = 'none';
+    }
+    function selectPlan(el, label, price) {
+        document.querySelectorAll('#subscribe-plans .plan-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        _selectedPlan = { label, price };
+    }
+    function _onSubscribePay() {
+        _showToast('결제 기능을 준비 중입니다. 곧 서비스됩니다!');
+    }
+    function _onSubscribePayGuest() {
+        const email = document.getElementById('subscribe-email').value.trim();
+        if (!email || !email.includes('@')) { _showToast('올바른 이메일을 입력해주세요.'); return; }
+        _showToast('결제 기능을 준비 중입니다. 곧 서비스됩니다!');
+    }
+
+    // ================================================================
+    // 이메일 발송 팝업
+    // ================================================================
+    function openEmailModal() {
+        document.getElementById('email-modal').style.display = 'flex';
+        const u = _dnUser;
+        if (u?.email) document.getElementById('email-send-input').value = u.email;
+    }
+    function closeEmailModal() {
+        document.getElementById('email-modal').style.display = 'none';
+    }
+    function sendReportEmail() {
+        const email = document.getElementById('email-send-input').value.trim();
+        if (!email || !email.includes('@')) { _showToast('올바른 이메일을 입력해주세요.'); return; }
+        closeEmailModal();
+        _showToast('이메일 발송 기능은 곧 서비스 예정입니다!');
+    }
+
+    // 토스트 메시지
+    function _showToast(msg) {
+        let t = document.getElementById('dn-toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'dn-toast';
+            t.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#0f172a;color:white;padding:14px 28px;border-radius:50px;font-size:0.9rem;font-weight:600;z-index:20000;opacity:0;transition:opacity 0.3s;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.25);';
+            document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.style.opacity = '1';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+    }
+
+    // ================================================================
+    // 마이페이지
+    // ================================================================
     function showMypageView() {
         document.getElementById('main-view').style.display         = 'none';
         document.getElementById('report-view').style.display       = 'none';
@@ -2827,43 +3070,138 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         document.getElementById('report-nav').style.display        = 'block';
         window.scrollTo(0, 0);
         _renderMypageProfile();
-        _renderMypageReports();
+        _renderMypageSubscription();
+        _renderMypageSelfReports();
+        _renderMypageAIReports();
+        _renderMypagePayments();
     }
 
     function _renderMypageProfile() {
         const u = _dnUser;
         if (!u) return;
-        document.getElementById('mypage-name').textContent     = u.name  || '사용자';
-        document.getElementById('mypage-email').textContent    = u.email || '';
-        const providerLabel = { google: 'Google 계정', apple: 'Apple 계정', guest: '게스트' };
-        document.getElementById('mypage-provider').textContent = providerLabel[u.provider] || '';
-        const img     = document.getElementById('mypage-avatar-img');
-        const initial = document.getElementById('mypage-avatar-initial');
-        if (u.photo) {
-            img.src = u.photo;
-            img.style.display     = 'block';
-            initial.style.display = 'none';
-        } else {
-            img.style.display     = 'none';
-            initial.style.display = '';
-            initial.textContent   = (u.name || '?')[0].toUpperCase();
+        const nameEl = document.getElementById('mypage-name');
+        const emailEl = document.getElementById('mypage-email');
+        const badgeEl = document.getElementById('mypage-provider-badge');
+        if (nameEl)  nameEl.textContent  = u.name  || '사용자';
+        if (emailEl) emailEl.textContent = u.email || '';
+        if (badgeEl) {
+            const icons = { google: 'G', apple: '' };
+            const labels = { google: 'Google 계정', apple: 'Apple 계정', guest: '게스트' };
+            const icon  = icons[u.provider]  || '';
+            const label = labels[u.provider] || u.provider || '';
+            badgeEl.innerHTML = `<span class="mp-provider-badge">${icon ? `<b>${icon}</b>` : ''}${label}</span>`;
         }
     }
 
-    function _renderMypageReports() {
-        const el = document.getElementById('mypage-reports-list');
+    function _renderMypageSubscription() {
+        const el = document.getElementById('mypage-subscription');
+        if (!el) return;
+        const sub = _getSubscription();
+        if (_isSubscribed()) {
+            const exp = new Date(sub.expiresAt).toLocaleDateString('ko-KR');
+            el.innerHTML = `
+                <div class="mp-sub-card">
+                    <div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">현재 이용권</div>
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--bg-dark);">${sub.label || '이용권'} <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:6px;vertical-align:middle;"></span></div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">만료: ${exp}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <button class="mp-btn mp-btn-gold" onclick="openSubscribeModal()">연장하기</button>
+                        <button class="mp-btn mp-btn-outline" onclick="_cancelSubscription()">구독 취소</button>
+                    </div>
+                </div>`;
+        } else {
+            el.innerHTML = `
+                <div class="mp-sub-card">
+                    <div>
+                        <div style="font-size:1rem;font-weight:700;color:var(--bg-dark);">미구독 상태</div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">이용권 구독 시 셀프작명 보고서를 열람할 수 있습니다</div>
+                    </div>
+                    <button class="mp-btn mp-btn-gold" onclick="openSubscribeModal()">구독 시작하기</button>
+                </div>`;
+        }
+    }
+
+    function _cancelSubscription() {
+        if (!confirm('구독을 취소할까요?')) return;
+        _showToast('구독 취소 기능을 준비 중입니다.');
+    }
+
+    function _renderMypageSelfReports() {
+        const el = document.getElementById('mypage-self-reports');
+        if (!el) return;
+        const list = _getSelfReports();
+        if (!list.length) {
+            el.innerHTML = `<div class="mp-empty">아직 저장된 셀프작명 보고서가 없습니다.<br><span style="font-size:0.82rem;">셀프 작명 분석 후 보고서를 열람하면 자동 저장됩니다.</span></div>`;
+            return;
+        }
+        el.innerHTML = list.map(r => {
+            const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : '';
+            const gender = r.gender || '';
+            return `
+            <div class="mp-report-row">
+                <div class="mp-report-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">${(r.nameHanja||'?')[0]}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:1.05rem;font-weight:800;color:var(--bg-dark);">${r.nameKr||''} <span style="font-weight:500;color:var(--text-secondary);font-size:0.9rem;">${r.nameHanja||''}</span></div>
+                    <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${date}${gender ? ' · ' + gender : ''}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+                    <button class="mp-btn mp-btn-gold" onclick="_openSavedSelfReport('${r.id}')">보고서 보기</button>
+                    <button class="mp-btn mp-btn-outline" onclick="openEmailModal()">이메일로 받기</button>
+                    <button class="mp-btn mp-btn-danger" onclick="_deleteSelfReportConfirm('${r.id}')">삭제</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function _openSavedSelfReport(id) {
+        const entry = _getSelfReports().find(r => r.id === id);
+        if (!entry) { _showToast('보고서를 찾을 수 없습니다.'); return; }
+        if (!_isSubscribed()) { openSubscribeModal(); return; }
+        // 저장된 데이터로 셀프 보고서 복원
+        _showToast('보고서를 불러오는 중...');
+        // 폼 값 복원 후 뷰 전환
+        if (entry.birthDate) document.getElementById('birth-date').value = entry.birthDate;
+        if (entry.birthTime) document.getElementById('birth-time').value = entry.birthTime;
+        setTimeout(showSelfReportViewDirect, 100);
+    }
+
+    function showSelfReportViewDirect() {
+        // 구독 체크 없이 직접 보고서 뷰로 이동 (마이페이지 복원용)
+        const lastName  = document.getElementById('kr-last-name').value.trim()  || '홍';
+        const firstName = document.getElementById('kr-first-name').value.trim() || '길동';
+        const gender    = document.getElementById('gender-type').value === 'M' ? '남자' : '여자';
+        const bDate     = document.getElementById('birth-date').value || '2026-03-07';
+        const bTime     = document.getElementById('birth-time').value || '12:00';
+        const selects   = document.querySelectorAll('#hanja-dropdowns select');
+        let hanjaStr = '';
+        selects.forEach(s => { const p = s.value.split('|'); if(p.length===3) hanjaStr += p[2]; });
+        if (!hanjaStr) hanjaStr = '洪吉童';
+
+        ['main-view','report-view','theory-detail-view','mypage-view'].forEach(id => document.getElementById(id).style.display='none');
+        document.getElementById('self-report-view').style.display = 'block';
+        document.getElementById('main-nav').style.display  = 'none';
+        document.getElementById('report-nav').style.display = 'block';
+        window.scrollTo(0,0);
+        _renderSelfSajuSection(bDate, bTime, gender, lastName);
+        document.getElementById('self-report-title').innerHTML = `${lastName}${firstName} <span>${hanjaStr}</span>`;
+        document.getElementById('self-report-meta').innerHTML  = `${bDate} ${bTime} 출생 &nbsp;|&nbsp; ${gender} &nbsp;|&nbsp; 알고리즘 정밀 진단`;
+        document.getElementById('self-kr-name-display').innerText = `${lastName}${firstName}`;
+    }
+
+    function _deleteSelfReportConfirm(id) {
+        if (!confirm('이 보고서를 삭제할까요?')) return;
+        _deleteSelfReport(id);
+        _renderMypageSelfReports();
+    }
+
+    function _renderMypageAIReports() {
+        const el = document.getElementById('mypage-ai-reports');
         if (!el) return;
         const list = _getReports(_dnUser?.uid);
         if (!list.length) {
-            el.innerHTML = `
-                <div style="text-align:center;padding:60px 0;color:var(--text-secondary);">
-                    <div style="font-size:2.5rem;margin-bottom:16px;">📋</div>
-                    <p style="font-size:1rem;margin:0 0 20px;">아직 저장된 보고서가 없습니다.</p>
-                    <button onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();},100);"
-                        class="btn btn-gold" style="width:auto;padding:14px 32px;">
-                        프리미엄 작명 의뢰하기 →
-                    </button>
-                </div>`;
+            el.innerHTML = `<div class="mp-empty">아직 의뢰한 AI 프리미엄 보고서가 없습니다.</div>`;
             return;
         }
         el.innerHTML = list.map(r => {
@@ -2872,39 +3210,34 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if (!c0) return '';
             const nameKr    = `${r.familyKr}${c0.h1?.kr||''}${c0.h2?.kr||''}`;
             const nameHanja = `${r.familyHanja}${c0.h1?.h||''}${c0.h2?.h||''}`;
-            const score     = c0.score || '--';
             const date      = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : '';
-            const tagline   = rep0?.tagline ? `<p style="font-size:0.82rem;color:var(--text-secondary);margin:4px 0 0;line-height:1.5;">${rep0.tagline.replace(/"/g,'')}</p>` : '';
             return `
-            <div style="display:flex;align-items:flex-start;gap:16px;padding:20px 0;border-bottom:1px solid var(--border-light);">
-                <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#d4af37,#f0d080);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:900;color:white;flex-shrink:0;">
-                    ${c0.h1?.h||'?'}
-                </div>
+            <div class="mp-report-row">
+                <div class="mp-report-icon" style="background:linear-gradient(135deg,#d4af37,#f0d080);">${c0.h1?.h||'?'}</div>
                 <div style="flex:1;min-width:0;">
-                    <div style="font-size:1.15rem;font-weight:800;color:var(--bg-dark);">${nameKr} <span style="font-size:0.9rem;font-weight:500;color:var(--text-secondary);">${nameHanja}</span></div>
-                    <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:2px;">${date} · 종합 점수 ${score}점</div>
-                    ${tagline}
+                    <div style="font-size:1.05rem;font-weight:800;color:var(--bg-dark);">${nameKr} <span style="font-weight:500;color:var(--text-secondary);font-size:0.9rem;">${nameHanja}</span></div>
+                    <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${date} · <span style="color:#22c55e;font-weight:700;">완료</span></div>
                 </div>
-                <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
-                    <button onclick="_openSavedReport('${r.id}')"
-                        style="background:var(--gold-premium);border:none;color:white;padding:8px 16px;border-radius:50px;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;">
-                        보고서 보기
-                    </button>
-                    <button onclick="_confirmDeleteReport('${r.id}')"
-                        style="background:transparent;border:1px solid var(--border-light);color:var(--text-secondary);padding:6px 14px;border-radius:50px;font-size:0.78rem;cursor:pointer;">
-                        삭제
-                    </button>
+                <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+                    <button class="mp-btn mp-btn-gold" onclick="_openSavedReport('${r.id}')">보고서 보기</button>
+                    <button class="mp-btn mp-btn-outline" onclick="openEmailModal()">이메일로 받기</button>
+                    <button class="mp-btn mp-btn-danger" onclick="_confirmDeleteReport('${r.id}')">삭제</button>
                 </div>
             </div>`;
         }).join('');
     }
 
+    function _renderMypagePayments() {
+        const el = document.getElementById('mypage-payments');
+        if (!el) return;
+        // 플레이스홀더 — 결제 연동 후 실데이터로 교체
+        el.innerHTML = `<div class="mp-empty">결제 내역이 없습니다.<br><span style="font-size:0.82rem;">결제 연동 후 자동으로 표시됩니다.</span></div>`;
+    }
+
     function _openSavedReport(id) {
         const list  = _getReports(_dnUser?.uid);
         const entry = list.find(r => r.id === id);
-        if (!entry) return alert('보고서를 찾을 수 없습니다.');
-
-        // 상태 복원
+        if (!entry) return _showToast('보고서를 찾을 수 없습니다.');
         _currentState    = {
             familyName:  { kr: entry.familyKr, hanja: entry.familyHanja },
             _saju:       entry.saju,
@@ -2914,13 +3247,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         _allCandidates   = entry.candidates || [];
         _allReports      = entry.reports    || [];
         _currentIdx      = 0;
-
-        // report-view 표시 후 렌더
         document.getElementById('mypage-view').style.display  = 'none';
         document.getElementById('report-view').style.display  = 'block';
         document.getElementById('report-nav').style.display   = 'block';
         window.scrollTo(0, 0);
-
         _renderReportTabs(_allCandidates);
         _renderReportContent(_allCandidates[0], _allReports[0], 0);
     }
@@ -2928,7 +3258,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function _confirmDeleteReport(id) {
         if (!confirm('이 보고서를 삭제할까요?')) return;
         _deleteReport(id);
-        _renderMypageReports();
+        _renderMypageAIReports();
     }
 
     const _HISTORY_KEY = 'dn_history';
