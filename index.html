@@ -751,22 +751,36 @@
                     </div>
                     <div class="full-width-form">
                         <label class="input-label">출생 일시 및 지역</label>
-                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                            <input type="date" id="birth-date" style="flex: 1; min-width: 140px;" onchange="updateSelfLunarLabel()">
-                            <input type="time" id="birth-time" style="flex: 1; min-width: 120px;">
-                            <div style="display:flex;flex-direction:column;gap:4px;justify-content:center;font-size:0.8rem;color:var(--text-secondary);white-space:nowrap;">
-                                <label style="cursor:pointer;display:flex;align-items:center;gap:5px;" title="야자시(夜子時): 밤 11시~자정은 당일 일주를 유지하되 시주 천간은 다음날 일간 기준으로 계산합니다."><input type="checkbox" id="self-opt-yajasi" checked> 야자시</label>
-                                <label style="cursor:pointer;display:flex;align-items:center;gap:5px;" title="한국 실태양시 보정: KST 기준 출생 시각에 +30분을 적용하여 절기·시주 경계를 비교합니다."><input type="checkbox" id="self-opt-30min" checked> −30분</label>
-                            </div>
-                            <select style="flex: 1; min-width: 100px;"><option>양력</option><option>음력</option><option>윤달</option></select>
-                            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                                <label style="font-size:0.82rem;color:var(--text-secondary);font-weight:600;">달력:</label>
-                                <label style="font-size:0.82rem;cursor:pointer;"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"> 양력</label>
-                                <label style="font-size:0.82rem;cursor:pointer;"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"> 음력</label>
-                                <label style="font-size:0.82rem;cursor:pointer;"><input type="radio" name="self_cal_type" value="leap" onchange="updateSelfLunarLabel()"> 윤달</label>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                            <input type="date" id="birth-date" style="flex:2; min-width:180px; max-width:220px;" onchange="updateSelfLunarLabel()">
+                            <input type="time" id="birth-time" style="flex:1; min-width:120px; max-width:160px;">
+                            <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:0.83rem;color:var(--text-secondary);">
+                                <label style="cursor:pointer;white-space:nowrap;"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"> 양력</label>
+                                <label style="cursor:pointer;white-space:nowrap;"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"> 음력</label>
+                                <label style="cursor:pointer;white-space:nowrap;"><input type="radio" name="self_cal_type" value="leap" onchange="updateSelfLunarLabel()"> 윤달</label>
                                 <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;"></span>
                             </div>
-                            <input type="text" id="birth-location" placeholder="태어난 지역 (예: 서울)" style="flex: 1.5; min-width: 150px;">
+                            <select id="birth-location" style="flex:1.5; min-width:155px;" onchange="toggleLocationOther(this)">
+                                <option value="">태어난 지역 (선택)</option>
+                                <option value="서울">서울</option>
+                                <option value="부산">부산</option>
+                                <option value="인천">인천</option>
+                                <option value="대구">대구</option>
+                                <option value="대전">대전</option>
+                                <option value="광주">광주</option>
+                                <option value="울산">울산</option>
+                                <option value="세종">세종</option>
+                                <option value="수원">수원 (경기)</option>
+                                <option value="성남">성남 (경기)</option>
+                                <option value="고양">고양 (경기)</option>
+                                <option value="청주">청주 (충북)</option>
+                                <option value="천안">천안 (충남)</option>
+                                <option value="전주">전주 (전북)</option>
+                                <option value="창원">창원 (경남)</option>
+                                <option value="제주">제주</option>
+                                <option value="기타">기타 (직접 입력)</option>
+                            </select>
+                            <input type="text" id="birth-location-other" placeholder="지역 직접 입력" style="flex:1;min-width:120px;display:none;">
                         </div>
                     </div>
                     <div class="full-width-form" style="margin-top: 20px;">
@@ -968,6 +982,7 @@
             <div class="oheng-dist-wrap" id="self-oheng-dist">
                 <!-- JS로 동적 생성 -->
             </div>
+            <div id="self-saju-diagnosis" style="margin-top:22px;"></div>
         </div>
 
         <div class="report-card">
@@ -1912,8 +1927,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             ? (normalizeToSolar(_birthDateRaw, _selfCalType) || _birthDateRaw)
             : _birthDateRaw;
         const _sajuOpts0 = {
-            yajasi:     document.getElementById('self-opt-yajasi')?.checked !== false,
-            apply30min: document.getElementById('self-opt-30min')?.checked !== false
+            yajasi:     true,
+            apply30min: true
         };
         const _sajuResult = (typeof calcSajuOhengGrade === 'function')
             ? calcSajuOhengGrade(hanjaOhengs, birthDateVal, birthTimeVal, _sajuOpts0)
@@ -2788,8 +2803,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             return;
         }
         const _selfSajuOpts = {
-            yajasi:     document.getElementById('self-opt-yajasi')?.checked !== false,
-            apply30min: document.getElementById('self-opt-30min')?.checked !== false
+            yajasi:     true,
+            apply30min: true
         };
         const saju = calcSaju(birthDate, birthTime || '12:00', _selfSajuOpts);
         if (!saju || !saju.day.gan) {
@@ -2866,6 +2881,100 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             balanceBadge.innerHTML = isBalanced
                 ? `<span style="background:#dcfce7;color:#16a34a;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">균형</span>`
                 : `<span style="background:#fee2e2;color:#dc2626;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">불균형</span>`;
+        }
+
+        // ── 사주 원국 진단 멘트 ───────────────────────────────────────
+        const diagEl = document.getElementById('self-saju-diagnosis');
+        if (diagEl && sajuScores) {
+            const _OHENG_INFO = {
+                '木': { name:'목(나무)', keywords:'창의력·인내·성장', color:'#16a34a',
+                        weak:'창의력과 성장의 기운이 부족합니다. 木 자원오행의 한자를 이름에 담으면 생명력과 유연한 성품을 길러줄 수 있습니다.',
+                        strong:'木 기운이 강한 사주입니다. 성장·추진 에너지가 풍부하지만 고집이 강해질 수 있으니, 이름에서는 균형을 잡아주는 오행을 고려하세요.' },
+                '火': { name:'화(불)', keywords:'열정·활력·표현력', color:'#dc2626',
+                        weak:'열정과 표현력의 기운이 부족합니다. 火 자원오행의 한자를 이름에 담으면 밝고 활기찬 기질을 더해줄 수 있습니다.',
+                        strong:'火 기운이 강한 사주입니다. 열정과 활력이 넘치지만 감정 기복이 클 수 있으니, 차분함을 더해주는 이름이 도움이 됩니다.' },
+                '土': { name:'토(흙)', keywords:'안정·신뢰·포용', color:'#d97706',
+                        weak:'안정감과 포용력의 기운이 부족합니다. 土 자원오행의 한자를 이름에 담으면 중심을 잡는 힘과 신뢰감을 심어줄 수 있습니다.',
+                        strong:'土 기운이 강한 사주입니다. 안정적이고 믿음직하지만 변화에 다소 둔감해질 수 있으니, 역동적인 기운을 보완해주세요.' },
+                '金': { name:'금(쇠)', keywords:'결단·의지·실행력', color:'#475569',
+                        weak:'결단력과 실행력의 기운이 부족합니다. 金 자원오행의 한자를 이름에 담으면 추진력과 절제하는 힘을 키워줄 수 있습니다.',
+                        strong:'金 기운이 강한 사주입니다. 의지와 결단력이 탁월하지만 지나치게 날카로워질 수 있으니, 부드러운 기운의 이름이 좋습니다.' },
+                '水': { name:'수(물)', keywords:'지혜·총명·유연성', color:'#2563eb',
+                        weak:'지혜와 유연성의 기운이 부족합니다. 水 자원오행의 한자를 이름에 담으면 총명함과 적응력을 높여줄 수 있습니다.',
+                        strong:'水 기운이 강한 사주입니다. 지혜롭고 감성이 풍부하지만 우유부단해질 수 있으니, 결단력을 더해주는 이름을 고려하세요.' },
+            };
+            const weakList   = Object.entries(sajuScores).filter(([,s]) => s < 10).map(([o]) => o);
+            const strongList  = Object.entries(sajuScores).filter(([,s]) => s >= 50).map(([o]) => o);
+            const sortedAll   = Object.entries(sajuScores).sort((a,b) => a[1]-b[1]);
+            const lowestEntry = sortedAll[0]; // 가장 부족한 오행
+
+            let diagHtml = '';
+
+            if (!weakList.length && !strongList.length) {
+                // 완전 균형
+                diagHtml = `
+                <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:16px;padding:20px 24px;">
+                    <div style="font-size:0.82rem;font-weight:800;color:#16a34a;letter-spacing:1px;margin-bottom:8px;">✦ 사주 원국 진단</div>
+                    <p style="font-size:0.95rem;color:#15803d;line-height:1.7;margin:0;">
+                        오행이 고르게 분포된 <b>균형 잡힌 사주</b>입니다. 특정 기운에 치우침이 없어 이름의 자원오행 선택 자유도가 높습니다.
+                        아이의 원하는 기질과 성향에 맞추어 이름을 지어주세요.
+                    </p>
+                </div>`;
+            } else {
+                // 불균형: 부족/과다 오행 각각 설명
+                const cards = [];
+
+                weakList.forEach(o => {
+                    const info = _OHENG_INFO[o];
+                    const score = Math.round(sajuScores[o]);
+                    cards.push(`
+                    <div style="background:#fff;border:1.5px solid ${info.color}22;border-left:4px solid ${info.color};border-radius:14px;padding:16px 20px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                            <span style="font-size:1rem;font-weight:900;color:${info.color};">${o}</span>
+                            <span style="font-size:0.78rem;color:${info.color};font-weight:700;">${info.name} · ${info.keywords}</span>
+                            <span style="margin-left:auto;font-size:0.75rem;background:#fee2e2;color:#dc2626;padding:2px 9px;border-radius:20px;font-weight:800;">부족 (${score}점)</span>
+                        </div>
+                        <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;margin:0;">${info.weak}</p>
+                    </div>`);
+                });
+
+                strongList.forEach(o => {
+                    const info = _OHENG_INFO[o];
+                    const score = Math.round(sajuScores[o]);
+                    cards.push(`
+                    <div style="background:#fff;border:1.5px solid ${info.color}22;border-left:4px solid ${info.color};border-radius:14px;padding:16px 20px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                            <span style="font-size:1rem;font-weight:900;color:${info.color};">${o}</span>
+                            <span style="font-size:0.78rem;color:${info.color};font-weight:700;">${info.name} · ${info.keywords}</span>
+                            <span style="margin-left:auto;font-size:0.75rem;background:#fef3c7;color:#92400e;padding:2px 9px;border-radius:20px;font-weight:800;">과다 (${score}점)</span>
+                        </div>
+                        <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;margin:0;">${info.strong}</p>
+                    </div>`);
+                });
+
+                // 부족/과다 없어도 최저 오행 soft 안내
+                if (!weakList.length && !strongList.length) {
+                    const [lo, ls] = lowestEntry;
+                    const info = _OHENG_INFO[lo];
+                    cards.push(`
+                    <div style="background:#f8fafc;border:1px solid var(--border-light);border-radius:14px;padding:16px 20px;">
+                        <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;margin:0;">
+                            상대적으로 <b style="color:${info.color};">${o} (${info.name})</b> 기운이 약합니다. 이름으로 보완하면 좋습니다.
+                        </p>
+                    </div>`);
+                }
+
+                diagHtml = `
+                <div>
+                    <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:12px;">✦ 사주 원국 진단 — 이름으로 보완할 기운</div>
+                    <div style="display:flex;flex-direction:column;gap:10px;">${cards.join('')}</div>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:14px;line-height:1.6;">
+                        위 진단을 참고해 이름 한자의 자원오행을 선택하면, 사주 원국의 불균형을 이름의 기운으로 보완할 수 있습니다.
+                    </p>
+                </div>`;
+            }
+
+            diagEl.innerHTML = diagHtml;
         }
 
         // ── 이름 한자 오행 기여 수집 ─────────────────────────────────
@@ -3287,6 +3396,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ── 셀프작명 음력 라벨 ─────────────────────────────────────────
+    function toggleLocationOther(sel) {
+        const other = document.getElementById('birth-location-other');
+        if (!other) return;
+        other.style.display = sel.value === '기타' ? 'block' : 'none';
+        if (sel.value !== '기타') other.value = '';
+    }
+
     function updateSelfLunarLabel() {
         const label   = document.getElementById('self-lunar-label');
         if (!label) return;
