@@ -528,6 +528,7 @@
         .oheng-dist-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; }
         .oheng-dist-count { font-size: 0.85rem; font-weight: 800; color: var(--bg-dark); margin-left: 2px; }
         .oheng-dist-item.weak .oheng-dist-count { color: #ef4444; }
+        .oheng-dist-plus { font-size: 0.85rem; font-weight: 900; margin-left: 1px; opacity: 0.85; }
 </style>
 </head>
 <body>
@@ -921,11 +922,11 @@
                 <table class="saju-mingsik" id="self-saju-table">
                     <thead>
                         <tr>
-                            <th>四柱</th>
-                            <th>時柱</th>
-                            <th>日柱</th>
-                            <th>月柱</th>
-                            <th>年柱</th>
+                            <th>사주</th>
+                            <th>시주</th>
+                            <th>일주</th>
+                            <th>월주</th>
+                            <th>연주</th>
                         </tr>
                     </thead>
                     <tbody id="self-saju-tbody">
@@ -2656,10 +2657,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 사주 4주 데이터
         const pillars = [
-            { label:'時柱', gan: saju.time.gan,  ji: saju.time.ji  },
-            { label:'日柱', gan: saju.day.gan,   ji: saju.day.ji,  isDay: true },
-            { label:'月柱', gan: saju.month.gan, ji: saju.month.ji },
-            { label:'年柱', gan: saju.year.gan,  ji: saju.year.ji  }
+            { label:'시주', gan: saju.time.gan,  ji: saju.time.ji  },
+            { label:'일주', gan: saju.day.gan,   ji: saju.day.ji,  isDay: true },
+            { label:'월주', gan: saju.month.gan, ji: saju.month.ji },
+            { label:'연주', gan: saju.year.gan,  ji: saju.year.ji  }
         ];
 
         // 지장간 간단 표시
@@ -2684,38 +2685,69 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (!tbody) return;
         tbody.innerHTML = `
             <tr>
-                <td class="row-label">천간<br>(天干)</td>
+                <td class="row-label">천간</td>
                 ${pillars.map(p => `<td><div class="gan-cell" style="color:${getGanColor(p.gan)};">${p.gan}</div><span class="gan-kr">${_CHEONGAN_KR[p.gan]||''}</span></td>`).join('')}
             </tr>
             <tr>
-                <td class="row-label">지지<br>(地支)</td>
+                <td class="row-label">지지</td>
                 ${pillars.map(p => `<td><div class="ji-cell" style="color:${getJiColor(p.ji)};">${p.ji}</div><span class="ji-kr">${_JIJI_KR[p.ji]||''}</span></td>`).join('')}
             </tr>
             <tr>
-                <td class="row-label">암장<br>(暗藏)</td>
+                <td class="row-label">암장</td>
                 ${pillars.map(p => `<td class="am-cell">${JIJANGGAN_SHORT[p.ji]||''}</td>`).join('')}
             </tr>
         `;
 
-        // 오행 분포 계산
+        // ── 오행 분포 계산 (사주 기반) ──────────────────────────────
         const ohengCount = {'木':0,'火':0,'土':0,'金':0,'水':0};
         for (const p of pillars) {
             const go = _CG_OHENG[p.gan]; if (go) ohengCount[go]++;
             const jo = _JJ_OHENG[p.ji];  if (jo) ohengCount[jo]++;
         }
 
+        // ── 이름 한자 오행 기여 수집 ─────────────────────────────────
+        const nameOhengCount = {'木':0,'火':0,'土':0,'金':0,'水':0};
+        const nameOhengItems = []; // [{hanja, ohaeng}, ...]
+        document.querySelectorAll('#hanja-dropdowns select').forEach(sel => {
+            if (!sel.value) return;
+            const parts = sel.value.split('|'); // [strokes, ohaeng, hanja]
+            if (parts.length < 3) return;
+            const o = parts[1], hj = parts[2];
+            if (nameOhengCount[o] !== undefined) nameOhengCount[o]++;
+            nameOhengItems.push({ hanja: hj, ohaeng: o });
+        });
+        const hasNameOheng = nameOhengItems.length > 0;
+
+        // 이름 오행 기여 설명 텍스트
+        const nameContribDesc = hasNameOheng
+            ? nameOhengItems.map(it => `${it.hanja}(${_OHENG_NAME[it.ohaeng]||it.ohaeng})`).join(', ')
+            : '';
+
         const distEl = document.getElementById('self-oheng-dist');
         if (distEl) {
-            distEl.innerHTML = Object.entries(ohengCount)
-                .map(([o, cnt]) => {
-                    const isWeak = cnt === 0;
-                    return `<div class="oheng-dist-item${isWeak?' weak':''}">
-                        <div class="oheng-dist-dot" style="background:${_OHENG_COLOR[o]};"></div>
-                        <span class="oheng-dist-hanja" style="color:${_OHENG_COLOR[o]};">${o}</span>
-                        <span class="oheng-dist-label">${_OHENG_NAME[o]}</span>
-                        <span class="oheng-dist-count">${cnt}개</span>
-                    </div>`;
-                }).join('');
+            const items = Object.entries(ohengCount).map(([o, cnt]) => {
+                const nameCnt = nameOhengCount[o] || 0;
+                const isWeak  = cnt === 0 && nameCnt === 0;
+                const countHtml = nameCnt > 0
+                    ? `<span class="oheng-dist-count">${cnt}</span><span class="oheng-dist-plus" style="color:${_OHENG_COLOR[o]};">+${nameCnt}</span>`
+                    : `<span class="oheng-dist-count">${cnt}</span>`;
+                return `<div class="oheng-dist-item${isWeak?' weak':''}">
+                    <div class="oheng-dist-dot" style="background:${_OHENG_COLOR[o]};"></div>
+                    <span class="oheng-dist-hanja" style="color:${_OHENG_COLOR[o]};">${o}</span>
+                    <span class="oheng-dist-label">${_OHENG_NAME[o]}</span>
+                    ${countHtml}
+                </div>`;
+            }).join('');
+
+            const noteHtml = hasNameOheng
+                ? `<p style="margin-top:14px;font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+                    <span style="font-weight:700;color:var(--bg-dark);">+숫자</span>는 이름 한자
+                    <strong style="color:var(--gold-dark);">${nameContribDesc}</strong>의
+                    자원오행이 사주 원국에 더해지는 기운입니다.
+                   </p>`
+                : '';
+
+            distEl.innerHTML = items + noteHtml;
         }
     }
 
