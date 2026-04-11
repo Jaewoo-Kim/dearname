@@ -473,6 +473,40 @@
         .name-card-tab.active .card-kr { color: #d4af37; }
         .card-hanja { color: rgba(255, 255, 255, 0.5); font-size: 0.9rem; }    
 
+        /* ── 스토리형 셀프 보고서 ── */
+        .story-intro-card { max-width:780px;margin:0 auto 8px;padding:28px 36px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:20px;border-left:4px solid var(--gold-dark);font-size:1rem;color:var(--text-secondary);line-height:1.9; }
+        .story-chapter-label { font-size:0.72rem;font-weight:800;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px; }
+        .story-bridge-wrap { max-width:780px;margin:0 auto;display:flex;flex-direction:column;align-items:center;padding:4px 0; }
+        .story-bridge-line { width:1px;height:28px;background:var(--border-light); }
+        .story-bridge-pill { font-size:0.85rem;color:var(--text-secondary);font-style:italic;background:#f8fafc;padding:10px 24px;border-radius:30px;border:1px solid var(--border-light);text-align:center; }
+        .suri-seasons-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px; }
+        @media(max-width:600px){ .suri-seasons-grid{ grid-template-columns:1fr; } }
+        .season-card { background:#f8fafc;border-radius:16px;padding:20px;border:1px solid var(--border-light);position:relative; }
+        .season-card.season-good { border-color:#bbf7d0; background:#f0fdf4; }
+        .season-card.season-bad  { border-color:#fecaca; background:#fff5f5; }
+        .season-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
+        .season-meta { display:flex;align-items:center;gap:8px; }
+        .season-emoji { font-size:1.2rem; }
+        .season-period { font-size:0.72rem;font-weight:700;color:var(--text-muted);letter-spacing:0.5px; }
+        .season-num { font-size:2.2rem;font-weight:900;color:var(--bg-dark);line-height:1;margin-bottom:2px; }
+        .season-suri-name { font-size:0.88rem;font-weight:700;color:var(--bg-dark);margin-bottom:8px; }
+        .season-desc { font-size:0.82rem;color:var(--text-secondary);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden; }
+        .jawon-chips { display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap; }
+        .jawon-chip { display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:30px;border:2px solid;background:white; }
+        .jawon-chip-hanja { font-size:1.5rem;font-weight:900; }
+        .jawon-chip-label { font-size:0.75rem;font-weight:600;opacity:0.85; }
+        .story-score-wrap { text-align:center;padding:28px 0 20px; }
+        .story-score-num { font-size:4.5rem;font-weight:900;color:var(--bg-dark);line-height:1; }
+        .story-score-unit { font-size:1.1rem;font-weight:600;color:var(--text-secondary);margin-left:4px; }
+        .story-score-sub { font-size:0.82rem;color:var(--text-muted);margin-top:6px; }
+        .conclusion-msg { font-size:0.97rem;line-height:1.85;color:var(--text-primary);margin-bottom:22px;padding:20px 22px;border-radius:14px;border-left:4px solid; }
+        .conclusion-points { display:flex;flex-direction:column;gap:10px;margin-bottom:24px; }
+        .conclusion-point { display:flex;align-items:flex-start;gap:10px;padding:14px 18px;border-radius:12px;font-size:0.88rem;line-height:1.65; }
+        .conclusion-point-icon { font-size:1.1rem;flex-shrink:0;margin-top:1px; }
+        .sound-unified { font-size:0.95rem;line-height:1.85;color:var(--text-primary);padding:20px 22px;background:#f8fafc;border-radius:14px;border:1px solid var(--border-light); }
+        .sound-grade-row { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+        .sound-grade-label { font-size:0.8rem;font-weight:700;color:var(--text-secondary);width:100px;flex-shrink:0; }
+
         /* ── DearName v2: 동적 보고서 뷰 추가 스타일 ── */
         .suri-cards-wrap { display: flex; flex-direction: column; gap: 24px; }
         .suri-card { display: flex; gap: 24px; align-items: flex-start; padding-bottom: 24px; border-bottom: 1px solid var(--border-light); }
@@ -964,151 +998,92 @@
 
 <div id="self-report-view">
     <header class="report-header">
-        <div class="score-badge" id="self-score-badge">스마트 셀프 진단 점수 : 85 / 100 점</div>
+        <div style="font-size:0.78rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:18px;">1차 알고리즘 성명 분석</div>
         <h1 id="self-report-title">홍길동 <span>洪吉童</span></h1>
-        <div class="meta-info" id="self-report-meta">
-            2026년 3월 7일 출생 &nbsp;|&nbsp; 남자 &nbsp;|&nbsp; 1차 알고리즘 분석
-        </div>
+        <div class="meta-info" id="self-report-meta">2026년 3월 7일 출생 &nbsp;|&nbsp; 남자 &nbsp;|&nbsp; 알고리즘 정밀 진단</div>
     </header>
 
     <main class="report-main">
+
+        <!-- ① 도입 브릿지 -->
+        <div class="story-intro-card" id="self-story-intro">
+            사주가 아이가 태어난 <b>'토양'</b>이라면, 이름은 그 위에 뿌리내릴 <b>'씨앗'</b>과 같습니다.<br>
+            먼저 이 아이가 어떤 토양을 가지고 태어났는지, 그리고 선택하신 이름이 그 토양에 어울리는지 함께 살펴봅니다.
+        </div>
+
+        <!-- ② 사주 원국 -->
         <div class="report-card" id="self-saju-section" style="display:none;">
-            <span class="section-tag">사주 운명 분석</span>
+            <div class="story-chapter-label">타고난 기운</div>
             <h2 class="section-title">사주 원국 (四柱八字)</h2>
-            <p style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:20px;" id="self-saju-meta-label"></p>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:20px;" id="self-saju-meta-label"></p>
             <div class="saju-mingsik-wrap">
                 <table class="saju-mingsik" id="self-saju-table">
-                    <thead>
-                        <tr>
-                            <th>사주</th>
-                            <th>시주</th>
-                            <th>일주</th>
-                            <th>월주</th>
-                            <th>연주</th>
-                        </tr>
-                    </thead>
-                    <tbody id="self-saju-tbody">
-                        <!-- JS로 동적 생성 -->
-                    </tbody>
+                    <thead><tr><th>사주</th><th>시주</th><th>일주</th><th>월주</th><th>연주</th></tr></thead>
+                    <tbody id="self-saju-tbody"></tbody>
                 </table>
             </div>
             <h3 style="font-size:1rem;font-weight:800;color:var(--bg-dark);margin:28px 0 14px;">오행(五行) 분포 <span id="self-oheng-balance-badge" style="display:inline-block;margin-left:8px;vertical-align:middle;"></span></h3>
-            <div class="oheng-dist-wrap" id="self-oheng-dist">
-                <!-- JS로 동적 생성 -->
-            </div>
+            <div class="oheng-dist-wrap" id="self-oheng-dist"></div>
             <div id="self-saju-diagnosis" style="margin-top:22px;"></div>
         </div>
 
+        <!-- 브릿지 →③ -->
+        <div class="story-bridge-wrap" id="self-bridge-jawon">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">그렇다면 선택하신 이름은 이 빈틈을 어떻게 채우고 있을까요?</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- ③ 자원오행 -->
         <div class="report-card">
-            <span class="section-tag">발음 오행·음양</span>
+            <div class="story-chapter-label">이름이 사주를 만날 때</div>
+            <h2 class="section-title">자원오행 분석</h2>
+            <div id="self-jawon-body"></div>
+        </div>
+
+        <!-- 브릿지 →④ -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">한자의 뜻도 중요하지만, 평생 수만 번 불리게 될 '소리의 기운'도 살펴야 합니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- ④ 발음 오행·음양 -->
+        <div class="report-card">
+            <div class="story-chapter-label">이름의 소리</div>
             <h2 class="section-title">발음 오행 및 음양 분석</h2>
-            <p style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 30px;">
-                이름을 부를 때 발생하는 소리의 파동은 아기의 평생 성격 형성에 관여합니다. 초성의 오행 흐름과 모음의 음양 밸런스를 분석합니다.
-            </p>
-            <table class="tech-table">
-                <tr>
-                    <th>한글 이름</th>
-                    <td id="self-kr-name-display" style="font-weight: 900; color: var(--bg-dark); font-size: 1.3rem;">홍길동</td>
-                </tr>
-                <tr>
-                    <th>발음 오행 (초성)</th>
-                    <td>
-                        <div style="margin-bottom: 8px;"><span class="grade-badge" id="self-rep-badge-pronounce-oheng"></span></div>
-                        <div id="self-pronounce-oheng-desc">초성 오행이 상생 관계로 이어져 부드럽고 막힘없는 흐름입니다.</div>
-                    </td>
-                </tr>
-                <tr>
-                    <th>발음 음양 (모음)</th>
-                    <td>
-                        <div style="margin-bottom: 8px;"><span class="grade-badge" id="self-rep-badge-pronounce-yin"></span></div>
-                        <div id="self-pronounce-yin-desc">양성(ㅗ) - 음성(ㅣ) - 양성(ㅗ) : 음양이 조화롭게 섞여 긍정적입니다.</div>
-                    </td>
-                </tr>
-            </table>
+            <div id="self-sound-body"></div>
         </div>
 
+        <!-- 브릿지 →⑤ -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">마지막으로, 이름의 획수가 그리는 '인생의 사계절'을 분석합니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- ⑤ 81수리 사계절 -->
         <div class="report-card">
-            <span class="section-tag">수리 운세</span>
-            <h2 class="section-title">81수리 사격(四格) 심층 분석</h2>
-            <p style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 40px;">
-                선택하신 한자의 획수를 바탕으로 <b style="color:var(--bg-dark);">초년(원격), 청년(형격), 장년(이격), 말년(정격)</b>의 4단계 인생 운세를 도출했습니다.
-            </p>
-            
-         <div class="suri-cards-wrap">
-                <div class="suri-card">
-                    <div class="suri-badge"><span class="num" id="suri-cho-num">15</span><span class="txt">초년운</span></div>
-                    <div class="suri-info">
-                        <h5 style="display: block; line-height: 1.4; word-break: keep-all;">원격(초년) : <b id="suri-cho-name">통솔격(吉)</b> <span class="grade-badge" id="self-rep-badge-suri-cho" style="display: inline-block; margin-left: 8px; vertical-align: middle; white-space: nowrap; padding: 4px 10px; font-size: 0.85rem;"></span></h5>
-                        <p id="suri-cho-desc">초지일관의 강인한 의지를 갖춥니다. 다소 고집이 있을 수 있으나 그 뚝심으로 학업에 정진하여 일찍부터 두각을 나타냅니다.</p>
-                    </div>
-                </div>
-                <div class="suri-card">
-                    <div class="suri-badge" style="background: #334155;"><span class="num" id="suri-cheong-num">24</span><span class="txt">청년운</span></div>
-                    <div class="suri-info">
-                        <h5 style="display: block; line-height: 1.4; word-break: keep-all;">형격(청년) : <b id="suri-cheong-name">입신격(吉)</b> <span class="grade-badge" id="self-rep-badge-suri-cheong" style="display: inline-block; margin-left: 8px; vertical-align: middle; white-space: nowrap; padding: 4px 10px; font-size: 0.85rem;"></span></h5>
-                        <p id="suri-cheong-desc">사회에 진출하는 시기에 강한 리더십이 빛을 발합니다. 뜻한 바를 거침없이 이루어 내며, 조직에서 능력을 인정받습니다.</p>
-                    </div>
-                </div>
-                <div class="suri-card">
-                    <div class="suri-badge" style="background: var(--gold-dark);"><span class="num" id="suri-jang-num">21</span><span class="txt">장년운</span></div>
-                    <div class="suri-info">
-                        <h5 style="display: block; line-height: 1.4; word-break: keep-all;">이격(장년) : <b id="suri-jang-name">두령격(吉)</b> <span class="grade-badge" id="self-rep-badge-suri-jang" style="display: inline-block; margin-left: 8px; vertical-align: middle; white-space: nowrap; padding: 4px 10px; font-size: 0.85rem;"></span></h5>
-                        <p id="suri-jang-desc">중년 이후 부와 명예를 거머쥐며, 주변의 존경을 한 몸에 받는 사회적 지도자로 성장하는 대길수입니다.</p>
-                    </div>
-                </div>
-                <div class="suri-card">
-                    <div class="suri-badge" style="background: var(--gold-premium);"><span class="num" id="suri-mal-num">31</span><span class="txt">말년운</span></div>
-                    <div class="suri-info">
-                        <h5 style="display: block; line-height: 1.4; word-break: keep-all;">정격(말년) : <b id="suri-mal-name">대성격(大吉)</b> <span class="grade-badge" id="self-rep-badge-suri-mal" style="display: inline-block; margin-left: 8px; vertical-align: middle; white-space: nowrap; padding: 4px 10px; font-size: 0.85rem;"></span></h5>
-                        <p id="suri-mal-desc">인생의 총운으로, 일찍 이룬 성취가 무너지지 않고 노년까지 이어지며 자손 대대로 번창하는 길수입니다.</p>
-                    </div>
-                </div>
+            <div class="story-chapter-label">수리로 본 인생</div>
+            <h2 class="section-title">81수리 사격(四格) — 인생의 사계절</h2>
+            <div id="self-suri-body"></div>
+        </div>
+
+        <!-- ⑥ 종합 결론 -->
+        <div class="report-card" style="border-top:3px solid var(--gold-premium);">
+            <div class="story-chapter-label">종합 결론</div>
+            <h2 class="section-title">이 이름에 대한 최종 의견</h2>
+            <div id="self-conclusion-body"></div>
+            <div style="margin-top:32px;padding:22px;background:#fffcf5;border:1px solid var(--border-gold);border-radius:14px;font-size:0.92rem;color:var(--gold-dark);line-height:1.7;">
+                <b>※ 유의사항 :</b> 본 보고서는 데이터 알고리즘에 기반한 1차 성명학 진단입니다. 출생일시(사주팔자)와 자원오행의 완벽한 매칭, 조후 용신 판단 등 정밀한 분석은 <a onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);" style="color:var(--bg-dark);font-weight:800;cursor:pointer;text-decoration:underline;">AI 프리미엄 작명 의뢰</a>를 통해 완벽히 확인하실 수 있습니다.
             </div>
         </div>
 
-        <div class="report-card">
-            <span class="section-tag">자원 오행 평가</span>
-            <h2 class="section-title">수리 및 자원 오행 평가</h2>
-            
-            <table class="tech-table">
-                <tr>
-                    <th>수리 음양 (획수 홀짝)</th>
-                    <td>
-                        <div style="margin-bottom: 8px;"><span class="grade-badge" id="self-rep-badge-math-yin"></span></div>
-                        <div id="self-math-yin-desc">음(짝) - 양(홀) - 양(홀) : 음양이 적절히 배합되어 성품의 균형이 잘 잡혀 있습니다.</div>
-                    </td>
-                </tr>
-                <tr>
-                    <th>수리 오행 (중심/총운)</th>
-                    <td>
-                        <div style="margin-bottom: 8px;"><span class="grade-badge" id="self-rep-badge-math-oheng"></span></div>
-                        <div id="self-math-oheng-desc"></div>
-                    </td>
-                </tr>
-                <tr>
-                    <th>자원 오행 (한자 뜻)</th>
-                    <td>
-                        <div style="margin-bottom: 8px;"><span class="grade-badge" id="self-rep-badge-saju-oheng"></span></div>
-                        <div id="self-saju-oheng-desc">선택하신 한자에는 木(나무)과 火(불)의 기운이 내포되어 있습니다. 사주 원국에서 해당 기운이 부족할 경우 훌륭한 보완(용신)이 됩니다.</div>
-                    </td>
-                </tr>
-            </table>
-
-            <div style="margin-top: 40px; padding: 25px; background: #fffcf5; border: 1px solid var(--border-gold); border-radius: 16px; font-size: 1.05rem; color: var(--gold-dark); line-height: 1.6;">
-                <b>※ 유의사항 :</b> 본 보고서는 데이터 알고리즘에 기반한 1차 성명학 진단입니다. 출생일시(사주팔자)와 자원오행의 완벽한 매칭, 조후 용신 판단 등 정밀한 분석은 <a onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);" style="color: var(--bg-dark); font-weight: 800; cursor: pointer; text-decoration: underline;">AI 프리미엄 작명 의뢰</a>를 통해 완벽히 확인하실 수 있습니다.
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 80px;">
-            <button onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView({behavior:'smooth'});}, 100);" class="btn btn-gold" style="width: auto; padding: 18px 36px; font-size: 1rem;">
-                AI 프리미엄 작명 의뢰
-            </button>
-            <button onclick="openEmailModal('self-report')" class="btn btn-navy" style="width: auto; padding: 18px 36px; font-size: 1rem; background:#1e40af;">
-                이메일로 받기
-            </button>
-            <button onclick="window.print();" class="btn btn-navy" style="width: auto; padding: 18px 36px; font-size: 1rem;">
-                PDF로 출력하기
-            </button>
+        <!-- 하단 버튼 -->
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:60px;">
+            <button onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView({behavior:'smooth'});}, 100);" class="btn btn-gold" style="width:auto;padding:18px 36px;font-size:1rem;">AI 프리미엄 작명 의뢰</button>
+            <button onclick="openEmailModal('self-report')" class="btn btn-navy" style="width:auto;padding:18px 36px;font-size:1rem;background:#1e40af;">이메일로 받기</button>
+            <button onclick="window.print();" class="btn btn-navy" style="width:auto;padding:18px 36px;font-size:1rem;">PDF로 출력하기</button>
         </div>
     </main>
 </div>
@@ -2027,110 +2002,187 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // 셀프 리포트 뷰 오픈 이벤트
     function showSelfReportView() {
-        // 구독 체크
         if (!_isSubscribed()) { openSubscribeModal(); return; }
-
-        const lastName = document.getElementById('kr-last-name').value.trim() || '홍';
+        const lastName  = document.getElementById('kr-last-name').value.trim()  || '홍';
         const firstName = document.getElementById('kr-first-name').value.trim() || '길동';
-        const gender = document.getElementById('gender-type').value === 'M' ? '남자' : '여자';
-        let bDate = document.getElementById('birth-date').value || '2026-03-07';
-        let bTime = document.getElementById('birth-time').value || '12:00';
-        let birthDateTime = `${bDate} ${bTime}`;
-
-        const selects = document.querySelectorAll('#hanja-dropdowns select');
+        const gender    = document.getElementById('gender-type').value === 'M' ? '남자' : '여자';
+        const bDate     = document.getElementById('birth-date').value || '2026-03-07';
+        const bTime     = document.getElementById('birth-time').value || '12:00';
+        const selects   = document.querySelectorAll('#hanja-dropdowns select');
         let hanjaStr = '';
-        selects.forEach(s => { 
-            const parts = s.value.split('|');
-            if(parts.length === 3) hanjaStr += parts[2]; // 은닉된 한자 텍스트 가져오기
-        });
-        if(!hanjaStr) hanjaStr = '洪吉童';
+        selects.forEach(s => { const p = s.value.split('|'); if (p.length === 3) hanjaStr += p[2]; });
+        if (!hanjaStr) hanjaStr = '洪吉童';
 
-        document.getElementById('main-view').style.display = 'none';
-        document.getElementById('report-view').style.display = 'none';
-        document.getElementById('theory-detail-view').style.display = 'none';
+        ['main-view','report-view','theory-detail-view'].forEach(id => document.getElementById(id).style.display = 'none');
         document.getElementById('self-report-view').style.display = 'block';
-        document.getElementById('main-nav').style.display = 'none';
+        document.getElementById('main-nav').style.display   = 'none';
         document.getElementById('report-nav').style.display = 'block';
         window.scrollTo(0, 0);
 
-        // ── 사주명식 + 오행 분포 렌더링 ──────────────────────────────
-        _renderSelfSajuSection(bDate, bTime, gender, lastName);
-
+        // 헤더
         document.getElementById('self-report-title').innerHTML = `${lastName}${firstName} <span>${hanjaStr}</span>`;
-        document.getElementById('self-report-meta').innerHTML = `${birthDateTime} 출생 &nbsp;|&nbsp; ${gender} &nbsp;|&nbsp; 알고리즘 정밀 진단`;
-        document.getElementById('self-kr-name-display').innerText = `${lastName}${firstName}`;
-        
-        // 리포트 상세 영역 업데이트
-        const data = getAnalysisData(lastName, firstName);
-        
-        applyBadge('self-rep-badge-pronounce-oheng', data.pronounceOheng.grade);
-        document.getElementById('self-pronounce-oheng-desc').innerText = data.pronounceOheng.desc;
-        
-        applyBadge('self-rep-badge-pronounce-yin', data.pronounceYin.grade);
-        document.getElementById('self-pronounce-yin-desc').innerText = data.pronounceYin.desc;
+        document.getElementById('self-report-meta').innerHTML  = `${bDate} ${bTime} 출생 &nbsp;|&nbsp; ${gender} &nbsp;|&nbsp; 알고리즘 정밀 진단`;
 
-        applyBadge('self-rep-badge-math-yin', data.mathYin.grade);
-        document.getElementById('self-math-yin-desc').innerText = data.mathYin.desc;
+        // 사주 원국 렌더링 (return: {nameOhengItems, weakList8, ohengCount})
+        const sajuData = _renderSelfSajuSection(bDate, bTime, gender, lastName);
+        const { nameOhengItems, weakList8 } = sajuData || { nameOhengItems: [], weakList8: [] };
 
-        applyBadge('self-rep-badge-saju-oheng', data.sajuOheng.grade);
-        document.getElementById('self-saju-oheng-desc').innerText = data.sajuOheng.desc;
-
-        applyBadge('self-rep-badge-math-oheng', data.mathOheng.grade);
-        document.getElementById('self-math-oheng-desc').innerText = data.mathOheng.desc;
-
-        // 81수리 사격 UI 매핑
+        // 분석 데이터
+        const data    = getAnalysisData(lastName, firstName);
         const sGrades = data.suriGrades;
-        
-        // 1. 초년운
-        document.getElementById('suri-cho-num').innerText = sGrades[0].num;
-        document.getElementById('suri-cho-name').innerText = `${sGrades[0].name}`;
-        document.getElementById('suri-cho-desc').innerText = sGrades[0].desc;
-        applyBadge('self-rep-badge-suri-cho', sGrades[0].grade);
-        
-        // 2. 청년운
-        document.getElementById('suri-cheong-num').innerText = sGrades[1].num;
-        document.getElementById('suri-cheong-name').innerText = `${sGrades[1].name}`;
-        document.getElementById('suri-cheong-desc').innerText = sGrades[1].desc;
-        applyBadge('self-rep-badge-suri-cheong', sGrades[1].grade);
-        
-        // 3. 장년운
-        document.getElementById('suri-jang-num').innerText = sGrades[2].num;
-        document.getElementById('suri-jang-name').innerText = `${sGrades[2].name}`;
-        document.getElementById('suri-jang-desc').innerText = sGrades[2].desc;
-        applyBadge('self-rep-badge-suri-jang', sGrades[2].grade);
-        
-        // 4. 말년운
-        document.getElementById('suri-mal-num').innerText = sGrades[3].num;
-        document.getElementById('suri-mal-name').innerText = `${sGrades[3].name}`;
-        document.getElementById('suri-mal-desc').innerText = sGrades[3].desc;
-        applyBadge('self-rep-badge-suri-mal', sGrades[3].grade);
 
-        // ── 총점 동적 계산 ──────────────────────────────────────────
-        const _g2s = { '대길': 100, '길': 75, '평': 50, '흉': 25, '대흉': 10 };
+        // ── 총점 계산 ─────────────────────────────────────────────────
+        const _g2s = { '대길':100,'길':75,'평':50,'흉':25,'대흉':10 };
         const _scored = [
-            { g: sGrades[0].grade, w: 2 },
-            { g: sGrades[1].grade, w: 2 },
-            { g: sGrades[2].grade, w: 2 },
-            { g: sGrades[3].grade, w: 2 },
-            { g: data.pronounceOheng.grade, w: 1.5 },
-            { g: data.pronounceYin.grade,   w: 1 },
-            { g: data.mathOheng.grade,      w: 2 },
-            { g: data.mathYin.grade,        w: 1 },
-            { g: data.sajuOheng.grade,      w: 1.5 },
+            { g: sGrades[0].grade, w:2 }, { g: sGrades[1].grade, w:2 },
+            { g: sGrades[2].grade, w:2 }, { g: sGrades[3].grade, w:2 },
+            { g: data.pronounceOheng.grade, w:1.5 }, { g: data.pronounceYin.grade, w:1 },
+            { g: data.mathOheng.grade, w:2 },        { g: data.mathYin.grade, w:1 },
+            { g: data.sajuOheng.grade, w:1.5 },
         ];
-        const totalW = _scored.reduce((s, x) => s + x.w, 0);
-        const totalS = _scored.reduce((s, x) => s + (_g2s[x.g] ?? 50) * x.w, 0);
-        const finalScore = Math.round(totalS / totalW);
-        document.getElementById('self-score-badge').textContent = `스마트 셀프 진단 점수 : ${finalScore} / 100 점`;
+        const totalW     = _scored.reduce((s,x) => s+x.w, 0);
+        const finalScore = Math.round(_scored.reduce((s,x) => s+(_g2s[x.g]??50)*x.w, 0) / totalW);
 
-        // ── 셀프 보고서 자동 저장 (구독 중일 때) ─────────────────────
-        _saveSelfReport({
-            nameKr:    `${lastName}${firstName}`,
-            nameHanja: hanjaStr,
-            gender,
-            birthDate: bDate,
-            birthTime: bTime,
-        });
+        // ── 공통 헬퍼 ─────────────────────────────────────────────────
+        const _OHENG_COLOR_R = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#475569','水':'#2563eb'};
+        const _OHENG_KR_R    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const _gradeColor = g => ({대길:'#16a34a',길:'#15803d',평:'#64748b',흉:'#d97706',대흉:'#dc2626'}[g]||'#64748b');
+        const _gradeBg    = g => ({대길:'#dcfce7',길:'#f0fdf4',평:'#f1f5f9',흉:'#fef3c7',대흉:'#fee2e2'}[g]||'#f1f5f9');
+        const _badgeHtml  = (g,label) => `<span style="display:inline-block;background:${_gradeBg(g)};color:${_gradeColor(g)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${label||g}</span>`;
+        const _isGood = g => g==='대길'||g==='길';
+        const _isBad  = g => g==='흉'||g==='대흉';
+
+        // ── ③ 자원오행 섹션 ───────────────────────────────────────────
+        const nameSet = [...new Set(nameOhengItems.map(it=>it.ohaeng))];
+        const compensated   = weakList8.filter(o => nameSet.includes(o));
+        const uncompensated = weakList8.filter(o => !nameSet.includes(o));
+
+        let jawonStoryMsg = '';
+        if (!nameOhengItems.length) {
+            jawonStoryMsg = '아직 이름 한자를 선택하지 않아 자원오행을 분석할 수 없습니다. 한자를 선택하면 이 분석이 업데이트됩니다.';
+        } else if (!weakList8.length) {
+            jawonStoryMsg = `이미 균형 잡힌 사주입니다. 이름의 자원오행 선택 자유도가 높으니, 아이가 갖길 바라는 기질에 맞춰 선택하시면 됩니다.`;
+        } else if (compensated.length === weakList8.length) {
+            const kr = compensated.map(o=>`<b style="color:${_OHENG_COLOR_R[o]};">${_OHENG_KR_R[o]}</b>`).join(', ');
+            jawonStoryMsg = `다행히 선택하신 한자의 자원오행이 사주에서 부족한 ${kr} 기운을 정확히 담고 있습니다. 마른 땅에 단비가 내리는 격입니다. 탁월한 선택입니다.`;
+        } else if (compensated.length > 0) {
+            const compKr   = compensated.map(o=>`<b style="color:${_OHENG_COLOR_R[o]};">${_OHENG_KR_R[o]}</b>`).join(', ');
+            const uncompKr = uncompensated.map(o=>`<b style="color:${_OHENG_COLOR_R[o]};">${_OHENG_KR_R[o]}</b>`).join(', ');
+            jawonStoryMsg = `${compKr} 기운은 이름으로 보완되었습니다. 그러나 ${uncompKr} 기운은 아직 채워지지 않았습니다. 해당 오행의 한자를 추가로 검토해보세요.`;
+        } else {
+            const weakKr = weakList8.map(o=>`<b style="color:${_OHENG_COLOR_R[o]};">${_OHENG_KR_R[o]}</b>`).join(', ');
+            jawonStoryMsg = `아쉽게도 선택하신 한자는 사주에서 부족한 ${weakKr} 기운을 채워주지 못하고 있습니다. 기운의 균형을 위해 재검토를 권장합니다.`;
+        }
+
+        const chipsHtml = nameOhengItems.map(it => {
+            const c = _OHENG_COLOR_R[it.ohaeng]||'#64748b';
+            return `<div class="jawon-chip" style="border-color:${c};color:${c};">
+                <span class="jawon-chip-hanja">${it.hanja}</span>
+                <span class="jawon-chip-label">${_OHENG_KR_R[it.ohaeng]||it.ohaeng}</span>
+            </div>`;
+        }).join('');
+
+        document.getElementById('self-jawon-body').innerHTML = `
+            ${nameOhengItems.length ? `<div class="jawon-chips">${chipsHtml}</div>` : ''}
+            <div style="font-size:0.97rem;line-height:1.85;color:var(--text-primary);padding:18px 20px;background:#f8fafc;border-radius:14px;border:1px solid var(--border-light);">${jawonStoryMsg}</div>
+            <div style="margin-top:12px;display:flex;align-items:center;gap:10px;">
+                <span style="font-size:0.8rem;color:var(--text-secondary);">자원오행 종합</span>
+                ${_badgeHtml(data.sajuOheng.grade)}
+            </div>`;
+
+        // ── ④ 발음 섹션 ───────────────────────────────────────────────
+        const pronFlow = data.pronounceOheng.grade==='대길' ? '막힘없이 기운이 흐르는 상생의 리듬' :
+                         data.pronounceOheng.grade==='평'   ? '상극이 일부 포함된 무난한 흐름' :
+                                                              '초성 간 기운이 충돌하는 상극의 흐름';
+        document.getElementById('self-sound-body').innerHTML = `
+            <div class="sound-unified">
+                <div class="sound-grade-row">
+                    <span class="sound-grade-label">발음 오행 (초성)</span>
+                    ${_badgeHtml(data.pronounceOheng.grade)}
+                </div>
+                <p style="margin:0 0 16px;">이름을 소리 내어 부를 때 초성의 오행 흐름은 <b>${pronFlow}</b>입니다. ${data.pronounceOheng.desc}</p>
+                <div class="sound-grade-row">
+                    <span class="sound-grade-label">발음 음양 (모음)</span>
+                    ${_badgeHtml(data.pronounceYin.grade)}
+                </div>
+                <p style="margin:0;">${data.pronounceYin.desc}</p>
+            </div>`;
+
+        // ── ⑤ 81수리 사계절 섹션 ─────────────────────────────────────
+        const seasons = [
+            { emoji:'🌱', period:'봄 · 초년 (0~20대)', label:'원격',  data: sGrades[0] },
+            { emoji:'☀️', period:'여름 · 청년 (20~40대)', label:'형격', data: sGrades[1] },
+            { emoji:'🍂', period:'가을 · 장년 (40~60대)', label:'이격', data: sGrades[2] },
+            { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:'정격', data: sGrades[3] },
+        ];
+        const seasonsHtml = seasons.map(s => {
+            const cls = _isGood(s.data.grade) ? 'season-good' : _isBad(s.data.grade) ? 'season-bad' : '';
+            return `<div class="season-card ${cls}">
+                <div class="season-top">
+                    <div class="season-meta">
+                        <span class="season-emoji">${s.emoji}</span>
+                        <div>
+                            <div class="season-period">${s.period}</div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);">${s.label}</div>
+                        </div>
+                    </div>
+                    ${_badgeHtml(s.data.grade)}
+                </div>
+                <div class="season-num">${s.data.num}</div>
+                <div class="season-suri-name">${s.data.name}</div>
+                <div class="season-desc">${s.data.desc}</div>
+            </div>`;
+        }).join('');
+
+        const suriSubMsg = `수리의 획수 음양 배합은 ${_badgeHtml(data.mathYin.grade)} — ${data.mathYin.desc} 수리오행(중심·총운)은 ${_badgeHtml(data.mathOheng.grade)} — ${data.mathOheng.desc}`;
+
+        document.getElementById('self-suri-body').innerHTML = `
+            <div class="suri-seasons-grid">${seasonsHtml}</div>
+            <div style="margin-top:18px;padding:16px 20px;background:#f8fafc;border-radius:12px;border:1px solid var(--border-light);font-size:0.85rem;color:var(--text-secondary);line-height:1.75;">${suriSubMsg}</div>`;
+
+        // ── ⑥ 종합 결론 섹션 ─────────────────────────────────────────
+        const scoreMsg = finalScore >= 80
+            ? { text:'사주와 이름의 조화가 매우 뛰어난 <b>대길(大吉)</b>의 성명입니다. 아이의 앞날을 든든하게 지켜줄 이름입니다.', border:'#86efac', bg:'#f0fdf4', color:'#15803d' }
+            : finalScore >= 50
+            ? { text:`전반적으로 무난한 구성이나 일부 보완 여지가 있습니다. 특히 약점 항목을 개선하시면 더 완벽한 이름이 됩니다.`, border:'#fcd34d', bg:'#fffbeb', color:'#92400e' }
+            : { text:`성명학적으로 불균형이 심해 아이에게 부담이 될 수 있는 이름입니다. 전문가의 안목으로 다시 구성해보시길 권합니다.`, border:'#fca5a5', bg:'#fff5f5', color:'#b91c1c' };
+
+        const labelMap = {
+            pronounceOheng:'발음 오행', pronounceYin:'발음 음양',
+            mathOheng:'수리 오행',      mathYin:'수리 음양',
+            sajuOheng:'자원 오행',
+        };
+        const suriLabelMap = ['초년 수리','청년 수리','장년 수리','말년 수리'];
+        const allItems = [
+            ...sGrades.map((s,i) => ({ label: suriLabelMap[i], grade: s.grade })),
+            { label:'발음 오행', grade: data.pronounceOheng.grade },
+            { label:'발음 음양', grade: data.pronounceYin.grade },
+            { label:'수리 오행', grade: data.mathOheng.grade },
+            { label:'수리 음양', grade: data.mathYin.grade },
+            { label:'자원 오행', grade: data.sajuOheng.grade },
+        ];
+        const goodItems = allItems.filter(x => _isGood(x.grade));
+        const badItems  = allItems.filter(x => _isBad(x.grade));
+
+        const pointsHtml = [
+            ...goodItems.map(x => `<div class="conclusion-point" style="background:#f0fdf4;">
+                <span class="conclusion-point-icon">✦</span>
+                <span><b style="color:#15803d;">${x.label}</b> — ${_badgeHtml(x.grade)} 좋은 기운이 작용합니다.</span></div>`),
+            ...badItems.map(x => `<div class="conclusion-point" style="background:#fff5f5;">
+                <span class="conclusion-point-icon">⚠</span>
+                <span><b style="color:#b91c1c;">${x.label}</b> — ${_badgeHtml(x.grade)} 보완이 필요합니다.</span></div>`),
+        ].join('');
+
+        document.getElementById('self-conclusion-body').innerHTML = `
+            <div class="story-score-wrap">
+                <div><span class="story-score-num">${finalScore}</span><span class="story-score-unit">/ 100</span></div>
+                <div class="story-score-sub">스마트 셀프 진단 종합 점수</div>
+            </div>
+            <div class="conclusion-msg" style="border-color:${scoreMsg.border};background:${scoreMsg.bg};color:${scoreMsg.color};">${scoreMsg.text}</div>
+            <div class="conclusion-points">${pointsHtml}</div>`;
+
+        // ── 저장 ──────────────────────────────────────────────────────
+        _saveSelfReport({ nameKr:`${lastName}${firstName}`, nameHanja:hanjaStr, gender, birthDate:bDate, birthTime:bTime });
     }
 
     // Chart.js 렌더링
@@ -3034,6 +3086,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
             distEl.innerHTML = items + noteHtml;
         }
+        return { nameOhengItems, weakList8, ohengCount };
     }
 
     // ================================================================
@@ -3292,25 +3345,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     function showSelfReportViewDirect() {
         // 구독 체크 없이 직접 보고서 뷰로 이동 (마이페이지 복원용)
-        const lastName  = document.getElementById('kr-last-name').value.trim()  || '홍';
-        const firstName = document.getElementById('kr-first-name').value.trim() || '길동';
-        const gender    = document.getElementById('gender-type').value === 'M' ? '남자' : '여자';
-        const bDate     = document.getElementById('birth-date').value || '2026-03-07';
-        const bTime     = document.getElementById('birth-time').value || '12:00';
-        const selects   = document.querySelectorAll('#hanja-dropdowns select');
-        let hanjaStr = '';
-        selects.forEach(s => { const p = s.value.split('|'); if(p.length===3) hanjaStr += p[2]; });
-        if (!hanjaStr) hanjaStr = '洪吉童';
-
-        ['main-view','report-view','theory-detail-view','mypage-view'].forEach(id => document.getElementById(id).style.display='none');
+        ['main-view','report-view','theory-detail-view','mypage-view'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
         document.getElementById('self-report-view').style.display = 'block';
-        document.getElementById('main-nav').style.display  = 'none';
+        document.getElementById('main-nav').style.display   = 'none';
         document.getElementById('report-nav').style.display = 'block';
         window.scrollTo(0,0);
-        _renderSelfSajuSection(bDate, bTime, gender, lastName);
-        document.getElementById('self-report-title').innerHTML = `${lastName}${firstName} <span>${hanjaStr}</span>`;
-        document.getElementById('self-report-meta').innerHTML  = `${bDate} ${bTime} 출생 &nbsp;|&nbsp; ${gender} &nbsp;|&nbsp; 알고리즘 정밀 진단`;
-        document.getElementById('self-kr-name-display').innerText = `${lastName}${firstName}`;
+        showSelfReportView();
     }
 
     function _deleteSelfReportConfirm(id) {
