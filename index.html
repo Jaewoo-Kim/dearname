@@ -2893,10 +2893,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 <td class="row-label">지지</td>
                 ${pillars.map(p => `<td><div class="ji-cell" style="color:${getJiColor(p.ji)};">${p.ji}</div><span class="ji-kr">${_JIJI_KR[p.ji]||''}</span></td>`).join('')}
             </tr>
-            <tr>
-                <td class="row-label">암장</td>
-                ${pillars.map(p => `<td class="am-cell">${JIJANGGAN_SHORT[p.ji]||''}</td>`).join('')}
-            </tr>
         `;
 
         // ── 오행 분포 계산 (사주 기반) ──────────────────────────────
@@ -2906,117 +2902,22 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const jo = _JJ_OHENG[p.ji];  if (jo) ohengCount[jo]++;
         }
 
-        // ── 오행 균형/불균형 뱃지 ────────────────────────────────────
-        const sajuScores = (typeof calcOhengScores === 'function') ? calcOhengScores(saju) : null;
+        // ── 오행 균형/불균형 뱃지 (8자 기준) ────────────────────────
+        const weakList8   = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
+        const strongList8 = Object.entries(ohengCount).filter(([,c]) => c >= 4).map(([o]) => o);
+        const isBalanced8 = weakList8.length === 0 && strongList8.length === 0;
         const balanceBadge = document.getElementById('self-oheng-balance-badge');
-        if (balanceBadge && sajuScores) {
-            const vals = Object.values(sajuScores);
-            const hasExtremeWeak   = vals.some(s => s < 10);
-            const hasExtremeStrong = vals.some(s => s >= 50);
-            const isBalanced = !hasExtremeWeak && !hasExtremeStrong;
-            balanceBadge.innerHTML = isBalanced
+        if (balanceBadge) {
+            balanceBadge.innerHTML = isBalanced8
                 ? `<span style="background:#dcfce7;color:#16a34a;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">균형</span>`
                 : `<span style="background:#fee2e2;color:#dc2626;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">불균형</span>`;
         }
 
-        // ── 사주 원국 진단 멘트 ───────────────────────────────────────
-        const diagEl = document.getElementById('self-saju-diagnosis');
-        if (diagEl && sajuScores) {
-            const _OHENG_INFO = {
-                '木': { name:'목(나무)', keywords:'창의력·인내·성장', color:'#16a34a',
-                        weak:'창의력과 성장의 기운이 부족합니다. 木 자원오행의 한자를 이름에 담으면 생명력과 유연한 성품을 길러줄 수 있습니다.',
-                        strong:'木 기운이 강한 사주입니다. 성장·추진 에너지가 풍부하지만 고집이 강해질 수 있으니, 이름에서는 균형을 잡아주는 오행을 고려하세요.' },
-                '火': { name:'화(불)', keywords:'열정·활력·표현력', color:'#dc2626',
-                        weak:'열정과 표현력의 기운이 부족합니다. 火 자원오행의 한자를 이름에 담으면 밝고 활기찬 기질을 더해줄 수 있습니다.',
-                        strong:'火 기운이 강한 사주입니다. 열정과 활력이 넘치지만 감정 기복이 클 수 있으니, 차분함을 더해주는 이름이 도움이 됩니다.' },
-                '土': { name:'토(흙)', keywords:'안정·신뢰·포용', color:'#d97706',
-                        weak:'안정감과 포용력의 기운이 부족합니다. 土 자원오행의 한자를 이름에 담으면 중심을 잡는 힘과 신뢰감을 심어줄 수 있습니다.',
-                        strong:'土 기운이 강한 사주입니다. 안정적이고 믿음직하지만 변화에 다소 둔감해질 수 있으니, 역동적인 기운을 보완해주세요.' },
-                '金': { name:'금(쇠)', keywords:'결단·의지·실행력', color:'#475569',
-                        weak:'결단력과 실행력의 기운이 부족합니다. 金 자원오행의 한자를 이름에 담으면 추진력과 절제하는 힘을 키워줄 수 있습니다.',
-                        strong:'金 기운이 강한 사주입니다. 의지와 결단력이 탁월하지만 지나치게 날카로워질 수 있으니, 부드러운 기운의 이름이 좋습니다.' },
-                '水': { name:'수(물)', keywords:'지혜·총명·유연성', color:'#2563eb',
-                        weak:'지혜와 유연성의 기운이 부족합니다. 水 자원오행의 한자를 이름에 담으면 총명함과 적응력을 높여줄 수 있습니다.',
-                        strong:'水 기운이 강한 사주입니다. 지혜롭고 감성이 풍부하지만 우유부단해질 수 있으니, 결단력을 더해주는 이름을 고려하세요.' },
-            };
-            const weakList   = Object.entries(sajuScores).filter(([,s]) => s < 10).map(([o]) => o);
-            const strongList  = Object.entries(sajuScores).filter(([,s]) => s >= 50).map(([o]) => o);
-            const sortedAll   = Object.entries(sajuScores).sort((a,b) => a[1]-b[1]);
-            const lowestEntry = sortedAll[0]; // 가장 부족한 오행
-
-            let diagHtml = '';
-
-            if (!weakList.length && !strongList.length) {
-                // 완전 균형
-                diagHtml = `
-                <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:16px;padding:20px 24px;">
-                    <div style="font-size:0.82rem;font-weight:800;color:#16a34a;letter-spacing:1px;margin-bottom:8px;">✦ 사주 원국 진단</div>
-                    <p style="font-size:0.95rem;color:#15803d;line-height:1.7;margin:0;">
-                        오행이 고르게 분포된 <b>균형 잡힌 사주</b>입니다. 특정 기운에 치우침이 없어 이름의 자원오행 선택 자유도가 높습니다.
-                        아이의 원하는 기질과 성향에 맞추어 이름을 지어주세요.
-                    </p>
-                </div>`;
-            } else {
-                // 불균형: 부족/과다 오행 각각 설명
-                const cards = [];
-
-                weakList.forEach(o => {
-                    const info = _OHENG_INFO[o];
-                    const score = Math.round(sajuScores[o]);
-                    cards.push(`
-                    <div style="background:#fff;border:1.5px solid ${info.color}22;border-left:4px solid ${info.color};border-radius:14px;padding:16px 20px;">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                            <span style="font-size:1rem;font-weight:900;color:${info.color};">${o}</span>
-                            <span style="font-size:0.78rem;color:${info.color};font-weight:700;">${info.name} · ${info.keywords}</span>
-                            <span style="margin-left:auto;font-size:0.75rem;background:#fee2e2;color:#dc2626;padding:2px 9px;border-radius:20px;font-weight:800;">부족 (${score}점)</span>
-                        </div>
-                        <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;margin:0;">${info.weak}</p>
-                    </div>`);
-                });
-
-                strongList.forEach(o => {
-                    const info = _OHENG_INFO[o];
-                    const score = Math.round(sajuScores[o]);
-                    cards.push(`
-                    <div style="background:#fff;border:1.5px solid ${info.color}22;border-left:4px solid ${info.color};border-radius:14px;padding:16px 20px;">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                            <span style="font-size:1rem;font-weight:900;color:${info.color};">${o}</span>
-                            <span style="font-size:0.78rem;color:${info.color};font-weight:700;">${info.name} · ${info.keywords}</span>
-                            <span style="margin-left:auto;font-size:0.75rem;background:#fef3c7;color:#92400e;padding:2px 9px;border-radius:20px;font-weight:800;">과다 (${score}점)</span>
-                        </div>
-                        <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;margin:0;">${info.strong}</p>
-                    </div>`);
-                });
-
-                // 부족/과다 없어도 최저 오행 soft 안내
-                if (!weakList.length && !strongList.length) {
-                    const [lo, ls] = lowestEntry;
-                    const info = _OHENG_INFO[lo];
-                    cards.push(`
-                    <div style="background:#f8fafc;border:1px solid var(--border-light);border-radius:14px;padding:16px 20px;">
-                        <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;margin:0;">
-                            상대적으로 <b style="color:${info.color};">${o} (${info.name})</b> 기운이 약합니다. 이름으로 보완하면 좋습니다.
-                        </p>
-                    </div>`);
-                }
-
-                diagHtml = `
-                <div>
-                    <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:12px;">✦ 사주 원국 진단 — 이름으로 보완할 기운</div>
-                    <div style="display:flex;flex-direction:column;gap:10px;">${cards.join('')}</div>
-                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:14px;line-height:1.6;">
-                        위 진단을 참고해 이름 한자의 자원오행을 선택하면, 사주 원국의 불균형을 이름의 기운으로 보완할 수 있습니다.
-                    </p>
-                </div>`;
-            }
-
-            diagEl.innerHTML = diagHtml;
-        }
-
-        // ── 이름 한자 오행 기여 수집 ─────────────────────────────────
+        // ── 이름 한자 오행 기여 수집 (성 제외, 이름 한자만) — 진단 앞에서 먼저 수집
         const nameOhengCount = {'木':0,'火':0,'土':0,'金':0,'水':0};
         const nameOhengItems = []; // [{hanja, ohaeng}, ...]
-        document.querySelectorAll('#hanja-dropdowns select').forEach(sel => {
+        const _allSelects = Array.from(document.querySelectorAll('#hanja-dropdowns select'));
+        _allSelects.slice(1).forEach(sel => { // 첫 번째(성) 제외
             if (!sel.value) return;
             const parts = sel.value.split('|'); // [strokes, ohaeng, hanja]
             if (parts.length < 3) return;
@@ -3025,6 +2926,82 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             nameOhengItems.push({ hanja: hj, ohaeng: o });
         });
         const hasNameOheng = nameOhengItems.length > 0;
+
+        // ── 사주 원국 진단 멘트 (8자 기준) ──────────────────────────
+        const diagEl = document.getElementById('self-saju-diagnosis');
+        if (diagEl) {
+            const _OHENG_COLOR_D = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#475569','水':'#2563eb'};
+            const _nameSet = [...new Set(nameOhengItems.map(it=>it.ohaeng))];
+            let diagHtml = '';
+
+            if (isBalanced8) {
+                // 균형 사주 — 4 시나리오
+                const _avg      = Object.values(ohengCount).reduce((a,b)=>a+b,0) / 5;
+                const _relWeak  = Object.entries(ohengCount).filter(([,c])=>c < _avg).map(([o])=>o);
+                const _relStrong= Object.entries(ohengCount).filter(([,c])=>c >= _avg).map(([o])=>o);
+                let _balMsg = '', _balBg = 'linear-gradient(135deg,#f0fdf4,#dcfce7)', _balBorder = '#86efac', _balColor = '#15803d', _balTitle = '#16a34a', _balTitleTxt = '✦ 사주 원국 진단';
+
+                if (!hasNameOheng) {
+                    _balMsg = '특정 기운에 치우침이 없어 이름의 자원오행 선택 자유도가 높습니다. 아이의 원하는 기질과 성향에 맞추어 이름을 지어주세요.';
+                } else {
+                    const _nd    = nameOhengItems.map(it=>`${it.hanja}(${_OHENG_NAME[it.ohaeng]||it.ohaeng})`).join(', ');
+                    const _cw    = _nameSet.some(o=>_relWeak.includes(o));
+                    const _cs    = _nameSet.some(o=>_relStrong.includes(o));
+                    if (_cw && !_cs) {
+                        const _fkr = _nameSet.filter(o=>_relWeak.includes(o)).map(o=>_OHENG_NAME[o]||o).join(', ');
+                        _balMsg = `선택한 이름의 자원오행(${_nd})이 사주에서 상대적으로 약한 <b>${_fkr}</b> 기운을 보충합니다. 균형 잡힌 사주를 더욱 탄탄하게 완성해주는 좋은 선택입니다.`;
+                        _balTitleTxt = '✦ 사주 원국 진단 — 이름이 균형을 강화합니다';
+                    } else if (_cs && !_cw) {
+                        const _dkr = _nameSet.filter(o=>_relStrong.includes(o)).map(o=>_OHENG_NAME[o]||o).join(', ');
+                        _balMsg = `선택한 이름의 자원오행(${_nd})이 사주에서 이미 강한 <b>${_dkr}</b> 기운을 더욱 강화합니다. 다른 오행의 한자도 함께 검토해보세요.`;
+                        _balBg='linear-gradient(135deg,#fffbeb,#fef3c7)';_balBorder='#fcd34d';_balColor='#92400e';_balTitle='#b45309';
+                        _balTitleTxt = '✦ 사주 원국 진단 — 기운 과집중 주의';
+                    } else {
+                        _balMsg = `선택한 이름의 자원오행(${_nd})이 고루 분산되어 있습니다. 균형 잡힌 사주와 조화를 이루며 아이의 다채로운 기질을 이름에 담아줍니다.`;
+                        _balTitleTxt = '✦ 사주 원국 진단 — 이름과 사주가 조화롭습니다';
+                    }
+                }
+                diagHtml = `
+                <div style="background:${_balBg};border:1px solid ${_balBorder};border-radius:16px;padding:20px 24px;">
+                    <div style="font-size:0.82rem;font-weight:800;color:${_balTitle};letter-spacing:1px;margin-bottom:8px;">${_balTitleTxt}</div>
+                    <p style="font-size:0.92rem;color:${_balColor};line-height:1.8;margin:0;">
+                        오행이 고르게 분포된 <b>균형 잡힌 사주</b>입니다. ${_balMsg}
+                    </p>
+                </div>`;
+            } else {
+                // 불균형 — 통합 한 문단
+                const _compensated   = weakList8.filter(o => _nameSet.includes(o));
+                const _uncompensated = weakList8.filter(o => !_nameSet.includes(o));
+                const _colorKr = o => `<b style="color:${_OHENG_COLOR_D[o]};">${_OHENG_NAME[o]}</b>`;
+                const parts = [];
+
+                if (weakList8.length) {
+                    parts.push(`사주팔자에 ${weakList8.map(_colorKr).join(', ')} 기운이 없습니다.`);
+                }
+                if (strongList8.length) {
+                    parts.push(`${strongList8.map(_colorKr).join(', ')} 기운이 특히 강합니다.`);
+                }
+
+                if (hasNameOheng && weakList8.length) {
+                    if (_compensated.length && _uncompensated.length) {
+                        parts.push(`이름의 자원오행으로 ${_compensated.map(_colorKr).join(', ')} 기운은 보완되었으나, ${_uncompensated.map(_colorKr).join(', ')} 기운은 아직 채워지지 않았습니다.`);
+                    } else if (_compensated.length === weakList8.length) {
+                        parts.push(`이름의 자원오행이 부족한 기운을 모두 보완합니다. 훌륭한 선택입니다.`);
+                    } else {
+                        parts.push(`이름의 자원오행이 부족한 ${weakList8.map(_colorKr).join(', ')} 기운을 보완하지 않습니다. 해당 오행의 한자를 검토해보세요.`);
+                    }
+                } else if (!hasNameOheng && weakList8.length) {
+                    parts.push(`이름 한자의 자원오행으로 ${weakList8.map(_colorKr).join(', ')} 기운을 보완하면 좋습니다.`);
+                }
+
+                diagHtml = `
+                <div style="background:#f8fafc;border:1px solid var(--border-light);border-radius:16px;padding:20px 24px;">
+                    <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:10px;">✦ 사주 원국 진단</div>
+                    <p style="font-size:0.92rem;color:var(--text-secondary);line-height:1.8;margin:0;">${parts.join(' ')}</p>
+                </div>`;
+            }
+            diagEl.innerHTML = diagHtml;
+        }
 
         // 이름 오행 기여 설명 텍스트
         const nameContribDesc = hasNameOheng
