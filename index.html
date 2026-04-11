@@ -250,6 +250,14 @@
         .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .premium-form select option { background: var(--bg-dark); color: white; }
 
+        /* 셀프작명 양력/음력 토글 */
+        .cal-pill-group { display:flex; gap:6px; }
+        .cal-pill { position:relative; cursor:pointer; }
+        .cal-pill input { position:absolute; opacity:0; cursor:pointer; height:0; width:0; }
+        .cal-pill .cal-label { display:inline-flex; align-items:center; padding:6px 14px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:20px; color:var(--text-secondary); font-size:0.82rem; font-weight:700; transition:all 0.2s; user-select:none; }
+        .cal-pill:hover .cal-label { background:#e2e8f0; }
+        .cal-pill input:checked ~ .cal-label { background:#fff8e6; border-color:var(--gold-dark); color:var(--gold-dark); }
+
         /* 푸터 */
         footer { text-align: center; padding: 60px 24px; border-top: 1px solid var(--border-light); background: var(--bg-white); font-size: 0.95rem; color: var(--text-secondary); font-weight: 500;}
 
@@ -802,12 +810,12 @@
                         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
                             <input type="date" id="birth-date" style="flex:2; min-width:180px; max-width:220px;" onchange="updateSelfLunarLabel()">
                             <input type="time" id="birth-time" style="flex:1; min-width:120px; max-width:160px;">
-                            <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:0.83rem;color:var(--text-secondary);">
-                                <label style="cursor:pointer;white-space:nowrap;"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"> 양력</label>
-                                <label style="cursor:pointer;white-space:nowrap;"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"> 음력</label>
-                                <label style="cursor:pointer;white-space:nowrap;"><input type="radio" name="self_cal_type" value="leap" onchange="updateSelfLunarLabel()"> 윤달</label>
-                                <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;"></span>
+                            <div class="cal-pill-group">
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"><span class="cal-label">양력</span></label>
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="leap" onchange="updateSelfLunarLabel()"><span class="cal-label">윤달</span></label>
                             </div>
+                            <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;align-self:center;"></span>
                             <select id="birth-location" style="flex:1.5; min-width:155px;" onchange="toggleLocationOther(this)">
                                 <option value="">태어난 지역 (선택)</option>
                                 <option value="서울">서울</option>
@@ -892,11 +900,7 @@
                             <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                                 <input type="date" id="prem-birth-date" class="compact-input" style="flex: 1; min-width: 140px; margin-bottom: 0;" onchange="updateLunarLabel()">
                                 <input type="time" id="prem-birth-time" class="compact-input" style="flex: 1; min-width: 120px; margin-bottom: 0;">
-                                <div style="display:flex;flex-direction:column;gap:4px;justify-content:center;font-size:0.8rem;color:rgba(255,255,255,0.55);white-space:nowrap;">
-                                    <label style="cursor:pointer;display:flex;align-items:center;gap:5px;" title="야자시(夜子時): 밤 11시~자정은 당일 일주를 유지하되 시주 천간은 다음날 일간 기준으로 계산합니다."><input type="checkbox" id="prem-opt-yajasi" checked> 야자시</label>
-                                    <label style="cursor:pointer;display:flex;align-items:center;gap:5px;" title="한국 실태양시 보정: KST 기준 출생 시각에 +30분을 적용하여 절기·시주 경계를 비교합니다."><input type="checkbox" id="prem-opt-30min" checked> −30분</label>
-                                </div>
-                                <div class="premium-pill-group" style="flex: 1.5; min-width: 250px;">
+<div class="premium-pill-group" style="flex: 1.5; min-width: 250px;">
                                     <label class="premium-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="pill-label">양력</span></label>
                                     <label class="premium-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="pill-label">음력</span></label>
                                     <label class="premium-pill"><input type="radio" name="cal_type" value="leap" onchange="updateLunarLabel()"><span class="pill-label">윤달</span></label>
