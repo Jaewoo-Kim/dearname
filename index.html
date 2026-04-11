@@ -500,9 +500,10 @@
         .story-score-unit { font-size:1.1rem;font-weight:600;color:var(--text-secondary);margin-left:4px; }
         .story-score-sub { font-size:0.82rem;color:var(--text-muted);margin-top:6px; }
         .conclusion-msg { font-size:0.97rem;line-height:1.85;color:var(--text-primary);margin-bottom:22px;padding:20px 22px;border-radius:14px;border-left:4px solid; }
-        .conclusion-points { display:flex;flex-direction:column;gap:10px;margin-bottom:24px; }
-        .conclusion-point { display:flex;align-items:flex-start;gap:10px;padding:14px 18px;border-radius:12px;font-size:0.88rem;line-height:1.65; }
-        .conclusion-point-icon { font-size:1.1rem;flex-shrink:0;margin-top:1px; }
+        .conclusion-points { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px; }
+        @media(max-width:600px){ .conclusion-points{ grid-template-columns:repeat(2,1fr); } }
+        .conclusion-point { display:flex;align-items:center;gap:7px;padding:10px 12px;border-radius:10px;font-size:0.82rem;font-weight:700; }
+        .conclusion-point-icon { font-size:0.88rem;flex-shrink:0; }
         .sound-unified { font-size:0.95rem;line-height:1.85;color:var(--text-primary);padding:20px 22px;background:#f8fafc;border-radius:14px;border:1px solid var(--border-light); }
         .sound-grade-row { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
         .sound-grade-label { font-size:0.8rem;font-weight:700;color:var(--text-secondary);width:100px;flex-shrink:0; }
@@ -1025,20 +1026,7 @@
             <h3 style="font-size:1rem;font-weight:800;color:var(--bg-dark);margin:28px 0 14px;">오행(五行) 분포 <span id="self-oheng-balance-badge" style="display:inline-block;margin-left:8px;vertical-align:middle;"></span></h3>
             <div class="oheng-dist-wrap" id="self-oheng-dist"></div>
             <div id="self-saju-diagnosis" style="margin-top:22px;"></div>
-        </div>
-
-        <!-- 브릿지 →③ -->
-        <div class="story-bridge-wrap" id="self-bridge-jawon">
-            <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">그렇다면 선택하신 이름은 이 빈틈을 어떻게 채우고 있을까요?</div>
-            <div class="story-bridge-line"></div>
-        </div>
-
-        <!-- ③ 자원오행 -->
-        <div class="report-card">
-            <div class="story-chapter-label">이름이 사주를 만날 때</div>
-            <h2 class="section-title">자원오행 분석</h2>
-            <div id="self-jawon-body"></div>
+            <div id="self-jawon-inline" style="margin-top:16px;"></div>
         </div>
 
         <!-- 브릿지 →④ -->
@@ -2111,12 +2099,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             </div>`;
         }).join('');
 
-        document.getElementById('self-jawon-body').innerHTML = `
-            ${nameOhengItems.length ? `<div class="jawon-chips">${chipsHtml}</div>` : ''}
-            <div style="font-size:0.95rem;line-height:1.9;color:var(--text-primary);padding:20px 24px;background:#f8fafc;border-radius:14px;border:1px solid var(--border-light);">${jawonStoryMsg}</div>
-            <div style="margin-top:12px;display:flex;align-items:center;gap:10px;">
-                <span style="font-size:0.8rem;color:var(--text-secondary);">자원오행 종합</span>
-                ${_badgeHtml(data.sajuOheng.grade)}
+        const jawonInlineEl = document.getElementById('self-jawon-inline');
+        if (jawonInlineEl) jawonInlineEl.innerHTML = `
+            <div style="border-top:1px solid var(--border-light);margin-top:20px;padding-top:20px;">
+                <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:10px;">✦ 자원오행 보완 분석</div>
+                ${nameOhengItems.length ? `<div class="jawon-chips" style="margin-bottom:14px;">${chipsHtml}</div>` : ''}
+                <p style="font-size:0.92rem;line-height:1.85;color:var(--text-secondary);margin:0 0 12px;">${jawonStoryMsg}</p>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:0.8rem;color:var(--text-secondary);">자원오행 종합</span>
+                    ${_badgeHtml(data.sajuOheng.grade)}
+                </div>
             </div>`;
 
         // ── ④ 발음 섹션 ───────────────────────────────────────────────
@@ -2238,13 +2230,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const pointsHtml = [
             ...goodItems.map(x => `<div class="conclusion-point" style="background:#f0fdf4;">
                 <span class="conclusion-point-icon" style="color:#16a34a;">✦</span>
-                <span><b style="color:#15803d;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}&nbsp;좋은 기운이 작용하는 항목입니다.</span></div>`),
+                <span><b style="color:#15803d;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
             ...midItems.map(x => `<div class="conclusion-point" style="background:#f8fafc;">
                 <span class="conclusion-point-icon" style="color:#64748b;">–</span>
-                <span><b style="color:#475569;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}&nbsp;무난한 수준입니다.</span></div>`),
+                <span><b style="color:#475569;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
             ...badItems.map(x => `<div class="conclusion-point" style="background:#fff5f5;">
                 <span class="conclusion-point-icon" style="color:#dc2626;">⚠</span>
-                <span><b style="color:#b91c1c;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}&nbsp;보완이 권장되는 항목입니다.</span></div>`),
+                <span><b style="color:#b91c1c;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
         ].join('');
 
         document.getElementById('self-conclusion-body').innerHTML = `
@@ -3095,35 +3087,42 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     </p>
                 </div>`;
             } else {
-                // 불균형 — 통합 한 문단
+                // 불균형 — 3문장 확장 진단
                 const _compensated   = weakList8.filter(o => _nameSet.includes(o));
                 const _uncompensated = weakList8.filter(o => !_nameSet.includes(o));
                 const _colorKr = o => `<b style="color:${_OHENG_COLOR_D[o]};">${_OHENG_NAME[o]}</b>`;
+                const _OHENG_MEANING = { '木':'창의력·성장·유연함', '火':'열정·표현력·활력', '土':'안정감·포용력·신뢰', '金':'결단력·실행력·절제', '水':'지혜·총명·유연성' };
                 const parts = [];
 
+                // 문장 1: 어떤 오행이 없고 어떤 오행이 강한지
+                const p1Parts = [];
+                if (weakList8.length) p1Parts.push(`사주팔자에 ${weakList8.map(_colorKr).join(', ')} 기운이 전혀 없습니다.`);
+                if (strongList8.length) p1Parts.push(`반면 ${strongList8.map(_colorKr).join(', ')} 기운은 특히 강하게 자리잡고 있습니다.`);
+                if (p1Parts.length) parts.push(p1Parts.join(' '));
+
+                // 문장 2: 부족한 오행의 의미
                 if (weakList8.length) {
-                    parts.push(`사주팔자에 ${weakList8.map(_colorKr).join(', ')} 기운이 없습니다.`);
-                }
-                if (strongList8.length) {
-                    parts.push(`${strongList8.map(_colorKr).join(', ')} 기운이 특히 강합니다.`);
+                    const meaningLines = weakList8.map(o => `${_colorKr(o)}(${_OHENG_MEANING[o]||''})`).join(', ');
+                    parts.push(`부족한 ${meaningLines}의 영역에서 자연스러운 지원이 약할 수 있어, 이름의 자원오행으로 이 빈자리를 채워주는 것이 이 아이의 작명에서 가장 중요한 과제입니다.`);
                 }
 
+                // 문장 3: 이름 보완 현황
                 if (hasNameOheng && weakList8.length) {
                     if (_compensated.length && _uncompensated.length) {
-                        parts.push(`이름의 자원오행으로 ${_compensated.map(_colorKr).join(', ')} 기운은 보완되었으나, ${_uncompensated.map(_colorKr).join(', ')} 기운은 아직 채워지지 않았습니다.`);
+                        parts.push(`현재 선택하신 이름의 자원오행으로 ${_compensated.map(_colorKr).join(', ')} 기운은 보완되었으나, ${_uncompensated.map(_colorKr).join(', ')} 기운은 아직 채워지지 않았습니다. 미보완 오행의 한자를 추가 검토해보세요.`);
                     } else if (_compensated.length === weakList8.length) {
-                        parts.push(`이름의 자원오행이 부족한 기운을 모두 보완합니다. 훌륭한 선택입니다.`);
+                        parts.push(`선택하신 이름의 자원오행이 부족한 기운을 모두 채워주고 있습니다. 사주 원국과의 조화라는 측면에서 훌륭한 선택입니다.`);
                     } else {
-                        parts.push(`이름의 자원오행이 부족한 ${weakList8.map(_colorKr).join(', ')} 기운을 보완하지 않습니다. 해당 오행의 한자를 검토해보세요.`);
+                        parts.push(`현재 선택하신 이름의 자원오행이 부족한 ${weakList8.map(_colorKr).join(', ')} 기운을 보완하지 못하고 있습니다. 해당 오행을 담은 한자로 교체하시면 더욱 균형 잡힌 이름이 됩니다.`);
                     }
                 } else if (!hasNameOheng && weakList8.length) {
-                    parts.push(`이름 한자의 자원오행으로 ${weakList8.map(_colorKr).join(', ')} 기운을 보완하면 좋습니다.`);
+                    parts.push(`한자를 선택하시면 이름의 자원오행이 부족한 기운을 얼마나 채워주는지 바로 확인하실 수 있습니다. 위 부족한 오행을 담은 한자를 우선적으로 검토해보세요.`);
                 }
 
                 diagHtml = `
                 <div style="background:#f8fafc;border:1px solid var(--border-light);border-radius:16px;padding:20px 24px;">
                     <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:10px;">✦ 사주 원국 진단</div>
-                    <p style="font-size:0.92rem;color:var(--text-secondary);line-height:1.8;margin:0;">${parts.join(' ')}</p>
+                    <p style="font-size:0.92rem;color:var(--text-secondary);line-height:1.85;margin:0;">${parts.join('<br><br>')}</p>
                 </div>`;
             }
             diagEl.innerHTML = diagHtml;
