@@ -507,6 +507,35 @@
         .story-score-num { font-size:4.5rem;font-weight:900;color:var(--bg-dark);line-height:1; }
         .story-score-unit { font-size:1.1rem;font-weight:600;color:var(--text-secondary);margin-left:4px; }
         .story-score-sub { font-size:0.82rem;color:var(--text-muted);margin-top:6px; }
+
+        /* AI 보고서 스토리 요소 */
+        .ai-story-block { background:#f8fafc; border:1px solid var(--border-light); border-radius:14px; padding:20px 24px; margin-top:20px; font-size:0.95rem; line-height:1.75; color:var(--text-primary); }
+        .ai-tagline { font-size:1.35rem; font-weight:800; color:var(--bg-dark); line-height:1.5; margin-bottom:20px; font-style:italic; border-left:4px solid var(--gold-dark); padding-left:18px; }
+        .ai-hanja-card { display:flex; gap:20px; align-items:flex-start; padding:22px 0; border-bottom:1px solid var(--border-light); }
+        .ai-hanja-card:last-child { border-bottom:none; padding-bottom:0; }
+        .ai-hanja-char { width:72px; height:72px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2.4rem; font-weight:900; color:white; flex-shrink:0; }
+        .ai-hanja-body h4 { font-size:1rem; font-weight:800; color:var(--bg-dark); margin:0 0 6px; }
+        .ai-hanja-body p { font-size:0.9rem; color:var(--text-secondary); line-height:1.7; margin:0 0 8px; }
+        .ai-hanja-synergy { font-size:0.82rem; background:#fff8e6; border:1px solid #fcd34d; border-radius:8px; padding:8px 12px; color:#92400e; line-height:1.6; }
+        .ai-hanja-meta { font-size:0.75rem; color:var(--text-muted); margin-bottom:6px; display:flex; gap:8px; }
+        .ai-hanja-meta span { background:#f1f5f9; border-radius:20px; padding:2px 10px; }
+        .ai-sound-flow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+        .ai-sound-char { text-align:center; }
+        .ai-sound-char .char-kr { font-size:1.4rem; font-weight:800; color:var(--bg-dark); display:block; }
+        .ai-sound-char .char-oheng { font-size:0.72rem; font-weight:700; color:white; border-radius:20px; padding:2px 10px; display:inline-block; margin-top:4px; }
+        .ai-sound-arrow { font-size:1.1rem; color:var(--text-muted); }
+        .ai-sound-arrow.good { color:#16a34a; }
+        .ai-sound-arrow.bad { color:#dc2626; }
+        .ai-conclusion-letter { background:linear-gradient(135deg,#fffbeb,#fff8e6); border:1px solid #fcd34d; border-radius:16px; padding:24px 28px; margin-top:24px; }
+        .ai-conclusion-letter .letter-title { font-size:0.82rem; font-weight:800; color:var(--gold-dark); letter-spacing:1px; margin-bottom:12px; }
+        .ai-conclusion-letter p { font-size:0.97rem; line-height:1.85; color:#78350f; margin:0; }
+        .ai-score-display { text-align:center; padding:28px 0 20px; }
+        .ai-score-num { font-size:4rem; font-weight:900; color:var(--gold-dark); line-height:1; }
+        .ai-score-denom { font-size:1.2rem; color:var(--text-secondary); font-weight:600; }
+        .ai-score-label { font-size:0.82rem; color:var(--text-muted); margin-top:6px; }
+        .ai-conclusion-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:20px 0; }
+        @media(max-width:600px){ .ai-conclusion-grid{ grid-template-columns:repeat(2,1fr); } }
+        .ai-conclusion-item { display:flex; align-items:center; gap:7px; padding:10px 12px; border-radius:10px; font-size:0.82rem; font-weight:700; }
         .conclusion-msg { font-size:0.97rem;line-height:1.85;color:var(--text-primary);margin-bottom:22px;padding:20px 22px;border-radius:14px;border-left:4px solid; }
         .conclusion-points { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px; }
         @media(max-width:600px){ .conclusion-points{ grid-template-columns:repeat(2,1fr); } }
@@ -1218,69 +1247,116 @@
     </header>
 
     <main class="report-main">
-        <!-- Executive Summary -->
-        <div class="report-card intro-grid">
-            <div class="intro-text">
-                <span class="section-tag">종합 분석</span>
-                <div class="highlight-quote" id="report-tagline">--</div>
-                <p id="report-saju-analysis" style="color:var(--text-primary);line-height:1.9;"></p>
-                <p id="report-naming-logic" style="color:var(--text-primary);line-height:1.9;"></p>
-                <div class="oheng-bars" id="report-oheng-bars"></div>
-            </div>
-            <div style="background:white;padding:30px;border-radius:24px;border:1px solid var(--border-light);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.02);">
-                <canvas id="sajuRadar"></canvas>
-                <p style="font-size:0.9rem;color:var(--text-secondary);margin-top:20px;font-weight:700;">▲ 작명 후 변화된 잠재력 밸런스</p>
+
+        <!-- 도입 브릿지 -->
+        <div class="story-intro-card">
+            사주가 이 아이가 태어난 <b>'토양'</b>이라면, 이름은 그 위에 심는 <b>'씨앗'</b>입니다.<br>
+            이 보고서는 사주 원국부터 한자의 의미, 소리의 기운, 수리의 흐름까지 — 이 이름이 탄생하기까지의 모든 이야기를 담고 있습니다.
+        </div>
+
+        <!-- Chapter 1: 사주 원국 -->
+        <div class="report-card">
+            <div class="story-chapter-label">Chapter 1. 이 아이가 태어난 우주</div>
+            <h2 class="section-title">사주 원국 (四柱八字)</h2>
+            <div class="saju-grid" id="report-saju-grid"></div>
+            <div class="oheng-bars" id="report-oheng-bars" style="margin-top:28px;"></div>
+            <div class="ai-story-block" id="ai-saju-story"></div>
+        </div>
+
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">이 사주 원국 위에, 선택된 이름이 어떤 기운을 더하는지 살펴봅니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- Chapter 2: 자원오행 & 레이더 -->
+        <div class="report-card">
+            <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
+            <h2 class="section-title">자원오행 & 오행 균형</h2>
+            <div class="ai-tagline" id="report-tagline">--</div>
+            <div class="intro-grid" style="margin-top:0;">
+                <div>
+                    <div class="ai-story-block" id="ai-jawon-story" style="margin-top:0;"></div>
+                </div>
+                <div style="background:white;padding:30px;border-radius:24px;border:1px solid var(--border-light);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.02);">
+                    <canvas id="sajuRadar"></canvas>
+                    <p style="font-size:0.88rem;color:var(--text-secondary);margin-top:16px;font-weight:700;">▲ 작명 후 변화된 잠재력 밸런스</p>
+                </div>
             </div>
         </div>
 
-        <!-- 사주 원국 -->
-        <div class="report-card">
-            <span class="section-tag">Saju Destiny Code</span>
-            <h2 class="section-title">사주 원국(四柱原局) 심층 해부</h2>
-            <p style="color:var(--text-primary);margin-top:-30px;margin-bottom:40px;font-size:1.1rem;">아기가 태어난 연·월·일·시의 8글자는 인생의 사계절입니다. 이 지형도를 정확히 읽어야 완벽한 이름을 지을 수 있습니다.</p>
-            <div class="saju-grid" id="report-saju-grid">
-                <!-- 동적 생성 -->
-            </div>
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">이제 선택된 한자 한 글자 한 글자가 품은 이야기를 들어봅니다.</div>
+            <div class="story-bridge-line"></div>
         </div>
 
-        <!-- 작명 전략 -->
+        <!-- Chapter 3: 한자 의미 -->
         <div class="report-card">
-            <span class="section-tag">작명 전략</span>
-            <h2 class="section-title">운명을 바꾸는 용신(用神) 작명법</h2>
-            <div class="synergy-box">
-                <h3 id="report-naming-strategy-title">💡 왜 이 이름이어야 했을까요?</h3>
-                <p id="report-naming-strategy-body"></p>
-            </div>
-            <div id="report-hanja-details">
-                <!-- 동적 생성 -->
-            </div>
+            <div class="story-chapter-label">Chapter 3. 한자가 품은 이야기</div>
+            <h2 class="section-title">자원(字源) 심층 분석</h2>
+            <div id="report-hanja-details"></div>
+            <div class="ai-story-block" id="ai-hanja-story" style="margin-top:24px;border-left:4px solid var(--gold-dark);background:#fffbeb;border-top:none;border-right:none;border-bottom:none;border-radius:0 14px 14px 0;"></div>
         </div>
 
-        <!-- 발음·수리 분석 -->
-        <div class="report-card">
-            <span class="section-tag">발음·수리 분석</span>
-            <h2 class="section-title">발음 및 수리 구조 정밀 분석</h2>
-            <div id="report-suri-cards" class="suri-cards-wrap">
-                <!-- 동적 생성 -->
-            </div>
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">이 이름이 귀에 닿을 때, 소리는 어떤 기운을 전달할까요?</div>
+            <div class="story-bridge-line"></div>
         </div>
 
-        <!-- 인생 흐름 -->
+        <!-- Chapter 4: 발음 -->
         <div class="report-card">
-            <span class="section-tag">생애 흐름</span>
-            <h2 class="section-title">인생 전반의 종합 운세 흐름</h2>
-            <p style="font-size:1.1rem;color:var(--text-primary);margin-top:-30px;margin-bottom:40px;" id="report-life-flow-intro"></p>
-            <div class="chart-container-large">
+            <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
+            <h2 class="section-title">발음 오행 및 음양 분석</h2>
+            <div id="ai-sound-section"></div>
+            <div class="ai-story-block" id="ai-sound-story"></div>
+        </div>
+
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">마지막으로, 이름의 획수가 그리는 인생의 사계절입니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- Chapter 5: 수리 -->
+        <div class="report-card">
+            <div class="story-chapter-label">Chapter 5. 인생의 사계절</div>
+            <h2 class="section-title">81수리 & 인생 흐름</h2>
+            <div id="report-suri-cards" class="suri-cards-wrap"></div>
+            <div class="chart-container-large" style="margin-top:28px;">
                 <canvas id="lifeFlowChart"></canvas>
             </div>
+            <div class="ai-story-block" id="ai-suri-story"></div>
         </div>
 
-        <!-- 양육 가이드 -->
-        <div class="report-card">
-            <span class="section-tag">인생 운로</span>
-            <h2 class="section-title">아기를 위한 부모님의 맞춤 양육 가이드</h2>
-            <div class="timeline" id="report-timeline">
-                <!-- 동적 생성 -->
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">지금까지 분석한 모든 요소를 종합합니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- Chapter 6: 종합 결론 -->
+        <div class="report-card" style="border-top:3px solid var(--gold-premium);">
+            <div class="story-chapter-label">Chapter 6. 작명가의 총평</div>
+            <h2 class="section-title">종합 결론</h2>
+            <div class="ai-score-display">
+                <div><span class="ai-score-num" id="ai-score-num">--</span><span class="ai-score-denom"> / 100</span></div>
+                <div class="ai-score-label">프리미엄 작명 종합 점수</div>
+            </div>
+            <div class="ai-conclusion-grid" id="ai-conclusion-grid"></div>
+            <div class="ai-conclusion-letter" id="ai-conclusion-letter" style="display:none;">
+                <div class="letter-title">✦ 작명가의 총평</div>
+                <p id="ai-conclusion-letter-text"></p>
+            </div>
+            <div style="margin-top:32px;">
+                <h3 style="font-size:1rem;font-weight:800;color:var(--bg-dark);margin-bottom:16px;">✦ 부모님을 위한 양육 가이드</h3>
+                <div class="timeline" id="report-timeline"></div>
             </div>
         </div>
 
@@ -1609,26 +1685,24 @@
         };
 
         const _demoReport = {
-            tagline: '"김나윤, 깊은 물처럼 고요하게 세상을 밝히다"',
-            sajuAnalysis: '癸巳 일주의 아이는 깊은 물속의 보석과 같습니다. 겉으로는 차분하지만 내면에 강한 의지와 풍부한 감수성을 품고 있습니다. 乙巳년생은 유연한 나무의 기질로 어떤 환경에서도 잘 적응하며, 己卯월의 기운이 더해져 학습 능력과 예술적 감각이 뛰어납니다. 庚申 시주는 강한 결단력과 추진력을 부여하여, 어린 시절부터 목표를 향해 꾸준히 나아가는 힘을 줍니다.',
-            namingLogic: '사주의 오행 분석 결과, 水(13.75점)와 土(16.75점)가 부족하고 金(26.5점)과 木(25.0점)이 강합니다. 娜(아리따울·土 기운)는 부족한 土를 보충하여 안정감과 포용력을 키워주고, 奫(물 깊고 넓을·水 기운)는 일간 癸水를 직접 강화하여 지혜와 통찰력을 높여줍니다. 특히 金→水→木의 상생 흐름을 완성하여 인생 전반에 걸쳐 에너지가 막힘없이 흐르는 이름입니다.',
+            tagline: '"깊은 물처럼 고요하고, 넓은 땅처럼 포용하는 아이"',
+            sajuStory: '癸巳 일주의 아이는 깊은 물속의 보석과 같습니다. 겉으로는 차분하고 고요해 보이지만, 내면에 강한 의지와 풍부한 감수성을 품고 있습니다. 乙巳년 태생의 이 아이는 유연한 나무(乙木)의 기질로 어떤 환경에서도 잘 적응하며, 己卯 월의 기운이 더해져 학습 능력과 예술적 감각이 뛰어납니다. 사주 원국을 살펴보면 金 기운이 강하고 水와 土가 부족한 지형인데, 이 빈자리를 이름으로 채워주는 것이 이 아이의 작명에서 가장 중요한 과제입니다.',
+            jawonStory: '娜(나)의 土 기운은 부족한 안정감을 채워주고, 奫(윤)의 水 기운은 일간 癸水를 직접 강화합니다. 이 두 글자가 더해지며 강한 金 기운 위에 水와 土가 자리 잡아, 金→水→木의 완성된 상생 흐름이 이루어집니다. 이름이 사주의 빈자리를 정확히 채워주는 이상적인 구성입니다.',
             hanjaDetails: [
-                {
-                    hanja: '娜', kr: '나', meaning: '아리따울', strokes: 10, oheng: '土',
-                    synergyWithSaju: '土 기운으로 金이 강한 사주에 안정과 포용의 에너지를 더합니다. 인간관계가 원만해지고 사람들의 신뢰를 얻는 힘이 생깁니다.'
-                },
-                {
-                    hanja: '奫', kr: '윤', meaning: '물 깊고 넓을', strokes: 15, oheng: '水',
-                    synergyWithSaju: '일간 癸水를 강화하여 깊은 사색과 직관력을 키워줍니다. 학문적 성취와 예술적 통찰이 뛰어난 인재로 성장하는 기반이 됩니다.'
-                }
+                { hanja:'娜', kr:'나', meaning:'아리따울 나(娜). 여성의 우아한 자태와 인품을 뜻하며, 土 기운을 품고 있어 만물을 포용하는 대지의 성질을 담고 있습니다. 사람들을 따뜻하게 아우르는 넉넉함이 이 글자 안에 있습니다.', strokes:10, oheng:'土', synergyWithSaju:'土 기운이 부족한 사주를 보완하여 인간관계를 원만하게 하고, 어디서나 신뢰를 얻는 힘을 더합니다.' },
+                { hanja:'奫', kr:'윤', meaning:'물 깊고 넓을 윤(奫). 깊고 넓은 물이 담겨 있는 모습을 형상화한 글자로, 지혜와 통찰을 상징합니다. 겉으로는 고요하지만 그 안에 무한한 가능성과 깊이를 품고 있는 물(水)의 성질을 지닙니다.', strokes:15, oheng:'水', synergyWithSaju:'일간 癸水를 직접 강화하여 깊은 사색과 직관력을 키워줍니다. 학문적 성취와 예술적 통찰에서 두각을 나타낼 기반이 됩니다.' }
             ],
+            hanjaStory: '이 이름을 풀어쓰면, 아리답고 포용력 있는(娜) 아이가 깊고 넓은 지혜(奫)를 품고 세상을 향해 나아간다는 이야기가 됩니다. "나윤"이라는 두 글자가 어우러져, 내면의 깊이와 외면의 우아함을 함께 갖춘 사람이 되리라는 부모님의 소망이 담깁니다.',
+            soundStory: '김·나·윤의 초성 기운(木→火→土)이 나무가 불을 키우고 불이 흙을 만드는 완벽한 상생 흐름을 이룹니다. 이름을 소리 내어 부를 때마다 에너지가 막힘없이 흘러 아이에게 긍정적인 파동을 전달합니다. 발음 음양도 음과 양이 고루 배합되어 듣는 이의 귀에 자연스럽고 편안하게 닿습니다.',
+            suriStory: '초년(원격 25수)에 탄탄한 기초를 쌓으며 주변의 기대를 한 몸에 받고, 청·장년기(형격 18수, 이격 9수)에 전문 분야에서 두각을 나타내며 사회적 영향력을 키워갑니다. 말년(정격 33수)에는 오랜 세월이 빚어낸 깊은 지혜와 인덕으로 많은 이들에게 존경받는 풍요로운 결실의 시기를 맞이합니다.',
+            conclusionLetter: '김나윤이라는 이름은 이 아이의 사주가 필요로 하는 土와 水의 기운을 정확히 담아, 강한 金 기운 위에 완성된 오행의 흐름을 만들어냅니다. 평생 불릴 이 두 글자가 아이의 든든한 동반자가 되어, 어떤 어려움도 유연하게 헤쳐나갈 지혜와 사람들에게 사랑받는 따뜻함을 함께 선물할 것입니다. 이 이름과 함께 나윤이가 자신의 빛깔로 세상을 아름답게 물들이기를 진심으로 축원합니다.',
             lifeFlow: {
                 early:  '탄탄한 기초와 우수한 학업 성취로 주변의 기대를 한 몸에 받는 시기',
                 middle: '전문 분야에서 두각을 나타내며 사회적 영향력을 넓혀가는 시기',
                 late:   '깊은 지혜와 인덕으로 많은 이들에게 존경받는 풍요로운 결실의 시기'
             },
-            careerAdvice: '水와 土의 기운이 조화를 이루어 창의성과 논리력이 함께 발달합니다. 연구·학문·예술·교육·상담 분야에서 특히 두각을 나타낼 것입니다.',
-            healthAdvice: '水 기운 보충을 위해 충분한 수분 섭취와 규칙적인 생활 패턴을 유지하는 것이 좋습니다. 과도한 스트레스에 주의하고 감정 표현을 자유롭게 하는 환경이 중요합니다.'
+            careerAdvice: 'Water와 土의 기운이 조화를 이루어 창의성과 논리력이 함께 발달합니다. 연구·학문·예술·교육·상담 분야에서 특히 두각을 나타낼 것입니다.',
+            healthAdvice: '충분한 수분 섭취와 규칙적인 생활 패턴을 유지하는 것이 좋습니다. 과도한 스트레스에 주의하고 감정 표현을 자유롭게 하는 환경이 중요합니다.'
         };
 
         _currentState = {
@@ -2623,6 +2697,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
             showLoadingOverlay('AI 명리학 대가의 소견서를 작성 중입니다... (약 20~30초)');
 
+            _currentState.parentSaju = document.getElementById('prem-parent-saju')?.value || '';
             _allReports = await generateAllReports(top3, _currentState);
             _currentIdx = 0;
 
@@ -2746,6 +2821,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // 헤더
         document.getElementById('main-score-badge').textContent = `프리미엄 작명 종합 점수 : ${score} / 100 점`;
         document.getElementById('premium-report-title').innerHTML = `${kr} <span>${hj}</span>`;
+        const aiScoreNum = document.getElementById('ai-score-num');
+        if (aiScoreNum) aiScoreNum.textContent = score;
 
         // 메타 정보
         const metaEl = document.getElementById('premium-report-meta');
@@ -2754,40 +2831,46 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             metaEl.textContent = `${_currentState.familyName.kr} ${h1.kr}${h2?.kr||''} · ${gender} · ${_saju.day.gan}${_saju.day.ji}(${_toHangul(_saju.day.gan)}${_toHangul(_saju.day.ji)}) 일주`;
         }
 
-        // Executive Summary
-        document.getElementById('report-tagline').textContent = report.tagline || '';
-        document.getElementById('report-saju-analysis').textContent = report.sajuAnalysis || '';
-        document.getElementById('report-naming-logic').textContent = report.namingLogic || '';
-
-        // 오행 밸런스 바
-        _renderOhengBars(_scores, candidate);
-
-        // 사주 원국 그리드
+        // Ch1: 사주 원국
         _renderSajuGrid(_saju);
+        _renderOhengBars(_scores, candidate);
+        const sajuStoryEl = document.getElementById('ai-saju-story');
+        if (sajuStoryEl) sajuStoryEl.textContent = report.sajuStory || report.sajuAnalysis || '';
 
-        // 작명 전략
-        const stratTitle = document.getElementById('report-naming-strategy-title');
-        if (stratTitle) stratTitle.textContent = `💡 왜 '${h1.kr}${h2?.kr||''}'이어야 했을까요?`;
-        const stratBody = document.getElementById('report-naming-strategy-body');
-        if (stratBody) stratBody.textContent = report.namingLogic || '';
+        // Ch2: 자원오행 & 레이더
+        document.getElementById('report-tagline').textContent = report.tagline || '';
+        const jawonStoryEl = document.getElementById('ai-jawon-story');
+        if (jawonStoryEl) jawonStoryEl.textContent = report.jawonStory || report.namingLogic || '';
 
-        // 한자 풀이
+        // Ch3: 한자 의미
         _renderHanjaDetails(report.hanjaDetails || [], h1, h2);
+        const hanjaStoryEl = document.getElementById('ai-hanja-story');
+        if (hanjaStoryEl) hanjaStoryEl.textContent = report.hanjaStory || '';
 
-        // 수리 카드
+        // Ch4: 발음
+        _renderSoundSection(candidate, report);
+        const soundStoryEl = document.getElementById('ai-sound-story');
+        if (soundStoryEl) soundStoryEl.textContent = report.soundStory || '';
+
+        // Ch5: 수리 + 라이프플로우
         _renderSuriCards(s0, s1, s2, isOija);
-
-        // 인생 흐름 소개
-        const lifeIntro = document.getElementById('report-life-flow-intro');
-        if (lifeIntro) {
+        const suriStoryEl = document.getElementById('ai-suri-story');
+        if (suriStoryEl) {
             const lf = report.lifeFlow || {};
-            lifeIntro.textContent = [lf.early, lf.middle, lf.late].filter(Boolean).join(' → ');
+            suriStoryEl.textContent = report.suriStory || [lf.early, lf.middle, lf.late].filter(Boolean).join(' → ') || '';
         }
 
-        // 양육 가이드
+        // Ch6: 종합 결론
+        _renderConclusionGrid(candidate, _currentState);
+        const conclusionEl = document.getElementById('ai-conclusion-letter');
+        const conclusionTextEl = document.getElementById('ai-conclusion-letter-text');
+        if (conclusionEl && conclusionTextEl && report.conclusionLetter) {
+            conclusionTextEl.textContent = report.conclusionLetter;
+            conclusionEl.style.display = 'block';
+        }
         _renderTimeline(report);
 
-        // 차트 렌더
+        // 차트
         setTimeout(() => { renderCharts(); _updateRadarChart(_scores, candidate); }, 100);
     }
 
@@ -2937,18 +3020,22 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function _renderHanjaDetails(details, h1, h2) {
         const el = document.getElementById('report-hanja-details');
         if (!el) return;
-        // details가 빈 배열이면 기본 데이터로 구성
         const src = details.length ? details : [
             { hanja:h1.h, kr:h1.kr, meaning:h1.m, strokes:h1.s, oheng:h1.o, synergyWithSaju:'' },
             ...(h2 ? [{ hanja:h2.h, kr:h2.kr, meaning:h2.m, strokes:h2.s, oheng:h2.o, synergyWithSaju:'' }] : [])
         ];
-        el.innerHTML = src.map((d, i) => `
-            <div class="meaning-item"${i===src.length-1?' style="border-bottom:none;margin-bottom:0;padding-bottom:0;"':''}>
-                <div class="hanja-circle" style="background:${OHENG_COLORS[d.oheng]||'#888'};color:white;border-color:var(--gold-premium);">${d.hanja}</div>
-                <div class="meaning-text">
-                    <h4>${d.kr ? d.kr+'(' + d.hanja + ')' : d.hanja} <span>(${d.oheng||''} 기운 · ${d.strokes||''}획)</span></h4>
-                    <p>${d.meaning||''}</p>
-                    ${d.synergyWithSaju ? `<div class="meaning-effect">${d.synergyWithSaju}</div>` : ''}
+        const OHENG_COLOR_MAP = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+        el.innerHTML = src.map(d => `
+            <div class="ai-hanja-card">
+                <div class="ai-hanja-char" style="background:${OHENG_COLOR_MAP[d.oheng]||'#888'};">${d.hanja}</div>
+                <div class="ai-hanja-body" style="flex:1;">
+                    <div class="ai-hanja-meta">
+                        <span>${d.kr||''} (${d.hanja})</span>
+                        <span>${d.oheng||''} 기운</span>
+                        <span>${d.strokes||''}획</span>
+                    </div>
+                    <h4>${d.meaning||''}</h4>
+                    ${d.synergyWithSaju ? `<div class="ai-hanja-synergy">✦ 사주 시너지 &nbsp;${d.synergyWithSaju}</div>` : ''}
                 </div>
             </div>`).join('');
     }
@@ -2980,6 +3067,103 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 </div>
             </div>`;
         }).join('');
+    }
+
+    // ── 발음 섹션 렌더링 ────────────────────────────────────────────
+    function _renderSoundSection(candidate, report) {
+        const el = document.getElementById('ai-sound-section');
+        if (!el) return;
+        const { familyKr, h1, h2 } = candidate;
+        const fullKr = `${familyKr}${h1.kr}${h2?.kr||''}`;
+        const OHENG_FROM_CHO = (cho) => {
+            if(['ㄱ','ㅋ','ㄲ'].includes(cho)) return '木';
+            if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho)) return '火';
+            if(['ㅇ','ㅎ'].includes(cho)) return '土';
+            if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho)) return '金';
+            if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho)) return '水';
+            return '?';
+        };
+        const OHENG_COLOR = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+        const OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const CYCLE = ['木','火','土','金','水'];
+        const isSangsaeng = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
+
+        const chars = fullKr.split('');
+        const ohengs = chars.map(c => {
+            if(typeof window.getCho === 'function' && typeof window.getOhengFromCho === 'function') {
+                return window.getOhengFromCho(window.getCho(c));
+            }
+            return OHENG_FROM_CHO('');
+        });
+
+        const flowHtml = chars.map((c, i) => {
+            const oheng = ohengs[i];
+            const arrowHtml = i < chars.length - 1 ? (() => {
+                const next = ohengs[i+1];
+                const good = isSangsaeng(oheng, next);
+                return `<div class="ai-sound-arrow ${good?'good':'bad'}">${good?'→':'⚡'}</div>`;
+            })() : '';
+            return `<div class="ai-sound-char">
+                <span class="char-kr">${c}</span>
+                <span class="char-oheng" style="background:${OHENG_COLOR[oheng]||'#888'};">${oheng}(${OHENG_KR[oheng]||''})</span>
+            </div>${arrowHtml}`;
+        }).join('');
+
+        const yinYangHtml = (() => {
+            if(typeof window.getYinYangFromJung !== 'function') return '';
+            const yys = fullKr.split('').map(c => window.getYinYangFromJung(c));
+            const allYang = yys.every(y=>y==='양'), allYin = yys.every(y=>y==='음');
+            const balanced = !allYang && !allYin;
+            const label = allYang ? '양(陽) 편중' : allYin ? '음(陰) 편중' : '음양 균형';
+            const color = balanced ? '#16a34a' : '#d97706';
+            return `<div style="margin-top:14px;display:flex;align-items:center;gap:10px;">
+                <span style="font-size:0.82rem;color:var(--text-secondary);">발음 음양 배합</span>
+                <span style="background:${balanced?'#f0fdf4':'#fef3c7'};color:${color};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${label}</span>
+                <span style="font-size:0.82rem;color:var(--text-muted);">${yys.join(' · ')}</span>
+            </div>`;
+        })();
+
+        el.innerHTML = `<div class="ai-sound-flow">${flowHtml}</div>${yinYangHtml}`;
+    }
+
+    // ── 종합 결론 그리드 ────────────────────────────────────────────
+    function _renderConclusionGrid(candidate, state) {
+        const el = document.getElementById('ai-conclusion-grid');
+        if (!el) return;
+        const { h1, h2, s0, score, isOija } = candidate;
+        const s1 = h1.s, s2 = h2 ? h2.s : 0;
+        const g1 = isOija ? s1+1 : s1+s2;
+        const g2 = s0+s1;
+        const g3 = isOija ? s0+1 : s0+s2;
+        const g4 = isOija ? s0+s1 : s0+s1+s2;
+
+        const getSuriGrade = (n) => {
+            let num = n > 81 ? n%81 : n;
+            if(num===0) num=81;
+            return (typeof SURI_DATA!=='undefined'&&SURI_DATA[num]) ? SURI_DATA[num].grade : '평';
+        };
+
+        const normG = g => g==='대길'?'길':g==='대흉'?'흉':g;
+        const gradeColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'}[normG(g)]||'#64748b');
+        const gradeBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'}[normG(g)]||'#f1f5f9');
+        const icon       = g => normG(g)==='길'?'✦':normG(g)==='흉'?'⚠':'–';
+
+        const items = [
+            { label:'초년 수리',  grade: getSuriGrade(g1) },
+            { label:'청년 수리',  grade: getSuriGrade(g2) },
+            { label:'장년 수리',  grade: getSuriGrade(g3) },
+            { label:'말년 수리',  grade: getSuriGrade(g4) },
+        ];
+
+        if(state && state._scores) {
+            const data = (typeof getAnalysisData==='function') ? null : null;
+        }
+
+        el.innerHTML = items.map(x => `
+            <div class="ai-conclusion-item" style="background:${gradeBg(x.grade)};">
+                <span style="color:${gradeColor(x.grade)};font-size:0.88rem;">${icon(x.grade)}</span>
+                <span><b style="color:${gradeColor(x.grade)};">${x.label}</b>&nbsp;<span style="background:${gradeBg(x.grade)};color:${gradeColor(x.grade)};border-radius:20px;padding:2px 9px;font-size:0.75rem;font-weight:800;">${normG(x.grade)}</span></span>
+            </div>`).join('');
     }
 
     // ── 양육 가이드 타임라인 ────────────────────────────────────────

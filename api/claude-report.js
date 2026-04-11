@@ -11,18 +11,11 @@ const SEORYEOK_KR = {
   'strong':'과다', 'extreme_strong':'태과'
 };
 
-/**
- * 단일 이름 후보 → Claude 소견서 JSON
- * @param {Object} candidate  { h1, h2, s0, score, familyKr, familyHanja, isOija }
- * @param {Object} state      SearchState (_saju, _scores, nameSpec, constraints)
- * @returns {Object} report JSON
- */
 async function generatePremiumReport(candidate, state) {
   const { h1, h2, s0, score, familyKr, familyHanja } = candidate;
   const { nameSpec, constraints, _saju, _scores } = state;
   const isOija = !h2;
 
-  // 수리 계산 (소견서 팩트용)
   const s1 = h1.s, s2 = h2 ? h2.s : 0;
   const g1 = isOija ? s1+1    : s1+s2;
   const g2 = s0 + s1;
@@ -44,6 +37,7 @@ async function generatePremiumReport(candidate, state) {
   const ohengStr  = Object.entries(_scores||{})
     .map(([o,s])=>`${o}:${s.toFixed(1)}점(${SEORYEOK_KR[getSeoryeokStatus(s)]||''})`)
     .join(' ');
+  const parentSaju = state.parentSaju || '';
 
   const systemPrompt =
 `당신은 30년 경력의 최고 명리학 대가이자 작명 전문가입니다.
@@ -53,6 +47,7 @@ async function generatePremiumReport(candidate, state) {
 - 어려운 한자 용어는 반드시 () 안에 풀이
 - 자원오행(字源五行)과 원획법(原劃法) 획수를 근거로 구체적으로 설명
 - 수치 데이터(획수, 점수)를 자연스럽게 서술에 녹임
+- 각 필드는 지정된 분량을 지켜 충분히 풍부하게 작성
 - JSON만 반환. 마크다운 코드블록 절대 없이.`;
 
   const userPrompt =
@@ -72,35 +67,34 @@ NameSpec Prefer: [${nameSpec?.prefer?.join(', ')||''}] / Avoid: [${nameSpec?.avo
 한자 뜻: ${h1.kr}(${h1.h}) = ${h1.m}${h2?' / '+h2.kr+'('+h2.h+') = '+h2.m:''}
 사격수리: 원격 ${getSuriInfo(g1)} / 형격 ${getSuriInfo(g2)} / 이격 ${getSuriInfo(g3)} / 정격 ${getSuriInfo(g4)}
 종합 점수: ${score}/100점
+${parentSaju ? `\n[부모님 사주]\n${parentSaju}` : ''}
 
 [부모 희망 성향]
 ${traitStr}
 
-아래 JSON 구조로 정확하게 반환해주세요:
+아래 JSON 구조로 정확하게 반환해주세요 (각 필드의 분량 지침 준수):
 {
-  "tagline": "핵심 한 줄 서사 (따옴표로 감싼 시적 표현, 20~40자)",
-  "sajuAnalysis": "사주 분석 2~3문장. 일주를 중심으로 아이의 타고난 기질과 사주 지형 설명",
-  "namingLogic": "왜 이 이름이어야 하는지 2~3문장. 사주 보완 + 자원오행 처방 논리",
+  "tagline": "핵심 한 줄 시그니처 (따옴표로 감싼 시적 표현, 20~40자)",
+  "sajuStory": "사주 원국 서사. 일주를 중심으로 아이의 타고난 기질, 사주 지형의 특징, 부족한 기운과 넘치는 기운의 의미를 3~4문장으로 풍부하게 서술. 부모가 읽으면 고개를 끄덕이게 되는 이야기여야 함.",
+  "jawonStory": "자원오행 보완 서사. 선택된 이름의 한자들이 어떻게 사주의 빈자리를 채우는지, 구체적인 오행 흐름과 함께 2~3문장으로 설명.",
   "hanjaDetails": [
     {
       "hanja": "한자 글자",
       "kr": "한글 음",
-      "meaning": "뜻 풀이 (2~3문장)",
+      "meaning": "뜻 풀이 — 한자의 어원이나 시적 의미를 포함해 2~3문장으로 풍부하게",
       "strokes": 획수,
       "oheng": "자원오행",
-      "synergyWithSaju": "사주와의 시너지 1~2문장"
+      "synergyWithSaju": "이 한자가 이 아이의 사주에 미치는 구체적 시너지 1~2문장"
     }
   ],
-  "lifeFlow": {
-    "early": "초년(원격) 흐름 1문장",
-    "middle": "청중년(형격·이격) 흐름 1문장",
-    "late": "말년(정격) 흐름 1문장"
-  },
-  "careerAdvice": "진로·직업 추천 1~2가지와 이유",
+  "hanjaStory": "세 글자(성+이름)가 하나의 이름으로 합쳐졌을 때의 종합적 의미. '이 이름을 풀어쓰면...' 형태로 시적이고 감성적으로 2~3문장.",
+  "soundStory": "이름의 발음 오행(초성)과 음양(모음) 배합이 주는 소리의 에너지를 2~3문장으로 묘사. 소리가 귀에 닿을 때의 느낌을 감각적으로 표현.",
+  "suriStory": "수리 기반 인생 흐름 서사. 초년→청년→장년→말년이 자연스럽게 이어지는 하나의 인생 이야기로 2~3문장.",
+  "conclusionLetter": "작명가의 총평 편지. 왜 이 이름이 이 아이에게 최선인지, 이 이름과 함께할 아이의 미래에 대한 진심 어린 축원. 3~4문장. 부모가 읽고 감동받을 수 있도록.",
+  "careerAdvice": "진로·직업 추천 1~2가지와 이유 (1~2문장)",
   "healthAdvice": "건강·생활 조언 1문장 (사주 오행 기반)"
 }`;
 
-  // 프록시 서버 우선 → 없으면 브라우저 직접 호출 (개발용)
   const PROXY_URL   = '/proxy/claude';
   const DIRECT_URL  = 'https://api.anthropic.com/v1/messages';
   const DIRECT_HEADERS = {
@@ -110,13 +104,12 @@ ${traitStr}
 
   const body = JSON.stringify({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 1500,
+    max_tokens: 2500,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }]
   });
 
   try {
-    // 1차: 프록시 시도
     let response;
     try {
       response = await fetch(PROXY_URL, {
@@ -124,7 +117,6 @@ ${traitStr}
       });
       if (!response.ok && response.status === 404) throw new Error('proxy_not_found');
     } catch (proxyErr) {
-      // 프록시 없음 → 직접 호출 (브라우저 CORS 헤더 필요)
       console.info('[DearName] 프록시 미사용 → 직접 API 호출');
       response = await fetch(DIRECT_URL, {
         method: 'POST', headers: DIRECT_HEADERS, body
@@ -144,25 +136,24 @@ ${traitStr}
 
   } catch (err) {
     console.error('generatePremiumReport 오류:', err);
-    // 파싱 실패 시 기본 소견서 반환
     return {
       tagline: `"${nameKr}, 맑고 깊은 기운으로 세상을 밝히다"`,
-      sajuAnalysis: `${_saju?.day?.gan||''}${_saju?.day?.ji||''}일주의 기질을 바탕으로, 사주의 균형을 완성하는 이름입니다.`,
-      namingLogic: `자원오행 ${h1.o}${h2?'+'+h2.o:''}의 기운이 사주의 필요를 정확히 보완합니다.`,
+      sajuStory: `${_saju?.day?.gan||''}${_saju?.day?.ji||''}일주의 아이는 독특한 기질과 감수성을 타고났습니다. 사주 원국의 오행 분포를 살펴보면 특정 기운이 강하고 일부가 부족한 지형을 보이는데, 이것이 바로 이름으로 보완해야 할 핵심 과제입니다. 이 사주가 지닌 가능성을 이름이 어떻게 열어주는지 함께 살펴봅니다.`,
+      jawonStory: `자원오행 ${h1.o}${h2?'+'+h2.o:''}의 기운이 사주의 필요를 정확히 보완합니다. 이 이름의 한자들이 부족한 기운을 채워 아이의 타고난 잠재력이 더욱 빛날 수 있도록 돕습니다.`,
       hanjaDetails: [
-        { hanja:h1.h, kr:h1.kr, meaning:h1.m, strokes:h1.s, oheng:h1.o, synergyWithSaju:'' },
-        ...(h2 ? [{ hanja:h2.h, kr:h2.kr, meaning:h2.m, strokes:h2.s, oheng:h2.o, synergyWithSaju:'' }] : [])
+        { hanja:h1.h, kr:h1.kr, meaning:h1.m, strokes:h1.s, oheng:h1.o, synergyWithSaju:'이 한자의 기운이 사주와 조화를 이룹니다.' },
+        ...(h2 ? [{ hanja:h2.h, kr:h2.kr, meaning:h2.m, strokes:h2.s, oheng:h2.o, synergyWithSaju:'이 한자가 사주의 균형을 완성합니다.' }] : [])
       ],
-      lifeFlow: { early:'탄탄한 기초를 쌓는 시기', middle:'사회에서 능력을 발휘하는 시기', late:'결실을 거두는 시기' },
+      hanjaStory: `이 이름을 풀어쓰면, ${h1.kr}(${h1.h})의 ${h1.m} 기운과${h2 ? ' '+h2.kr+'('+h2.h+')의 '+h2.m+' 기운이' : ''} 하나로 어우러져 아이의 이름이 됩니다. 부를 때마다 이 기운들이 아이를 감싸줄 것입니다.`,
+      soundStory: '이름을 소리 내어 부를 때, 초성의 기운이 자연스럽게 이어지며 에너지의 흐름을 만들어냅니다. 모음의 음양 배합도 균형 잡혀 있어 귀에 닿는 소리가 부드럽고 편안합니다.',
+      suriStory: '초년에 탄탄한 기초를 쌓고, 청·장년기에 사회에서 능력을 발휘하며, 말년에는 깊은 지혜와 풍요로운 결실을 거두는 인생의 흐름이 수리에 담겨 있습니다.',
+      conclusionLetter: `${nameKr}이라는 이름은 이 아이의 사주가 필요로 하는 기운을 정확히 담고 있습니다. 평생 불릴 이 이름이 아이에게 든든한 동반자가 되어, 어떤 어려움도 이겨낼 힘이 되어주길 바랍니다. 이 이름과 함께 아이가 건강하고 행복하게 자라나길 진심으로 축원합니다.`,
       careerAdvice: '다양한 분야에서 잠재력을 발휘할 수 있습니다.',
       healthAdvice: '규칙적인 생활로 타고난 기운을 보전하세요.'
     };
   }
 }
 
-/**
- * 여러 후보를 병렬로 처리 (최대 3개)
- */
 async function generateAllReports(candidates, state) {
   const top = candidates.slice(0, 3);
   return Promise.all(top.map(c => generatePremiumReport(c, state)));
