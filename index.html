@@ -2103,10 +2103,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         const jawonInlineEl = document.getElementById('self-jawon-inline');
         if (jawonInlineEl) jawonInlineEl.innerHTML = `
-            <div style="border-top:1px solid var(--border-light);margin-top:20px;padding-top:20px;">
+            <div style="background:#f8fafc;border:1px solid var(--border-light);border-radius:16px;padding:20px 24px;margin-top:12px;">
                 <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:10px;">✦ 자원오행 보완 분석</div>
-                ${nameOhengItems.length ? `<div class="jawon-chips" style="margin-bottom:14px;">${chipsHtml}</div>` : ''}
-                <p style="font-size:0.92rem;line-height:1.85;color:var(--text-secondary);margin:0;">${jawonStoryMsg}</p>
+                ${nameOhengItems.length ? `<div class="jawon-chips" style="margin-bottom:12px;">${chipsHtml}</div>` : ''}
+                <p style="font-size:0.92rem;line-height:1.65;color:var(--text-secondary);margin:0;">${jawonStoryMsg}</p>
             </div>`;
 
         // ── ④ 발음 섹션 ───────────────────────────────────────────────
@@ -3120,7 +3120,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 diagHtml = `
                 <div style="background:#f8fafc;border:1px solid var(--border-light);border-radius:16px;padding:20px 24px;">
                     <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:10px;">✦ 사주 원국 진단</div>
-                    <p style="font-size:0.92rem;color:var(--text-secondary);line-height:1.85;margin:0;">${parts.join('<br><br>')}</p>
+                    <p style="font-size:0.92rem;color:var(--text-secondary);line-height:1.65;margin:0;">${parts.join('<br><br>')}</p>
                 </div>`;
             }
             diagEl.innerHTML = diagHtml;
