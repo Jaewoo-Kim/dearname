@@ -803,7 +803,7 @@
 
                 <div id="analysis-result-area">
                     <h3 style="font-size: 1.6rem; color: var(--bg-dark); font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between;">
-                        진단 결과 요약 <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-light); padding: 5px 15px; border-radius: 20px;">총 6개 지표 평가 완료</span>
+                        진단 결과 요약 <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-light); padding: 5px 15px; border-radius: 20px;">총 7개 지표 평가 완료</span>
                     </h3>
                     <div class="result-grid">
                         <div class="result-box"><div class="result-header"><h4>발음 오행</h4><span class="grade-badge" id="res-pronounce-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-oheng"></p></div>
@@ -812,6 +812,7 @@
                         <div class="result-box"><div class="result-header"><h4>수리 오행</h4><span class="grade-badge" id="res-math-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-oheng"></p></div>
                         <div class="result-box"><div class="result-header"><h4>수리 음양</h4><span class="grade-badge" id="res-math-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-yin"></p></div>
                         <div class="result-box"><div class="result-header"><h4>사주 오행</h4><span class="grade-badge" id="res-saju-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-saju-oheng"></p></div>
+                        <div class="result-box"><div class="result-header"><h4>자원 오행</h4><span class="grade-badge" id="res-jawonohaeng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-jawonohaeng">한자를 선택하면 자원오행이 표시됩니다.</p></div>
                     </div>
 
                     <button type="button" class="btn btn-gold" style="margin-top: 40px;" onclick="showSelfReportView()">보고서 전체 보기 &rarr;</button>
@@ -1948,6 +1949,24 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             : { grade: '평', desc: '사주 엔진 로딩 중...' };
         const sajuGrade = _sajuResult.grade;
         const sajuDesc  = _sajuResult.desc;
+        /* ----------------------------------------------------
+           ⑦ 자원오행 — 선택 한자의 오행 구성 요약
+           ---------------------------------------------------- */
+        const _OHENG_KR_SHORT = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+        const _OHENG_C_DIAG   = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+        let jawonGrade = '평', jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
+        if (hanjaOhengs.length > 0) {
+            const uniqueOhengs = [...new Set(hanjaOhengs)];
+            const ohengLabels  = hanjaOhengs.map(o => _OHENG_KR_SHORT[o] || o).join(' · ');
+            if (uniqueOhengs.length === 1) {
+                jawonGrade = '길';
+                jawonDesc  = `이름의 기운이 모두 ${_OHENG_KR_SHORT[uniqueOhengs[0]]} 기운으로 구성되어 있습니다. 단일 기운이 집중되어 강한 개성을 나타냅니다.`;
+            } else if (uniqueOhengs.length >= 2) {
+                jawonGrade = '대길';
+                jawonDesc  = `${ohengLabels} 기운으로 구성된 이름입니다. 다양한 기운이 어우러져 풍부한 기질을 형성합니다.`;
+            }
+        }
+
         // 통합 결과 리턴
         return {
             pronounceOheng: { grade: pronGrade, desc: pronDesc },
@@ -1956,6 +1975,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             mathOheng: { grade: moGrade, desc: moDesc },
             mathYin: { grade: myGrade, desc: myDesc },
             sajuOheng: { grade: sajuGrade, desc: sajuDesc },
+            jawonohaeng: { grade: jawonGrade, desc: jawonDesc },
             suriGrades: [
                 { name: s1_data.name, num: g1_num, grade: s1_data.grade, desc: s1_data.desc },
                 { name: s2_data.name, num: g2_num, grade: s2_data.grade, desc: s2_data.desc },
@@ -1996,6 +2016,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         
         applyBadge('res-saju-oheng', data.sajuOheng.grade);
         document.getElementById('res-desc-saju-oheng').innerText = data.sajuOheng.desc;
+
+        applyBadge('res-jawonohaeng', data.jawonohaeng.grade);
+        document.getElementById('res-desc-jawonohaeng').innerText = data.jawonohaeng.desc;
 
         const resultArea = document.getElementById('analysis-result-area');
         resultArea.style.display = 'block';
@@ -3096,9 +3119,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         try { return JSON.parse(localStorage.getItem(_SUB_KEY)) || null; } catch(e) { return null; }
     }
     function _isSubscribed() {
-        const sub = _getSubscription();
-        if (!sub || !sub.expiresAt) return false;
-        return new Date(sub.expiresAt) > new Date();
+        return true; // ⚠️ 임시 개방 중 — 실결제 연동 후 아래 코드로 교체
+        // const sub = _getSubscription();
+        // if (!sub || !sub.expiresAt) return false;
+        // return new Date(sub.expiresAt) > new Date();
     }
 
     // 셀프작명 보고서 저장
