@@ -425,3 +425,45 @@ openLoginModal()
 | `data/` | `data/dev_index.md` | 한자 DB, 만세력, 81수리, 음력 변환 데이터 구조 |
 | `lib/` | `lib/dev_index.md` | 사주 엔진, NameSpec, 탐색 엔진 API |
 | `api/` | `api/dev_index.md` | Claude API 소견서 생성 인터페이스 |
+
+---
+
+## 8. 기획 중인 기능
+
+### AI 작명 상담 채팅 (`feature_chat_plan.md`)
+
+> 상세 기획서: `C:\dearname\feature_chat_plan.md`
+
+**개요:** AI 프리미엄 보고서 하단에 LLM 채팅 위젯 추가.  
+보고서에서 분석된 이름 데이터를 컨텍스트로 가지고, 유저의 추가 질문에 맞춤 답변 생성.
+
+**구현 위치:**
+
+| 파일 | 변경 내용 |
+|---|---|
+| `server.py` | `POST /proxy/claude-chat` 엔드포인트 신규 추가 |
+| `index.html` | `#report-chat-section` HTML/CSS 추가, `_initChatContext()` / `sendChatMessage()` 함수 추가 |
+
+**데이터 흐름:**
+```
+_renderReportContent() → _initChatContext(candidate, report, scores)
+  → 유저 질문 입력
+  → POST /proxy/claude-chat { message, context, history }
+  → server.py: build_chat_system_prompt(context) + Claude API 호출
+  → 답변 말풍선으로 표시
+```
+
+**핵심 컨텍스트 (서버 시스템 프롬프트에 주입):**
+- 이름 (한글/한자), 종합 점수, tagline
+- 사주 원국 (연월일시주)
+- 오행 점수 (木火土金水)
+- 한자 각 글자의 의미/오행/획수
+- 수리 4격 (원형이정격 + 이름)
+- 보고서 핵심 스토리 요약
+
+**구현 단계:**
+- Phase 1 (MVP): 기본 채팅 UI + `/proxy/claude-chat` 엔드포인트
+- Phase 2: Enter 전송, 예시 질문 chip, 로딩 애니메이션
+- Phase 3: 스트리밍 응답, 이용 횟수 제한, 채팅 저장
+
+**토큰 비용:** 약 2,250 토큰/1회 상담 → claude-sonnet-4-6 기준 ~$0.006 (약 8원)

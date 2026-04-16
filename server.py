@@ -94,6 +94,104 @@ def claude_proxy():
     except Exception as e:
         return jsonify({'error': f'서버 오류: {str(e)}'}), 500
 
+# ── AI 작명 상담 채팅 ─────────────────────────────────────
+def _build_chat_system_prompt(ctx):
+    name       = ctx.get('nameKr', '')
+    hanja      = ctx.get('nameHanja', '')
+    score      = ctx.get('score', '')
+    tagline    = ctx.get('tagline', '')
+    saju       = ctx.get('saju', {})
+    scores     = ctx.get('ohengScores', {})
+    suri       = ctx.get('suri', {})
+    hanja_list = ctx.get('hanja', [])
+    stories    = ctx.get('stories', {})
+
+    hanja_desc = '\n'.join([
+        f"  - {h.get('char','')}({h.get('kr','')}): {h.get('meaning','')} / {h.get('oheng','')} 기운 / {h.get('strokes','')}획"
+        for h in hanja_list
+    ])
+
+    suri_desc = '\n'.join([
+        f"  - {v.get('name','')}({k}격 {v.get('num','')}수): {v.get('grade','')}"
+        for k, v in suri.items()
+    ])
+
+    story_snippet = ''
+    if stories.get('conclusion'):
+        story_snippet = f"\n총평 요약: {str(stories['conclusion'])[:300]}"
+
+    yr = saju.get('year', {});  mo = saju.get('month', {})
+    dy = saju.get('day',  {});  ti = saju.get('time',  {})
+
+    return f"""당신은 30년 경력의 최고 명리학 작명 전문가입니다.
+현재 '{name}({hanja})' 이름의 AI 프리미엄 작명 보고서를 열람 중인 부모님과 채팅 상담을 진행합니다.
+
+[분석된 이름 정보]
+이름: {name} ({hanja}) — 종합 점수 {score}/100
+핵심 메시지: {tagline}
+
+사주 원국:
+  연주 {yr.get('gan','')}{yr.get('ji','')} / 월주 {mo.get('gan','')}{mo.get('ji','')} / 일주 {dy.get('gan','')}{dy.get('ji','')} / 시주 {ti.get('gan','')}{ti.get('ji','')}
+
+오행 점수: 木{scores.get('木',0):.1f} 火{scores.get('火',0):.1f} 土{scores.get('土',0):.1f} 金{scores.get('金',0):.1f} 水{scores.get('水',0):.1f}
+
+한자 풀이:
+{hanja_desc}
+
+수리 4격:
+{suri_desc}{story_snippet}
+
+[답변 규칙]
+- 채팅이므로 짧고 명확하게 (200자 내외, 길어도 350자 이내)
+- 어려운 한자 용어는 반드시 () 안에 한글 풀이 병기
+- 친근하고 따뜻한 톤, 부모님 입장에서 공감하며 답변
+- 이 이름의 실제 데이터를 근거로 구체적으로 설명
+- 모든 답변은 한국어로"""
+
+
+@app.route('/proxy/claude-chat', methods=['POST'])
+def claude_chat():
+    if not CLIENT:
+        return jsonify({'error': 'ANTHROPIC_API_KEY 미설정', 'reply': None}), 500
+
+    try:
+        body        = request.get_json(force=True)
+        user_msg    = (body.get('message') or '').strip()
+        context     = body.get('context') or {}
+        history     = body.get('history') or []
+
+        if not user_msg:
+            return jsonify({'error': '질문이 비어 있습니다.', 'reply': None}), 400
+
+        # 히스토리 최근 10턴만 허용 (비용 보호)
+        history = history[-20:]
+
+        system_prompt = _build_chat_system_prompt(context)
+        messages = history + [{'role': 'user', 'content': user_msg}]
+
+        response = CLIENT.messages.create(
+            model      = 'claude-sonnet-4-6',
+            max_tokens = 600,
+            system     = system_prompt,
+            messages   = messages
+        )
+
+        reply = response.content[0].text
+        return jsonify({
+            'reply': reply,
+            'usage': response.usage.output_tokens
+        })
+
+    except anthropic.AuthenticationError:
+        return jsonify({'error': 'API 키 인증 실패', 'reply': None}), 401
+    except anthropic.RateLimitError:
+        return jsonify({'error': '요청 한도 초과. 잠시 후 다시 시도해주세요.', 'reply': None}), 429
+    except anthropic.APIError as e:
+        return jsonify({'error': f'API 오류: {str(e)}', 'reply': None}), 500
+    except Exception as e:
+        return jsonify({'error': f'서버 오류: {str(e)}', 'reply': None}), 500
+
+
 # ── 헬스체크 ─────────────────────────────────────────────
 @app.route('/health')
 def health():
