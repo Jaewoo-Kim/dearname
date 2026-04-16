@@ -542,6 +542,18 @@
         .conclusion-point { display:flex;align-items:center;gap:7px;padding:10px 12px;border-radius:10px;font-size:0.82rem;font-weight:700; }
         .conclusion-point-icon { font-size:0.88rem;flex-shrink:0; }
 
+        /* ── Report Guide 그리드 ── */
+        .report-guide-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+        @media(max-width:640px){ .report-guide-grid{ grid-template-columns:repeat(2,1fr); } }
+        .report-guide-item { display:flex;align-items:center;gap:8px;padding:9px 10px;background:white;border-radius:10px;border:1px solid var(--border-light); }
+        .report-guide-num { font-size:0.95rem;font-weight:900;color:var(--gold-dark);min-width:22px;flex-shrink:0; }
+        .report-guide-title { font-size:0.83rem;font-weight:800;color:var(--bg-dark);line-height:1.3; }
+        .report-guide-desc { font-size:0.72rem;color:var(--text-muted);margin-top:1px;line-height:1.3; }
+
+        /* ── 오행 순환도 + 바 레이아웃 ── */
+        .oheng-layout { display:grid; grid-template-columns:220px 1fr; gap:28px; margin-top:28px; align-items:center; }
+        @media(max-width:640px){ .oheng-layout{ grid-template-columns:1fr; } }
+
         /* ── AI 작명 상담 채팅 ── */
         #report-chat-section { margin-top:12px; }
         #chat-example-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
@@ -1314,32 +1326,32 @@
         </div>
 
         <!-- 보고서 구성 안내 -->
-        <div style="background:var(--bg-warm);border:1px solid var(--border-light);border-radius:20px;padding:28px 32px;margin-bottom:32px;">
-            <div style="font-size:0.8rem;font-weight:800;color:var(--gold-dark);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;">Report Guide · 보고서 구성 안내</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-                <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border-radius:14px;border:1px solid var(--border-light);">
-                    <span style="font-size:1.1rem;font-weight:900;color:var(--gold-dark);min-width:28px;">01</span>
-                    <div><b style="font-size:0.88rem;">사주 원국</b><br><span style="font-size:0.78rem;color:var(--text-muted);">이 아이의 타고난 기질과 사주 지형</span></div>
+        <div style="background:var(--bg-warm);border:1px solid var(--border-light);border-radius:16px;padding:16px 20px;margin-bottom:28px;">
+            <div style="font-size:0.72rem;font-weight:800;color:var(--gold-dark);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Report Guide · 보고서 구성 안내</div>
+            <div class="report-guide-grid">
+                <div class="report-guide-item">
+                    <span class="report-guide-num">01</span>
+                    <div><div class="report-guide-title">사주 원국</div><div class="report-guide-desc">타고난 기질과 사주 지형</div></div>
                 </div>
-                <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border-radius:14px;border:1px solid var(--border-light);">
-                    <span style="font-size:1.1rem;font-weight:900;color:var(--gold-dark);min-width:28px;">02</span>
-                    <div><b style="font-size:0.88rem;">자원오행 & 균형</b><br><span style="font-size:0.78rem;color:var(--text-muted);">이름이 사주를 어떻게 보완하는지</span></div>
+                <div class="report-guide-item">
+                    <span class="report-guide-num">02</span>
+                    <div><div class="report-guide-title">자원오행 & 균형</div><div class="report-guide-desc">이름이 사주를 보완하는 방식</div></div>
                 </div>
-                <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border-radius:14px;border:1px solid var(--border-light);">
-                    <span style="font-size:1.1rem;font-weight:900;color:var(--gold-dark);min-width:28px;">03</span>
-                    <div><b style="font-size:0.88rem;">한자 심층 분석</b><br><span style="font-size:0.78rem;color:var(--text-muted);">이름 한 글자 한 글자의 의미와 기운</span></div>
+                <div class="report-guide-item">
+                    <span class="report-guide-num">03</span>
+                    <div><div class="report-guide-title">한자 심층 분석</div><div class="report-guide-desc">한 글자 한 글자의 의미와 기운</div></div>
                 </div>
-                <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border-radius:14px;border:1px solid var(--border-light);">
-                    <span style="font-size:1.1rem;font-weight:900;color:var(--gold-dark);min-width:28px;">04</span>
-                    <div><b style="font-size:0.88rem;">발음 오행·음양</b><br><span style="font-size:0.78rem;color:var(--text-muted);">소리가 전달하는 에너지의 흐름</span></div>
+                <div class="report-guide-item">
+                    <span class="report-guide-num">04</span>
+                    <div><div class="report-guide-title">발음 오행·음양</div><div class="report-guide-desc">소리가 전달하는 에너지 흐름</div></div>
                 </div>
-                <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border-radius:14px;border:1px solid var(--border-light);">
-                    <span style="font-size:1.1rem;font-weight:900;color:var(--gold-dark);min-width:28px;">05</span>
-                    <div><b style="font-size:0.88rem;">81수리 인생 흐름</b><br><span style="font-size:0.78rem;color:var(--text-muted);">획수로 읽는 초년~말년의 사계절</span></div>
+                <div class="report-guide-item">
+                    <span class="report-guide-num">05</span>
+                    <div><div class="report-guide-title">81수리 인생 흐름</div><div class="report-guide-desc">획수로 읽는 초년~말년 사계절</div></div>
                 </div>
-                <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:white;border-radius:14px;border:1px solid var(--border-light);">
-                    <span style="font-size:1.1rem;font-weight:900;color:var(--gold-dark);min-width:28px;">06</span>
-                    <div><b style="font-size:0.88rem;">종합 결론 & 가이드</b><br><span style="font-size:0.78rem;color:var(--text-muted);">종합 평가·총평·양육 방향 제시</span></div>
+                <div class="report-guide-item">
+                    <span class="report-guide-num">06</span>
+                    <div><div class="report-guide-title">종합 결론 & 가이드</div><div class="report-guide-desc">총평·양육 방향·진로 제시</div></div>
                 </div>
             </div>
         </div>
@@ -1349,10 +1361,10 @@
             <div class="story-chapter-label">Chapter 1. 이 아이가 태어난 우주</div>
             <h2 class="section-title">사주 원국 (四柱八字)</h2>
             <div class="saju-grid" id="report-saju-grid"></div>
-            <div style="display:flex;gap:24px;margin-top:28px;align-items:flex-start;flex-wrap:wrap;">
-                <div style="flex:0 0 auto;width:200px;text-align:center;">
-                    <div style="font-size:0.75rem;font-weight:800;color:var(--text-secondary);letter-spacing:0.08em;margin-bottom:12px;">오행 순환도</div>
-                    <svg viewBox="0 0 200 200" width="200" height="200" style="display:block;margin:0 auto;">
+            <div class="oheng-layout">
+                <div style="text-align:center;">
+                    <div style="font-size:0.75rem;font-weight:800;color:var(--text-secondary);letter-spacing:0.08em;margin-bottom:10px;">오행 순환도</div>
+                    <svg viewBox="0 0 200 200" width="100%" style="display:block;margin:0 auto;max-width:220px;">
                         <!-- 오행 순환 화살표 원 -->
                         <defs>
                             <marker id="arrowG" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#16a34a"/></marker>
@@ -1388,7 +1400,7 @@
                         <text x="100" y="109" text-anchor="middle" fill="#94a3b8" font-size="8">순환의 흐름</text>
                     </svg>
                 </div>
-                <div class="oheng-bars" id="report-oheng-bars" style="flex:1;min-width:200px;"></div>
+                <div class="oheng-bars" id="report-oheng-bars"></div>
             </div>
             <div class="ai-story-block" id="ai-saju-story"></div>
         </div>
@@ -2656,10 +2668,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 options: {
                     scales: {
                         r: {
+                            min: 0,
+                            max: 100,
                             angleLines: { color: 'rgba(0,0,0,0.05)' },
                             grid: { color: 'rgba(0,0,0,0.05)' },
                             pointLabels: { color: '#0f172a', font: { size: 12, family: 'Pretendard', weight: '700' } },
-                            ticks: { display: false, max: 100, min: 0 }
+                            ticks: { display: false }
                         }
                     },
                     plugins: {
@@ -3537,7 +3551,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     function _updateRadarChart(scores, candidate) {
-        const rc = window.radarChartInstance;
+        const rc = radarChartInstance;
         if (!rc || !scores) return;
 
         // dataset[0]: 사주 원국 (이름 전)
