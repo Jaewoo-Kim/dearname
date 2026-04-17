@@ -1920,6 +1920,7 @@
         };
         _allCandidates = [_demoCandidate];
         _allReports    = [_demoReport];
+        _chatDemoMode  = true;   // 데모 모드: API 없이 미리 준비된 답변 사용
 
         _renderReportTabs([_demoCandidate]);
         _renderReportContent(_demoCandidate, _demoReport, 0);
@@ -2911,6 +2912,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             _currentIdx = 0;
 
             hideLoadingOverlay();
+            _chatDemoMode = false; // 실제 보고서: 실제 API 사용
             _renderReportTabs(top3);
             _renderReportContent(top3[0], _allReports[0], 0);
 
@@ -4458,6 +4460,39 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     let _chatHistory = [];    // [{role:'user'|'assistant', content:'...'}]
     let _chatContext = null;  // 현재 보고서 컨텍스트
     let _chatSending = false; // 중복 전송 방지
+    let _chatDemoMode = false; // 데모 모드 (API 없이 미리 준비된 답변)
+
+    // ── 데모 모드 미리 준비된 답변 ───────────────────────────────────
+    function _getDemoReply(msg) {
+        const m = msg.toLowerCase().replace(/\s/g, '');
+
+        // 사주에 왜 좋은가
+        if (/사주|좋은|왜좋|잘맞|어울|궁합/.test(m)) {
+            return `김나윤의 사주 원국을 보면 <b>金 기운(26.5pt)이 가장 강하고, 水(13.75pt)와 土(16.75pt)가 상대적으로 부족</b>합니다.\n\n이름 <b>娜(나) — 土 기운</b>은 부족한 土를 직접 채워 안정감과 포용력을 더해주고, <b>奫(윤) — 水 기운</b>은 일간 癸水를 강화해 깊은 사색력과 직관을 키워줍니다.\n\n특히 金→水→木 상생 흐름이 완성되어 이름이 사주의 빈자리를 정확히 메워주는 이상적인 구성이에요. 오행 균형이 잡히면 대인관계, 학업, 정서 안정 모두에 긍정적 영향을 줍니다.`;
+        }
+        // 한자 의미
+        if (/한자|의미|뜻|자원|글자/.test(m)) {
+            return `이름에 담긴 두 한자를 자세히 풀어드릴게요.\n\n<b>娜 (나) — 아리따울 나, 土 기운</b>\n획수 10획. 여성의 우아한 자태와 인품을 뜻하며, 대지(土)처럼 모든 것을 포용하는 성질을 담고 있어요. 娜 자를 품은 아이는 어디서든 자연스럽게 주변을 따뜻하게 아우르는 힘을 가집니다.\n\n<b>奫 (윤) — 물 깊고 넓을 윤, 水 기운</b>\n획수 15획. 깊고 넓은 물이 고요하게 담긴 형상으로, 겉으로는 차분하지만 내면에 무한한 지혜와 통찰을 품은 글자예요. 癸水 일간과 오행이 같아 아이의 본래 기질을 더욱 강화해 줍니다.`;
+        }
+        // 성격
+        if (/성격|기질|어떤아이|어떻게될|인성|성품|특징/.test(m)) {
+            return `사주와 이름 기운을 종합해 보면 김나윤 아이는 이런 기질을 보일 가능성이 높아요.\n\n<b>🌊 깊고 고요한 내면</b>\n癸水 일간 특유의 조용하고 섬세한 감수성을 가져요. 겉으로는 차분해 보이지만 내면에 강한 의지와 풍부한 상상력을 품고 있습니다.\n\n<b>🌱 유연한 적응력</b>\n乙木(을목)의 기운으로 어떤 환경에서도 자연스럽게 녹아드는 사교성을 보여요. 고집보다 배려로 사람들의 마음을 얻는 타입입니다.\n\n<b>✨ 학문·예술 재능</b>\n己卯 월의 기운과 水·土 이름 기운이 합쳐져 학습 능력과 예술적 감각이 뛰어날 수 있어요. 글쓰기, 음악, 미술 등 창의 분야에서 두각을 나타낼 가능성이 높습니다.`;
+        }
+        // 오행 보완 원리
+        if (/오행|보완|원리|상생|균형|기운/.test(m)) {
+            return `오행 보완의 원리를 쉽게 설명해 드릴게요!\n\n<b>🔵 사주 원국 = 타고난 땅</b>\n아이가 태어난 시간(년·월·일·시)에서 木火土金水 5가지 기운의 배분이 결정돼요. 김나윤의 경우 金이 26.5pt로 가장 강하고, 水(13.75)와 土(16.75)가 부족합니다.\n\n<b>🌟 이름 = 부족한 기운을 채우는 처방</b>\n娜(土 +15pt)와 奫(水 +15pt)를 이름에 넣어 부족한 두 오행을 보충합니다. 마치 영양제처럼 사주가 필요로 하는 기운을 이름으로 매일 공급하는 것이죠.\n\n<b>♻️ 상생(相生) = 에너지가 막힘없이 흐르는 흐름</b>\n金→水→木으로 이어지는 상생 사이클이 완성되어 이름을 부를 때마다 이 에너지가 순환합니다.`;
+        }
+        // 진로/직업
+        if (/진로|직업|직종|미래|어른|커서|장래/.test(m)) {
+            return `사주와 이름의 오행 배합으로 보면 김나윤 아이에게 잘 맞는 분야가 보여요.\n\n<b>📚 학문·연구 분야</b>\n水 기운의 깊은 사색력 + 金 기운의 집중력이 합쳐져 연구직, 학자, 분석가 계열에서 두각을 나타낼 수 있어요.\n\n<b>🎨 예술·창작 분야</b>\n乙木과 水의 감수성이 풍부해 음악, 미술, 문학, 디자인 등 창의적 표현 분야에서 재능을 꽃피울 가능성이 높습니다.\n\n<b>💬 상담·교육 분야</b>\n娜(나)의 土 기운이 주는 포용력과 배려심으로 교사, 상담사, 사회복지사 등 사람을 돕는 직종과도 잘 맞아요.\n\n물론 이건 기운의 방향성이며, 아이의 의지와 노력이 가장 중요합니다!`;
+        }
+        // 수리
+        if (/수리|획수|81|원격|형격|이격|정격/.test(m)) {
+            return `김나윤의 81수리 사격(四格)을 풀어드릴게요.\n\n<b>원격(元格) 25수 — 안전수</b>\n초년기 기운. 안정 속에 차근차근 기반을 쌓아나가는 수로, 어린 시절 주변의 사랑과 보살핌을 받으며 건강하게 성장합니다.\n\n<b>형격(亨格) 18수 — 발전수</b>\n청년기 기운. 뛰어난 능력으로 사회에서 인정받고 전문 분야에서 두각을 나타내는 발전과 상승의 수입니다.\n\n<b>이격(利格) 9수 — 명예수</b>\n장년기 기운. 쌓아온 실력과 인덕으로 명예를 얻는 시기예요. 리더십이 발휘됩니다.\n\n<b>정격(貞格) 33수 — 대길수 ⭐</b>\n말년 기운. 33수는 81수리 중 최고 길수 중 하나! 풍요롭고 행복한 말년을 예고합니다.`;
+        }
+        // 기본 답변
+        return `좋은 질문이에요! 😊\n\n<b>김나윤</b>이라는 이름은 金(쇠) 기운이 강한 사주에 土(흙)와 水(물) 기운을 더해 오행의 균형을 완성한 이름입니다.\n\n구체적으로 궁금하신 점이 있으시면 더 자세히 답변드릴게요. 예를 들어\n• "사주에 왜 좋은가요?" — 오행 보완 원리\n• "한자 의미" — 娜·奫 글자 해설\n• "아이 성격이나 진로" — 기질·재능 분석\n등을 물어보시면 더 풍부하게 설명해 드릴 수 있어요!`;
+    }
 
     // 보고서 렌더 시 컨텍스트 초기화
     function _initChatContext(candidate, report, scores) {
@@ -4550,24 +4585,32 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const loadingId = _appendChatLoadingBubble();
 
         try {
-            const res = await fetch('/proxy/claude-chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: msg,
-                    context: _chatContext,
-                    history: _chatHistory.slice(-20)
-                })
-            });
-
-            const data = await res.json();
-
-            if (!res.ok || data.error) {
-                _updateChatBubble(loadingId, `⚠️ ${data.error || '답변 생성에 실패했습니다. 잠시 후 다시 시도해주세요.'}`);
-            } else {
-                const reply = data.reply || '';
+            if (_chatDemoMode) {
+                // 데모 모드: API 없이 미리 준비된 답변 반환 (1~1.5초 딜레이)
+                await new Promise(r => setTimeout(r, 900 + Math.random() * 600));
+                const reply = _getDemoReply(msg);
                 _updateChatBubble(loadingId, reply.replace(/\n/g, '<br>'));
                 _chatHistory.push({ role: 'assistant', content: reply });
+            } else {
+                const res = await fetch('/proxy/claude-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: msg,
+                        context: _chatContext,
+                        history: _chatHistory.slice(-20)
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok || data.error) {
+                    _updateChatBubble(loadingId, `⚠️ ${data.error || '답변 생성에 실패했습니다. 잠시 후 다시 시도해주세요.'}`);
+                } else {
+                    const reply = data.reply || '';
+                    _updateChatBubble(loadingId, reply.replace(/\n/g, '<br>'));
+                    _chatHistory.push({ role: 'assistant', content: reply });
+                }
             }
         } catch(e) {
             _updateChatBubble(loadingId, '⚠️ 네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
