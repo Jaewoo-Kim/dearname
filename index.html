@@ -70,8 +70,8 @@
             --z-toast:   700;
 
             /* ── 오행 색상 (단일 정의) ── */
-            --oheng-wood:  #16a34a;
-            --oheng-fire:  #dc2626;
+            --oheng-wood:  #22c55e;
+            --oheng-fire:  #ef4444;
             --oheng-earth: #eab308;
             --oheng-metal: #e8ecf0;
             --oheng-water: #0f172a;
@@ -1367,23 +1367,23 @@
                     <svg viewBox="0 0 200 200" width="100%" style="display:block;margin:0 auto;max-width:220px;">
                         <!-- 오행 순환 화살표 원 -->
                         <defs>
-                            <marker id="arrowG" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#16a34a"/></marker>
-                            <marker id="arrowR" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#dc2626"/></marker>
+                            <marker id="arrowG" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#22c55e"/></marker>
+                            <marker id="arrowR" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#ef4444"/></marker>
                             <marker id="arrowY" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#eab308"/></marker>
                             <marker id="arrowS" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#94a3b8"/></marker>
                             <marker id="arrowB" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#0f172a"/></marker>
                         </defs>
                         <!-- 상생 순환 오각형 -->
-                        <line x1="100" y1="22" x2="173" y2="70" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowG)" opacity="0.7"/>
-                        <line x1="175" y1="78" x2="147" y2="148" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowR)" opacity="0.7"/>
+                        <line x1="100" y1="22" x2="173" y2="70" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowG)" opacity="0.7"/>
+                        <line x1="175" y1="78" x2="147" y2="148" stroke="#ef4444" stroke-width="2" marker-end="url(#arrowR)" opacity="0.7"/>
                         <line x1="143" y1="155" x2="57" y2="155" stroke="#eab308" stroke-width="2" marker-end="url(#arrowY)" opacity="0.7"/>
                         <line x1="50" y1="148" x2="26" y2="78" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowS)" opacity="0.7"/>
                         <line x1="25" y1="70" x2="96" y2="22" stroke="#0f172a" stroke-width="2" marker-end="url(#arrowB)" opacity="0.7"/>
                         <!-- 오행 노드 -->
-                        <circle cx="100" cy="18" r="18" fill="#16a34a"/>
+                        <circle cx="100" cy="18" r="18" fill="#22c55e"/>
                         <text x="100" y="15" text-anchor="middle" fill="white" font-size="11" font-weight="bold">木</text>
                         <text x="100" y="26" text-anchor="middle" fill="white" font-size="9">나무</text>
-                        <circle cx="178" cy="73" r="18" fill="#dc2626"/>
+                        <circle cx="178" cy="73" r="18" fill="#ef4444"/>
                         <text x="178" y="70" text-anchor="middle" fill="white" font-size="11" font-weight="bold">火</text>
                         <text x="178" y="81" text-anchor="middle" fill="white" font-size="9">불</text>
                         <circle cx="150" cy="158" r="18" fill="#eab308"/>
@@ -2295,7 +2295,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
            ⑦ 자원오행 — 선택 한자의 오행 구성 요약
            ---------------------------------------------------- */
         const _OHENG_KR_SHORT = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
-        const _OHENG_C_DIAG   = {'木':'#16a34a','火':'#dc2626','土':'#eab308','金':'#e8ecf0','水':'#0f172a'};
+        const _OHENG_C_DIAG   = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#e8ecf0','水':'#0f172a'};
         let jawonGrade = '평', jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
         if (hanjaOhengs.length > 0) {
             const uniqueOhengs = [...new Set(hanjaOhengs)];
@@ -2411,7 +2411,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const finalScore = Math.round(_scored.reduce((s,x) => s+(_g2s[x.g]??50)*x.w, 0) / totalW);
 
         // ── 공통 헬퍼 ─────────────────────────────────────────────────
-        const _OHENG_COLOR_R = {'木':'#16a34a','火':'#dc2626','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+        const _OHENG_COLOR_R = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
         const _OHENG_KR_R    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
         const _normG      = g => g==='대길'?'길':g==='대흉'?'흉':g;
         const _gradeColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'}[_normG(g)]||'#64748b');
@@ -3107,7 +3107,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ── 오행 밸런스 바 ───────────────────────────────────────────────
-    const OHENG_COLORS = {'木':'#16a34a','火':'#dc2626','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+    const OHENG_COLORS = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
     const SEORYEOK_KR_MAP = {'extreme_weak':'부족','weak':'약함','balanced':'보통','strong':'강함','extreme_strong':'과다'};
 
     // 오행 한자 → 한글 변환 (U+F90A 등 이형자 포함)
@@ -3205,7 +3205,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     };
     const _OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
     // 오행 → 상징 색상 (OHENG_COLORS와 동일하게 유지)
-    const _PILLAR_OHENG_COLOR = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+    const _PILLAR_OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
 
     function _getPillarStory(p, type) {
         const gan = _GAN_STORY[p.gan] || p.gan;
@@ -3237,7 +3237,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (!saju) return;
         const el = document.getElementById('report-saju-grid');
         if (!el) return;
-        const _KR_COLOR = {'나무':'#16a34a','불':'#dc2626','흙':'#d97706','쇠':'#64748b','물':'#2563eb'};
+        const _KR_COLOR = {'나무':'#22c55e','불':'#ef4444','흙':'#eab308','쇠':'#94a3b8','물':'#0f172a'};
         el.innerHTML = PILLAR_META.map(({ key, label, period, isPoint }) => {
             const p    = saju[key];
             const ganO = CHEONGAN_OHENG_KR[p.gan] || '';
@@ -3269,7 +3269,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             { hanja:h1.h, kr:h1.kr, meaning:h1.m, strokes:h1.s, oheng:h1.o, synergyWithSaju:'' },
             ...(h2 ? [{ hanja:h2.h, kr:h2.kr, meaning:h2.m, strokes:h2.s, oheng:h2.o, synergyWithSaju:'' }] : [])
         ];
-        const OHENG_COLOR_MAP = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+        const OHENG_COLOR_MAP = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
         el.innerHTML = src.map(d => `
             <div class="ai-hanja-card">
                 <div class="ai-hanja-char" style="background:${OHENG_COLOR_MAP[d.oheng]||'#888'};">${d.hanja}</div>
@@ -3332,7 +3332,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho)) return '水';
             return '?';
         };
-        const OHENG_COLOR = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+        const OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
         const OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
         const CYCLE = ['木','火','土','金','水'];
         const isSangsaeng = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
@@ -3581,7 +3581,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // ── 셀프 보고서: 사주명식 + 오행 분포 렌더링 ────────────────────
     const _CHEONGAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
     const _JIJI_KR     = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
-    const _OHENG_COLOR = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+    const _OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
     const _OHENG_NAME  = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
     const _CG_OHENG    = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
     const _JJ_OHENG    = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
