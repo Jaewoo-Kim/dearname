@@ -220,7 +220,10 @@
 
         #analysis-result-area { display: none; margin-top: 50px; border-top: 1px solid var(--border-light); padding-top: 50px; animation: fadeIn 0.6s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .result-grid { display: flex; flex-direction: column; gap: 16px; }
+        .result-row { display: grid; gap: 16px; }
+        .result-row-4 { grid-template-columns: repeat(4, 1fr); }
+        .result-row-3 { grid-template-columns: repeat(3, 1fr); }
         .result-box { background: var(--bg-white); padding: 30px; border-radius: 24px; border: 1px solid var(--border-light); box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .result-header h4 { margin: 0; font-size: 1.15rem; color: var(--bg-dark); font-weight: 800;}
@@ -403,7 +406,8 @@
             .theory-split .diagram-area { margin-top: 30px; padding: 40px 20px; }
         }
         @media (max-width: 768px) {
-            .core-report-box, .intro-grid, .advice-grid, .theory-grid, .theory-example-grid, .form-grid, .result-grid, .suri-grid { grid-template-columns: 1fr; }
+            .core-report-box, .intro-grid, .advice-grid, .theory-grid, .theory-example-grid, .form-grid, .suri-grid { grid-template-columns: 1fr; }
+            .result-row-4, .result-row-3 { grid-template-columns: 1fr; }
             /* 사주 그리드: 2×2 유지 */
             .saju-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .saju-box-inner { padding: 16px 12px 14px; }
@@ -983,13 +987,17 @@
                         진단 결과 요약 <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-light); padding: 5px 15px; border-radius: 20px;">총 7개 지표 평가 완료</span>
                     </h3>
                     <div class="result-grid">
-                        <div class="result-box"><div class="result-header"><h4>발음 오행</h4><span class="grade-badge" id="res-pronounce-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-oheng"></p></div>
-                        <div class="result-box"><div class="result-header"><h4>발음 음양</h4><span class="grade-badge" id="res-pronounce-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-yin"></p></div>
-                        <div class="result-box"><div class="result-header"><h4>사격 수리</h4><span class="grade-badge" id="res-math-4"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-4"></p></div>
-                        <div class="result-box"><div class="result-header"><h4>수리 오행</h4><span class="grade-badge" id="res-math-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-oheng"></p></div>
-                        <div class="result-box"><div class="result-header"><h4>수리 음양</h4><span class="grade-badge" id="res-math-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-yin"></p></div>
-                        <div class="result-box"><div class="result-header"><h4>사주 오행</h4><span class="grade-badge" id="res-saju-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-saju-oheng"></p></div>
-                        <div class="result-box"><div class="result-header"><h4>자원 오행</h4><span class="grade-badge" id="res-jawonohaeng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-jawonohaeng">한자를 선택하면 자원오행이 표시됩니다.</p></div>
+                        <div class="result-row result-row-4">
+                            <div class="result-box"><div class="result-header"><h4>사주 오행</h4><span class="grade-badge" id="res-saju-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-saju-oheng"></p></div>
+                            <div class="result-box"><div class="result-header"><h4>자원 오행</h4><span class="grade-badge" id="res-jawonohaeng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-jawonohaeng">한자를 선택하면 자원오행이 표시됩니다.</p></div>
+                            <div class="result-box"><div class="result-header"><h4>발음 오행</h4><span class="grade-badge" id="res-pronounce-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-oheng"></p></div>
+                            <div class="result-box"><div class="result-header"><h4>발음 음양</h4><span class="grade-badge" id="res-pronounce-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-yin"></p></div>
+                        </div>
+                        <div class="result-row result-row-3">
+                            <div class="result-box"><div class="result-header"><h4>사격 수리</h4><span class="grade-badge" id="res-math-4"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-4"></p></div>
+                            <div class="result-box"><div class="result-header"><h4>수리 오행</h4><span class="grade-badge" id="res-math-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-oheng"></p></div>
+                            <div class="result-box"><div class="result-header"><h4>수리 음양</h4><span class="grade-badge" id="res-math-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-yin"></p></div>
+                        </div>
                     </div>
 
                     <button type="button" class="btn btn-gold" style="margin-top: 40px;" onclick="showSelfReportView()">보고서 전체 보기 &rarr;</button>
