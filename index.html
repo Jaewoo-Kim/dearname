@@ -215,13 +215,9 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold-premium); background: white; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
         
         #hanja-selection-area { background: #fffcf5; border: 1px dashed var(--gold-premium); padding: 30px; border-radius: 20px; display: none; margin-bottom: 25px; margin-top: 10px; }
-        .premium-form #hanja-selection-area { background: rgba(255,255,255,0.03); border: 1px dashed rgba(212,175,55,0.4); }
         .hanja-block { background: white; border: 1px solid var(--border-gold); padding: 20px; border-radius: 16px; flex: 1; text-align: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.05);}
-        .premium-form .hanja-block { background: rgba(255,255,255,0.06); border: 1px solid rgba(212,175,55,0.25); box-shadow: none; }
         .hanja-block span { display: block; font-size: 1.4rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 15px; }
-        .premium-form .hanja-block span { color: white; }
         .hanja-block select { margin-bottom: 0; padding: 12px; font-size: 1.1rem; text-align: center; background: #fffcf5; font-weight: 600;}
-        .premium-form .hanja-block select { background: rgba(255,255,255,0.04); color: white; border-color: rgba(255,255,255,0.1); }
 
         #analysis-result-area { display: none; margin-top: 50px; border-top: 1px solid var(--border-light); padding-top: 50px; animation: fadeIn 0.6s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -919,58 +915,52 @@
         </div>
     </section>
 
-    <section id="self-naming" class="bg-premium" style="padding-top: 100px; padding-bottom: 120px;">
+    <section id="self-naming" class="bg-white">
         <div class="section-inner">
-            <div class="premium-box">
-                <div class="premium-form">
-                    <span class="section-tag" style="color: var(--gold-premium); display: inline-block;">셀프 작명 진단</span>
-                    <h3 style="font-size: 2rem; margin-bottom: 8px; font-weight: 800; color: white;">스마트 셀프 작명 진단</h3>
-                    <p style="color: rgba(255,255,255,0.6); margin-bottom: 40px; font-size: 1rem;">성별, 이름 형식, 한글·한자, 생년월일을 입력하면 7개 지표를 즉시 분석합니다.</p>
-
-                    <form id="naming-form" class="form-grid">
-                        <div>
-                            <label class="input-label">이름 형식</label>
-                            <div class="premium-pill-group">
-                                <label class="premium-pill"><input type="radio" name="self_name_type" value="2" checked><span class="pill-label">두 글자</span></label>
-                                <label class="premium-pill"><input type="radio" name="self_name_type" value="1"><span class="pill-label">외자</span></label>
+            <div class="form-card">
+                <span class="section-tag">셀프 작명 진단</span>
+                <h3 style="font-size: 2rem; margin-bottom: 40px; font-weight: 800;">스마트 셀프 작명 진단</h3>
+                
+                <form id="naming-form" class="form-grid">
+                    <div>
+                        <label class="input-label">이름 형식</label>
+                        <div class="cal-pill-group">
+                            <label class="cal-pill"><input type="radio" name="self_name_type" value="2" checked><span class="cal-label">두 글자</span></label>
+                            <label class="cal-pill"><input type="radio" name="self_name_type" value="1"><span class="cal-label">외자</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="input-label">성별</label>
+                        <div class="cal-pill-group">
+                            <label class="cal-pill"><input type="radio" name="self_gender" value="M" checked><span class="cal-label">남자</span></label>
+                            <label class="cal-pill"><input type="radio" name="self_gender" value="F"><span class="cal-label">여자</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="input-label">한글 성(姓)</label>
+                        <input type="text" id="kr-last-name" placeholder="예: 김" maxlength="1" onkeyup="generateHanjaSelectors()">
+                    </div>
+                    <div>
+                        <label class="input-label">한글 이름</label>
+                        <input type="text" id="kr-first-name" placeholder="예: 민준" maxlength="2" onkeyup="generateHanjaSelectors()">
+                    </div>
+                    <div id="hanja-selection-area" class="full-width-form">
+                        <label class="input-label" style="color: var(--gold-dark);">한자 매칭 <span style="font-weight: 500; font-size: 0.9rem; color: var(--text-secondary);">(한글 음에 맞는 한자를 선택해주세요)</span></label>
+                        <div id="hanja-dropdowns" style="display: flex; gap: 20px;"></div>
+                    </div>
+                    <div class="full-width-form">
+                        <label class="input-label">출생 일시 및 지역</label>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                            <input type="date" id="birth-date" style="flex:2; min-width:160px; max-width:220px;" onchange="updateSelfLunarLabel()">
+                            <input type="time" id="birth-time" style="flex:1; min-width:110px; max-width:150px;">
+                            <div class="cal-pill-group">
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"><span class="cal-label">양력</span></label>
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="leap" onchange="updateSelfLunarLabel()"><span class="cal-label">윤달</span></label>
                             </div>
-                        </div>
-                        <div>
-                            <label class="input-label">성별</label>
-                            <div class="premium-pill-group">
-                                <label class="premium-pill"><input type="radio" name="self_gender" value="M" checked><span class="pill-label">남자</span></label>
-                                <label class="premium-pill"><input type="radio" name="self_gender" value="F"><span class="pill-label">여자</span></label>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="input-label">한글 성(姓)</label>
-                            <input type="text" id="kr-last-name" class="compact-input" placeholder="예: 김" maxlength="1" onkeyup="generateHanjaSelectors()">
-                        </div>
-                        <div>
-                            <label class="input-label">한글 이름</label>
-                            <input type="text" id="kr-first-name" class="compact-input" placeholder="예: 민준" maxlength="2" onkeyup="generateHanjaSelectors()">
-                        </div>
-                        <div id="hanja-selection-area" class="full-width-form">
-                            <label class="input-label" style="color: var(--gold-premium);">한자 매칭 <span style="font-weight: 500; font-size: 0.9rem; color: rgba(255,255,255,0.4);">(한글 음에 맞는 한자를 선택해주세요)</span></label>
-                            <div id="hanja-dropdowns" style="display: flex; gap: 20px;"></div>
-                        </div>
-                        <div class="full-width-form">
-                            <label class="input-label">생년월일 및 태어난 시간</label>
-                            <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                                <input type="date" id="birth-date" class="compact-input" style="flex:2; min-width:160px; max-width:220px; margin-bottom:0;" onchange="updateSelfLunarLabel()">
-                                <input type="time" id="birth-time" class="compact-input" style="flex:1; min-width:110px; max-width:150px; margin-bottom:0;">
-                                <div class="premium-pill-group" style="flex:1.5; min-width:200px;">
-                                    <label class="premium-pill"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"><span class="pill-label">양력</span></label>
-                                    <label class="premium-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="pill-label">음력</span></label>
-                                    <label class="premium-pill"><input type="radio" name="self_cal_type" value="leap" onchange="updateSelfLunarLabel()"><span class="pill-label">윤달</span></label>
-                                    <span id="self-lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="input-label">태어난 도시 <span style="font-weight:500;font-size:0.85rem;color:rgba(255,255,255,0.4);">— 정확한 사주 계산용</span></label>
-                            <select id="birth-location" class="compact-input">
-                                <option value="">도시 선택</option>
+                            <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;align-self:center;"></span>
+                            <select id="birth-location" style="flex:1.5; min-width:155px;">
+                                <option value="">태어난 도시 (선택)</option>
                                 <option value="서울">서울</option>
                                 <option value="부산">부산</option>
                                 <option value="인천">인천</option>
@@ -987,30 +977,31 @@
                                 <option value="제주">제주</option>
                             </select>
                         </div>
-                        <div class="full-width-form" style="margin-top: 10px;">
-                            <button type="button" class="wizard-btn-next" onclick="runAnalysis()">셀프 작명 분석하기</button>
-                        </div>
-                    </form>
-
-                    <div id="analysis-result-area">
-                        <h3 style="font-size: 1.6rem; color: white; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 50px; margin-top: 50px;">
-                            진단 결과 요약 <span style="font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.06); padding: 5px 15px; border-radius: 20px;">총 7개 지표 평가 완료</span>
-                        </h3>
-                        <div class="result-grid">
-                            <div class="result-row result-row-4">
-                                <div class="result-box"><div class="result-header"><h4>사주 오행</h4><span class="grade-badge" id="res-saju-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-saju-oheng"></p></div>
-                                <div class="result-box"><div class="result-header"><h4>자원 오행</h4><span class="grade-badge" id="res-jawonohaeng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-jawonohaeng">한자를 선택하면 자원오행이 표시됩니다.</p></div>
-                                <div class="result-box"><div class="result-header"><h4>발음 오행</h4><span class="grade-badge" id="res-pronounce-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-oheng"></p></div>
-                                <div class="result-box"><div class="result-header"><h4>발음 음양</h4><span class="grade-badge" id="res-pronounce-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-yin"></p></div>
-                            </div>
-                            <div class="result-row result-row-3">
-                                <div class="result-box"><div class="result-header"><h4>사격 수리</h4><span class="grade-badge" id="res-math-4"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-4"></p></div>
-                                <div class="result-box"><div class="result-header"><h4>수리 오행</h4><span class="grade-badge" id="res-math-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-oheng"></p></div>
-                                <div class="result-box"><div class="result-header"><h4>수리 음양</h4><span class="grade-badge" id="res-math-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-yin"></p></div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-gold" style="margin-top: 40px;" onclick="showSelfReportView()">보고서 전체 보기 &rarr;</button>
                     </div>
+                    <div class="full-width-form" style="margin-top: 20px;">
+                        <button type="button" class="btn btn-navy" onclick="runAnalysis()">셀프 작명 분석하기</button>
+                    </div>
+                </form>
+
+                <div id="analysis-result-area">
+                    <h3 style="font-size: 1.6rem; color: var(--bg-dark); font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between;">
+                        진단 결과 요약 <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-light); padding: 5px 15px; border-radius: 20px;">총 7개 지표 평가 완료</span>
+                    </h3>
+                    <div class="result-grid">
+                        <div class="result-row result-row-4">
+                            <div class="result-box"><div class="result-header"><h4>사주 오행</h4><span class="grade-badge" id="res-saju-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-saju-oheng"></p></div>
+                            <div class="result-box"><div class="result-header"><h4>자원 오행</h4><span class="grade-badge" id="res-jawonohaeng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-jawonohaeng">한자를 선택하면 자원오행이 표시됩니다.</p></div>
+                            <div class="result-box"><div class="result-header"><h4>발음 오행</h4><span class="grade-badge" id="res-pronounce-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-oheng"></p></div>
+                            <div class="result-box"><div class="result-header"><h4>발음 음양</h4><span class="grade-badge" id="res-pronounce-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-pronounce-yin"></p></div>
+                        </div>
+                        <div class="result-row result-row-3">
+                            <div class="result-box"><div class="result-header"><h4>사격 수리</h4><span class="grade-badge" id="res-math-4"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-4"></p></div>
+                            <div class="result-box"><div class="result-header"><h4>수리 오행</h4><span class="grade-badge" id="res-math-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-oheng"></p></div>
+                            <div class="result-box"><div class="result-header"><h4>수리 음양</h4><span class="grade-badge" id="res-math-yin"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-yin"></p></div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-gold" style="margin-top: 40px;" onclick="showSelfReportView()">보고서 전체 보기 &rarr;</button>
                 </div>
             </div>
         </div>
