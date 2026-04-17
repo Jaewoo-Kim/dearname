@@ -564,6 +564,9 @@
             transition:all 0.18s;
         }
         #chat-example-chips button:hover { background:var(--bg-dark); color:white; border-color:var(--bg-dark); }
+        .chat-followup-chips { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px; }
+        .chat-followup-chips button { background:#f1f5f9; border:1px solid var(--border-light); border-radius:20px; padding:5px 13px; font-size:0.78rem; font-weight:600; cursor:pointer; color:var(--text-secondary); transition:all .15s; }
+        .chat-followup-chips button:hover { background:var(--bg-dark); color:white; border-color:var(--bg-dark); }
         #chat-messages {
             min-height:60px; max-height:420px; overflow-y:auto;
             padding:4px 0 8px; display:flex; flex-direction:column; gap:12px;
@@ -4578,9 +4581,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (sendBtn) sendBtn.disabled = true;
         if (input) { input.value = ''; input.style.height = 'auto'; }
 
-        // 예시 chip 숨김
+        // 예시 chip 숨김 + 이전 후속 칩 제거
         const chips = document.getElementById('chat-example-chips');
         if (chips) chips.style.display = 'none';
+        document.querySelectorAll('.chat-followup-chips').forEach(el => el.remove());
 
         _appendChatBubble('user', msg);
         _chatHistory.push({ role: 'user', content: msg });
@@ -4595,6 +4599,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 const reply = _getDemoReply(msg);
                 _updateChatBubble(loadingId, reply.replace(/\n/g, '<br>'));
                 _chatHistory.push({ role: 'assistant', content: reply });
+                _appendFollowUpChips(_getFollowUpChips(msg));
             } else {
                 const res = await fetch('/proxy/claude-chat', {
                     method: 'POST',
@@ -4614,6 +4619,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     const reply = data.reply || '';
                     _updateChatBubble(loadingId, reply.replace(/\n/g, '<br>'));
                     _chatHistory.push({ role: 'assistant', content: reply });
+                    _appendFollowUpChips(_getFollowUpChips(msg));
                 }
             }
         } catch(e) {
@@ -4660,6 +4666,47 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             el.innerHTML = html;
             el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+    }
+
+    // 맥락별 후속 질문 칩 목록 반환
+    function _getFollowUpChips(lastMsg) {
+        const m = (lastMsg || '').toLowerCase().replace(/\s/g, '');
+        if (/사주|좋은|왜좋|잘맞|어울|궁합/.test(m))
+            return ['한자 의미를 더 자세히 알려줘', '아이 성격이 어떻게 될까요?', '진로는 어떤 게 잘 맞나요?'];
+        if (/한자|의미|뜻|자원|글자|娜|奫/.test(m))
+            return ['사주에 어떻게 도움이 되나요?', '아이 성격이 어떻게 될까요?', '수리 운세도 알려줘'];
+        if (/성격|기질|어떤아이|성품|인성/.test(m))
+            return ['진로는 어떤 게 잘 맞나요?', '오행 보완 원리가 뭔가요?', '이름 수리가 좋은가요?'];
+        if (/오행|보완|원리|상생|균형|기운/.test(m))
+            return ['이 이름이 왜 사주에 좋은가요?', '한자 의미를 더 자세히 알려줘', '아이 성격이 어떻게 될까요?'];
+        if (/진로|직업|직종|장래|커서|미래/.test(m))
+            return ['건강 관리 팁도 알려줘', '아이 성격이 어떻게 될까요?', '수리 운세도 알려줘'];
+        if (/수리|획수|81|원격|형격|이격|정격/.test(m))
+            return ['이 이름이 왜 사주에 좋은가요?', '한자 의미를 더 자세히 알려줘', '아이 성격이 어떻게 될까요?'];
+        if (/건강|체력|음식|생활/.test(m))
+            return ['진로는 어떤 게 잘 맞나요?', '오행 보완 원리가 뭔가요?', '이 이름이 왜 사주에 좋은가요?'];
+        return ['이 이름이 왜 사주에 좋은가요?', '아이 성격이 어떻게 될까요?', '오행 보완 원리가 뭔가요?'];
+    }
+
+    // 후속 질문 칩을 채팅창 안에 추가
+    function _appendFollowUpChips(chips) {
+        const wrap = document.getElementById('chat-messages');
+        if (!wrap || !chips?.length) return;
+        const el = document.createElement('div');
+        el.className = 'chat-followup-chips';
+        el.innerHTML = chips.map(c =>
+            `<button onclick="sendChatFollowUp(this)">${c}</button>`
+        ).join('');
+        wrap.appendChild(el);
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // 후속 칩 클릭 전송
+    function sendChatFollowUp(btn) {
+        btn.closest('.chat-followup-chips')?.remove();
+        const input = document.getElementById('chat-input');
+        if (input) input.value = btn.textContent.trim();
+        sendChatMessage();
     }
 
     // textarea 자동 높이 조절 + Enter 전송
