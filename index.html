@@ -72,9 +72,9 @@
             /* ── 오행 색상 (단일 정의) ── */
             --oheng-wood:  #16a34a;
             --oheng-fire:  #dc2626;
-            --oheng-earth: #d97706;
-            --oheng-metal: #64748b;
-            --oheng-water: #2563eb;
+            --oheng-earth: #eab308;
+            --oheng-metal: #e8ecf0;
+            --oheng-water: #0f172a;
         }
 
         body {
@@ -1369,16 +1369,16 @@
                         <defs>
                             <marker id="arrowG" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#16a34a"/></marker>
                             <marker id="arrowR" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#dc2626"/></marker>
-                            <marker id="arrowY" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#d97706"/></marker>
-                            <marker id="arrowS" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#64748b"/></marker>
-                            <marker id="arrowB" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#2563eb"/></marker>
+                            <marker id="arrowY" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#eab308"/></marker>
+                            <marker id="arrowS" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#94a3b8"/></marker>
+                            <marker id="arrowB" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#0f172a"/></marker>
                         </defs>
                         <!-- 상생 순환 오각형 -->
                         <line x1="100" y1="22" x2="173" y2="70" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowG)" opacity="0.7"/>
                         <line x1="175" y1="78" x2="147" y2="148" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowR)" opacity="0.7"/>
-                        <line x1="143" y1="155" x2="57" y2="155" stroke="#d97706" stroke-width="2" marker-end="url(#arrowY)" opacity="0.7"/>
-                        <line x1="50" y1="148" x2="26" y2="78" stroke="#64748b" stroke-width="2" marker-end="url(#arrowS)" opacity="0.7"/>
-                        <line x1="25" y1="70" x2="96" y2="22" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowB)" opacity="0.7"/>
+                        <line x1="143" y1="155" x2="57" y2="155" stroke="#eab308" stroke-width="2" marker-end="url(#arrowY)" opacity="0.7"/>
+                        <line x1="50" y1="148" x2="26" y2="78" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowS)" opacity="0.7"/>
+                        <line x1="25" y1="70" x2="96" y2="22" stroke="#0f172a" stroke-width="2" marker-end="url(#arrowB)" opacity="0.7"/>
                         <!-- 오행 노드 -->
                         <circle cx="100" cy="18" r="18" fill="#16a34a"/>
                         <text x="100" y="15" text-anchor="middle" fill="white" font-size="11" font-weight="bold">木</text>
@@ -1386,13 +1386,13 @@
                         <circle cx="178" cy="73" r="18" fill="#dc2626"/>
                         <text x="178" y="70" text-anchor="middle" fill="white" font-size="11" font-weight="bold">火</text>
                         <text x="178" y="81" text-anchor="middle" fill="white" font-size="9">불</text>
-                        <circle cx="150" cy="158" r="18" fill="#d97706"/>
+                        <circle cx="150" cy="158" r="18" fill="#eab308"/>
                         <text x="150" y="155" text-anchor="middle" fill="white" font-size="11" font-weight="bold">土</text>
                         <text x="150" y="166" text-anchor="middle" fill="white" font-size="9">흙</text>
-                        <circle cx="50" cy="158" r="18" fill="#64748b"/>
-                        <text x="50" y="155" text-anchor="middle" fill="white" font-size="11" font-weight="bold">金</text>
-                        <text x="50" y="166" text-anchor="middle" fill="white" font-size="9">쇠</text>
-                        <circle cx="22" cy="73" r="18" fill="#2563eb"/>
+                        <circle cx="50" cy="158" r="18" fill="#e8ecf0" stroke="#94a3b8" stroke-width="1.5"/>
+                        <text x="50" y="155" text-anchor="middle" fill="#334155" font-size="11" font-weight="bold">金</text>
+                        <text x="50" y="166" text-anchor="middle" fill="#334155" font-size="9">쇠</text>
+                        <circle cx="22" cy="73" r="18" fill="#0f172a"/>
                         <text x="22" y="70" text-anchor="middle" fill="white" font-size="11" font-weight="bold">水</text>
                         <text x="22" y="81" text-anchor="middle" fill="white" font-size="9">물</text>
                         <!-- 중앙 레이블 -->
@@ -2295,7 +2295,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
            ⑦ 자원오행 — 선택 한자의 오행 구성 요약
            ---------------------------------------------------- */
         const _OHENG_KR_SHORT = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
-        const _OHENG_C_DIAG   = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+        const _OHENG_C_DIAG   = {'木':'#16a34a','火':'#dc2626','土':'#eab308','金':'#e8ecf0','水':'#0f172a'};
         let jawonGrade = '평', jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
         if (hanjaOhengs.length > 0) {
             const uniqueOhengs = [...new Set(hanjaOhengs)];
@@ -2411,7 +2411,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const finalScore = Math.round(_scored.reduce((s,x) => s+(_g2s[x.g]??50)*x.w, 0) / totalW);
 
         // ── 공통 헬퍼 ─────────────────────────────────────────────────
-        const _OHENG_COLOR_R = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#475569','水':'#2563eb'};
+        const _OHENG_COLOR_R = {'木':'#16a34a','火':'#dc2626','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
         const _OHENG_KR_R    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
         const _normG      = g => g==='대길'?'길':g==='대흉'?'흉':g;
         const _gradeColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'}[_normG(g)]||'#64748b');
@@ -2645,23 +2645,27 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                         {
                             label: '사주 원국 (작명 전)',
                             data: [50, 50, 50, 50, 50, 50],
-                            backgroundColor: 'rgba(100,116,139,0.18)',
-                            borderColor: 'rgba(100,116,139,0.8)',
-                            borderWidth: 2,
-                            pointBackgroundColor: 'rgba(100,116,139,0.9)',
+                            order: 2,
+                            backgroundColor: 'rgba(100,116,139,0.15)',
+                            borderColor: 'rgba(100,116,139,0.6)',
+                            borderWidth: 1.5,
+                            pointBackgroundColor: 'rgba(100,116,139,0.8)',
                             pointBorderColor: 'white',
                             pointBorderWidth: 1.5,
-                            pointRadius: 4,
-                            pointHoverRadius: 6
+                            pointRadius: 3,
+                            pointHoverRadius: 5
                         },
                         {
                             label: '이름 후 잠재력',
                             data: [98, 92, 88, 85, 95, 99],
-                            backgroundColor: 'rgba(212, 175, 55, 0.22)',
+                            order: 1,
+                            backgroundColor: 'rgba(212, 175, 55, 0.25)',
                             borderColor: '#d4af37',
-                            borderWidth: 2,
+                            borderWidth: 2.5,
                             pointBackgroundColor: '#ffffff',
                             pointBorderColor: '#d4af37',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
                             pointHoverRadius: 6
                         }
                     ]
@@ -3103,7 +3107,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ── 오행 밸런스 바 ───────────────────────────────────────────────
-    const OHENG_COLORS = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#64748b','水':'#2563eb'};
+    const OHENG_COLORS = {'木':'#16a34a','火':'#dc2626','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
     const SEORYEOK_KR_MAP = {'extreme_weak':'부족','weak':'약함','balanced':'보통','strong':'강함','extreme_strong':'과다'};
 
     // 오행 한자 → 한글 변환 (U+F90A 등 이형자 포함)
