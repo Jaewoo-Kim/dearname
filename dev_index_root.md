@@ -143,6 +143,75 @@ PORT=8080 python server.py
 
 4개 뷰(view)가 `display: none/block`으로 전환되는 단일 페이지 앱.
 
+---
+
+### UI/UX 변경 이력 (2026-04-18 세션)
+
+#### 네비게이션
+- `이름의 과학` → `작명 기준` (nav 링크 텍스트)
+- `마이페이지` 버튼: `login-link` 클래스 적용 → 로그인 버튼과 동일한 다크 둥근 버튼
+- `showMainView()` 내 `main-nav.style.display = 'flex'` (기존 `'block'` → 줄바꿈 버그 수정)
+
+#### 히어로 섹션
+- 영역 확대: padding `220px/140px` → `280px/200px`
+- h1 `3.8rem` → `5rem`
+- `.hero-eyebrow`: 상단 레이블 (`1.05rem`, 금색)
+- `.hero-divider`: 금색 장식 선
+- `.hero-sub`: 부제목 단락 (`1.35rem`)
+- 하단 CTA 버튼·통계 뱃지 추가 후 사용자 요청으로 제거 (현재 없음)
+
+#### 이름 티커 (`#live-ticker`)
+- 아이템 4개 → 8개 (+ 복제 8개 = 총 16개): 끊김 없는 루프 구현
+- 폰트 `0.95rem` → `1.1rem`, 볼드 `1.15rem`
+- animation `60s` → `50s`
+
+#### 진단 결과 요약 (result grid)
+- **사주 오행 카드 제거** (자원 오행과 중복)
+- 7개 → 6개 지표, 레이아웃: 2열(자원오행·사격수리) + 4열(보조 4개)
+- 추가 CSS: `.result-row-2 { grid-template-columns: repeat(2, 1fr); }`
+
+#### 작명 기준 섹션 (theory section, `#theory`)
+- 기존 크기 불균일 카드(split + span-2 + 3열) → **균일 3×2 그리드** (`theory-grid-uniform`)
+- 모든 예시(`theory-example`) 제거, 간결 설명만 유지
+- 오행 다이어그램 홈에서 제거 (상세 페이지에만 유지)
+- 카드 순서: 자원오행 → 수리사격 → 발음오행 → 발음음양 → 수리음양 → 수리오행
+- 신규 CSS 클래스:
+  - `.theory-grid-uniform`: `display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px`
+  - `.theory-card-clean`: 흰색 균일 카드 (패딩 30px, border-radius 20px)
+  - `.tc-icon`: 금색 테두리 아이콘 박스 (44×44px)
+  - `.tc-sub`: 소제목 레이블 (금색, 0.8rem)
+- `디어네임 작명 과학` → `디어네임 작명 기준` (상세 페이지 헤더)
+
+#### 셀프 작명 섹션 (`#self-naming`)
+- section-tag: `셀프 작명 진단` → `셀프 작명`
+- 제목: `우리 아이 이름, 점수가 몇 점일까요?` → `우리 아이 이름을 직접 지어보아요.`
+
+#### 프리미엄 작명 섹션 (`#premium`)
+- 제목: `아이의 사주에 꼭 맞는 이름, 직접 지어드립니다` → `우리 아이에게 꼭 맞는 이름, 직접 지어드립니다.`
+- 설명 콤마 뒤 `<br>` 줄바꿈 추가
+- `_isSubscribed()` → 항상 `true` 반환 (개발 모드 결제 우회)
+
+#### 보고서 미리보기 섹션 (`#report`)
+- 리스트 항목 구조 개선: `<li><div><b>제목</b><span>설명</span></div></li>`
+- CSS: `.core-text-area li > div { flex: 1; }`, `.core-text-area li b { display: block; }`
+- `ID: ALM-2026-N190` 텍스트 제거
+
+#### 오행 다이어그램 (자원오행 카드 내)
+- 제목: `오행의 상생 순환 (시계방향)` → `오행의 상생 순환`
+- SVG 시계방향 호 화살표 추가 (Fire~土 사이, 금색)
+- 木(나무) 레이블 → 원소 왼쪽 배치 (겹침 해소)
+- 土(흙) 레이블 → 원소 오른쪽 배치 (겹침 해소)
+
+#### 카드 텍스트 수정
+- `자원 오행 (용신 작명)` → `자원 오행`
+- `수리 사격 (81수리)` → `수리 사격`
+
+#### 푸터
+- `AI Premium Narrative Naming Service` → `Premium Narrative Naming Service`
+- `Designed with Traditional Wisdom & Artificial Intelligence` → `Designed with Traditional Wisdom & Modern Science`
+
+---
+
 ### 뷰 전환 함수
 
 | 함수 | 이동 뷰 |
