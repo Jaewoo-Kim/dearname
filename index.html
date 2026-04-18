@@ -785,13 +785,13 @@
         <a onclick="showMainView()" class="logo">디어네임</a>
         <div class="main-nav-links" id="main-nav">
             <a onclick="showMainView(); setTimeout(()=>{document.getElementById('report').scrollIntoView();}, 100);">보고서 미리보기</a>
-            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('theory').scrollIntoView();}, 100);">이름의 과학</a>
+            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('theory').scrollIntoView();}, 100);">작명 기준</a>
             <a onclick="showMainView(); setTimeout(()=>{document.getElementById('self-naming').scrollIntoView();}, 100);">셀프 작명</a>
             <a class="premium-link" onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 작명 의뢰</a>
             <a class="login-link" onclick="openLoginModal()">로그인</a>
             <div id="user-badge" style="display:none;align-items:center;gap:8px;cursor:pointer;margin-left:20px;" onclick="showMypageView()" title="마이페이지">
                 <img class="user-avatar" src="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:none;">
-                <span style="font-size:0.9rem;font-weight:700;color:var(--text-secondary);">마이페이지</span>
+                <a class="login-link" style="margin-left:0;cursor:pointer;">마이페이지</a>
             </div>
         </div>
         <a onclick="showMainView()" class="report-back-link" id="report-nav">&larr; 메인으로 돌아가기</a>
