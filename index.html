@@ -189,7 +189,9 @@
         .ticker-wrap b { color: var(--gold-premium); font-weight: 800; margin-right: 6px; font-size: 1.15rem; }
         @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        .core-text-area li b { display: block; margin-bottom: 5px; color: var(--bg-dark); font-size: 1.05rem; white-space: nowrap; }
+        .core-text-area li > div { flex: 1; }
+        .core-text-area li b { display: block; margin-bottom: 6px; color: var(--bg-dark); font-size: 1.05rem; font-weight: 800; }
+        .core-text-area li > div > span { font-size: 1rem; color: var(--text-secondary); line-height: 1.7; }
 
         .core-report-box { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: center; }
         .core-text-area p { font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 30px; }
@@ -807,17 +809,6 @@
                 사주·한자·수리 6가지 기준으로 분석하고,<br>
                 평생 복을 담은 이름을 찾아드립니다.
             </p>
-            <div class="hero-cta">
-                <button class="btn btn-gold" onclick="showMainView(); setTimeout(()=>{document.getElementById('self-naming').scrollIntoView({behavior:'smooth'});}, 100);">셀프 작명 시작하기</button>
-                <button class="btn btn-ghost-white" onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView({behavior:'smooth'});}, 100);">프리미엄 작명 의뢰</button>
-            </div>
-            <div class="hero-badges">
-                <div class="hero-badge"><span class="hero-badge-num">사주 · 한자 · 수리</span><span class="hero-badge-label">전통 명리학 3대 기준</span></div>
-                <div class="hero-badge-sep"></div>
-                <div class="hero-badge"><span class="hero-badge-num">6가지</span><span class="hero-badge-label">이름 분석 지표</span></div>
-                <div class="hero-badge-sep"></div>
-                <div class="hero-badge"><span class="hero-badge-num">100%</span><span class="hero-badge-label">맞춤 작명 소견서</span></div>
-            </div>
         </div>
     </section>
     
@@ -851,15 +842,14 @@
                 <div class="core-text-area">
                     <p>기존 작명 서비스의 불친절한 설명과 어려운 한자 용어 남발은 부모님들의 가장 큰 페인포인트입니다. 디어네임은 다릅니다.</p>
                     <ul>
-                        <li><b>누구나 이해하는 보고서</b>전문 명리학 용어를 현대적인 일상 언어로 완벽히 순화하여 전달합니다.</li>
-                        <li><b>직관적인 데이터 시각화</b>사주 오행의 균형과 수리 길흉의 변화를 대시보드 형태로 한눈에 보여줍니다.</li>
-                        <li><b>운명과 연결된 스토리텔링</b>이름이 아이의 삶과 성격에 미치는 긍정적 기운을 아름다운 스토리로 풀어냅니다.</li>
+                        <li><div><b>누구나 이해하는 보고서</b><span>전문 명리학 용어를 현대적인 일상 언어로 완벽히 순화하여 전달합니다.</span></div></li>
+                        <li><div><b>직관적인 데이터 시각화</b><span>사주 오행의 균형과 수리 길흉의 변화를 대시보드 형태로 한눈에 보여줍니다.</span></div></li>
+                        <li><div><b>운명과 연결된 스토리텔링</b><span>이름이 아이의 삶과 성격에 미치는 긍정적 기운을 아름다운 스토리로 풀어냅니다.</span></div></li>
                     </ul>
                 </div>
                 <div class="report-visual">
                     <div class="badge-premium">PREMIUM REPORT</div>
                     <h4>AI 대가의 작명 소견서</h4>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">ID: ALM-2026-N190</p>
                     <div class="report-narrative">
                         "이 이름은 한겨울 대지에 내리는 <b>따뜻한 햇살</b>과 같습니다. 사주에 부족한 수(水) 기운을 완벽히 보완하여 가문을 빛낼 고귀한 기운을 담았습니다." 
                     </div>
