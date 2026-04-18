@@ -735,23 +735,23 @@
         /* Wizard */
         .wizard-progress { display:flex; gap:16px; margin-bottom:44px; }
         .wizard-step-tab { flex:1; text-align:center; cursor:default; }
-        .wizard-step-tab .tab-bar { height:3px; background:rgba(255,255,255,0.12); margin-bottom:8px; border-radius:2px; transition:background 0.35s; }
-        .wizard-step-tab .tab-label { font-size:0.78rem; font-weight:700; color:rgba(255,255,255,0.3); letter-spacing:0.5px; text-transform:uppercase; }
+        .wizard-step-tab .tab-bar { height:3px; background:rgba(0,0,0,0.08); margin-bottom:8px; border-radius:2px; transition:background 0.35s; }
+        .wizard-step-tab .tab-label { font-size:0.78rem; font-weight:700; color:var(--text-secondary); letter-spacing:0.5px; text-transform:uppercase; }
         .wizard-step-tab.wt-active .tab-bar { background:var(--gold-premium); }
-        .wizard-step-tab.wt-active .tab-label { color:var(--gold-premium); }
+        .wizard-step-tab.wt-active .tab-label { color:var(--gold-dark); }
         .wizard-step-tab.wt-done .tab-bar { background:rgba(212,175,55,0.38); }
-        .wizard-step-tab.wt-done .tab-label { color:rgba(212,175,55,0.55); }
+        .wizard-step-tab.wt-done .tab-label { color:var(--gold-dark); opacity:0.6; }
         .wizard-step { display:none; }
         .wizard-step.ws-active { display:block; animation:wsFadeIn 0.25s ease; }
         @keyframes wsFadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         .wizard-nav { display:flex; gap:12px; margin-top:44px; }
-        .wizard-btn-prev { flex:1; padding:17px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:14px; color:rgba(255,255,255,0.65); font-size:0.97rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
-        .wizard-btn-prev:hover { background:rgba(255,255,255,0.1); }
+        .wizard-btn-prev { flex:1; padding:17px; background:var(--bg-light); border:1px solid var(--border-light); border-radius:14px; color:var(--text-secondary); font-size:0.97rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+        .wizard-btn-prev:hover { background:var(--bg-dark); color:white; }
         .wizard-btn-next { flex:2; padding:17px; background:linear-gradient(135deg,var(--gold-dark),var(--gold-premium)); border:none; border-radius:14px; color:#1a1410; font-size:0.97rem; font-weight:800; cursor:pointer; transition:all 0.2s; letter-spacing:0.3px; }
         .wizard-btn-next:hover { opacity:0.9; transform:translateY(-1px); }
-        .wizard-step-hint { font-size:0.78rem; color:rgba(255,255,255,0.28); margin-top:10px; text-align:center; }
-        .wizard-step-title { color:white; font-size:1.25rem; font-weight:800; margin:0 0 6px; }
-        .wizard-step-sub { color:rgba(255,255,255,0.45); font-size:0.9rem; margin:0 0 30px; }
+        .wizard-step-hint { font-size:0.78rem; color:var(--text-secondary); margin-top:10px; text-align:center; }
+        .wizard-step-title { color:var(--bg-dark); font-size:1.25rem; font-weight:800; margin:0 0 6px; }
+        .wizard-step-sub { color:var(--text-secondary); font-size:0.9rem; margin:0 0 30px; }
         .tooltip-icon { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; background:rgba(255,255,255,0.15); border-radius:50%; font-size:0.68rem; font-weight:800; color:rgba(255,255,255,0.5); cursor:help; margin-left:5px; vertical-align:middle; }
 </style>
 </head>
@@ -1007,16 +1007,16 @@
         </div>
     </section>
 
-    <section id="premium" class="bg-premium" style="padding-top: 100px; padding-bottom: 120px;">
+    <section id="premium" class="bg-white" style="padding-top: 100px; padding-bottom: 120px;">
         <div class="section-inner">
             <div style="text-align: center; margin-bottom: 60px;">
-                <span class="section-tag" style="color: var(--gold-premium); display: inline-block;">프리미엄 의뢰</span>
-                <h2 class="section-title" style="color: white; font-size: 2.8rem; margin-bottom: 20px;"> AI 프리미엄 작명 의뢰하기</h2>
-                <p style="color: rgba(255,255,255,0.7); max-width: 600px; margin: 0 auto; font-size: 1.15rem;">데이터 기반의 객관적 분석을 넘어, 가문을 위한 철학과 아이의 사주 용신(用神)을 완벽히 조율한 하이엔드 작명 리포트를 제공합니다.</p>
+                <span class="section-tag">프리미엄 의뢰</span>
+                <h2 class="section-title" style="font-size: 2.8rem; margin-bottom: 20px;">AI 프리미엄 작명 의뢰하기</h2>
+                <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto; font-size: 1.15rem;">데이터 기반의 객관적 분석을 넘어, 가문을 위한 철학과 아이의 사주 용신(用神)을 완벽히 조율한 하이엔드 작명 리포트를 제공합니다.</p>
             </div>
-            
-            <div class="premium-box">
-                <form class="premium-form" id="premium-wizard-form">
+
+            <div class="form-card">
+                <form id="premium-wizard-form">
 
                     <!-- 진행바 -->
                     <div class="wizard-progress">
@@ -1040,37 +1040,37 @@
                         <p class="wizard-step-sub">성별, 생년월일, 태어난 시간과 지역을 정확히 입력할수록 정밀한 분석이 가능합니다.</p>
                         <div class="form-grid">
                             <div>
-                                <label class="input-label">성(姓) <span style="font-weight:500;font-size:0.85rem;color:rgba(255,255,255,0.4);">— 한자까지 선택해주세요</span></label>
+                                <label class="input-label">성(姓) <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">— 한자까지 선택해주세요</span></label>
                                 <div style="display:flex;gap:10px;">
-                                    <input type="text" id="prem-last-name" class="compact-input" placeholder="한글 (예: 김)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-last-name','prem-last-name-hanja')">
-                                    <select id="prem-last-name-hanja" class="compact-input" style="flex:1;margin-bottom:0;padding:16px;">
+                                    <input type="text" id="prem-last-name" placeholder="한글 (예: 김)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-last-name','prem-last-name-hanja')">
+                                    <select id="prem-last-name-hanja" style="flex:1;margin-bottom:0;">
                                         <option value="">한자 선택</option>
                                     </select>
                                 </div>
                             </div>
                             <div>
                                 <label class="input-label">성별</label>
-                                <div class="premium-pill-group">
-                                    <label class="premium-pill"><input type="radio" name="premium_gender" value="M" checked><span class="pill-label">남자</span></label>
-                                    <label class="premium-pill"><input type="radio" name="premium_gender" value="F"><span class="pill-label">여자</span></label>
+                                <div class="cal-pill-group">
+                                    <label class="cal-pill"><input type="radio" name="premium_gender" value="M" checked><span class="cal-label">남자</span></label>
+                                    <label class="cal-pill"><input type="radio" name="premium_gender" value="F"><span class="cal-label">여자</span></label>
                                 </div>
                             </div>
                             <div class="full-width-form">
                                 <label class="input-label">생년월일 및 태어난 시간</label>
                                 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                                    <input type="date" id="prem-birth-date" class="compact-input" style="flex:1;min-width:140px;margin-bottom:0;" onchange="updateLunarLabel()">
-                                    <input type="time" id="prem-birth-time" class="compact-input" style="flex:1;min-width:120px;margin-bottom:0;">
-                                    <div class="premium-pill-group" style="flex:1.5;min-width:200px;">
-                                        <label class="premium-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="pill-label">양력</span></label>
-                                        <label class="premium-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="pill-label">음력</span></label>
-                                        <label class="premium-pill"><input type="radio" name="cal_type" value="leap" onchange="updateLunarLabel()"><span class="pill-label">윤달</span></label>
+                                    <input type="date" id="prem-birth-date" style="flex:1;min-width:140px;margin-bottom:0;" onchange="updateLunarLabel()">
+                                    <input type="time" id="prem-birth-time" style="flex:1;min-width:120px;margin-bottom:0;">
+                                    <div class="cal-pill-group" style="flex:1.5;min-width:200px;">
+                                        <label class="cal-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="cal-label">양력</span></label>
+                                        <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
+                                        <label class="cal-pill"><input type="radio" name="cal_type" value="leap" onchange="updateLunarLabel()"><span class="cal-label">윤달</span></label>
                                         <span id="lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <label class="input-label">태어난 도시 <span style="font-weight:500;font-size:0.85rem;color:rgba(255,255,255,0.4);">— 정확한 사주 계산용</span></label>
-                                <input type="text" id="prem-city" class="compact-input" placeholder="예: 서울특별시, 부산광역시">
+                                <label class="input-label">태어난 도시 <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">— 정확한 사주 계산용</span></label>
+                                <input type="text" id="prem-city" placeholder="예: 서울특별시, 부산광역시">
                             </div>
                         </div>
                         <div class="wizard-nav">
@@ -1086,41 +1086,41 @@
                         <div class="form-grid">
                             <div class="full-width-form">
                                 <label class="input-label">이름에 담고 싶은 이미지 및 성향 (다중 선택)</label>
-                                <div class="premium-pill-group" style="margin-bottom:15px;">
-                                    <label class="premium-pill"><input type="checkbox" name="traits" value="1"><span class="pill-label">리더십·카리스마</span></label>
-                                    <label class="premium-pill"><input type="checkbox" name="traits" value="2"><span class="pill-label">지혜·총명함</span></label>
-                                    <label class="premium-pill"><input type="checkbox" name="traits" value="3"><span class="pill-label">따뜻함·포용력</span></label>
-                                    <label class="premium-pill"><input type="checkbox" name="traits" value="4"><span class="pill-label">건강·활력</span></label>
-                                    <label class="premium-pill"><input type="checkbox" name="traits" value="5"><span class="pill-label">예술성·창의력</span></label>
-                                    <label class="premium-pill"><input type="checkbox" name="traits" value="6"><span class="pill-label">재물·풍요로움</span></label>
+                                <div class="cal-pill-group" style="margin-bottom:15px;flex-wrap:wrap;">
+                                    <label class="cal-pill"><input type="checkbox" name="traits" value="1"><span class="cal-label">리더십·카리스마</span></label>
+                                    <label class="cal-pill"><input type="checkbox" name="traits" value="2"><span class="cal-label">지혜·총명함</span></label>
+                                    <label class="cal-pill"><input type="checkbox" name="traits" value="3"><span class="cal-label">따뜻함·포용력</span></label>
+                                    <label class="cal-pill"><input type="checkbox" name="traits" value="4"><span class="cal-label">건강·활력</span></label>
+                                    <label class="cal-pill"><input type="checkbox" name="traits" value="5"><span class="cal-label">예술성·창의력</span></label>
+                                    <label class="cal-pill"><input type="checkbox" name="traits" value="6"><span class="cal-label">재물·풍요로움</span></label>
                                 </div>
-                                <input type="text" id="prem-traits-text" class="compact-input" placeholder="기타 원하시는 성향이나 이미지가 있다면 직접 입력해주세요.">
+                                <input type="text" id="prem-traits-text" placeholder="기타 원하시는 성향이나 이미지가 있다면 직접 입력해주세요.">
                             </div>
-                            <div class="full-width-form" style="background:rgba(255,255,255,0.03);padding:25px;border-radius:20px;border:1px solid rgba(255,255,255,0.05);">
+                            <div class="full-width-form" style="background:var(--bg-light);padding:25px;border-radius:20px;border:1px solid var(--border-light);">
                                 <div class="split-grid">
                                     <div>
-                                        <label class="input-label" style="color:var(--gold-premium);">돌림자 (선택)</label>
+                                        <label class="input-label" style="color:var(--gold-dark);">돌림자 (선택)</label>
                                         <div style="display:flex;gap:10px;flex-direction:column;">
                                             <div style="display:flex;gap:10px;">
-                                                <input type="text" id="prem-dolrim" class="compact-input" placeholder="한글 (예: 수)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-dolrim','prem-dolrim-hanja')">
-                                                <select id="prem-dolrim-hanja" class="compact-input" style="flex:1;margin-bottom:0;padding:16px;"><option value="">한자 선택</option></select>
+                                                <input type="text" id="prem-dolrim" placeholder="한글 (예: 수)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-dolrim','prem-dolrim-hanja')">
+                                                <select id="prem-dolrim-hanja" style="flex:1;margin-bottom:0;"><option value="">한자 선택</option></select>
                                             </div>
-                                            <div class="premium-pill-group">
-                                                <label class="premium-pill"><input type="radio" name="dolrim_pos" value="2"><span class="pill-label" style="padding:8px 14px;font-size:0.85rem;">2번째 (가운데)</span></label>
-                                                <label class="premium-pill"><input type="radio" name="dolrim_pos" value="3"><span class="pill-label" style="padding:8px 14px;font-size:0.85rem;">3번째 (끝)</span></label>
+                                            <div class="cal-pill-group">
+                                                <label class="cal-pill"><input type="radio" name="dolrim_pos" value="2"><span class="cal-label">2번째 (가운데)</span></label>
+                                                <label class="cal-pill"><input type="radio" name="dolrim_pos" value="3"><span class="cal-label">3번째 (끝)</span></label>
                                             </div>
                                         </div>
                                     </div>
                                     <div>
-                                        <label class="input-label" style="color:var(--gold-premium);">항렬자 (선택)</label>
+                                        <label class="input-label" style="color:var(--gold-dark);">항렬자 (선택)</label>
                                         <div style="display:flex;gap:10px;flex-direction:column;">
                                             <div style="display:flex;gap:10px;">
-                                                <input type="text" id="prem-hangryul" class="compact-input" placeholder="한글 (예: 영)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-hangryul','prem-hangryul-hanja')">
-                                                <select id="prem-hangryul-hanja" class="compact-input" style="flex:1;margin-bottom:0;padding:16px;"><option value="">한자 선택</option></select>
+                                                <input type="text" id="prem-hangryul" placeholder="한글 (예: 영)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-hangryul','prem-hangryul-hanja')">
+                                                <select id="prem-hangryul-hanja" style="flex:1;margin-bottom:0;"><option value="">한자 선택</option></select>
                                             </div>
-                                            <div class="premium-pill-group">
-                                                <label class="premium-pill"><input type="radio" name="hangryul_pos" value="2"><span class="pill-label" style="padding:8px 14px;font-size:0.85rem;">2번째 (가운데)</span></label>
-                                                <label class="premium-pill"><input type="radio" name="hangryul_pos" value="3"><span class="pill-label" style="padding:8px 14px;font-size:0.85rem;">3번째 (끝)</span></label>
+                                            <div class="cal-pill-group">
+                                                <label class="cal-pill"><input type="radio" name="hangryul_pos" value="2"><span class="cal-label">2번째 (가운데)</span></label>
+                                                <label class="cal-pill"><input type="radio" name="hangryul_pos" value="3"><span class="cal-label">3번째 (끝)</span></label>
                                             </div>
                                         </div>
                                     </div>
@@ -1129,13 +1129,13 @@
                             <div>
                                 <label class="input-label">선호하는 한자 (선택)</label>
                                 <div style="display:flex;gap:10px;">
-                                    <input type="text" id="prem-fav" class="compact-input" placeholder="한글 (예: 명)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-fav','prem-fav-hanja')">
-                                    <select id="prem-fav-hanja" class="compact-input" style="flex:1.5;margin-bottom:0;padding:16px;"><option value="">한자 선택</option></select>
+                                    <input type="text" id="prem-fav" placeholder="한글 (예: 명)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-fav','prem-fav-hanja')">
+                                    <select id="prem-fav-hanja" style="flex:1.5;margin-bottom:0;"><option value="">한자 선택</option></select>
                                 </div>
                             </div>
                             <div>
                                 <label class="input-label">가족 중 피해야 할 이름 (동명이인 방지)</label>
-                                <input type="text" id="prem-avoid" class="compact-input" placeholder="예: 조부모, 삼촌, 친척 이름">
+                                <input type="text" id="prem-avoid" placeholder="예: 조부모, 삼촌, 친척 이름">
                             </div>
                         </div>
                         <div class="wizard-nav">
@@ -1154,15 +1154,15 @@
                                 <label class="input-label">
                                     부모님 사주
                                     <span class="tooltip-icon" title="부모님과 기운이 조화로운 이름을 짓기 위해 활용합니다. 생년월일시를 입력해주세요.">?</span>
-                                    <span style="font-weight:500;font-size:0.85rem;color:rgba(255,255,255,0.4);margin-left:8px;">선택 사항</span>
+                                    <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);margin-left:8px;">선택 사항</span>
                                 </label>
                                 <div style="display:flex;gap:12px;flex-direction:column;">
-                                    <input type="text" id="prem-parent-saju" class="compact-input" placeholder="예: 아버지 1985년 5월 12일 오전 9시 / 어머니 1987년 8월 3일 오후 2시">
+                                    <input type="text" id="prem-parent-saju" placeholder="예: 아버지 1985년 5월 12일 오전 9시 / 어머니 1987년 8월 3일 오후 2시">
                                 </div>
                             </div>
                             <div class="full-width-form">
-                                <label class="input-label">기타 특별 요청사항 <span style="font-weight:500;font-size:0.85rem;color:rgba(255,255,255,0.4);">선택 사항</span></label>
-                                <textarea rows="4" id="prem-request" class="compact-input" style="resize:vertical;" placeholder="특별히 원하시는 사항이 있으면 자유롭게 적어주세요."></textarea>
+                                <label class="input-label">기타 특별 요청사항 <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">선택 사항</span></label>
+                                <textarea rows="4" id="prem-request" style="resize:vertical;" placeholder="특별히 원하시는 사항이 있으면 자유롭게 적어주세요."></textarea>
                             </div>
                         </div>
                         <div class="wizard-nav">
