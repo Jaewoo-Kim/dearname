@@ -925,8 +925,8 @@
                     <div>
                         <label class="input-label">이름 형식</label>
                         <div class="cal-pill-group">
-                            <label class="cal-pill"><input type="radio" name="self_name_type" value="2" checked><span class="cal-label">두 글자</span></label>
-                            <label class="cal-pill"><input type="radio" name="self_name_type" value="1"><span class="cal-label">외자</span></label>
+                            <label class="cal-pill"><input type="radio" name="self_name_type" value="2" checked onchange="updateNameTypeInput()"><span class="cal-label">두 글자</span></label>
+                            <label class="cal-pill"><input type="radio" name="self_name_type" value="1" onchange="updateNameTypeInput()"><span class="cal-label">외자</span></label>
                         </div>
                     </div>
                     <div>
@@ -942,7 +942,7 @@
                     </div>
                     <div>
                         <label class="input-label">한글 이름</label>
-                        <input type="text" id="kr-first-name" placeholder="예: 민준" maxlength="2" onkeyup="generateHanjaSelectors()">
+                        <input type="text" id="kr-first-name" placeholder="예: 민준" maxlength="2" onkeyup="generateHanjaSelectors()" oninput="enforceNameLength(this)">
                     </div>
                     <div id="hanja-selection-area" class="full-width-form">
                         <label class="input-label" style="color: var(--gold-dark);">한자 매칭 <span style="font-weight: 500; font-size: 0.9rem; color: var(--text-secondary);">(한글 음에 맞는 한자를 선택해주세요)</span></label>
@@ -3900,9 +3900,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         try { return JSON.parse(localStorage.getItem(_SUB_KEY)) || null; } catch(e) { return null; }
     }
     function _isSubscribed() {
-        const sub = _getSubscription();
-        if (!sub || !sub.expiresAt) return false;
-        return new Date(sub.expiresAt) > new Date();
+        return true; // 개발 모드: 결제 없이 모든 기능 사용 가능
     }
 
     // 셀프작명 보고서 저장
@@ -4205,6 +4203,29 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (!other) return;
         other.style.display = sel.value === '기타' ? 'block' : 'none';
         if (sel.value !== '기타') other.value = '';
+    }
+
+    function updateNameTypeInput() {
+        const type = parseInt(document.querySelector('[name="self_name_type"]:checked')?.value || '2');
+        const input = document.getElementById('kr-first-name');
+        if (!input) return;
+        if (type === 1) {
+            input.maxLength = 1;
+            input.placeholder = '예: 민';
+            if (input.value.length > 1) {
+                input.value = input.value.charAt(0);
+                generateHanjaSelectors();
+            }
+        } else {
+            input.maxLength = 2;
+            input.placeholder = '예: 민준';
+        }
+    }
+
+    function enforceNameLength(input) {
+        const type = parseInt(document.querySelector('[name="self_name_type"]:checked')?.value || '2');
+        const max = type === 1 ? 1 : 2;
+        if (input.value.length > max) input.value = input.value.slice(0, max);
     }
 
     function updateSelfLunarLabel() {
