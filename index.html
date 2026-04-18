@@ -209,6 +209,14 @@
         .theory-row { display: grid; gap: 30px; }
         .theory-row-2 { grid-template-columns: repeat(2, 1fr); }
         .theory-row-3 { grid-template-columns: repeat(3, 1fr); }
+        .theory-grid-uniform { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .theory-card-clean { background: white; padding: 30px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 16px rgba(0,0,0,0.03); transition: all 0.3s ease; display: flex; flex-direction: column; gap: 12px; }
+        .theory-card-clean:hover { transform: translateY(-4px); border-color: var(--border-gold); box-shadow: var(--shadow-premium); }
+        .theory-card-clean .tc-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #fffcf0, #fff8e0); border: 1px solid var(--border-gold); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--gold-dark); }
+        .theory-card-clean .tc-icon svg { width: 22px; height: 22px; }
+        .theory-card-clean h3 { font-size: 1.1rem; font-weight: 800; color: var(--bg-dark); margin: 0; }
+        .theory-card-clean .tc-sub { font-size: 0.8rem; font-weight: 700; color: var(--gold-dark); letter-spacing: 0.5px; }
+        .theory-card-clean p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin: 0; }
         .theory-card { background: white; padding: 40px; border-radius: 24px; border: 1px solid rgba(0,0,0,0.03); transition: all 0.4s ease; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
         .theory-card:hover { transform: translateY(-10px); border-color: var(--border-gold); box-shadow: var(--shadow-premium); }
         .theory-header { display: flex; align-items: center; margin-bottom: 25px; }
@@ -430,6 +438,7 @@
         @media (max-width: 768px) {
             .core-report-box, .intro-grid, .advice-grid, .theory-example-grid, .form-grid, .suri-grid { grid-template-columns: 1fr; }
             .theory-row-2, .theory-row-3 { grid-template-columns: 1fr; }
+            .theory-grid-uniform { grid-template-columns: 1fr; }
             .result-row-4, .result-row-3 { grid-template-columns: 1fr; }
             /* 사주 그리드: 2×2 유지 */
             .saju-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -871,105 +880,42 @@
                 <button class="btn-outline-gold" onclick="showTheoryDetailView()">이름 짓는 기준 더 알아보기 &rarr;</button>
             </div>
 
-            <div class="theory-grid">
+                        <div class="theory-grid-uniform">
 
-                <!-- 자원 오행 단독 (전체 너비) -->
-                <div class="theory-card theory-split">
-                    <div class="text-area">
-                        <div class="theory-header"><div class="theory-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><h3>자원 오행</h3><span class="theory-subtitle">사주 팔자의 완벽한 보완</span></div></div>
-                        <p>작명의 꽃이라 불립니다. 태어난 생년월일시(사주 원국)를 정밀 분석하여 <b>가장 필요하고 부족한 기운(용신/희신)</b>을 찾아내어, 해당 기운을 내포한 한자(부수)로 뼈대를 세웁니다.</p>
-                        <div class="theory-example" style="margin-top: 25px;">
-                            <p class="example-label">사주 분석 예시:</p>
-                            <p>木2 火1 土3 金2 水0 → <b>水(물) 기운 고갈!</b><br><span style="color: var(--bg-dark); font-weight: 800;">→ 처방: 물(氵) 관련 한자 추천 (浩, 潤, 澤)</span></p>
-                        </div>
-                    </div>
-                    
-                    <div class="diagram-area">
-                        <h4 style="margin: 0 0 45px 0; font-size: 1.2rem; color: var(--bg-dark); font-weight: 800; text-align: center; letter-spacing: -0.5px;">오행의 상생 순환</h4>
-                        <div style="position: relative; width: 220px; height: 220px; border: 2px dashed var(--gold-premium); border-radius: 50%; margin: 0 auto; overflow: visible;">
-
-                            <!-- SVG 시계방향 화살표 -->
-                            <svg style="position:absolute;top:0;left:0;width:220px;height:220px;overflow:visible;pointer-events:none;" viewBox="0 0 220 220">
-                                <defs>
-                                    <marker id="cw-arrow" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto">
-                                        <path d="M0,1 L7,4 L0,7 Z" fill="#D4AF37"/>
-                                    </marker>
-                                </defs>
-                                <!-- 10°~50° 구간 시계방향 호 (火와 土 사이) -->
-                                <path d="M 129,17 A 95,95 0 0,1 181,58"
-                                      fill="none" stroke="#D4AF37" stroke-width="2.5"
-                                      marker-end="url(#cw-arrow)"/>
-                            </svg>
-
-                            <!-- 木 (나무) — 레이블 왼쪽에 배치 -->
-                            <div style="position: absolute; top: 38%; left: 0%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px; flex-direction: row-reverse;">
-                                <div style="width: 56px; height: 56px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(34,197,94,0.3); flex-shrink: 0;">木</div>
-                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); white-space: nowrap;">나무</span>
-                            </div>
-
-                            <!-- 火 (불) — 레이블 아래 -->
-                            <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                                <div style="width: 56px; height: 56px; background: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(239,68,68,0.3); margin: 0 auto 6px;">火</div>
-                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">불</span>
-                            </div>
-
-                            <!-- 土 (흙) — 레이블 오른쪽에 배치 -->
-                            <div style="position: absolute; top: 38%; left: 100%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px;">
-                                <div style="width: 56px; height: 56px; background: #eab308; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(234,179,8,0.3); flex-shrink: 0;">土</div>
-                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); white-space: nowrap;">흙</span>
-                            </div>
-
-                            <!-- 金 (쇠) — 레이블 아래 -->
-                            <div style="position: absolute; top: 90%; left: 80%; transform: translate(-50%, -50%); text-align: center;">
-                                <div style="width: 56px; height: 56px; background: #ffffff; border: 2px solid #cbd5e1; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: #0f172a; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin: 0 auto 6px;">金</div>
-                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">쇠</span>
-                            </div>
-
-                            <!-- 水 (물) — 레이블 아래 -->
-                            <div style="position: absolute; top: 90%; left: 20%; transform: translate(-50%, -50%); text-align: center;">
-                                <div style="width: 56px; height: 56px; background: #111111; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(17,17,17,0.3); margin: 0 auto 6px;">水</div>
-                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">물</span>
-                            </div>
-
-                            <!-- 중앙 텍스트 -->
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.85rem; color: var(--gold-dark); font-weight: 800; text-align: center; line-height: 1.4;">
-                                서로<br>도우며<br>순환
-                            </div>
-                        </div>
-                    </div>
+                <div class="theory-card-clean">
+                    <div class="tc-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+                    <div><span class="tc-sub">자원지정 작명의 핵심</span><h3>자원 오행</h3></div>
+                    <p>태어난 사주에서 부족한 기운(용신)을 찾아, 그 기운을 보완하는 한자 부수로 이름의 별대를 세움니다.</p>
                 </div>
 
-                <!-- 수리 사격 (중요도 2위, 넓게) + 발음 오행 -->
-                <div class="theory-row theory-row-3">
-                    <div class="theory-card" style="grid-column: span 2;">
-                        <div class="theory-header"><div class="theory-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div><div><h3>수리 사격</h3><span class="theory-subtitle">획수가 그리는 운세</span></div></div>
-                        <p>한자의 획수를 더해 원격(초년), 형격(청년), 이격(장년), 정격(말년)의 <b>4단계 시기별 대길(大吉) 운세</b>를 세팅합니다.</p>
-                        <div class="theory-example"><p class="example-label">예시 (김민수):</p><p>원격 15획 : 통솔격(吉)<br>형격 24획 : 입신격(吉)</p></div>
-                    </div>
-                    <div class="theory-card">
-                        <div class="theory-header"><div class="theory-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg></div><div><h3>발음 오행</h3><span class="theory-subtitle">이름 소리의 조화</span></div></div>
-                        <p>이름의 초성(ㄱ,ㄴ,ㄷ...)을 木·火·土·金·水 다섯 기운으로 분류하여 <b>상생 관계</b>(서로 돕는 부드러운 흐름)를 설계합니다.</p>
-                        <div class="theory-example"><p class="example-label">예시:</p><p>김(金) → 민(水) → 준(木)<br><span style="color: #16a34a; font-weight: 800;">✓ 金생水, 水生木 (상생 길격)</span></p></div>
-                    </div>
+                <div class="theory-card-clean">
+                    <div class="tc-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div>
+                    <div><span class="tc-sub">획수가 그리는 운세</span><h3>수리 사격</h3></div>
+                    <p>한자 획수의 합으로 초년·청년·장년·말년 4단계 시기별 운세를 설계합니다. 81수리 체계의 대길 획수 조합을 목표로 합니다.</p>
                 </div>
 
-                <!-- 보조 지표 3열: 발음 음양 + 수리 음양 + 수리 오행 -->
-                <div class="theory-row theory-row-3">
-                    <div class="theory-card">
-                        <div class="theory-header"><div class="theory-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></div><div><h3>발음 음양</h3><span class="theory-subtitle">소리의 균형</span></div></div>
-                        <p>모음의 소리를 양성(밝은 소리)과 음성(어두운 소리)으로 나누어, <b>음양이 적절히 혼합된</b> 균형 잡힌 성격을 유도합니다.</p>
-                        <div class="theory-example"><p class="example-label">분류:</p><p>양성: ㅏ,ㅗ,ㅑ,ㅛ (밝고 경쾌함)<br>음성: ㅓ,ㅜ,ㅕ,ㅠ,ㅡ,ㅣ (차분함)</p></div>
-                    </div>
-                    <div class="theory-card">
-                        <div class="theory-header"><div class="theory-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div><div><h3>수리 음양</h3><span class="theory-subtitle">획수의 음양 조화</span></div></div>
-                        <p>각 한자 획수의 <b>홀수(양)와 짝수(음)</b>가 모두 한쪽으로 치우치지 않도록 적절히 섞어 극단적인 흉운을 방지합니다.</p>
-                        <div class="theory-example"><p class="example-label">배합 예시:</p><p>김(8획/음) - 민(5획/양) - 수(6획/음)<br><span style="color: #16a34a; font-weight: 800;">✓ 음-양-음 완벽한 균형</span></p></div>
-                    </div>
-                    <div class="theory-card">
-                        <div class="theory-header"><div class="theory-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div><div><h3>수리 오행</h3><span class="theory-subtitle">획수가 만드는 운세의 상생</span></div></div>
-                        <p>이름의 중심운(형격)과 전체운(정격) 획수 끝자리를 오행으로 변환하여, 인생 전반의 운세가 서로 막힘없이 돕고 상생하는지 분석합니다.</p>
-                        <div class="theory-example"><p class="example-label">예시:</p><p>형격 24획(火) - 정격 31획(木)<br><span style="color: #16a34a; font-weight: 800;">✓ 木生火 (나무가 불을 돕는 길격)</span></p></div>
-                    </div>
+                <div class="theory-card-clean">
+                    <div class="tc-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg></div>
+                    <div><span class="tc-sub">이름 소리의 조화</span><h3>발음 오행</h3></div>
+                    <p>이름 초성을 木·火·土·金·水로 분류해 서로 돵는 상생 관계가 되도록 소리의 흐름을 설계합니다.</p>
+                </div>
+
+                <div class="theory-card-clean">
+                    <div class="tc-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></div>
+                    <div><span class="tc-sub">소리의 음양 균형</span><h3>발음 음양</h3></div>
+                    <p>모음을 양성(밝은 소리)과 음성(어두운 소리)으로 나눠 적절히 혼합되도록 설계해 균형 잡힌 성품을 유도합니다.</p>
+                </div>
+
+                <div class="theory-card-clean">
+                    <div class="tc-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
+                    <div><span class="tc-sub">획수의 음양 조화</span><h3>수리 음양</h3></div>
+                    <p>한자 획수의 홀수(양)·짝수(음)가 한쪽으로 치우치지 않도록 균형 있게 배합해 극단적인 흔운을 방지합니다.</p>
+                </div>
+
+                <div class="theory-card-clean">
+                    <div class="tc-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
+                    <div><span class="tc-sub">획수가 만드는 상생</span><h3>수리 오행</h3></div>
+                    <p>중심운·전체운 획수 끝자리를 오행으로 변환해, 인생 전반의 운세가 서로 막힌없이 상생하는지 분석합니다.</p>
                 </div>
 
             </div>
@@ -1670,7 +1616,7 @@
 
 <div id="theory-detail-view">
     <header class="report-header">
-        <div class="score-badge">디어네임 작명 과학</div>
+        <div class="score-badge">디어네임 작명 기준</div>
         <h1>정통 성명학 5대 핵심 이론 가이드</h1>
         <div class="meta-info">
             왕초보도 단숨에 이해할 수 있는, 아주 친절하고 깊이 있는 성명학 해설
