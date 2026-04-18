@@ -106,7 +106,8 @@
         }
         .logo { font-size: 1.3rem; font-weight: 900; color: var(--bg-dark); letter-spacing: 2px; text-decoration: none; cursor: pointer; }
         
-        .main-nav-links { display: flex; align-items: center; }
+        .main-nav-links { display: flex; align-items: center; flex-wrap: nowrap; }
+        #user-badge { align-self: center; }
         .main-nav-links a { text-decoration: none; color: var(--text-secondary); margin-left: 35px; font-weight: 600; font-size: 0.9rem; transition: 0.3s; letter-spacing: 0.5px; cursor: pointer; }
         .main-nav-links a:hover { color: var(--gold-premium); }
         .main-nav-links a.premium-link { color: var(--gold-premium); border: 1px solid var(--border-gold); padding: 8px 16px; border-radius: 30px; background: rgba(212, 175, 55, 0.05); }
@@ -1901,7 +1902,7 @@
         document.getElementById('mypage-view').style.display        = 'none';
         document.getElementById('main-view').style.display          = 'block';
         document.getElementById('report-nav').style.display         = 'none';
-        document.getElementById('main-nav').style.display           = 'block';
+        document.getElementById('main-nav').style.display           = 'flex';
     }
 
     function showReportViewWithoutLock() {
