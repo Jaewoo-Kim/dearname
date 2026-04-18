@@ -1040,12 +1040,10 @@
                         <p class="wizard-step-sub">성별, 생년월일, 태어난 시간과 지역을 정확히 입력할수록 정밀한 분석이 가능합니다.</p>
                         <div class="form-grid">
                             <div>
-                                <label class="input-label">성(姓) <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">— 한자까지 선택해주세요</span></label>
-                                <div style="display:flex;gap:10px;">
-                                    <input type="text" id="prem-last-name" placeholder="한글 (예: 김)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-last-name','prem-last-name-hanja')">
-                                    <select id="prem-last-name-hanja" style="flex:1;margin-bottom:0;">
-                                        <option value="">한자 선택</option>
-                                    </select>
+                                <label class="input-label">이름 형식</label>
+                                <div class="cal-pill-group">
+                                    <label class="cal-pill"><input type="radio" name="prem_name_type" value="2" checked><span class="cal-label">두 글자</span></label>
+                                    <label class="cal-pill"><input type="radio" name="prem_name_type" value="1"><span class="cal-label">외자</span></label>
                                 </div>
                             </div>
                             <div>
@@ -1055,25 +1053,48 @@
                                     <label class="cal-pill"><input type="radio" name="premium_gender" value="F"><span class="cal-label">여자</span></label>
                                 </div>
                             </div>
+                            <div>
+                                <label class="input-label">성(姓) <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">— 한글</span></label>
+                                <input type="text" id="prem-last-name" placeholder="예: 김" maxlength="1" onkeyup="updateHanjaSelect('prem-last-name','prem-last-name-hanja')">
+                            </div>
+                            <div>
+                                <label class="input-label">성(姓) <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">— 한자</span></label>
+                                <select id="prem-last-name-hanja">
+                                    <option value="">한자 선택</option>
+                                </select>
+                            </div>
                             <div class="full-width-form">
-                                <label class="input-label">생년월일 및 태어난 시간</label>
+                                <label class="input-label">출생 일시 및 지역</label>
                                 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                                    <input type="date" id="prem-birth-date" style="flex:1;min-width:140px;margin-bottom:0;" onchange="updateLunarLabel()">
-                                    <input type="time" id="prem-birth-time" style="flex:1;min-width:120px;margin-bottom:0;">
+                                    <input type="date" id="prem-birth-date" style="flex:2;min-width:160px;max-width:220px;margin-bottom:0;" onchange="updateLunarLabel()">
+                                    <input type="time" id="prem-birth-time" style="flex:1;min-width:110px;max-width:150px;margin-bottom:0;">
                                     <div class="cal-pill-group" style="flex:1.5;min-width:200px;">
                                         <label class="cal-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="cal-label">양력</span></label>
                                         <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
                                         <label class="cal-pill"><input type="radio" name="cal_type" value="leap" onchange="updateLunarLabel()"><span class="cal-label">윤달</span></label>
                                         <span id="lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
                                     </div>
+                                    <select id="prem-city" style="flex:1.5;min-width:155px;margin-bottom:0;">
+                                        <option value="">태어난 도시 (선택)</option>
+                                        <option value="서울">서울</option>
+                                        <option value="부산">부산</option>
+                                        <option value="인천">인천</option>
+                                        <option value="대구">대구</option>
+                                        <option value="대전">대전</option>
+                                        <option value="광주">광주</option>
+                                        <option value="울산">울산</option>
+                                        <option value="세종">세종</option>
+                                        <option value="수원">수원</option>
+                                        <option value="고양">고양</option>
+                                        <option value="청주">청주</option>
+                                        <option value="전주">전주</option>
+                                        <option value="창원">창원</option>
+                                        <option value="제주">제주</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div>
-                                <label class="input-label">태어난 도시 <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">— 정확한 사주 계산용</span></label>
-                                <input type="text" id="prem-city" placeholder="예: 서울특별시, 부산광역시">
-                            </div>
                         </div>
-                        <div class="wizard-nav">
+                        <div class="wizard-nav" style="margin-top:30px;">
                             <button type="button" class="wizard-btn-next" onclick="wizardNext(1)">다음 단계로 →</button>
                         </div>
                         <p class="wizard-step-hint">① 기본 정보 &nbsp;·&nbsp; 3단계 중 1단계</p>
