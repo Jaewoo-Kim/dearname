@@ -752,7 +752,7 @@
         .wizard-nav { display:flex; gap:12px; margin-top:44px; }
         .wizard-btn-prev { flex:1; padding:17px; background:var(--bg-light); border:1px solid var(--border-light); border-radius:14px; color:var(--text-secondary); font-size:0.97rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
         .wizard-btn-prev:hover { background:var(--bg-dark); color:white; }
-        .wizard-btn-next { flex:2; padding:17px; background:linear-gradient(135deg,var(--gold-dark),var(--gold-premium)); border:none; border-radius:14px; color:#1a1410; font-size:0.97rem; font-weight:800; cursor:pointer; transition:all 0.2s; letter-spacing:0.3px; }
+        .wizard-btn-next { flex:2; padding:17px; background:linear-gradient(135deg,var(--gold-dark),var(--gold-premium)); border:none; border-radius:14px; color:white; font-size:0.97rem; font-weight:800; cursor:pointer; transition:all 0.2s; letter-spacing:0.3px; }
         .wizard-btn-next:hover { opacity:0.9; transform:translateY(-1px); }
         .wizard-step-hint { font-size:0.78rem; color:var(--text-secondary); margin-top:10px; text-align:center; }
         .wizard-step-title { color:var(--bg-dark); font-size:1.25rem; font-weight:800; margin:0 0 6px; }
@@ -1097,9 +1097,8 @@
                             </div>
                         </div>
                         <div class="wizard-nav" style="margin-top:30px;">
-                            <button type="button" class="wizard-btn-next" onclick="wizardNext(1)">다음 단계로 →</button>
+                            <button type="button" class="wizard-btn-next" onclick="wizardNext(1)">다음 단계로</button>
                         </div>
-                        <p class="wizard-step-hint">① 기본 정보 &nbsp;·&nbsp; 3단계 중 1단계</p>
                     </div>
 
                     <!-- Step 2: 작명 방향 -->
@@ -1163,9 +1162,8 @@
                         </div>
                         <div class="wizard-nav">
                             <button type="button" class="wizard-btn-prev" onclick="wizardPrev(2)">← 이전</button>
-                            <button type="button" class="wizard-btn-next" onclick="wizardNext(2)">다음 단계로 →</button>
+                            <button type="button" class="wizard-btn-next" onclick="wizardNext(2)">다음 단계로</button>
                         </div>
-                        <p class="wizard-step-hint">② 작명 방향 &nbsp;·&nbsp; 3단계 중 2단계</p>
                     </div>
 
                     <!-- Step 3: 심층 분석 -->
@@ -1192,7 +1190,6 @@
                             <button type="button" class="wizard-btn-prev" onclick="wizardPrev(3)">← 이전</button>
                             <button type="button" class="wizard-btn-next" onclick="requestPremiumReport()" style="flex:3;">✦ 프리미엄 작명 의뢰하기</button>
                         </div>
-                        <p class="wizard-step-hint">③ 심층 분석 &nbsp;·&nbsp; 마지막 단계</p>
                     </div>
 
                 </form>
