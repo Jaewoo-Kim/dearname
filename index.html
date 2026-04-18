@@ -762,10 +762,10 @@
     <div class="nav-inner">
         <a onclick="showMainView()" class="logo">디어네임</a>
         <div class="main-nav-links" id="main-nav">
-            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('report').scrollIntoView();}, 100);">인생 리포트</a>
-            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('theory').scrollIntoView();}, 100);">작명 이론</a>
+            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('report').scrollIntoView();}, 100);">보고서 미리보기</a>
+            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('theory').scrollIntoView();}, 100);">이름의 과학</a>
             <a onclick="showMainView(); setTimeout(()=>{document.getElementById('self-naming').scrollIntoView();}, 100);">셀프 작명</a>
-            <a class="premium-link" onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 의뢰</a>
+            <a class="premium-link" onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 작명 의뢰</a>
             <a class="login-link" onclick="openLoginModal()">로그인</a>
             <div id="user-badge" style="display:none;align-items:center;gap:8px;cursor:pointer;margin-left:20px;" onclick="showMypageView()" title="마이페이지">
                 <img class="user-avatar" src="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:none;">
@@ -780,8 +780,9 @@
     
     <section class="bg-hero hero">
         <div class="section-inner">
+            <p style="font-size:0.8rem;font-weight:800;letter-spacing:3px;color:var(--gold-premium);text-transform:uppercase;margin-bottom:20px;">세상에서 가장 중요한 첫 번째 선물</p>
             <h1>이름은 아이가 평생 입을<br><span>가장 고귀한 의복</span>입니다</h1>
-            <p>단순한 통계나 난해한 한자 용어를 넘어,<br>아이의 전 생애를 축복하는 따뜻한 서사를 AI와 명리학으로 정교하게 설계합니다.</p>
+            <p>어떤 이름이 우리 아이에게 어울릴까요?<br>사주·한자·수리 6가지 기준으로 분석하고, 평생 복을 담은 이름을 찾아드립니다.</p>
         </div>
     </section>
     
@@ -796,8 +797,8 @@
 
     <section id="report" class="bg-white">
         <div class="section-inner">
-            <span class="section-tag">디어네임이 보는 좋은 이름</span>
-            <h2 class="section-title">난해한 용어가 아닌<br>이해하기 쉬운 한 편의 서사</h2>
+            <span class="section-tag">이런 보고서를 받게 됩니다</span>
+            <h2 class="section-title">어려운 한자 용어 없이,<br>부모님도 한눈에 이해되는 보고서</h2>
             <div class="core-report-box">
                 <div class="core-text-area">
                     <p>기존 작명 서비스의 불친절한 설명과 어려운 한자 용어 남발은 부모님들의 가장 큰 페인포인트입니다. 디어네임은 다릅니다.</p>
@@ -818,7 +819,7 @@
                         • <b>핵심 용신 :</b> 금(金), 수(水) 기운 필수 배치<br>
                         • <b>수리 길흉 :</b> 정격 31획(대성격) 최종 확정
                     </div>
-                    <a onclick="showReportViewWithoutLock()" class="btn btn-gold" style="display: block; text-decoration: none;">나윤이 프리미엄 리포트 예시 보기 &rarr;</a>
+                    <a onclick="showReportViewWithoutLock()" class="btn btn-gold" style="display: block; text-decoration: none;">예시 보고서 보기 &rarr;</a>
                 </div>
             </div>
         </div>
@@ -826,10 +827,10 @@
 
     <section id="theory" class="bg-gray">
         <div class="section-inner">
-            <span class="section-tag">작명 원리</span>
+            <span class="section-tag">좋은 이름에는 이유가 있습니다</span>
             <div class="title-flex-container">
-                <h2 class="section-title" style="margin-bottom: 0;">좋은 이름을 짓기 위한<br>6가지 핵심 성명학 이론</h2>
-                <button class="btn-outline-gold" onclick="showTheoryDetailView()">이론 가이드 자세히 보기 &rarr;</button>
+                <h2 class="section-title" style="margin-bottom: 0;">디어네임이 이름 하나에<br>담는 6가지 기준</h2>
+                <button class="btn-outline-gold" onclick="showTheoryDetailView()">이름 짓는 기준 더 알아보기 &rarr;</button>
             </div>
 
             <div class="theory-grid">
@@ -920,7 +921,7 @@
         <div class="section-inner">
             <div class="form-card">
                 <span class="section-tag">셀프 작명 진단</span>
-                <h3 style="font-size: 2rem; margin-bottom: 40px; font-weight: 800;">스마트 셀프 작명 진단</h3>
+                <h3 style="font-size: 2rem; margin-bottom: 40px; font-weight: 800;">우리 아이 이름, 점수가 몇 점일까요?</h3>
                 
                 <form id="naming-form" class="form-grid">
                     <div>
@@ -980,7 +981,7 @@
                         </div>
                     </div>
                     <div class="full-width-form" style="margin-top: 20px;">
-                        <button type="button" class="btn btn-navy" onclick="runAnalysis()">셀프 작명 분석하기</button>
+                        <button type="button" class="btn btn-navy" onclick="runAnalysis()">지금 바로 진단하기</button>
                     </div>
                 </form>
 
@@ -1002,7 +1003,7 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-gold" style="margin-top: 40px;" onclick="showSelfReportView()">보고서 전체 보기 &rarr;</button>
+                    <button type="button" class="btn btn-gold" style="margin-top: 40px;" onclick="showSelfReportView()">상세 보고서 보기 &rarr;</button>
                 </div>
             </div>
         </div>
@@ -1011,9 +1012,9 @@
     <section id="premium" class="bg-premium" style="padding-top: 100px; padding-bottom: 120px;">
         <div class="section-inner">
             <div style="text-align: center; margin-bottom: 60px;">
-                <span class="section-tag" style="color: var(--gold-premium); display: inline-block;">프리미엄 의뢰</span>
-                <h2 class="section-title" style="color: white; font-size: 2.8rem; margin-bottom: 20px;">AI 프리미엄 작명 의뢰하기</h2>
-                <p style="color: rgba(255,255,255,0.65); max-width: 600px; margin: 0 auto; font-size: 1.15rem;">데이터 기반의 객관적 분석을 넘어, 가문을 위한 철학과 아이의 사주 용신(用神)을 완벽히 조율한 하이엔드 작명 리포트를 제공합니다.</p>
+                <span class="section-tag" style="color: var(--gold-premium); display: inline-block;">프리미엄 작명 의뢰</span>
+                <h2 class="section-title" style="color: white; font-size: 2.8rem; margin-bottom: 20px;">아이의 사주에 꼭 맞는 이름,<br>직접 지어드립니다</h2>
+                <p style="color: rgba(255,255,255,0.65); max-width: 600px; margin: 0 auto; font-size: 1.15rem;">사주·한자·수리 6가지를 모두 충족하는 이름 후보를 분석하고, 왜 이 이름이 좋은지 알기 쉽게 설명해드립니다.</p>
             </div>
 
             <div class="form-card">
@@ -1037,8 +1038,8 @@
 
                     <!-- Step 1: 기본 정보 -->
                     <div class="wizard-step ws-active" id="wstep-1">
-                        <p class="wizard-step-title">아이의 기본 정보를 입력해주세요</p>
-                        <p class="wizard-step-sub">성별, 생년월일, 태어난 시간과 지역을 정확히 입력할수록 정밀한 분석이 가능합니다.</p>
+                        <p class="wizard-step-title">아이 정보를 알려주세요</p>
+                        <p class="wizard-step-sub">성별과 생년월일, 태어난 시간이 정확할수록 더 잘 맞는 이름을 찾을 수 있어요.</p>
                         <div class="form-grid">
                             <div>
                                 <label class="input-label">이름 형식</label>
@@ -1103,8 +1104,8 @@
 
                     <!-- Step 2: 작명 방향 -->
                     <div class="wizard-step" id="wstep-2">
-                        <p class="wizard-step-title">어떤 이름을 원하시나요?</p>
-                        <p class="wizard-step-sub">이름에 담고 싶은 기질을 선택해주세요. 복수 선택 가능합니다.</p>
+                        <p class="wizard-step-title">어떤 아이로 자라길 바라시나요?</p>
+                        <p class="wizard-step-sub">이름에 담고 싶은 기운을 골라주세요. 여러 개 선택 가능해요.</p>
                         <div class="form-grid">
                             <div class="full-width-form">
                                 <label class="input-label">이름에 담고 싶은 이미지 및 성향 (다중 선택)</label>
@@ -1169,8 +1170,8 @@
 
                     <!-- Step 3: 심층 분석 -->
                     <div class="wizard-step" id="wstep-3">
-                        <p class="wizard-step-title">이제 마지막 단계입니다! 🎉</p>
-                        <p class="wizard-step-sub">아래 항목은 모두 선택 사항입니다. 추가 정보가 있을수록 더 정밀한 보고서가 제공됩니다.</p>
+                        <p class="wizard-step-title">거의 다 됐어요! 🎉</p>
+                        <p class="wizard-step-sub">없어도 괜찮아요. 있으면 더 세밀하게 맞춰드립니다.</p>
                         <div class="form-grid">
                             <div class="full-width-form">
                                 <label class="input-label">
@@ -1189,7 +1190,7 @@
                         </div>
                         <div class="wizard-nav">
                             <button type="button" class="wizard-btn-prev" onclick="wizardPrev(3)">← 이전</button>
-                            <button type="button" class="wizard-btn-next" onclick="requestPremiumReport()" style="flex:3;">✦ AI 프리미엄 작명 의뢰하기</button>
+                            <button type="button" class="wizard-btn-next" onclick="requestPremiumReport()" style="flex:3;">✦ 프리미엄 작명 의뢰하기</button>
                         </div>
                         <p class="wizard-step-hint">③ 심층 분석 &nbsp;·&nbsp; 마지막 단계</p>
                     </div>
