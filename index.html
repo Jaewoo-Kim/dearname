@@ -895,28 +895,53 @@
                     </div>
                     
                     <div class="diagram-area">
-                        <h4 style="margin: 0 0 45px 0; font-size: 1.2rem; color: var(--bg-dark); font-weight: 800; text-align: center; letter-spacing: -0.5px;">오행의 상생 순환 (시계방향)</h4>
-                        <div style="position: relative; width: 220px; height: 220px; border: 2px dashed var(--gold-premium); border-radius: 50%; margin: 0 auto;">
-                            <div style="position: absolute; top: 38%; left: 0%; transform: translate(-50%, -50%); text-align: center;">
-                                <div style="width: 56px; height: 56px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(34,197,94,0.3); margin: 0 auto 6px;">木</div>
-                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">나무</span>
+                        <h4 style="margin: 0 0 45px 0; font-size: 1.2rem; color: var(--bg-dark); font-weight: 800; text-align: center; letter-spacing: -0.5px;">오행의 상생 순환</h4>
+                        <div style="position: relative; width: 220px; height: 220px; border: 2px dashed var(--gold-premium); border-radius: 50%; margin: 0 auto; overflow: visible;">
+
+                            <!-- SVG 시계방향 화살표 -->
+                            <svg style="position:absolute;top:0;left:0;width:220px;height:220px;overflow:visible;pointer-events:none;" viewBox="0 0 220 220">
+                                <defs>
+                                    <marker id="cw-arrow" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto">
+                                        <path d="M0,1 L7,4 L0,7 Z" fill="#D4AF37"/>
+                                    </marker>
+                                </defs>
+                                <!-- 10°~50° 구간 시계방향 호 (火와 土 사이) -->
+                                <path d="M 129,17 A 95,95 0 0,1 181,58"
+                                      fill="none" stroke="#D4AF37" stroke-width="2.5"
+                                      marker-end="url(#cw-arrow)"/>
+                            </svg>
+
+                            <!-- 木 (나무) — 레이블 왼쪽에 배치 -->
+                            <div style="position: absolute; top: 38%; left: 0%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px; flex-direction: row-reverse;">
+                                <div style="width: 56px; height: 56px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(34,197,94,0.3); flex-shrink: 0;">木</div>
+                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); white-space: nowrap;">나무</span>
                             </div>
+
+                            <!-- 火 (불) — 레이블 아래 -->
                             <div style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
                                 <div style="width: 56px; height: 56px; background: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(239,68,68,0.3); margin: 0 auto 6px;">火</div>
                                 <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">불</span>
                             </div>
-                            <div style="position: absolute; top: 38%; left: 100%; transform: translate(-50%, -50%); text-align: center;">
-                                <div style="width: 56px; height: 56px; background: #eab308; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(234,179,8,0.3); margin: 0 auto 6px;">土</div>
-                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">흙</span>
+
+                            <!-- 土 (흙) — 레이블 오른쪽에 배치 -->
+                            <div style="position: absolute; top: 38%; left: 100%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px;">
+                                <div style="width: 56px; height: 56px; background: #eab308; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(234,179,8,0.3); flex-shrink: 0;">土</div>
+                                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); white-space: nowrap;">흙</span>
                             </div>
+
+                            <!-- 金 (쇠) — 레이블 아래 -->
                             <div style="position: absolute; top: 90%; left: 80%; transform: translate(-50%, -50%); text-align: center;">
                                 <div style="width: 56px; height: 56px; background: #ffffff; border: 2px solid #cbd5e1; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: #0f172a; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin: 0 auto 6px;">金</div>
                                 <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">쇠</span>
                             </div>
+
+                            <!-- 水 (물) — 레이블 아래 -->
                             <div style="position: absolute; top: 90%; left: 20%; transform: translate(-50%, -50%); text-align: center;">
                                 <div style="width: 56px; height: 56px; background: #111111; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; color: white; box-shadow: 0 4px 10px rgba(17,17,17,0.3); margin: 0 auto 6px;">水</div>
                                 <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">물</span>
                             </div>
+
+                            <!-- 중앙 텍스트 -->
                             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.85rem; color: var(--gold-dark); font-weight: 800; text-align: center; line-height: 1.4;">
                                 서로<br>도우며<br>순환
                             </div>
