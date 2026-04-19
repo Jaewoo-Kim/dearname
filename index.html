@@ -2449,8 +2449,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         applyBadge('res-math-yin', data.mathYin.grade);
         document.getElementById('res-desc-math-yin').innerText = data.mathYin.desc;
         
-        applyBadge('res-saju-oheng', data.sajuOheng.grade);
-        document.getElementById('res-desc-saju-oheng').innerText = data.sajuOheng.desc;
+        if (document.getElementById('res-saju-oheng')) applyBadge('res-saju-oheng', data.sajuOheng.grade);
+        const _saohEl = document.getElementById('res-desc-saju-oheng');
+        if (_saohEl) _saohEl.innerText = data.sajuOheng.desc;
 
         applyBadge('res-jawonohaeng', data.jawonohaeng.grade);
         document.getElementById('res-desc-jawonohaeng').innerText = data.jawonohaeng.desc;
