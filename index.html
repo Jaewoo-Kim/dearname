@@ -241,7 +241,13 @@
         .input-label { display: block; font-size: 0.9rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 12px; }
         input, select, textarea { width: 100%; padding: 16px 20px; border: 1px solid var(--border-light); border-radius: 16px; font-size: 1.05rem; box-sizing: border-box; background: var(--bg-light); transition: all 0.3s ease; color: var(--text-primary); font-family: 'Pretendard', sans-serif;}
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold-premium); background: white; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
-        
+        .date-split-input { display:flex; align-items:center; background:var(--bg-light); border:1px solid var(--border-light); border-radius:16px; padding:0 8px; gap:0; box-sizing:border-box; transition:all 0.3s ease; }
+        .date-split-input:focus-within { border-color:var(--gold-premium); background:white; box-shadow:0 0 0 4px rgba(212,175,55,0.1); }
+        .date-split-input .date-part { width:auto !important; border:none !important; border-radius:0 !important; background:transparent !important; padding:15px 4px !important; box-shadow:none !important; font-size:1.05rem; color:var(--text-primary); font-family:'Pretendard',sans-serif; outline:none; }
+        .date-split-input .date-year { width:58px !important; text-align:center; }
+        .date-split-input .date-month, .date-split-input .date-day { width:48px !important; }
+        .date-split-input .date-sep { font-size:0.85rem; color:var(--text-secondary); user-select:none; padding:0 1px; }
+
         #hanja-selection-area { background: #fffcf5; border: 1px dashed var(--gold-premium); padding: 30px; border-radius: 20px; display: none; margin-bottom: 25px; margin-top: 10px; }
         .hanja-block { background: white; border: 1px solid var(--border-gold); padding: 20px; border-radius: 16px; flex: 1; text-align: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.05);}
         .hanja-block span { display: block; font-size: 1.4rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 15px; }
@@ -764,6 +770,25 @@
         .mp-sub-card { background:var(--bg-light); border-radius:16px; padding:20px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
         .mp-provider-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:20px; font-size:0.78rem; font-weight:700; background:#f1f5f9; color:#475569; }
 
+        /* ── 결제 내역 ── */
+        .mp-payment-row { display:flex; align-items:center; gap:14px; padding:16px 0; border-bottom:1px solid var(--border-light); }
+        .mp-payment-row:last-child { border-bottom:none; }
+        .mp-payment-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+        .mp-payment-icon.type-sub { background:linear-gradient(135deg,#f0fdf4,#dcfce7); }
+        .mp-payment-icon.type-ai  { background:linear-gradient(135deg,#fefce8,#fef9c3); }
+        .mp-payment-info { flex:1; min-width:0; }
+        .mp-payment-title { font-size:0.97rem; font-weight:800; color:var(--bg-dark); }
+        .mp-payment-meta  { font-size:0.78rem; color:var(--text-secondary); margin-top:3px; }
+        .mp-payment-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+        .mp-payment-amount { font-size:1rem; font-weight:800; color:var(--bg-dark); }
+        .mp-payment-status { font-size:0.73rem; font-weight:700; padding:3px 9px; border-radius:20px; }
+        .mp-status-done   { background:#f0fdf4; color:#16a34a; }
+        .mp-status-cancel { background:#fef2f2; color:#dc2626; }
+        .mp-status-refund { background:#f8fafc; color:#64748b; }
+        .mp-payment-type-badge { display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.5px; padding:2px 8px; border-radius:10px; margin-right:6px; vertical-align:middle; }
+        .mp-badge-sub { background:#dcfce7; color:#15803d; }
+        .mp-badge-ai  { background:#fef9c3; color:#a16207; }
+
         /* Wizard */
         .wizard-progress { display:flex; gap:16px; margin-bottom:44px; }
         .wizard-step-tab { flex:1; text-align:center; cursor:default; }
@@ -958,8 +983,22 @@
                     <div class="full-width-form">
                         <label class="input-label">출생 일시 및 지역</label>
                         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                            <input type="date" id="birth-date" style="flex:2; min-width:160px; max-width:220px;" onchange="updateSelfLunarLabel()">
-                            <input type="time" id="birth-time" style="flex:1; min-width:110px; max-width:150px;">
+                            <div class="date-split-input" style="flex:2; min-width:210px; max-width:270px;">
+                                <input type="hidden" id="birth-date">
+                                <input type="text" inputmode="numeric" maxlength="4" placeholder="연도" class="date-part date-year" id="birth-date-year">
+                                <span class="date-sep">년</span>
+                                <select class="date-part date-month" id="birth-date-month">
+                                    <option value="">월</option>
+                                    <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                </select>
+                                <span class="date-sep">월</span>
+                                <select class="date-part date-day" id="birth-date-day">
+                                    <option value="">일</option>
+                                    <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+                                </select>
+                                <span class="date-sep">일</span>
+                            </div>
+                            <input type="time" id="birth-time" style="flex:1.2; min-width:150px; max-width:185px;">
                             <div class="cal-pill-group">
                                 <label class="cal-pill"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"><span class="cal-label">양력</span></label>
                                 <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
@@ -1074,8 +1113,22 @@
                             <div class="full-width-form">
                                 <label class="input-label">출생 일시 및 지역</label>
                                 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                                    <input type="date" id="prem-birth-date" style="flex:2;min-width:160px;max-width:220px;margin-bottom:0;" onchange="updateLunarLabel()">
-                                    <input type="time" id="prem-birth-time" style="flex:1;min-width:110px;max-width:150px;margin-bottom:0;">
+                                    <div class="date-split-input" style="flex:2; min-width:210px; max-width:270px;">
+                                        <input type="hidden" id="prem-birth-date">
+                                        <input type="text" inputmode="numeric" maxlength="4" placeholder="연도" class="date-part date-year" id="prem-birth-date-year">
+                                        <span class="date-sep">년</span>
+                                        <select class="date-part date-month" id="prem-birth-date-month">
+                                            <option value="">월</option>
+                                            <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                        </select>
+                                        <span class="date-sep">월</span>
+                                        <select class="date-part date-day" id="prem-birth-date-day">
+                                            <option value="">일</option>
+                                            <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+                                        </select>
+                                        <span class="date-sep">일</span>
+                                    </div>
+                                    <input type="time" id="prem-birth-time" style="flex:1.2;min-width:150px;max-width:185px;margin-bottom:0;">
                                     <div class="cal-pill-group" style="flex:1.5;min-width:200px;">
                                         <label class="cal-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="cal-label">양력</span></label>
                                         <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
@@ -4091,7 +4144,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // 저장된 데이터로 셀프 보고서 복원
         _showToast('보고서를 불러오는 중...');
         // 폼 값 복원 후 뷰 전환
-        if (entry.birthDate) document.getElementById('birth-date').value = entry.birthDate;
+        if (entry.birthDate) _setDateFields('birth-date', entry.birthDate);
         if (entry.birthTime) document.getElementById('birth-time').value = entry.birthTime;
         setTimeout(showSelfReportViewDirect, 100);
     }
@@ -4146,8 +4199,51 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function _renderMypagePayments() {
         const el = document.getElementById('mypage-payments');
         if (!el) return;
-        // 플레이스홀더 — 결제 연동 후 실데이터로 교체
-        el.innerHTML = `<div class="mp-empty">결제 내역이 없습니다.<br><span style="font-size:0.82rem;">결제 연동 후 자동으로 표시됩니다.</span></div>`;
+
+        // 결제 내역 데이터: localStorage 또는 서버 연동 시 교체
+        const payments = _getPayments();
+
+        if (!payments.length) {
+            el.innerHTML = `<div class="mp-empty">결제 내역이 없습니다.<br><span style="font-size:0.82rem;">결제 후 자동으로 표시됩니다.</span></div>`;
+            return;
+        }
+
+        el.innerHTML = payments.map(p => {
+            const date   = p.paidAt ? new Date(p.paidAt).toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'}) : '';
+            const amount = Number(p.amount).toLocaleString('ko-KR') + '원';
+            const statusClass = p.status === 'done' ? 'mp-status-done' : p.status === 'cancel' ? 'mp-status-cancel' : 'mp-status-refund';
+            const statusLabel = p.status === 'done' ? '결제 완료' : p.status === 'cancel' ? '취소됨' : '환불';
+            const isAI = p.type === 'ai';
+            return `
+            <div class="mp-payment-row">
+                <div class="mp-payment-icon ${isAI ? 'type-ai' : 'type-sub'}">${isAI ? '✦' : '♾'}</div>
+                <div class="mp-payment-info">
+                    <div class="mp-payment-title">
+                        <span class="mp-payment-type-badge ${isAI ? 'mp-badge-ai' : 'mp-badge-sub'}">${isAI ? 'AI작명' : '멤버십'}</span>${p.label}
+                    </div>
+                    <div class="mp-payment-meta">${date}${p.desc ? ' · ' + p.desc : ''}</div>
+                </div>
+                <div class="mp-payment-right">
+                    <span class="mp-payment-amount">${amount}</span>
+                    <span class="mp-payment-status ${statusClass}">${statusLabel}</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function _getPayments() {
+        // 실 결제 연동 전 데모 데이터 — 연동 후 서버 데이터로 교체
+        try {
+            const stored = localStorage.getItem('dn_payments');
+            if (stored) return JSON.parse(stored);
+        } catch(e) {}
+        // 데모용 샘플 (로그인 상태일 때만 표시)
+        if (!_dnUser) return [];
+        return [
+            { id:'demo1', type:'sub',  label:'셀프작명 이용권 1개월', desc:'월간 구독', amount:9900,  status:'done',   paidAt: Date.now() - 86400000 * 2 },
+            { id:'demo2', type:'ai',   label:'AI 프리미엄 작명 의뢰', desc:'이도윤 외 4후보', amount:49000, status:'done', paidAt: Date.now() - 86400000 * 10 },
+            { id:'demo3', type:'sub',  label:'셀프작명 이용권 1개월', desc:'월간 구독',  amount:9900,  status:'done',   paidAt: Date.now() - 86400000 * 33 },
+        ];
     }
 
     function _openSavedReport(id) {
@@ -4766,6 +4862,50 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (input) input.value = btn.textContent.trim();
         sendChatMessage();
     }
+
+    // 날짜 분리 입력 동기화
+    function _syncDateVal(baseId, onChangeCb) {
+        const year  = document.getElementById(baseId + '-year')?.value  || '';
+        const month = document.getElementById(baseId + '-month')?.value || '';
+        const day   = document.getElementById(baseId + '-day')?.value   || '';
+        const hidden = document.getElementById(baseId);
+        if (!hidden) return;
+        hidden.value = (year.length === 4 && month && day) ? `${year}-${month}-${day}` : '';
+        if (onChangeCb) onChangeCb();
+    }
+    function _setDateFields(baseId, dateStr) {
+        if (!dateStr) return;
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return;
+        const yearEl  = document.getElementById(baseId + '-year');
+        const monthEl = document.getElementById(baseId + '-month');
+        const dayEl   = document.getElementById(baseId + '-day');
+        const hidden  = document.getElementById(baseId);
+        if (yearEl)  yearEl.value  = parts[0];
+        if (monthEl) monthEl.value = parts[1];
+        if (dayEl)   dayEl.value   = parts[2];
+        if (hidden)  hidden.value  = dateStr;
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const dateConfigs = [
+            { base: 'birth-date',      cb: () => typeof updateSelfLunarLabel === 'function' && updateSelfLunarLabel() },
+            { base: 'prem-birth-date', cb: () => typeof updateLunarLabel      === 'function' && updateLunarLabel()      },
+        ];
+        dateConfigs.forEach(({ base, cb }) => {
+            const yearEl  = document.getElementById(base + '-year');
+            const monthEl = document.getElementById(base + '-month');
+            const dayEl   = document.getElementById(base + '-day');
+            if (yearEl) {
+                yearEl.addEventListener('input', () => {
+                    if (yearEl.value.length > 4) yearEl.value = yearEl.value.slice(0, 4);
+                    _syncDateVal(base, cb);
+                });
+            }
+            [monthEl, dayEl].forEach(el => {
+                if (el) el.addEventListener('change', () => _syncDateVal(base, cb));
+            });
+        });
+    });
 
     // textarea 자동 높이 조절 + Enter 전송
     document.addEventListener('DOMContentLoaded', () => {
