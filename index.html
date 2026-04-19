@@ -247,6 +247,23 @@
         .date-split-input .date-year { width:58px !important; text-align:center; }
         .date-split-input .date-month, .date-split-input .date-day { width:48px !important; }
         .date-split-input .date-sep { font-size:0.85rem; color:var(--text-secondary); user-select:none; padding:0 1px; }
+        /* 시간 AM/PM 피커 */
+        .time-split-input { display:flex; align-items:center; background:var(--bg-light); border:1px solid var(--border-light); border-radius:16px; padding:0 8px; gap:2px; box-sizing:border-box; transition:all 0.3s ease; }
+        .time-split-input:focus-within { border-color:var(--gold-premium); background:white; box-shadow:0 0 0 4px rgba(212,175,55,0.1); }
+        .time-split-input .date-part { width:auto !important; border:none !important; border-radius:0 !important; background:transparent !important; padding:15px 4px !important; box-shadow:none !important; font-size:1.05rem; color:var(--text-primary); font-family:'Pretendard',sans-serif; outline:none; }
+        .time-split-input .time-hour, .time-split-input .time-min { width:42px !important; }
+        .ampm-group { display:flex; gap:2px; margin-right:2px; }
+        .ampm-pill { position:relative; cursor:pointer; }
+        .ampm-pill input { position:absolute; opacity:0; cursor:pointer; height:0; width:0; }
+        .ampm-pill span { display:inline-flex; align-items:center; padding:5px 7px; font-size:0.78rem; font-weight:700; color:var(--text-secondary); border-radius:8px; transition:all 0.2s; white-space:nowrap; }
+        .ampm-pill input:checked ~ span { background:var(--gold-premium); color:white; }
+        /* 윤달 서브 옵션 */
+        .cal-lunar-group { display:flex; flex-direction:column; gap:4px; align-items:flex-start; }
+        .cal-sub-pill { position:relative; cursor:pointer; }
+        .cal-sub-pill input[type="checkbox"] { position:absolute; opacity:0; cursor:pointer; height:0; width:0; }
+        .cal-sub-label { display:inline-flex; align-items:center; padding:4px 10px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:12px; color:var(--text-secondary); font-size:0.75rem; font-weight:700; transition:all 0.2s; user-select:none; margin-left:8px; }
+        .cal-sub-pill:hover .cal-sub-label { background:#e2e8f0; }
+        .cal-sub-pill input:checked ~ .cal-sub-label { background:#fff8e6; border-color:var(--gold-dark); color:var(--gold-dark); }
 
         #hanja-selection-area { background: #fffcf5; border: 1px dashed var(--gold-premium); padding: 30px; border-radius: 20px; display: none; margin-bottom: 25px; margin-top: 10px; }
         .hanja-block { background: white; border: 1px solid var(--border-gold); padding: 20px; border-radius: 16px; flex: 1; text-align: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.05);}
@@ -951,7 +968,8 @@
         <div class="section-inner">
             <div class="form-card">
                 <span class="section-tag">셀프 작명</span>
-                <h3 style="font-size: 2rem; margin-bottom: 40px; font-weight: 800;">우리 아이 이름을 직접 지어보아요.</h3>
+                <h3 style="font-size: 2rem; margin-bottom: 12px; font-weight: 800;">우리 아이 이름을 직접 지어보아요.</h3>
+                <p style="font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.7;">마음에 두고 있는 이름이 있으신가요?<br>한글 이름을 입력하면, 성명학 6가지 기준으로 즉시 분석해드립니다.</p>
                 
                 <form id="naming-form" class="form-grid">
                     <div>
@@ -988,21 +1006,42 @@
                                 <input type="text" inputmode="numeric" maxlength="4" placeholder="연도" class="date-part date-year" id="birth-date-year">
                                 <span class="date-sep">년</span>
                                 <select class="date-part date-month" id="birth-date-month">
-                                    <option value="">월</option>
+                                    <option value=""></option>
                                     <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
                                 </select>
                                 <span class="date-sep">월</span>
                                 <select class="date-part date-day" id="birth-date-day">
-                                    <option value="">일</option>
+                                    <option value=""></option>
                                     <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
                                 </select>
                                 <span class="date-sep">일</span>
                             </div>
-                            <input type="time" id="birth-time" style="flex:1.2; min-width:150px; max-width:185px;">
-                            <div class="cal-pill-group">
+                            <div class="time-split-input" style="flex:1.5; min-width:200px; max-width:245px;">
+                                <input type="hidden" id="birth-time">
+                                <div class="ampm-group">
+                                    <label class="ampm-pill"><input type="radio" name="birth-ampm" value="am" checked><span>오전</span></label>
+                                    <label class="ampm-pill"><input type="radio" name="birth-ampm" value="pm"><span>오후</span></label>
+                                </div>
+                                <select class="date-part time-hour" id="birth-time-hour">
+                                    <option value=""></option>
+                                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                </select>
+                                <span class="date-sep">시</span>
+                                <select class="date-part time-min" id="birth-time-min">
+                                    <option value=""></option>
+                                    <option value="00">00</option><option value="05">05</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option>
+                                </select>
+                                <span class="date-sep">분</span>
+                            </div>
+                            <div class="cal-pill-group" style="align-items:flex-start;">
                                 <label class="cal-pill"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"><span class="cal-label">양력</span></label>
-                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
-                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="leap" onchange="updateSelfLunarLabel()"><span class="cal-label">윤달</span></label>
+                                <div class="cal-lunar-group">
+                                    <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
+                                    <label class="cal-sub-pill" id="self-leap-label" style="display:none;">
+                                        <input type="checkbox" id="self-leap-check" onchange="updateSelfLunarLabel()">
+                                        <span class="cal-sub-label">윤달</span>
+                                    </label>
+                                </div>
                             </div>
                             <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;align-self:center;"></span>
                             <select id="birth-location" style="flex:1.5; min-width:155px;">
@@ -1118,21 +1157,42 @@
                                         <input type="text" inputmode="numeric" maxlength="4" placeholder="연도" class="date-part date-year" id="prem-birth-date-year">
                                         <span class="date-sep">년</span>
                                         <select class="date-part date-month" id="prem-birth-date-month">
-                                            <option value="">월</option>
+                                            <option value=""></option>
                                             <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
                                         </select>
                                         <span class="date-sep">월</span>
                                         <select class="date-part date-day" id="prem-birth-date-day">
-                                            <option value="">일</option>
+                                            <option value=""></option>
                                             <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
                                         </select>
                                         <span class="date-sep">일</span>
                                     </div>
-                                    <input type="time" id="prem-birth-time" style="flex:1.2;min-width:150px;max-width:185px;margin-bottom:0;">
-                                    <div class="cal-pill-group" style="flex:1.5;min-width:200px;">
+                                    <div class="time-split-input" style="flex:1.5; min-width:200px; max-width:245px; margin-bottom:0;">
+                                        <input type="hidden" id="prem-birth-time">
+                                        <div class="ampm-group">
+                                            <label class="ampm-pill"><input type="radio" name="prem-ampm" value="am" checked><span>오전</span></label>
+                                            <label class="ampm-pill"><input type="radio" name="prem-ampm" value="pm"><span>오후</span></label>
+                                        </div>
+                                        <select class="date-part time-hour" id="prem-time-hour">
+                                            <option value=""></option>
+                                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                        </select>
+                                        <span class="date-sep">시</span>
+                                        <select class="date-part time-min" id="prem-time-min">
+                                            <option value=""></option>
+                                            <option value="00">00</option><option value="05">05</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option>
+                                        </select>
+                                        <span class="date-sep">분</span>
+                                    </div>
+                                    <div class="cal-pill-group" style="flex:1.5;min-width:160px;align-items:flex-start;">
                                         <label class="cal-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="cal-label">양력</span></label>
-                                        <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
-                                        <label class="cal-pill"><input type="radio" name="cal_type" value="leap" onchange="updateLunarLabel()"><span class="cal-label">윤달</span></label>
+                                        <div class="cal-lunar-group">
+                                            <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
+                                            <label class="cal-sub-pill" id="prem-leap-label" style="display:none;">
+                                                <input type="checkbox" id="prem-leap-check" onchange="updateLunarLabel()">
+                                                <span class="cal-sub-label">윤달</span>
+                                            </label>
+                                        </div>
                                         <span id="lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
                                     </div>
                                     <select id="prem-city" style="flex:1.5;min-width:155px;margin-bottom:0;">
@@ -2371,7 +2431,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
            ---------------------------------------------------- */
         const _birthDateRaw = document.getElementById('birth-date')?.value || '';
         const birthTimeVal  = document.getElementById('birth-time')?.value || '12:00';
-        const _selfCalType  = document.querySelector('[name="self_cal_type"]:checked')?.value || 'solar';
+        const _selfCalType  = _getCalType('self');
         const birthDateVal  = (_selfCalType !== 'solar' && typeof normalizeToSolar === 'function')
             ? (normalizeToSolar(_birthDateRaw, _selfCalType) || _birthDateRaw)
             : _birthDateRaw;
@@ -2917,7 +2977,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function _buildSearchState() {
         const birthDateRaw = document.getElementById('prem-birth-date')?.value || '';
         const birthTime    = document.getElementById('prem-birth-time')?.value || '12:00';
-        const calType      = document.querySelector('[name="cal_type"]:checked')?.value || 'solar';
+        const calType      = _getCalType('prem');
 
         // 음력/윤달이면 양력으로 변환
         const birthDate = (calType !== 'solar' && typeof normalizeToSolar === 'function')
@@ -3701,7 +3761,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         section.style.display = 'block';
 
         // 메타 라벨
-        const calType = document.querySelector('[name="self_cal_type"]:checked')?.value || 'solar';
+        const calType = _getCalType('self');
         const calLabel = calType === 'solar' ? '양력' : calType === 'lunar' ? '음력' : '음력(윤달)';
         const gLabel   = gender === '남자' ? '남' : '여';
         const metaEl = document.getElementById('self-saju-meta-label');
@@ -4146,7 +4206,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         _showToast('보고서를 불러오는 중...');
         // 폼 값 복원 후 뷰 전환
         if (entry.birthDate) _setDateFields('birth-date', entry.birthDate);
-        if (entry.birthTime) document.getElementById('birth-time').value = entry.birthTime;
+        if (entry.birthTime) _setTimeFields('birth', entry.birthTime);
         setTimeout(showSelfReportViewDirect, 100);
     }
 
@@ -4334,7 +4394,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const label   = document.getElementById('self-lunar-label');
         if (!label) return;
         const dateVal = document.getElementById('birth-date')?.value;
-        const calType = document.querySelector('[name="self_cal_type"]:checked')?.value || 'solar';
+        const calType = _getCalType('self');
 
         if (calType === 'solar' || !dateVal) {
             label.style.display = 'none'; return;
@@ -4536,7 +4596,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (!label) return;
 
         const dateVal = document.getElementById('prem-birth-date')?.value;
-        const calType = document.querySelector('[name="cal_type"]:checked')?.value || 'solar';
+        const calType = _getCalType('prem');
 
         if (calType === 'solar' || !dateVal) {
             label.style.display = 'none';
@@ -4565,7 +4625,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function validatePremiumForm() {
         const familyKr  = document.getElementById('prem-last-name')?.value.trim();
         const birthDate = document.getElementById('prem-birth-date')?.value;
-        const calType   = document.querySelector('[name="cal_type"]:checked')?.value || 'solar';
+        const calType   = _getCalType('prem');
 
         if (!familyKr) { alert('성(姓)을 입력해주세요.'); return false; }
         if (!birthDate) { alert('출생일을 입력해주세요.'); return false; }
@@ -4864,6 +4924,46 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         sendChatMessage();
     }
 
+    // 양력/음력/윤달 타입 반환 (윤달은 음력 라디오 + 체크박스 조합)
+    function _getCalType(prefix) {
+        const name = prefix === 'prem' ? 'cal_type' : 'self_cal_type';
+        const base = document.querySelector(`[name="${name}"]:checked`)?.value || 'solar';
+        if (base === 'lunar') {
+            const leapId = prefix === 'prem' ? 'prem-leap-check' : 'self-leap-check';
+            if (document.getElementById(leapId)?.checked) return 'leap';
+        }
+        return base;
+    }
+    // 시간 분리 입력 동기화 (24h hidden input으로 변환)
+    function _syncTimeVal(prefix) {
+        const ampmName = prefix === 'prem' ? 'prem-ampm' : 'birth-ampm';
+        const ampm     = document.querySelector(`[name="${ampmName}"]:checked`)?.value || 'am';
+        const hourEl   = document.getElementById(prefix === 'prem' ? 'prem-time-hour'  : 'birth-time-hour');
+        const minEl    = document.getElementById(prefix === 'prem' ? 'prem-time-min'   : 'birth-time-min');
+        const hidden   = document.getElementById(prefix === 'prem' ? 'prem-birth-time' : 'birth-time');
+        if (!hidden || !hourEl?.value || minEl?.value === '') { if (hidden) hidden.value = ''; return; }
+        let h = parseInt(hourEl.value);
+        if (ampm === 'am' && h === 12) h = 0;
+        if (ampm === 'pm' && h !== 12) h += 12;
+        hidden.value = `${String(h).padStart(2,'0')}:${minEl.value}`;
+    }
+    function _setTimeFields(prefix, timeStr) {
+        if (!timeStr) return;
+        const [hStr, mStr] = timeStr.split(':');
+        let h = parseInt(hStr);
+        const ampm = h < 12 ? 'am' : 'pm';
+        if (h === 0) h = 12; else if (h > 12) h -= 12;
+        const ampmName = prefix === 'prem' ? 'prem-ampm' : 'birth-ampm';
+        const ampmEl   = document.querySelector(`[name="${ampmName}"][value="${ampm}"]`);
+        const hourEl   = document.getElementById(prefix === 'prem' ? 'prem-time-hour'  : 'birth-time-hour');
+        const minEl    = document.getElementById(prefix === 'prem' ? 'prem-time-min'   : 'birth-time-min');
+        const hidden   = document.getElementById(prefix === 'prem' ? 'prem-birth-time' : 'birth-time');
+        if (ampmEl)  ampmEl.checked  = true;
+        if (hourEl)  hourEl.value    = String(h);
+        if (minEl)   minEl.value     = mStr;
+        if (hidden)  hidden.value    = timeStr;
+    }
+
     // 날짜 분리 입력 동기화
     function _syncDateVal(baseId, onChangeCb) {
         const year  = document.getElementById(baseId + '-year')?.value  || '';
@@ -4904,6 +5004,34 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             }
             [monthEl, dayEl].forEach(el => {
                 if (el) el.addEventListener('change', () => _syncDateVal(base, cb));
+            });
+        });
+
+        // 시간 피커 이벤트 (self / prem)
+        ['birth', 'prem'].forEach(prefix => {
+            const ampmName = prefix === 'prem' ? 'prem-ampm' : 'birth-ampm';
+            const hourId   = prefix === 'prem' ? 'prem-time-hour' : 'birth-time-hour';
+            const minId    = prefix === 'prem' ? 'prem-time-min'  : 'birth-time-min';
+            document.querySelectorAll(`[name="${ampmName}"]`).forEach(el => {
+                el.addEventListener('change', () => _syncTimeVal(prefix));
+            });
+            [hourId, minId].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', () => _syncTimeVal(prefix));
+            });
+        });
+
+        // 윤달 서브 옵션: 음력 선택 시 표시, 타 선택 시 숨김
+        [{ name: 'self_cal_type', leapLabel: 'self-leap-label', leapCheck: 'self-leap-check' },
+         { name: 'cal_type',      leapLabel: 'prem-leap-label', leapCheck: 'prem-leap-check' }]
+        .forEach(({ name, leapLabel, leapCheck }) => {
+            document.querySelectorAll(`[name="${name}"]`).forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const lbl = document.getElementById(leapLabel);
+                    const chk = document.getElementById(leapCheck);
+                    if (lbl) lbl.style.display = this.value === 'lunar' ? '' : 'none';
+                    if (this.value !== 'lunar' && chk) chk.checked = false;
+                });
             });
         });
     });
