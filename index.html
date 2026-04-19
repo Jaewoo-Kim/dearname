@@ -1009,7 +1009,7 @@
                     <div class="full-width-form">
                         <label class="input-label">출생 일시 및 지역</label>
                         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                            <div class="date-split-input" style="flex:0 0 auto; width:235px;">
+                            <div class="date-split-input" style="flex:0 0 auto; width:240px;">
                                 <input type="hidden" id="birth-date">
                                 <input type="text" inputmode="numeric" maxlength="4" placeholder="YYYY" class="date-part date-year" id="birth-date-year">
                                 <span class="date-sep">년</span>
@@ -1018,26 +1018,24 @@
                                 <input type="text" inputmode="numeric" maxlength="2" placeholder="DD" class="date-part date-day" id="birth-date-day" list="dl-day">
                                 <span class="date-sep">일</span>
                             </div>
-                            <div class="time-split-input" style="flex:1; min-width:245px; max-width:280px;">
+                            <div class="time-split-input" style="flex:0 0 auto; width:235px;">
                                 <input type="hidden" id="birth-time">
                                 <div class="ampm-group">
                                     <label class="ampm-pill"><input type="radio" name="birth-ampm" value="am" checked><span>오전</span></label>
                                     <label class="ampm-pill"><input type="radio" name="birth-ampm" value="pm"><span>오후</span></label>
                                 </div>
-                                <input type="text" inputmode="numeric" maxlength="2" placeholder="시" class="date-part time-hour" id="birth-time-hour" list="dl-hour">
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="date-part time-hour" id="birth-time-hour" list="dl-hour">
                                 <span class="date-sep">시</span>
-                                <input type="text" inputmode="numeric" maxlength="2" placeholder="분" class="date-part time-min" id="birth-time-min" list="dl-min">
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="date-part time-min" id="birth-time-min" list="dl-min">
                                 <span class="date-sep">분</span>
                             </div>
-                            <div class="cal-pill-group" style="align-items:flex-start;">
+                            <div class="cal-pill-group">
                                 <label class="cal-pill"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"><span class="cal-label">양력</span></label>
-                                <div class="cal-lunar-group">
-                                    <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
-                                    <label class="cal-sub-pill" id="self-leap-label" style="display:none;">
-                                        <input type="checkbox" id="self-leap-check" onchange="updateSelfLunarLabel()">
-                                        <span class="cal-sub-label">윤달</span>
-                                    </label>
-                                </div>
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
+                                <label class="cal-sub-pill" id="self-leap-label" style="display:none;">
+                                    <input type="checkbox" id="self-leap-check" onchange="updateSelfLunarLabel()">
+                                    <span class="cal-sub-label">윤달</span>
+                                </label>
                             </div>
                             <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;align-self:center;"></span>
                             <select id="birth-location" style="flex:1; min-width:140px; max-width:180px;">
@@ -1157,26 +1155,24 @@
                                         <input type="text" inputmode="numeric" maxlength="2" placeholder="DD" class="date-part date-day" id="prem-birth-date-day" list="dl-day">
                                         <span class="date-sep">일</span>
                                     </div>
-                                    <div class="time-split-input" style="flex:1.5; min-width:200px; max-width:245px; margin-bottom:0;">
+                                    <div class="time-split-input" style="flex:0 0 auto; width:235px; margin-bottom:0;">
                                         <input type="hidden" id="prem-birth-time">
                                         <div class="ampm-group">
                                             <label class="ampm-pill"><input type="radio" name="prem-ampm" value="am" checked><span>오전</span></label>
                                             <label class="ampm-pill"><input type="radio" name="prem-ampm" value="pm"><span>오후</span></label>
                                         </div>
-                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="시" class="date-part time-hour" id="prem-time-hour" list="dl-hour">
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="date-part time-hour" id="prem-time-hour" list="dl-hour">
                                         <span class="date-sep">시</span>
-                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="분" class="date-part time-min" id="prem-time-min" list="dl-min">
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="date-part time-min" id="prem-time-min" list="dl-min">
                                         <span class="date-sep">분</span>
                                     </div>
                                     <div class="cal-pill-group" style="flex:1.5;min-width:160px;align-items:flex-start;">
                                         <label class="cal-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="cal-label">양력</span></label>
-                                        <div class="cal-lunar-group">
-                                            <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
-                                            <label class="cal-sub-pill" id="prem-leap-label" style="display:none;">
-                                                <input type="checkbox" id="prem-leap-check" onchange="updateLunarLabel()">
-                                                <span class="cal-sub-label">윤달</span>
-                                            </label>
-                                        </div>
+                                        <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
+                                        <label class="cal-sub-pill" id="prem-leap-label" style="display:none;">
+                                            <input type="checkbox" id="prem-leap-check" onchange="updateLunarLabel()">
+                                            <span class="cal-sub-label">윤달</span>
+                                        </label>
                                         <span id="lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
                                     </div>
                                     <select id="prem-city" style="flex:1;min-width:140px;max-width:180px;margin-bottom:0;">
