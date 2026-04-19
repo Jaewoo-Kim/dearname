@@ -243,19 +243,21 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold-premium); background: white; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
         .date-split-input { display:flex; align-items:center; background:var(--bg-light); border:1px solid var(--border-light); border-radius:16px; padding:0 8px; gap:0; box-sizing:border-box; transition:all 0.3s ease; }
         .date-split-input:focus-within { border-color:var(--gold-premium); background:white; box-shadow:0 0 0 4px rgba(212,175,55,0.1); }
-        .date-split-input .date-part { width:auto !important; border:none !important; border-radius:0 !important; background:transparent !important; padding:15px 4px !important; box-shadow:none !important; font-size:1.05rem; color:var(--text-primary); font-family:'Pretendard',sans-serif; outline:none; }
-        .date-split-input .date-year { width:58px !important; text-align:center; }
-        .date-split-input .date-month, .date-split-input .date-day { width:48px !important; }
-        .date-split-input .date-sep { font-size:0.85rem; color:var(--text-secondary); user-select:none; padding:0 1px; }
+        .date-split-input .date-part { width:auto !important; border:none !important; border-radius:0 !important; background:transparent !important; padding:15px 4px !important; box-shadow:none !important; font-size:1rem; color:var(--text-primary); font-family:'Pretendard',sans-serif; outline:none; }
+        .date-split-input .date-part::placeholder { font-size:0.78rem; color:#bbb; letter-spacing:0.5px; }
+        .date-split-input .date-year { width:52px !important; text-align:center; }
+        .date-split-input .date-month, .date-split-input .date-day { width:38px !important; text-align:center; }
+        .date-split-input .date-sep { font-size:0.9rem; color:var(--text-secondary); user-select:none; padding:0 1px; }
         /* 시간 AM/PM 피커 */
         .time-split-input { display:flex; align-items:center; background:var(--bg-light); border:1px solid var(--border-light); border-radius:16px; padding:0 8px; gap:2px; box-sizing:border-box; transition:all 0.3s ease; }
         .time-split-input:focus-within { border-color:var(--gold-premium); background:white; box-shadow:0 0 0 4px rgba(212,175,55,0.1); }
-        .time-split-input .date-part { width:auto !important; border:none !important; border-radius:0 !important; background:transparent !important; padding:15px 4px !important; box-shadow:none !important; font-size:1.05rem; color:var(--text-primary); font-family:'Pretendard',sans-serif; outline:none; }
-        .time-split-input .time-hour, .time-split-input .time-min { width:42px !important; }
+        .time-split-input .date-part { width:auto !important; border:none !important; border-radius:0 !important; background:transparent !important; padding:15px 4px !important; box-shadow:none !important; font-size:1rem; color:var(--text-primary); font-family:'Pretendard',sans-serif; outline:none; }
+        .time-split-input .date-part::placeholder { font-size:0.78rem; color:#bbb; }
+        .time-split-input .time-hour, .time-split-input .time-min { width:36px !important; text-align:center; }
         .ampm-group { display:flex; gap:2px; margin-right:2px; }
         .ampm-pill { position:relative; cursor:pointer; }
         .ampm-pill input { position:absolute; opacity:0; cursor:pointer; height:0; width:0; }
-        .ampm-pill span { display:inline-flex; align-items:center; padding:5px 7px; font-size:0.78rem; font-weight:700; color:var(--text-secondary); border-radius:8px; transition:all 0.2s; white-space:nowrap; }
+        .ampm-pill span { display:inline-flex; align-items:center; padding:5px 7px; font-size:0.9rem; font-weight:700; color:var(--text-secondary); border-radius:8px; transition:all 0.2s; white-space:nowrap; }
         .ampm-pill input:checked ~ span { background:var(--gold-premium); color:white; }
         /* 윤달 서브 옵션 */
         .cal-lunar-group { display:flex; flex-direction:column; gap:4px; align-items:flex-start; }
@@ -1003,17 +1005,11 @@
                         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
                             <div class="date-split-input" style="flex:2; min-width:210px; max-width:270px;">
                                 <input type="hidden" id="birth-date">
-                                <input type="text" inputmode="numeric" maxlength="4" placeholder="연도" class="date-part date-year" id="birth-date-year">
+                                <input type="text" inputmode="numeric" maxlength="4" placeholder="YYYY" class="date-part date-year" id="birth-date-year">
                                 <span class="date-sep">년</span>
-                                <select class="date-part date-month" id="birth-date-month">
-                                    <option value=""></option>
-                                    <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                </select>
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="MM" class="date-part date-month" id="birth-date-month" list="dl-month">
                                 <span class="date-sep">월</span>
-                                <select class="date-part date-day" id="birth-date-day">
-                                    <option value=""></option>
-                                    <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
-                                </select>
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="DD" class="date-part date-day" id="birth-date-day" list="dl-day">
                                 <span class="date-sep">일</span>
                             </div>
                             <div class="time-split-input" style="flex:1.5; min-width:200px; max-width:245px;">
@@ -1022,15 +1018,9 @@
                                     <label class="ampm-pill"><input type="radio" name="birth-ampm" value="am" checked><span>오전</span></label>
                                     <label class="ampm-pill"><input type="radio" name="birth-ampm" value="pm"><span>오후</span></label>
                                 </div>
-                                <select class="date-part time-hour" id="birth-time-hour">
-                                    <option value=""></option>
-                                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                </select>
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="시" class="date-part time-hour" id="birth-time-hour" list="dl-hour">
                                 <span class="date-sep">시</span>
-                                <select class="date-part time-min" id="birth-time-min">
-                                    <option value=""></option>
-                                    <option value="00">00</option><option value="05">05</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option>
-                                </select>
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="분" class="date-part time-min" id="birth-time-min" list="dl-min">
                                 <span class="date-sep">분</span>
                             </div>
                             <div class="cal-pill-group" style="align-items:flex-start;">
@@ -1154,17 +1144,11 @@
                                 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
                                     <div class="date-split-input" style="flex:2; min-width:210px; max-width:270px;">
                                         <input type="hidden" id="prem-birth-date">
-                                        <input type="text" inputmode="numeric" maxlength="4" placeholder="연도" class="date-part date-year" id="prem-birth-date-year">
+                                        <input type="text" inputmode="numeric" maxlength="4" placeholder="YYYY" class="date-part date-year" id="prem-birth-date-year">
                                         <span class="date-sep">년</span>
-                                        <select class="date-part date-month" id="prem-birth-date-month">
-                                            <option value=""></option>
-                                            <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                        </select>
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="MM" class="date-part date-month" id="prem-birth-date-month" list="dl-month">
                                         <span class="date-sep">월</span>
-                                        <select class="date-part date-day" id="prem-birth-date-day">
-                                            <option value=""></option>
-                                            <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
-                                        </select>
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="DD" class="date-part date-day" id="prem-birth-date-day" list="dl-day">
                                         <span class="date-sep">일</span>
                                     </div>
                                     <div class="time-split-input" style="flex:1.5; min-width:200px; max-width:245px; margin-bottom:0;">
@@ -1173,15 +1157,9 @@
                                             <label class="ampm-pill"><input type="radio" name="prem-ampm" value="am" checked><span>오전</span></label>
                                             <label class="ampm-pill"><input type="radio" name="prem-ampm" value="pm"><span>오후</span></label>
                                         </div>
-                                        <select class="date-part time-hour" id="prem-time-hour">
-                                            <option value=""></option>
-                                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                        </select>
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="시" class="date-part time-hour" id="prem-time-hour" list="dl-hour">
                                         <span class="date-sep">시</span>
-                                        <select class="date-part time-min" id="prem-time-min">
-                                            <option value=""></option>
-                                            <option value="00">00</option><option value="05">05</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option>
-                                        </select>
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="분" class="date-part time-min" id="prem-time-min" list="dl-min">
                                         <span class="date-sep">분</span>
                                     </div>
                                     <div class="cal-pill-group" style="flex:1.5;min-width:160px;align-items:flex-start;">
@@ -4941,11 +4919,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const hourEl   = document.getElementById(prefix === 'prem' ? 'prem-time-hour'  : 'birth-time-hour');
         const minEl    = document.getElementById(prefix === 'prem' ? 'prem-time-min'   : 'birth-time-min');
         const hidden   = document.getElementById(prefix === 'prem' ? 'prem-birth-time' : 'birth-time');
-        if (!hidden || !hourEl?.value || minEl?.value === '') { if (hidden) hidden.value = ''; return; }
-        let h = parseInt(hourEl.value);
+        const hourRaw = parseInt(hourEl?.value || '0');
+        const minRaw  = minEl?.value.trim() || '';
+        if (!hidden || !hourRaw || minRaw === '') { if (hidden) hidden.value = ''; return; }
+        let h = hourRaw;
         if (ampm === 'am' && h === 12) h = 0;
         if (ampm === 'pm' && h !== 12) h += 12;
-        hidden.value = `${String(h).padStart(2,'0')}:${minEl.value}`;
+        hidden.value = `${String(h).padStart(2,'0')}:${minRaw.padStart(2,'0')}`;
     }
     function _setTimeFields(prefix, timeStr) {
         if (!timeStr) return;
@@ -4966,10 +4946,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // 날짜 분리 입력 동기화
     function _syncDateVal(baseId, onChangeCb) {
-        const year  = document.getElementById(baseId + '-year')?.value  || '';
-        const month = document.getElementById(baseId + '-month')?.value || '';
-        const day   = document.getElementById(baseId + '-day')?.value   || '';
-        const hidden = document.getElementById(baseId);
+        const year     = document.getElementById(baseId + '-year')?.value.trim()  || '';
+        const monthRaw = document.getElementById(baseId + '-month')?.value.trim() || '';
+        const dayRaw   = document.getElementById(baseId + '-day')?.value.trim()   || '';
+        const month    = monthRaw ? monthRaw.padStart(2, '0') : '';
+        const day      = dayRaw   ? dayRaw.padStart(2, '0')   : '';
+        const hidden   = document.getElementById(baseId);
         if (!hidden) return;
         hidden.value = (year.length === 4 && month && day) ? `${year}-${month}-${day}` : '';
         if (onChangeCb) onChangeCb();
@@ -5003,7 +4985,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 });
             }
             [monthEl, dayEl].forEach(el => {
-                if (el) el.addEventListener('change', () => _syncDateVal(base, cb));
+                if (el) { el.addEventListener('input', () => _syncDateVal(base, cb)); el.addEventListener('change', () => _syncDateVal(base, cb)); }
             });
         });
 
@@ -5017,7 +4999,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             });
             [hourId, minId].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.addEventListener('change', () => _syncTimeVal(prefix));
+                if (el) { el.addEventListener('input', () => _syncTimeVal(prefix)); el.addEventListener('change', () => _syncTimeVal(prefix)); }
             });
         });
 
@@ -5054,4 +5036,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
 
 
-</script></body>
+</script>
+<datalist id="dl-month"><option value="01"><option value="02"><option value="03"><option value="04"><option value="05"><option value="06"><option value="07"><option value="08"><option value="09"><option value="10"><option value="11"><option value="12"></datalist>
+<datalist id="dl-day"><option value="01"><option value="02"><option value="03"><option value="04"><option value="05"><option value="06"><option value="07"><option value="08"><option value="09"><option value="10"><option value="11"><option value="12"><option value="13"><option value="14"><option value="15"><option value="16"><option value="17"><option value="18"><option value="19"><option value="20"><option value="21"><option value="22"><option value="23"><option value="24"><option value="25"><option value="26"><option value="27"><option value="28"><option value="29"><option value="30"><option value="31"></datalist>
+<datalist id="dl-hour"><option value="1"><option value="2"><option value="3"><option value="4"><option value="5"><option value="6"><option value="7"><option value="8"><option value="9"><option value="10"><option value="11"><option value="12"></datalist>
+<datalist id="dl-min"><option value="00"><option value="05"><option value="10"><option value="15"><option value="20"><option value="25"><option value="30"><option value="35"><option value="40"><option value="45"><option value="50"><option value="55"></datalist>
+</body>
