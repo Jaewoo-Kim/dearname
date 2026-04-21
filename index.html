@@ -264,7 +264,7 @@
         .ampm-pill span { display:inline-flex; align-items:center; padding:6px 11px; font-size:0.9rem; font-weight:700; color:var(--text-secondary); border-radius:9px; transition:all 0.2s; white-space:nowrap; user-select:none; }
         .ampm-pill input:checked ~ span { background:var(--gold-premium); color:white; }
         /* 도시 선택 */
-        .bf-city-select { appearance:none; -webkit-appearance:none; background-color:var(--bg-light); border:1.5px solid var(--border-light); border-radius:13px; padding:10px 32px 10px 14px; font-size:0.95rem; font-weight:600; color:var(--bg-dark); font-family:'Pretendard',sans-serif; cursor:pointer; flex:0 0 auto; min-width:152px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; transition:border-color 0.2s,box-shadow 0.2s; }
+        .bf-city-select { appearance:none; -webkit-appearance:none; background-color:var(--bg-light); border:1.5px solid var(--border-light); border-radius:13px; padding:10px 32px 10px 14px; font-size:0.95rem; font-weight:600; color:var(--bg-dark); font-family:'Pretendard',sans-serif; cursor:pointer; flex:1; min-width:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; transition:border-color 0.2s,box-shadow 0.2s; }
         .bf-city-select:focus { outline:none; border-color:var(--gold-premium); box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
         /* 레거시 호환 (prem 폼 등) */
         .ampm-group { display:flex; gap:3px; margin-right:4px; flex-shrink:0; }
@@ -1037,7 +1037,7 @@
                                 </div>
                                 <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;align-self:center;"></span>
                             </div>
-                            <!-- 출생 시간 + 지역 -->
+                            <!-- 출생 시간 -->
                             <div class="birth-form-row">
                                 <span class="birth-row-lbl">출생 시간</span>
                                 <div class="bf-ampm-chip">
@@ -1052,6 +1052,10 @@
                                     <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="birth-time-min">
                                     <span class="bf-unit">분</span>
                                 </div>
+                            </div>
+                            <!-- 출생 지역 -->
+                            <div class="birth-form-row">
+                                <span class="birth-row-lbl">출생 지역</span>
                                 <select class="bf-city-select" id="birth-location">
                                     <option value="">태어난 도시 (선택)</option>
                                     <option value="서울">서울</option>
@@ -1188,7 +1192,7 @@
                                             <span id="lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
                                         </div>
                                     </div>
-                                    <!-- 출생 시간 + 지역 -->
+                                    <!-- 출생 시간 -->
                                     <div class="birth-form-row">
                                         <span class="birth-row-lbl">출생 시간</span>
                                         <div class="bf-ampm-chip">
@@ -1203,6 +1207,10 @@
                                             <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="prem-time-min">
                                             <span class="bf-unit">분</span>
                                         </div>
+                                    </div>
+                                    <!-- 출생 지역 -->
+                                    <div class="birth-form-row">
+                                        <span class="birth-row-lbl">출생 지역</span>
                                         <select class="bf-city-select" id="prem-city">
                                             <option value="">태어난 도시 (선택)</option>
                                             <option value="서울">서울</option>
@@ -1666,6 +1674,7 @@
             <div class="story-chapter-label">Chapter 5. 인생의 사계절</div>
             <h2 class="section-title">81수리 & 인생 흐름</h2>
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
+            <div id="report-suri-sub"></div>
             <div class="chart-container-large" style="margin-top:28px;">
                 <canvas id="lifeFlowChart"></canvas>
             </div>
@@ -2749,11 +2758,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             </div>`;
         }).join('');
 
-        const suriSubMsg = `수리의 획수 음양 배합은 ${_badgeHtml(data.mathYin.grade)} — ${data.mathYin.desc}&nbsp;&nbsp;|&nbsp;&nbsp;수리오행(중심·총운)은 ${_badgeHtml(data.mathOheng.grade)} — ${data.mathOheng.desc}`;
+        const suriSubHtml = _buildSuriSubHtml(data.mathYin, data.mathOheng);
 
         document.getElementById('self-suri-body').innerHTML = `
             <div class="suri-seasons-grid">${seasonsHtml}</div>
-            <div style="margin-top:18px;padding:16px 20px;background:#f8fafc;border-radius:12px;border:1px solid var(--border-light);font-size:0.85rem;color:var(--text-secondary);line-height:1.85;">${suriSubMsg}</div>`;
+            ${suriSubHtml}`;
 
         // ── ⑥ 종합 결론 섹션 ─────────────────────────────────────────
         const scoreMsgs = {
@@ -3297,6 +3306,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // Ch5: 수리 + 라이프플로우
         _renderSuriCards(s0, s1, s2, isOija);
+        // Ch5: 수리음양 / 수리오행 서브 섹션
+        const suriSubEl = document.getElementById('report-suri-sub');
+        if (suriSubEl) {
+            const ad = (typeof getAnalysisData === 'function')
+                ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
+            suriSubEl.innerHTML = ad ? _buildSuriSubHtml(ad.mathYin, ad.mathOheng) : '';
+        }
         const suriStoryEl = document.getElementById('ai-suri-story');
         if (suriStoryEl) {
             const lf = report.lifeFlow || {};
@@ -3497,6 +3513,49 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     ${d.synergyWithSaju ? `<div class="ai-hanja-synergy">✦ 사주 시너지 &nbsp;${d.synergyWithSaju}</div>` : ''}
                 </div>
             </div>`).join('');
+    }
+
+    // ── 수리음양/수리오행 서브 섹션 HTML 빌더 (셀프/프리미엄 공통) ──
+    function _buildSuriSubHtml(mathYin, mathOheng) {
+        const _normG  = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
+        const _gColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const badge   = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
+        const cardBorder = g => _normG(g)==='길' ? '#bbf7d0' : _normG(g)==='흉' ? '#fecaca' : '#e2e8f0';
+        const cardBg     = g => _normG(g)==='길' ? '#f0fdf4' : _normG(g)==='흉' ? '#fff5f5' : '#f8fafc';
+
+        const yinTexts = {
+            '길': `획수의 홀(양·陽)과 짝(음·陰)이 균형 있게 배합되어 있습니다. 음양의 조화는 이름이 뿜어내는 기운이 한쪽으로 치우치지 않고 고르게 순환함을 뜻합니다.`,
+            '평': `획수의 음양 배합이 무난한 수준입니다. 완전한 균형은 아니지만 다른 수리 요소들과 함께 전체적인 조화를 유지합니다.`,
+            '흉': `획수가 홀수 또는 짝수 한쪽으로만 쏠려 있어 음양 균형이 깨져 있습니다. 이름에서 방출되는 기운이 한 방향으로 편중될 수 있습니다.`,
+        };
+        const ohengTexts = {
+            '길': `수리의 핵심인 형격과 정격의 오행이 서로를 돕는 <b>상생(相生)</b> 관계입니다. 청년기의 기운과 전체 운이 서로 조화롭게 이어져 인생 흐름이 막힘 없이 흐릅니다.`,
+            '평': `형격과 정격의 오행이 상생도 상극도 아닌 중립 관계입니다. 다른 수리 요소들과의 조화를 함께 고려해 주세요.`,
+            '흉': `형격과 정격의 오행 사이에 <b>상극(相剋)</b>이 발생합니다. 청년기에 쌓은 기운이 전체 운과 충돌하여 인생 흐름에 불협화음이 생길 수 있습니다.`,
+        };
+
+        const myG = mathYin?.grade  || '평';
+        const moG = mathOheng?.grade || '평';
+
+        return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;">
+            <div style="padding:16px 18px;background:${cardBg(myG)};border-radius:14px;border:1.5px solid ${cardBorder(myG)};box-sizing:border-box;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                    <span style="font-size:0.8rem;font-weight:800;color:var(--text-secondary);">수리음양 (획수 홀짝)</span>
+                    ${badge(myG)}
+                </div>
+                <p style="margin:0;font-size:0.85rem;line-height:1.75;color:var(--text-secondary);">${yinTexts[_normG(myG)]}</p>
+                ${mathYin?.desc ? `<p style="margin:10px 0 0;font-size:0.78rem;color:var(--text-muted);">※ ${mathYin.desc}</p>` : ''}
+            </div>
+            <div style="padding:16px 18px;background:${cardBg(moG)};border-radius:14px;border:1.5px solid ${cardBorder(moG)};box-sizing:border-box;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                    <span style="font-size:0.8rem;font-weight:800;color:var(--text-secondary);">수리오행 (형격·정격)</span>
+                    ${badge(moG)}
+                </div>
+                <p style="margin:0;font-size:0.85rem;line-height:1.75;color:var(--text-secondary);">${ohengTexts[_normG(moG)]}</p>
+                ${mathOheng?.desc ? `<p style="margin:10px 0 0;font-size:0.78rem;color:var(--text-muted);">※ ${mathOheng.desc}</p>` : ''}
+            </div>
+        </div>`;
     }
 
     // ── 사격수리 카드 렌더링 (시즌 카드 디자인) ─────────────────────
