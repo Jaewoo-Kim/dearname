@@ -459,6 +459,41 @@ openLoginModal()
 | `_showToast(msg)` | 하단 토스트 메시지 |
 | `showSelfReportViewDirect()` | 구독 체크 없이 셀프 보고서 직접 열기 (마이페이지 복원용) |
 
+#### 게스트 모드 가드 (로그인 벽)
+
+`showMypageView()` 진입 시 `_dnUser` 확인:
+- **비로그인**: `#mypage-guest-wall` 표시 (로그인/회원가입 버튼)
+- **로그인 중**: `#mypage-content` 표시 + 5섹션 모두 렌더
+
+---
+
+### 프리미엄 보고서 ↔ 셀프작명 보고서 디자인 통일 (priority 1–4)
+
+셀프작명이 더 나은 디자인 요소를 프리미엄에 일괄 적용:
+
+#### 변경 내용
+
+| # | 항목 | Before | After |
+|---|---|---|---|
+| 1 | 결론 포인트 CSS | `.ai-conclusion-item` (별도) | `.conclusion-point` 통합 (공통 CSS) |
+| 2 | `_renderConclusionGrid` | `class="ai-conclusion-item"` | `class="conclusion-point"` |
+| 3 | `_renderSuriCards` | `suri-card` 배지+텍스트 레이아웃 | `season-card` 시즌 디자인 (🌱☀️🍂❄️) |
+| 4 | Ch2 자원오행 칩 | 없음 | `#report-jawon-chips` + JS 렌더링 |
+
+#### Change ③ 상세 (`_renderSuriCards`)
+
+- `season-card.season-good/bad` CSS 적용 (길/평/흉에 따라)
+- `suri-seasons-grid` 2열 그리드 컨테이너
+- 시즌 이모지(🌱☀️🍂❄️) + period + label + 수리 번호 + 격명 + 설명
+- 로컬 `_badge()`, `_isGood()`, `_isBad()` 헬퍼 (셀프작명 스코프 밖이므로 함수 내부 선언)
+
+#### Change ④ 상세 (자원오행 칩)
+
+- HTML: `<div id="report-jawon-chips"></div>` — Ch2 카드 tagline 바로 아래
+- JS: `_renderReport()` Ch2 블록에서 `h1.o`, `h2.o` 오행 읽어 `jawon-chip` 렌더
+  - `_normOheng()` 사용해 한자키 정규화
+  - 칩 내부: 한자 대형 + 한글 독음 + 오행 한글 표시
+
 #### 셀프작명 보고서 자동 저장
 
 `showSelfReportView()` 완료 시 `_saveSelfReport({ nameKr, nameHanja, gender, birthDate, birthTime })` 자동 호출.  
