@@ -1421,52 +1421,77 @@
     </header>
     <main class="report-main">
 
-        <!-- [1] 프로필 -->
-        <div class="report-card" style="margin-bottom:24px;">
-            <span class="mp-section-tag">내 계정</span>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:8px;">
-                <div>
-                    <div id="mypage-name" style="font-size:1.25rem;font-weight:800;color:var(--bg-dark);"></div>
-                    <div id="mypage-email" style="font-size:0.88rem;color:var(--text-secondary);margin-top:3px;"></div>
-                    <div id="mypage-provider-badge" style="margin-top:10px;"></div>
+        <!-- ── 비로그인 안내 ── -->
+        <div id="mypage-guest-wall" style="display:none;">
+            <div class="report-card" style="text-align:center;padding:56px 24px 60px;">
+                <div style="font-size:2.8rem;margin-bottom:18px;line-height:1;">🔐</div>
+                <div style="font-size:1.22rem;font-weight:900;color:var(--bg-dark);margin-bottom:10px;">로그인이 필요합니다</div>
+                <div style="font-size:0.92rem;color:var(--text-secondary);line-height:1.7;margin-bottom:32px;">
+                    로그인하면 아래 내용을 확인할 수 있어요.<br>
+                    <span style="color:var(--bg-dark);font-weight:700;">멤버십·구독 현황 · 셀프작명 보고서 기록<br>AI 프리미엄 작명 의뢰 내역 · 결제 내역</span>
                 </div>
-                <button onclick="_signOut()" class="mp-btn mp-btn-outline" style="padding:9px 20px;font-size:0.85rem;">로그아웃</button>
+                <button onclick="openLoginModal()" class="btn btn-navy" style="width:auto;padding:15px 44px;font-size:1rem;margin-bottom:16px;">
+                    로그인 / 회원가입
+                </button>
+                <div>
+                    <button onclick="showMainView()" style="background:none;border:none;color:var(--text-secondary);font-size:0.85rem;cursor:pointer;text-decoration:underline;font-family:'Pretendard',sans-serif;">
+                        메인으로 돌아가기
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- [2] 구독 현황 -->
-        <div class="report-card" style="margin-bottom:24px;">
-            <span class="mp-section-tag">구독 현황</span>
-            <h2 class="mp-section-title" style="margin-top:8px;">셀프작명 이용권</h2>
-            <div id="mypage-subscription"><!-- JS 동적 생성 --></div>
-        </div>
+        <!-- ── 로그인 상태 콘텐츠 ── -->
+        <div id="mypage-content" style="display:none;">
 
-        <!-- [3] 셀프작명 보고서 기록 -->
-        <div class="report-card" style="margin-bottom:24px;">
-            <span class="mp-section-tag">셀프작명 보고서</span>
-            <h2 class="mp-section-title" style="margin-top:8px;">셀프작명 보고서 기록</h2>
-            <div id="mypage-self-reports"><!-- JS 동적 생성 --></div>
-        </div>
+            <!-- [1] 프로필 -->
+            <div class="report-card" style="margin-bottom:24px;">
+                <span class="mp-section-tag">내 계정</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:8px;">
+                    <div>
+                        <div id="mypage-name" style="font-size:1.25rem;font-weight:800;color:var(--bg-dark);"></div>
+                        <div id="mypage-email" style="font-size:0.88rem;color:var(--text-secondary);margin-top:3px;"></div>
+                        <div id="mypage-provider-badge" style="margin-top:10px;"></div>
+                    </div>
+                    <button onclick="_signOut()" class="mp-btn mp-btn-outline" style="padding:9px 20px;font-size:0.85rem;">로그아웃</button>
+                </div>
+            </div>
 
-        <!-- [4] AI 프리미엄 보고서 -->
-        <div class="report-card" style="margin-bottom:24px;">
-            <span class="mp-section-tag">AI 프리미엄 보고서</span>
-            <h2 class="mp-section-title" style="margin-top:8px;">AI 프리미엄 보고서 기록</h2>
-            <div id="mypage-ai-reports"><!-- JS 동적 생성 --></div>
-        </div>
+            <!-- [2] 구독 현황 -->
+            <div class="report-card" style="margin-bottom:24px;">
+                <span class="mp-section-tag">구독 현황</span>
+                <h2 class="mp-section-title" style="margin-top:8px;">셀프작명 이용권</h2>
+                <div id="mypage-subscription"><!-- JS 동적 생성 --></div>
+            </div>
 
-        <!-- [5] 결제 내역 -->
-        <div class="report-card" style="margin-bottom:24px;">
-            <span class="mp-section-tag">결제 내역</span>
-            <h2 class="mp-section-title" style="margin-top:8px;">결제 내역</h2>
-            <div id="mypage-payments"><!-- JS 동적 생성 --></div>
-        </div>
+            <!-- [3] 셀프작명 보고서 기록 -->
+            <div class="report-card" style="margin-bottom:24px;">
+                <span class="mp-section-tag">셀프작명 보고서</span>
+                <h2 class="mp-section-title" style="margin-top:8px;">셀프작명 보고서 기록</h2>
+                <div id="mypage-self-reports"><!-- JS 동적 생성 --></div>
+            </div>
 
-        <div style="text-align:center;margin-top:60px;">
-            <button onclick="showMainView()" class="btn btn-navy" style="width:auto;padding:16px 48px;font-size:1rem;">
-                메인으로 돌아가기
-            </button>
-        </div>
+            <!-- [4] AI 프리미엄 보고서 -->
+            <div class="report-card" style="margin-bottom:24px;">
+                <span class="mp-section-tag">AI 프리미엄 보고서</span>
+                <h2 class="mp-section-title" style="margin-top:8px;">AI 프리미엄 보고서 기록</h2>
+                <div id="mypage-ai-reports"><!-- JS 동적 생성 --></div>
+            </div>
+
+            <!-- [5] 결제 내역 -->
+            <div class="report-card" style="margin-bottom:24px;">
+                <span class="mp-section-tag">결제 내역</span>
+                <h2 class="mp-section-title" style="margin-top:8px;">결제 내역</h2>
+                <div id="mypage-payments"><!-- JS 동적 생성 --></div>
+            </div>
+
+            <div style="text-align:center;margin-top:60px;">
+                <button onclick="showMainView()" class="btn btn-navy" style="width:auto;padding:16px 48px;font-size:1rem;">
+                    메인으로 돌아가기
+                </button>
+            </div>
+
+        </div><!-- /mypage-content -->
     </main>
 </div>
 
@@ -4123,6 +4148,21 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         document.getElementById('main-nav').style.display          = 'none';
         document.getElementById('report-nav').style.display        = 'block';
         window.scrollTo(0, 0);
+
+        const guestWall = document.getElementById('mypage-guest-wall');
+        const content   = document.getElementById('mypage-content');
+
+        if (!_dnUser) {
+            // 비로그인: 안내 화면만 표시
+            if (guestWall) guestWall.style.display = 'block';
+            if (content)   content.style.display   = 'none';
+            return;
+        }
+
+        // 로그인 상태: 콘텐츠 표시
+        if (guestWall) guestWall.style.display = 'none';
+        if (content)   content.style.display   = 'block';
+
         _renderMypageProfile();
         _renderMypageSubscription();
         _renderMypageSelfReports();
@@ -4151,7 +4191,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const el = document.getElementById('mypage-subscription');
         if (!el) return;
         const sub = _getSubscription();
-        if (_isSubscribed()) {
+        if (_isSubscribed() && sub) {
             const exp = new Date(sub.expiresAt).toLocaleDateString('ko-KR');
             el.innerHTML = `
                 <div class="mp-sub-card">
