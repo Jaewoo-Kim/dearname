@@ -394,7 +394,7 @@ openLoginModal()
 | 구독 현황 | `mypage-subscription` | `_renderMypageSubscription()` | `dn_subscription` (localStorage) |
 | 셀프작명 보고서 | `mypage-self-reports` | `_renderMypageSelfReports()` | `dn_self_reports` (localStorage) |
 | AI 프리미엄 보고서 | `mypage-ai-reports` | `_renderMypageAIReports()` | `dn_reports` (localStorage) |
-| 결제 내역 | `mypage-payments` | `_renderMypagePayments()` | 플레이스홀더 |
+| 결제 내역 | `mypage-payments` | `_renderMypagePayments()` | `dn_payments` (localStorage / 서버 연동 예정) |
 
 #### 데이터 모델 (localStorage)
 
@@ -420,7 +420,28 @@ openLoginModal()
   candidates: [...], reports: [...],
   saju, ohengScores, constraints
 }]
+
+// dn_payments — 결제 내역 배열 (서버 연동 전 localStorage 임시 저장)
+[{
+  id: 'pay_' + Date.now(),
+  type: 'sub' | 'ai',          // 'sub'=멤버십, 'ai'=AI작명 의뢰
+  label: '셀프작명 이용권 1개월' | 'AI 프리미엄 작명 의뢰',
+  desc: '월간 구독' | '이도윤 외 4후보',
+  amount: 9900,                 // 원 단위
+  status: 'done' | 'cancel' | 'refund',
+  paidAt: timestamp (ms)
+}]
 ```
+
+#### 결제 내역 UI 구성 요소 (CSS)
+
+| 클래스 | 설명 |
+|---|---|
+| `.mp-payment-row` | 결제 행 (flex, border-bottom) |
+| `.mp-payment-icon` | 타입별 아이콘 컨테이너 (`type-sub`=초록, `type-ai`=노랑) |
+| `.mp-payment-type-badge` | 인라인 타입 뱃지 (`mp-badge-sub`=초록, `mp-badge-ai`=노랑) |
+| `.mp-payment-amount` | 금액 (bold) |
+| `.mp-payment-status` | 상태 뱃지 (`mp-status-done`/`cancel`/`refund`) |
 
 #### 주요 함수 목록
 
@@ -430,7 +451,8 @@ openLoginModal()
 | `_renderMypageSubscription()` | 구독 현황 카드 |
 | `_renderMypageSelfReports()` | 셀프작명 보고서 목록 |
 | `_renderMypageAIReports()` | AI 보고서 목록 |
-| `_renderMypagePayments()` | 결제 내역 (플레이스홀더) |
+| `_renderMypagePayments()` | 결제 내역 렌더 (데모 샘플 + `dn_payments` 연동 대기) |
+| `_getPayments()` | 결제 내역 조회 (`dn_payments` localStorage → 없으면 데모 샘플 반환) |
 | `_openSavedSelfReport(id)` | 셀프 보고서 복원 (구독 체크 포함) |
 | `_openSavedReport(id)` | AI 보고서 복원 |
 | `_deleteSelfReportConfirm(id)` | 셀프 보고서 삭제 확인 |
