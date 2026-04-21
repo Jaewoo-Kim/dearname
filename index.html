@@ -3549,12 +3549,14 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         el.innerHTML = `<div class="suri-seasons-grid">${cardsHtml}</div>`;
     }
 
-    // ── 발음 섹션 렌더링 ────────────────────────────────────────────
+    // ── 발음 섹션 렌더링 (프리미엄 풍부화 ver.) ─────────────────────
     function _renderSoundSection(candidate, report) {
         const el = document.getElementById('ai-sound-section');
         if (!el) return;
         const { familyKr, h1, h2 } = candidate;
         const fullKr = `${familyKr}${h1.kr}${h2?.kr||''}`;
+
+        // ── 공통 헬퍼 ────────────────────────────────────────────────
         const OHENG_FROM_CHO = (cho) => {
             if(['ㄱ','ㅋ','ㄲ'].includes(cho)) return '木';
             if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho)) return '火';
@@ -3564,26 +3566,54 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             return '?';
         };
         const OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
-        const OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const OHENG_KR    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
         const CYCLE = ['木','火','土','金','水'];
         const isSangsaeng = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
 
-        const chars = fullKr.split('');
         const getChoByChr = (c) => {
             const code = c.charCodeAt(0) - 0xAC00;
             if (code < 0 || code > 11171) return '';
             const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
             return CHO[Math.floor(code / 588)] || '';
         };
+        const getYYByChr = (c) => {
+            const code = c.charCodeAt(0) - 0xAC00;
+            if (code < 0 || code > 11171) return '';
+            const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+            const YANG = new Set(['ㅏ','ㅐ','ㅑ','ㅒ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ']);
+            const j = JUNG[Math.floor((code % 588) / 28)];
+            return YANG.has(j) ? '양' : '음';
+        };
+
+        const chars  = fullKr.split('');
         const ohengs = chars.map(c => {
             if(typeof window.getCho === 'function' && typeof window.getOhengFromCho === 'function') {
                 const cho = window.getCho(c);
-                const o = window.getOhengFromCho(cho);
-                return o || OHENG_FROM_CHO(getChoByChr(c));
+                return window.getOhengFromCho(cho) || OHENG_FROM_CHO(getChoByChr(c));
             }
             return OHENG_FROM_CHO(getChoByChr(c));
         });
+        const yinYangs = chars.map(c =>
+            typeof window.getYinYangFromJung === 'function'
+                ? window.getYinYangFromJung(c) || getYYByChr(c)
+                : getYYByChr(c)
+        );
 
+        // ── 등급 계산 ────────────────────────────────────────────────
+        const analysisData = (typeof getAnalysisData === 'function')
+            ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
+        const pronGrade = analysisData?.pronounceOheng?.grade || '평';
+        const yinGrade  = analysisData?.pronounceYin?.grade  || '평';
+
+        const _normG  = g => g==='대길'?'길':g==='대흉'?'흉':g;
+        const _gColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
+
+        // ── 글자별 오행 흐름 시각화 ──────────────────────────────────
+        const goodCount = ohengs.reduce((cnt, o, i) =>
+            i < ohengs.length-1 ? cnt + (isSangsaeng(o, ohengs[i+1]) ? 1 : 0) : cnt, 0);
+        const totalPairs = Math.max(ohengs.length - 1, 1);
         const flowHtml = chars.map((c, i) => {
             const oheng = ohengs[i];
             const arrowHtml = i < chars.length - 1 ? (() => {
@@ -3591,28 +3621,93 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 const good = isSangsaeng(oheng, next);
                 return `<div class="ai-sound-arrow ${good?'good':'bad'}">${good?'→':'⚡'}</div>`;
             })() : '';
-            const oLabel = OHENG_KR[oheng] || oheng || '?';
             return `<div class="ai-sound-char">
                 <span class="char-kr">${c}</span>
-                <span class="char-oheng" style="background:${OHENG_COLOR[oheng]||'#94a3b8'};">${oLabel}</span>
+                <span class="char-oheng" style="background:${OHENG_COLOR[oheng]||'#94a3b8'};">${OHENG_KR[oheng]||oheng||'?'}</span>
             </div>${arrowHtml}`;
         }).join('');
 
-        const yinYangHtml = (() => {
-            if(typeof window.getYinYangFromJung !== 'function') return '';
-            const yys = fullKr.split('').map(c => window.getYinYangFromJung(c));
-            const allYang = yys.every(y=>y==='양'), allYin = yys.every(y=>y==='음');
-            const balanced = !allYang && !allYin;
-            const label = allYang ? '양(陽) 편중' : allYin ? '음(陰) 편중' : '음양 균형';
-            const color = balanced ? '#16a34a' : '#d97706';
-            return `<div style="margin-top:14px;display:flex;align-items:center;gap:10px;">
-                <span style="font-size:0.82rem;color:var(--text-secondary);">발음 음양 배합</span>
-                <span style="background:${balanced?'#f0fdf4':'#fef3c7'};color:${color};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${label}</span>
-                <span style="font-size:0.82rem;color:var(--text-muted);">${yys.join(' · ')}</span>
+        // ── 음양 글자별 시각화 ───────────────────────────────────────
+        const yyCharsHtml = chars.map((c, i) => {
+            const yy = yinYangs[i];
+            const isYang = yy === '양';
+            return `<div style="text-align:center;">
+                <div style="font-size:1.2rem;font-weight:800;color:var(--bg-dark);">${c}</div>
+                <div style="margin-top:4px;font-size:0.7rem;font-weight:800;padding:2px 9px;border-radius:20px;
+                    background:${isYang?'#fff7ed':'#eff6ff'};color:${isYang?'#c2410c':'#1d4ed8'};
+                    display:inline-block;">${yy||'?'}</div>
             </div>`;
-        })();
+        }).join(`<div style="font-size:1rem;color:var(--text-muted);align-self:flex-start;padding-top:6px;">·</div>`);
 
-        el.innerHTML = `<div class="ai-sound-flow">${flowHtml}</div>${yinYangHtml}`;
+        // ── 설명 텍스트 ──────────────────────────────────────────────
+        const pronTexts = {
+            '길': `이름을 부를 때마다 초성의 기운이 서로를 북돋아주는 <b>상생(相生)</b>의 흐름이 형성됩니다.
+                상생이란 나무가 불을 키우고, 불이 흙을 만들듯 기운이 자연스럽게 이어지는 것입니다.
+                이름이 불릴 때마다 에너지가 막힘없이 흘러 아이에게 긍정적인 파동을 전달합니다.
+                발음 오행에서 가장 이상적인 구성으로, 이름의 소리 자체가 좋은 기운을 만들어냅니다.`,
+            '평': `이름 초성의 기운 흐름에 일부 마찰이 있으나 치명적인 수준은 아닙니다.
+                상생과 상극이 혼재하며, 좋은 흐름이 나쁜 흐름을 어느 정도 상쇄해줍니다.
+                자원오행·수리 등 다른 요소들이 보완해준다면 전체적인 균형을 유지할 수 있습니다.
+                발음 오행 하나로 이름의 길흉을 판단하지 않으므로 종합 점수를 함께 참고해주세요.`,
+            '흉': `이름을 소리 내어 부를 때 초성 간에 연속적으로 <b>상극(相剋)</b>이 발생합니다.
+                상극이란 쇠가 나무를 자르고, 물이 불을 끄듯 기운이 서로 충돌하는 것입니다.
+                평생 수만 번 불릴 이름에서 이런 충돌이 반복되면 기운의 흐름이 막히는 영향을 줄 수 있습니다.
+                초성 오행이 상생 관계를 이루는 이름으로 재검토해보시길 권합니다.`,
+        };
+        const yinTexts = {
+            '길': `이름의 모음이 양성(ㅏ·ㅗ·ㅐ)과 음성(ㅣ·ㅜ·ㅡ)을 조화롭게 교차합니다.
+                동양 철학에서 음양의 교차는 만물이 생성되는 근본 원리입니다.
+                이름을 부를 때 들숨과 날숨처럼 기운이 자연스럽게 순환하며,
+                아이의 성격 형성에 균형 잡힌 에너지를 꾸준히 공급합니다.`,
+            '평': `모음의 음양 배합이 양호한 수준으로, 기운의 흐름이 크게 치우치지 않습니다.
+                완전한 교차는 아니지만 다른 항목들과 함께 전체적인 조화를 이루고 있습니다.`,
+            '흉': `이름의 모음이 양성 또는 음성 한쪽으로만 쏠려 있습니다.
+                음양의 균형이 무너지면 에너지가 한 방향으로만 흐르는 편향이 발생합니다.
+                한쪽 기운만 지속적으로 공급받는 것은 아이의 기질 형성에 영향을 줄 수 있습니다.
+                다양한 모음이 섞인 이름을 검토해보시길 권합니다.`,
+        };
+
+        // ── 상극 쌍 설명 생성 ────────────────────────────────────────
+        const conflictPairs = [];
+        const goodPairs = [];
+        for (let i = 0; i < ohengs.length - 1; i++) {
+            const pair = `${OHENG_KR[ohengs[i]]||ohengs[i]}(${chars[i]}) → ${OHENG_KR[ohengs[i+1]]||ohengs[i+1]}(${chars[i+1]})`;
+            isSangsaeng(ohengs[i], ohengs[i+1]) ? goodPairs.push(pair) : conflictPairs.push(pair);
+        }
+        const pairNoteHtml = (conflictPairs.length || goodPairs.length) ? `
+            <div style="margin-top:14px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid var(--border-light);font-size:0.82rem;line-height:1.8;">
+                ${goodPairs.length ? `<div>✦ <b style="color:#15803d;">상생</b> : ${goodPairs.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>` : ''}
+                ${conflictPairs.length ? `<div>⚡ <b style="color:#dc2626;">상극</b> : ${conflictPairs.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>` : ''}
+            </div>` : '';
+
+        el.innerHTML = `
+            <!-- ① 초성 오행 흐름 시각화 -->
+            <div style="margin-bottom:22px;">
+                <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 초성 오행 흐름</div>
+                <div class="ai-sound-flow">${flowHtml}</div>
+                ${pairNoteHtml}
+            </div>
+
+            <!-- ② 발음 오행 + 음양 분석 카드 -->
+            <div class="sound-unified">
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">발음 오행 (초성)</span>
+                    ${_badge(pronGrade)}
+                    <span style="font-size:0.8rem;color:var(--text-muted);margin-left:4px;">상생 ${goodCount}/${totalPairs}쌍</span>
+                </div>
+                <p style="margin:0 0 24px;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${pronTexts[_normG(pronGrade)]||pronTexts['평']}</p>
+
+                <div style="margin-bottom:18px;">
+                    <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 모음 음양 배합</div>
+                    <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">${yyCharsHtml}</div>
+                </div>
+
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">발음 음양 (모음)</span>
+                    ${_badge(yinGrade)}
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(yinGrade)]||yinTexts['평']}</p>
+            </div>`;
     }
 
     // ── 종합 결론 그리드 ────────────────────────────────────────────
