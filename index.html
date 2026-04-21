@@ -3315,8 +3315,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
         const suriStoryEl = document.getElementById('ai-suri-story');
         if (suriStoryEl) {
-            const lf = report.lifeFlow || {};
-            suriStoryEl.textContent = report.suriStory || [lf.early, lf.middle, lf.late].filter(Boolean).join(' → ') || '';
+            suriStoryEl.textContent = report.suriStory || '';
         }
 
         // Ch6: 종합 결론
