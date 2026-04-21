@@ -1401,6 +1401,20 @@
             <div id="self-suri-body"></div>
         </div>
 
+        <!-- 브릿지 →⑤-2 -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">획수의 홀짝 배합과 오행 상생, 수리의 숨겨진 두 지표를 살펴봅니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- ⑤-2 수리 오행 & 음양 -->
+        <div class="report-card">
+            <div class="story-chapter-label">수리의 보조 지표</div>
+            <h2 class="section-title">수리 오행 & 음양 분석</h2>
+            <div id="self-suri-oheng-yin"></div>
+        </div>
+
         <!-- ⑥ 종합 결론 -->
         <div class="report-card" style="border-top:3px solid var(--gold-premium);">
             <div class="story-chapter-label">종합 결론</div>
@@ -1674,11 +1688,24 @@
             <div class="story-chapter-label">Chapter 5. 인생의 사계절</div>
             <h2 class="section-title">81수리 & 인생 흐름</h2>
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
-            <div id="report-suri-sub"></div>
             <div class="chart-container-large" style="margin-top:28px;">
                 <canvas id="lifeFlowChart"></canvas>
             </div>
             <div class="ai-story-block" id="ai-suri-story"></div>
+        </div>
+
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">획수의 홀짝 배합과 오행 상생, 수리의 숨겨진 두 지표를 살펴봅니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- Chapter 5-2: 수리 오행 & 음양 -->
+        <div class="report-card">
+            <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
+            <h2 class="section-title">수리 오행 & 음양 분석</h2>
+            <div id="report-suri-oheng-yin"></div>
         </div>
 
         <!-- Bridge -->
@@ -2758,11 +2785,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             </div>`;
         }).join('');
 
-        const suriSubHtml = _buildSuriSubHtml(data.mathYin, data.mathOheng);
-
         document.getElementById('self-suri-body').innerHTML = `
-            <div class="suri-seasons-grid">${seasonsHtml}</div>
-            ${suriSubHtml}`;
+            <div class="suri-seasons-grid">${seasonsHtml}</div>`;
+
+        const selfSuriOhengYinEl = document.getElementById('self-suri-oheng-yin');
+        if (selfSuriOhengYinEl) {
+            selfSuriOhengYinEl.innerHTML = _buildSuriSubHtml(data.mathYin, data.mathOheng);
+        }
 
         // ── ⑥ 종합 결론 섹션 ─────────────────────────────────────────
         const scoreMsgs = {
@@ -3307,11 +3336,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // Ch5: 수리 + 라이프플로우
         _renderSuriCards(s0, s1, s2, isOija);
         // Ch5: 수리음양 / 수리오행 서브 섹션
-        const suriSubEl = document.getElementById('report-suri-sub');
-        if (suriSubEl) {
+        const suriOhengYinEl = document.getElementById('report-suri-oheng-yin');
+        if (suriOhengYinEl) {
             const ad = (typeof getAnalysisData === 'function')
                 ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
-            suriSubEl.innerHTML = ad ? _buildSuriSubHtml(ad.mathYin, ad.mathOheng) : '';
+            suriOhengYinEl.innerHTML = ad ? _buildSuriSubHtml(ad.mathYin, ad.mathOheng) : '';
         }
         const suriStoryEl = document.getElementById('ai-suri-story');
         if (suriStoryEl) {
