@@ -604,14 +604,12 @@
         .ai-score-num { font-size:4rem; font-weight:900; color:var(--gold-dark); line-height:1; }
         .ai-score-denom { font-size:1.2rem; color:var(--text-secondary); font-weight:600; }
         .ai-score-label { font-size:0.82rem; color:var(--text-muted); margin-top:6px; }
-        .ai-conclusion-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:20px 0; }
-        @media(max-width:600px){ .ai-conclusion-grid{ grid-template-columns:repeat(2,1fr); } }
-        .ai-conclusion-item { display:flex; align-items:center; gap:7px; padding:10px 12px; border-radius:10px; font-size:0.82rem; font-weight:700; }
-        .conclusion-msg { font-size:0.97rem;line-height:1.85;color:var(--text-primary);margin-bottom:22px;padding:20px 22px;border-radius:14px;border-left:4px solid; }
-        .conclusion-points { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px; }
-        @media(max-width:600px){ .conclusion-points{ grid-template-columns:repeat(2,1fr); } }
+        .ai-conclusion-grid, .conclusion-points { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:20px 0; }
+        @media(max-width:600px){ .ai-conclusion-grid, .conclusion-points { grid-template-columns:repeat(2,1fr); } }
+        /* 결론 포인트 — 셀프/프리미엄 공통 */
         .conclusion-point { display:flex;align-items:center;gap:7px;padding:10px 12px;border-radius:10px;font-size:0.82rem;font-weight:700; }
         .conclusion-point-icon { font-size:0.88rem;flex-shrink:0; }
+        .conclusion-msg { font-size:0.97rem;line-height:1.85;color:var(--text-primary);margin-bottom:22px;padding:20px 22px;border-radius:14px;border-left:4px solid; }
 
         /* ── Report Guide 그리드 ── */
         .report-guide-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
@@ -1606,6 +1604,7 @@
             <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
             <h2 class="section-title">자원오행 & 오행 균형</h2>
             <div class="ai-tagline" id="report-tagline">--</div>
+            <div id="report-jawon-chips"></div>
             <div class="intro-grid" style="margin-top:0;">
                 <div>
                     <div class="ai-story-block" id="ai-jawon-story" style="margin-top:0;"></div>
@@ -3258,6 +3257,31 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // Ch2: 자원오행 & 레이더
         document.getElementById('report-tagline').textContent = report.tagline || '';
+
+        // Ch2: 자원오행 칩 렌더링
+        const jawonChipsEl = document.getElementById('report-jawon-chips');
+        if (jawonChipsEl) {
+            const OHENG_C = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+            const hanjaItems = [h1, h2].filter(Boolean).filter(x => x.h && x.o);
+            if (hanjaItems.length) {
+                const chipsHtml = hanjaItems.map(x => {
+                    const normO = _normOheng(x.o);
+                    const c = OHENG_C[normO] || '#64748b';
+                    return `<div class="jawon-chip" style="border-color:${c};color:${c};">
+                        <span class="jawon-chip-hanja">${x.h}</span>
+                        <div class="jawon-chip-label">
+                            <div style="font-weight:800;font-size:0.78rem;">${x.kr||''}</div>
+                            <div>${OHENG_KR[normO]||normO} 기운</div>
+                        </div>
+                    </div>`;
+                }).join('');
+                jawonChipsEl.innerHTML = `<div class="jawon-chips" style="margin:12px 0 20px;">${chipsHtml}</div>`;
+            } else {
+                jawonChipsEl.innerHTML = '';
+            }
+        }
+
         const jawonStoryEl = document.getElementById('ai-jawon-story');
         if (jawonStoryEl) jawonStoryEl.textContent = report.jawonStory || report.namingLogic || '';
 
@@ -3475,7 +3499,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             </div>`).join('');
     }
 
-    // ── 사격수리 카드 렌더링 ────────────────────────────────────────
+    // ── 사격수리 카드 렌더링 (시즌 카드 디자인) ─────────────────────
     function _renderSuriCards(s0, s1, s2, isOija) {
         const el = document.getElementById('report-suri-cards');
         if (!el) return;
@@ -3483,29 +3507,46 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const g2 = s0+s1;
         const g3 = isOija ? s0+1 : s0+s2;
         const g4 = isOija ? s0+s1 : s0+s1+s2;
-        const labels = ['원격(초년운)','형격(청년운)','이격(장년운)','정격(말년운)'];
-        const nums   = [g1, g2, g3, g4];
-        const bgColors = ['#1e293b','#334155','var(--gold-dark)','var(--gold-premium)'];
+        const rawNums = [g1, g2, g3, g4];
 
-        const _normG = g => g==='대길'?'길':g==='대흉'?'흉':g;
+        const _normG  = g => g==='대길'?'길':g==='대흉'?'흉':g;
         const _gColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'})[_normG(g)]||'#64748b';
         const _gBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'})[_normG(g)]||'#f1f5f9';
-        el.innerHTML = nums.map((n, i) => {
-            let num = n > 81 ? n%81 : n;
+        const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
+        const _isGood = g => _normG(g)==='길';
+        const _isBad  = g => _normG(g)==='흉';
+
+        const seasons = [
+            { emoji:'🌱', period:'봄 · 초년 (0~20대)',    label:'원격', rawNum: rawNums[0] },
+            { emoji:'☀️', period:'여름 · 청년 (20~40대)', label:'형격', rawNum: rawNums[1] },
+            { emoji:'🍂', period:'가을 · 장년 (40~60대)', label:'이격', rawNum: rawNums[2] },
+            { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:'정격', rawNum: rawNums[3] },
+        ];
+
+        const cardsHtml = seasons.map(s => {
+            let num = s.rawNum > 81 ? s.rawNum % 81 : s.rawNum;
             if (num === 0) num = 81;
             const d = (typeof SURI_DATA !== 'undefined' && SURI_DATA[num])
                 ? SURI_DATA[num] : { name:'', grade:'평', desc:'' };
-            const gr = _normG(d.grade);
-            return `<div class="suri-card">
-                <div class="suri-badge" style="background:${bgColors[i]};"><span class="num">${n}</span><span class="txt">${labels[i].split('(')[1]?.replace(')','')}</span></div>
-                <div class="suri-info">
-                    <h5>${labels[i].split('(')[0]} : <b>${d.name}</b>
-                        <span style="display:inline-block;margin-left:8px;vertical-align:middle;white-space:nowrap;padding:3px 11px;font-size:0.78rem;font-weight:800;border-radius:20px;background:${_gBg(d.grade)};color:${_gColor(d.grade)};">${gr}</span>
-                    </h5>
-                    <p>${d.desc||''}</p>
+            const cls = _isGood(d.grade) ? 'season-good' : _isBad(d.grade) ? 'season-bad' : '';
+            return `<div class="season-card ${cls}">
+                <div class="season-top">
+                    <div class="season-meta">
+                        <span class="season-emoji">${s.emoji}</span>
+                        <div>
+                            <div class="season-period">${s.period}</div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);">${s.label}</div>
+                        </div>
+                    </div>
+                    ${_badge(d.grade)}
                 </div>
+                <div class="season-num">${s.rawNum}</div>
+                <div class="season-suri-name">${d.name}</div>
+                <div class="season-desc">${d.desc}</div>
             </div>`;
         }).join('');
+
+        el.innerHTML = `<div class="suri-seasons-grid">${cardsHtml}</div>`;
     }
 
     // ── 발음 섹션 렌더링 ────────────────────────────────────────────
@@ -3661,8 +3702,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         ];
 
         el.innerHTML = items.map(x => `
-            <div class="ai-conclusion-item" style="background:${gradeBg(x.grade)};">
-                <span style="color:${gradeColor(x.grade)};font-size:0.88rem;">${icon(x.grade)}</span>
+            <div class="conclusion-point" style="background:${gradeBg(x.grade)};">
+                <span class="conclusion-point-icon" style="color:${gradeColor(x.grade)};">${icon(x.grade)}</span>
                 <div style="flex:1;">
                     <b style="color:${gradeColor(x.grade)};font-size:0.88rem;">${x.label}</b>
                     <span style="display:inline-block;margin-left:6px;background:${gradeBg(x.grade)};color:${gradeColor(x.grade)};border-radius:20px;padding:2px 9px;font-size:0.72rem;font-weight:800;border:1px solid ${gradeColor(x.grade)}33;">${normG(x.grade)}</span>
