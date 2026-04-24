@@ -1856,10 +1856,6 @@
                 </div>
                 <div class="report-guide-item">
                     <span class="report-guide-num">06</span>
-                    <div><div class="report-guide-title">실천 가이드</div><div class="report-guide-desc">오행 생활 팁 & 시기별 부모 가이드</div></div>
-                </div>
-                <div class="report-guide-item">
-                    <span class="report-guide-num">07</span>
                     <div><div class="report-guide-title">종합 결론</div><div class="report-guide-desc">총점·9개 지표·작명가 총평</div></div>
                 </div>
                 <div class="report-guide-item" style="border-color:var(--gold-dark);background:linear-gradient(135deg,#fffbeb,#fff8e6);">
@@ -2030,20 +2026,6 @@
             <div id="daeun-labels-bar"></div>
             <!-- 클릭 시 펼쳐지는 상세 패널 -->
             <div id="daeun-detail-panel" style="display:none;margin-top:12px;"></div>
-        </div>
-
-        <!-- Bridge to Practice Guide -->
-        <div class="story-bridge-wrap">
-            <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">이 이름을 가진 아이를 어떻게 키울까요?</div>
-            <div class="story-bridge-line"></div>
-        </div>
-
-        <!-- Chapter 6: 실천 가이드 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 6. 실천 가이드</div>
-            <h2 class="section-title">오행 생활 팁 &amp; 시기별 부모 가이드</h2>
-            <div id="report-practice-guide"></div>
         </div>
 
         <!-- Bridge -->
@@ -3953,10 +3935,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
         _renderDaeunSection(candidate, _currentState, report);
 
-        // Ch6: 실천 가이드
-        _renderPracticeGuide(candidate, _currentState, 'report-practice-guide');
-
-        // Ch7: 종합 결론
+        // Ch6: 종합 결론
         _renderConclusionGrid(candidate, _currentState);
         const conclusionEl = document.getElementById('ai-conclusion-letter');
         const conclusionTextEl = document.getElementById('ai-conclusion-letter-text');
