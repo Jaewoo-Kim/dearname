@@ -691,6 +691,20 @@
             #chat-send-btn { padding:11px 16px; font-size:0.85rem; }
         }
         .sound-unified { font-size:0.95rem;line-height:1.85;color:var(--text-primary);padding:20px 22px;background:#f8fafc;border-radius:14px;border:1px solid var(--border-light); }
+        /* ── 대운 칩 바 ── */
+        .daeun-chips-bar { display:flex;gap:6px;padding:14px 0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch; }
+        .daeun-chip { flex:1;min-width:54px;text-align:center;padding:10px 4px 8px;border-radius:12px;cursor:pointer;border:2px solid transparent;transition:all 0.2s;background:#f8fafc;position:relative; }
+        .daeun-chip:hover { transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.12); }
+        .daeun-chip.active { box-shadow:0 4px 16px rgba(0,0,0,0.18); }
+        .daeun-chip .dc-age { font-size:0.6rem;font-weight:700;color:#94a3b8;display:block;margin-bottom:5px;letter-spacing:0.3px; }
+        .daeun-chip .dc-gan { font-size:1.25rem;font-weight:900;display:block;line-height:1.1; }
+        .daeun-chip .dc-ji  { font-size:1.05rem;font-weight:800;display:block;line-height:1.1; }
+        .daeun-chip .dc-read{ font-size:0.58rem;color:#94a3b8;display:block;margin-top:3px; }
+        /* 상세 패널 */
+        .daeun-panel { padding:20px 22px;background:#fffcf5;border-radius:14px;border:1.5px solid var(--gold-dark);animation:fadeIn 0.2s ease; }
+        .daeun-panel-head { display:flex;align-items:center;gap:14px;margin-bottom:14px; }
+        .daeun-panel-ganji { font-size:2rem;font-weight:900;line-height:1;min-width:48px; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none} }
         .sound-grade-row { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
         .sound-grade-label { font-size:0.8rem;font-weight:700;color:var(--text-secondary);width:100px;flex-shrink:0; }
 
@@ -1696,15 +1710,18 @@
             <div class="story-bridge-line"></div>
         </div>
 
-        <!-- Chapter 5-B: 인생 흐름 & 대운 -->
+        <!-- Chapter 5-B: 인생 흐름 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 5. 대운과 이름의 여정</div>
-            <h2 class="section-title">인생 흐름 & 대운 분석</h2>
+            <h2 class="section-title">인생 흐름</h2>
             <div id="report-daeun-section"></div>
-            <div class="chart-container-large" style="margin-top:28px;">
+            <div class="chart-container-large" style="margin-top:20px;">
                 <canvas id="lifeFlowChart"></canvas>
             </div>
-            <div id="report-timeline" style="margin-top:28px;"></div>
+            <!-- 대운 칩 바 (차트 하단) -->
+            <div id="daeun-labels-bar"></div>
+            <!-- 클릭 시 펼쳐지는 상세 패널 -->
+            <div id="daeun-detail-panel" style="display:none;margin-top:12px;"></div>
         </div>
 
         <!-- Bridge -->
@@ -2938,7 +2955,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             lifeFlowChartInstance = new Chart(ctxFlow.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: ['10대 대운', '20대 대운', '30대 대운', '40대 대운', '50대 대운', '60대 대운', '70대 대운', '80대~'],
+                    labels: (window._daeunChartLabels && window._daeunChartLabels.length === 8)
+                        ? window._daeunChartLabels
+                        : ['1운','2운','3운','4운','5운','6운','7운','8운'],
                     datasets: [{
                         label: '종합 운세 지수',
                         data: [65, 78, 72, 85, 82, 92, 88, 98],
@@ -3918,120 +3937,192 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             </div>`).join('');
     }
 
-    // ── 대운 계산 & 렌더링 ─────────────────────────────────────────
+    // ── 대운 계산 & 칩 렌더링 ──────────────────────────────────────
     function _renderDaeunSection(candidate, state, report) {
-        const el = document.getElementById('report-daeun-section');
-        if (!el) return;
+        const elIntro  = document.getElementById('report-daeun-section');
+        const elChips  = document.getElementById('daeun-labels-bar');
+        const elDetail = document.getElementById('daeun-detail-panel');
+        if (!elIntro && !elChips) return;
 
         const saju   = state._saju || {};
         const gender = state.constraints?.gender || 'M';
 
-        // 60갑자 순서
+        // ── 공통 데이터 ────────────────────────────────────────────
         const G60 = ['甲子','乙丑','丙寅','丁卯','戊辰','己巳','庚午','辛未','壬申','癸酉',
                      '甲戌','乙亥','丙子','丁丑','戊寅','己卯','庚辰','辛巳','壬午','癸未',
                      '甲申','乙酉','丙戌','丁亥','戊子','己丑','庚寅','辛卯','壬辰','癸巳',
                      '甲午','乙未','丙申','丁酉','戊戌','己亥','庚子','辛丑','壬寅','癸卯',
                      '甲辰','乙巳','丙午','丁未','戊申','己酉','庚戌','辛亥','壬子','癸丑',
                      '甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥'];
-
         const GAN_O  = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
         const JI_O   = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
         const GAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
         const JI_KR  = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
-        const O_COLOR= {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#94a3b8','水':'#3b82f6'};
-        const O_KR   = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+        const O_COLOR= {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
+        const O_KR2  = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
         const CYCLE  = ['木','火','土','金','水'];
         const isSS   = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
         const isSK   = (a,b) => (CYCLE.indexOf(a)+2)%5===CYCLE.indexOf(b);
 
-        // 양간 여부 → 순행/역행
+        // 천간별 특성 설명 (1줄)
+        const GAN_DESC = {
+            '甲':'강한 개척 의지와 리더십이 발동하는 시기로, 새로운 도전이 폭발적으로 시작됩니다.',
+            '乙':'유연한 적응력과 섬세한 감수성이 강점이 되며, 인연과 협력이 풍성해집니다.',
+            '丙':'밝은 에너지와 사교성이 절정에 달해 명예와 인기가 자연스럽게 뒤따르는 황금기입니다.',
+            '丁':'조용한 집중력과 전문성이 깊어지며, 한 분야에서 차별화된 실력을 쌓아가는 내실의 시간입니다.',
+            '戊':'중후한 신뢰감과 안정된 기반이 구축되며, 주변의 믿음과 의지를 한 몸에 받게 됩니다.',
+            '己':'꼼꼼한 실용성과 계획력이 빛을 발해, 현실적이고 견고한 성과를 일궈내는 시기입니다.',
+            '庚':'강한 결단력과 추진력이 앞세워지며, 오랜 노력이 구체적인 결실로 맺혀나는 때입니다.',
+            '辛':'정교한 심미안과 완성도에 대한 추구가 두드러지며, 가치 있는 것을 선별하고 다듬어 나갑니다.',
+            '壬':'탁 트인 시야와 넓은 포용력으로 활동 무대가 확장되며 창의적 아이디어가 넘쳐납니다.',
+            '癸':'내면의 지혜와 통찰력이 무르익는 성숙의 시기로, 삶의 깊은 이치를 터득하게 됩니다.',
+        };
+        // 지지별 뒷받침 (1줄)
+        const JI_DESC = {
+            '子':'지지의 水(子) 기운이 학문적 탐구심과 유연한 사고를 뒷받침합니다.',
+            '丑':'지지의 土(丑) 기운이 견고한 토대와 꾸준한 인내력을 더해줍니다.',
+            '寅':'지지의 木(寅) 기운이 힘찬 시작과 진취적인 도약을 강하게 밀어줍니다.',
+            '卯':'지지의 木(卯) 기운이 부드럽고 지속적인 성장의 에너지를 공급합니다.',
+            '辰':'지지의 土(辰) 기운이 넓은 포용력과 대담한 실행력을 보태줍니다.',
+            '巳':'지지의 火(巳) 기운이 열정과 집중력을 더해 성취 욕구를 고조시킵니다.',
+            '午':'지지의 火(午) 기운이 최고조의 활동 에너지와 카리스마를 발산합니다.',
+            '未':'지지의 土(未) 기운이 풍성한 결실과 따뜻한 인덕(人德)을 예고합니다.',
+            '申':'지지의 金(申) 기운이 날카로운 판단력과 효율적 실행력을 더합니다.',
+            '酉':'지지의 金(酉) 기운이 정밀한 완성도와 깊은 성취감을 강화합니다.',
+            '戌':'지지의 土(戌) 기운이 성실한 마무리와 오랜 노력의 축적을 돕습니다.',
+            '亥':'지지의 水(亥) 기운이 깊은 내공과 내면의 성찰을 무르익게 합니다.',
+        };
+
+        // 양간 → 순행/역행
         const YANG_GAN = new Set(['甲','丙','戊','庚','壬']);
-        const yearGan  = saju.year?.gan || '';
-        const isYang   = YANG_GAN.has(yearGan);
+        const isYang   = YANG_GAN.has(saju.year?.gan||'');
         const isMale   = gender === 'M';
         const forward  = (isYang && isMale) || (!isYang && !isMale);
 
         const monthGanji = (saju.month?.gan||'') + (saju.month?.ji||'');
         let baseIdx = G60.indexOf(monthGanji);
         if (baseIdx === -1) baseIdx = 0;
-
-        // 대운 시작 나이 (절기 기반 정밀 계산 필요하나, 간략화로 5세 적용)
         const startAge = 5;
 
-        // 이름 자원오행 목록
         const nameOs = [candidate.h1?.o, candidate.h2?.o].filter(Boolean).map(o => _normOheng(o));
+        const nameKr = `${candidate.familyKr}${candidate.h1.kr}${candidate.h2?.kr||''}`;
 
-        // 대운 생성 (8개)
+        // ── 대운 8개 생성 ─────────────────────────────────────────
         const daeuns = Array.from({length: 8}, (_, i) => {
-            const idx = ((baseIdx + (forward ? i+1 : -(i+1))) % 60 + 60) % 60;
-            const gj  = G60[idx];
-            const gan = gj[0], ji = gj[1];
+            const idx  = ((baseIdx + (forward ? i+1 : -(i+1))) % 60 + 60) % 60;
+            const gj   = G60[idx];
+            const gan  = gj[0], ji = gj[1];
             const ganO = GAN_O[gan]||'', jiO = JI_O[ji]||'';
-            const ageS = startAge + i * 10;
-            const ageE = ageS + 9;
+            const ageS = startAge + i * 10, ageE = ageS + 9;
 
-            // 이름과의 관계 분석 (천간 오행 기준)
-            let rel = '', relColor = '#64748b', relBg = '#f1f5f9';
-            if (ganO && nameOs.length) {
-                const helpNames = nameOs.filter(no => isSS(no, ganO));
-                const hurtNames = nameOs.filter(no => isSK(no, ganO));
-                if (helpNames.length) {
-                    rel = `이름의 ${helpNames.map(o=>O_KR[o]).join('·')} 기운이 대운 ${O_KR[ganO]} 기운을 상생(相生)하여 시너지를 만듭니다.`;
-                    relColor = '#15803d'; relBg = '#f0fdf4';
-                } else if (hurtNames.length) {
-                    rel = `대운 ${O_KR[ganO]} 기운과 이름 오행이 상극 관계이나, 지지 ${O_KR[jiO]||''} 기운이 완충하여 큰 작용은 없습니다.`;
-                    relColor = '#b45309'; relBg = '#fffbeb';
+            // 3줄 해석
+            const line1 = GAN_DESC[gan] || `${gan} 대운의 기운이 인생에 영향을 미칩니다.`;
+            const line2 = JI_DESC[ji]   || `${ji} 지지의 기운이 뒷받침합니다.`;
+            let line3 = '';
+            if (nameOs.length && ganO) {
+                const helps = nameOs.filter(no => isSS(no, ganO));
+                const hurts = nameOs.filter(no => isSK(no, ganO));
+                if (helps.length) {
+                    const rel = helps[0] === ganO ? '동기상조(同氣相助)' : '상생(相生)';
+                    line3 = `이름 "${nameKr}"의 ${helps.map(o=>O_KR2[o]).join('·')} 기운이 대운과 ${rel}하여, 이 시기 잠재력이 한층 극대화됩니다.`;
+                } else if (hurts.length) {
+                    line3 = `이름의 ${hurts.map(o=>O_KR2[o]).join('·')} 기운이 대운과 상극 관계이나, 지지 ${O_KR2[jiO]||''}의 완충 작용으로 큰 충돌 없이 안정적으로 흘러갑니다.`;
                 } else {
-                    rel = `이름의 오행과 대운이 중화(中和)적 관계로, 안정된 흐름을 유지합니다.`;
-                    relColor = '#1d4ed8'; relBg = '#eff6ff';
+                    line3 = `이름의 오행과 대운이 중화(中和)적으로 작용하며, 꾸준하고 무탈한 흐름이 지속됩니다.`;
                 }
             }
 
-            return { gj, gan, ji, ganO, jiO, ageS, ageE, rel, relColor, relBg };
+            // 이름 시너지 유형 (칩 배경에 쓸 키)
+            const synergy = nameOs.some(no=>isSS(no,ganO)) ? 'good' : nameOs.some(no=>isSK(no,ganO)) ? 'warn' : 'mid';
+            return { gj, gan, ji, ganO, jiO, ageS, ageE, line1, line2, line3, synergy };
         });
 
-        // 현재 연도 기준으로 가장 관련된 대운(초년~청년)에 하이라이트
-        const birthYear = parseInt(saju.year?.ji ? '2000' : '2000'); // fallback
-        const lf = report.lifeFlow || {};
+        // ── 차트 레이블 전역 저장 ─────────────────────────────────
+        window._daeunChartLabels = daeuns.map(d => `${d.ageS}~${d.ageE}세`);
 
-        const colorsMap = ['#16a34a','#0891b2','#2563eb','#7c3aed','#db2777','#ea580c','#b45309','#64748b'];
+        // ── 인트로 ────────────────────────────────────────────────
+        if (elIntro) {
+            elIntro.innerHTML = `
+                <div style="font-size:0.88rem;line-height:1.8;color:var(--text-secondary);
+                    padding:13px 17px;background:#f8fafc;border-radius:12px;border-left:3px solid var(--gold-dark);margin-bottom:4px;">
+                    대운(大運)은 <b>월주(月柱)</b>에서 출발해 10년 주기로 흐르는 인생의 큰 파도입니다. 이 아이의 사주는
+                    <b>${forward?'순행(順行)':'역행(逆行)'}</b> 대운으로 약 <b>${startAge}세</b>부터 시작됩니다.
+                    아래 그래프의 대운 칩을 클릭하면 각 시기의 해석과 이름의 작용을 확인할 수 있습니다.
+                </div>`;
+        }
 
-        const daeunHtml = daeuns.map((d, i) => `
-            <div style="display:flex;gap:14px;align-items:flex-start;padding:18px;border-radius:14px;
-                        background:${i<2?'#fffcf5':'#f8fafc'};border:1.5px solid ${i<2?'#f0d070':'#e2e8f0'};margin-bottom:12px;">
-                <!-- 나이 + 간지 -->
-                <div style="flex-shrink:0;text-align:center;min-width:72px;">
-                    <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;letter-spacing:1px;margin-bottom:4px;">${d.ageS}~${d.ageE}세</div>
-                    <div style="font-size:1.35rem;font-weight:900;color:var(--bg-dark);line-height:1;">${d.gj[0]}</div>
-                    <div style="font-size:1.1rem;font-weight:800;color:var(--bg-dark);">${d.gj[1]}</div>
-                    <div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">${GAN_KR[d.gan]||''}${JI_KR[d.ji]||''}</div>
-                </div>
-                <!-- 오행 뱃지 + 분석 -->
-                <div style="flex:1;">
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
-                        <span style="font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;
-                            background:${O_COLOR[d.ganO]||'#94a3b8'}20;color:${O_COLOR[d.ganO]||'#64748b'};
-                            border:1px solid ${O_COLOR[d.ganO]||'#94a3b8'}50;">
-                            천간 ${O_KR[d.ganO]||d.ganO}</span>
-                        <span style="font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;
-                            background:${O_COLOR[d.jiO]||'#94a3b8'}15;color:${O_COLOR[d.jiO]||'#64748b'};
-                            border:1px solid ${O_COLOR[d.jiO]||'#94a3b8'}40;">
-                            지지 ${O_KR[d.jiO]||d.jiO}</span>
+        // ── 대운 칩 바 렌더링 ─────────────────────────────────────
+        if (elChips) {
+            const SYNERBY_BORDER = { good:'#22c55e', warn:'#f59e0b', mid:'#94a3b8' };
+            elChips.innerHTML = `<div class="daeun-chips-bar">${daeuns.map((d, i) => {
+                const c = O_COLOR[d.ganO] || '#64748b';
+                const b = SYNERBY_BORDER[d.synergy];
+                return `<button class="daeun-chip" data-idx="${i}"
+                    style="border-color:${b}30;background:${c}10;"
+                    onclick="_showDaeunDetail(${i})">
+                    <span class="dc-age">${d.ageS}~${d.ageE}세</span>
+                    <span class="dc-gan" style="color:${c};">${d.gan}</span>
+                    <span class="dc-ji"  style="color:${c};">${d.ji}</span>
+                    <span class="dc-read">${GAN_KR[d.gan]||''}${JI_KR[d.ji]||''}</span>
+                </button>`;
+            }).join('')}</div>
+            <div style="font-size:0.72rem;color:#94a3b8;text-align:center;margin-top:2px;">
+                <span style="color:#22c55e;font-weight:700;">●</span> 상생&nbsp;
+                <span style="color:#f59e0b;font-weight:700;">●</span> 보완&nbsp;
+                <span style="color:#94a3b8;font-weight:700;">●</span> 중화&nbsp;&nbsp;— 칩을 클릭하면 대운 해석을 볼 수 있습니다
+            </div>`;
+        }
+
+        // ── 전역 함수: 칩 클릭 시 상세 패널 ──────────────────────
+        window._showDaeunDetail = (idx) => {
+            if (!elDetail) return;
+            const d = daeuns[idx];
+            const c = O_COLOR[d.ganO] || '#64748b';
+            // 칩 active 표시
+            document.querySelectorAll('.daeun-chip').forEach((el,i) => {
+                el.classList.toggle('active', i === idx);
+                el.style.borderColor = i === idx ? c : ({good:'#22c55e',warn:'#f59e0b',mid:'#94a3b8'}[daeuns[i].synergy]+'30');
+            });
+            // 같은 칩 재클릭 시 닫기
+            if (elDetail.style.display !== 'none' && elDetail.dataset.openIdx === String(idx)) {
+                elDetail.style.display = 'none';
+                elDetail.dataset.openIdx = '';
+                document.querySelectorAll('.daeun-chip').forEach(el => el.classList.remove('active'));
+                return;
+            }
+            elDetail.dataset.openIdx = String(idx);
+            elDetail.style.display = 'block';
+            elDetail.innerHTML = `
+                <div class="daeun-panel">
+                    <div class="daeun-panel-head">
+                        <div class="daeun-panel-ganji" style="color:${c};">${d.gan}<br>${d.ji}</div>
+                        <div>
+                            <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;letter-spacing:1px;margin-bottom:4px;">${d.ageS} ~ ${d.ageE}세 대운</div>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <span style="font-size:0.75rem;font-weight:800;padding:3px 11px;border-radius:20px;
+                                    background:${c}18;color:${c};border:1px solid ${c}40;">천간 ${O_KR2[d.ganO]||d.ganO}</span>
+                                <span style="font-size:0.75rem;font-weight:800;padding:3px 11px;border-radius:20px;
+                                    background:${O_COLOR[d.jiO]||'#94a3b8'}18;color:${O_COLOR[d.jiO]||'#64748b'};border:1px solid ${O_COLOR[d.jiO]||'#94a3b8'}40;">
+                                    지지 ${O_KR2[d.jiO]||d.jiO}</span>
+                            </div>
+                        </div>
                     </div>
-                    ${d.rel ? `<div style="font-size:0.85rem;line-height:1.7;padding:10px 14px;border-radius:10px;
-                        background:${d.relBg};color:${d.relColor};font-weight:600;">
-                        ✦ ${d.rel}</div>` : ''}
-                </div>
-            </div>`).join('');
-
-        el.innerHTML = `
-            <div style="font-size:0.88rem;line-height:1.75;color:var(--text-secondary);padding:14px 18px;
-                background:#f8fafc;border-radius:12px;border-left:3px solid var(--gold-dark);margin-bottom:20px;">
-                대운(大運)은 사주의 <b>월주(月柱)</b>에서 출발하여 10년 주기로 흐르는 인생의 큰 파도입니다.
-                이 아이의 사주는 <b>${forward?'순행(順行)':'역행(逆行)'}</b> 대운으로 흘러, ${startAge}세 무렵부터 아래의 대운이 시작됩니다.
-                이름의 자원오행이 각 대운에서 어떤 역할을 하는지 살펴봅니다.
-            </div>
-            ${daeunHtml}`;
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="font-size:0.75rem;font-weight:800;color:white;background:${c};border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">대운</span>
+                            <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);">${d.line1}</p>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="font-size:0.75rem;font-weight:800;color:white;background:${O_COLOR[d.jiO]||'#94a3b8'};border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">지지</span>
+                            <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);">${d.line2}</p>
+                        </div>
+                        ${d.line3 ? `<div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="font-size:0.75rem;font-weight:800;color:white;background:#d4af37;border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">이름</span>
+                            <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);font-weight:600;">${d.line3}</p>
+                        </div>` : ''}
+                    </div>
+                </div>`;
+        };
     }
 
     // ── 양육 가이드 타임라인 ────────────────────────────────────────
