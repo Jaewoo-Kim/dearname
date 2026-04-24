@@ -3609,36 +3609,50 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
               }</div>`
             : '';
 
-        const yinTexts = {
-            '길': `획수의 홀(양·陽)과 짝(음·陰)이 균형 있게 배합되어 있습니다. 음양의 조화는 이름이 뿜어내는 기운이 한쪽으로 치우치지 않고 고르게 순환함을 뜻하며, 아이의 기질 형성에 안정적인 에너지를 공급합니다.`,
-            '평': `획수의 음양 배합이 무난한 수준입니다. 완전한 균형은 아니지만 다른 수리 요소들과 함께 전체적인 조화를 유지합니다.`,
-            '흉': `획수가 홀수 또는 짝수 한쪽으로만 쏠려 있어 음양 균형이 깨져 있습니다. 이름에서 방출되는 기운이 한 방향으로 편중될 수 있습니다.`,
-        };
+        const moDesc = mathOheng?.desc ? ` ${mathOheng.desc}` : '';
+        const myDesc = mathYin?.desc   ? ` ${mathYin.desc}`   : '';
+
         const ohengTexts = {
-            '길': `수리의 핵심인 형격과 정격의 오행이 서로를 돕는 <b>상생(相生)</b> 관계입니다. 청년기의 기운과 전체 운이 조화롭게 이어져 인생 흐름이 막힘없이 흐릅니다.`,
-            '평': `형격과 정격의 오행이 상생도 상극도 아닌 중립 관계입니다. 다른 수리 요소들과의 조화를 함께 고려해 주세요.`,
-            '흉': `형격과 정격의 오행 사이에 <b>상극(相剋)</b>이 발생합니다. 청년기에 쌓은 기운이 전체 운과 충돌하여 인생 흐름에 불협화음이 생길 수 있습니다.`,
+            '길': `수리의 핵심인 형격(청년운)과 정격(전체운)의 오행이 서로를 북돋는 <b>상생(相生)</b> 관계를 이루고 있습니다.
+                상생이란 나무가 불을 키우고 불이 흙을 만들 듯, 앞선 기운이 다음 기운으로 자연스럽게 이어지는 것입니다.
+                청년기에 쌓은 에너지가 인생 전체의 흐름으로 막힘없이 연결되어, 노력이 결실로 이어지는 구조가 탄탄합니다.${moDesc}`,
+            '평': `형격(청년운)과 정격(전체운)의 오행이 상생도 상극도 아닌 <b>중화(中和)</b>적 관계를 맺고 있습니다.
+                기운의 충돌은 없으나 서로 적극적으로 돕지도 않아, 인생 흐름이 큰 기복 없이 평탄하게 이어집니다.
+                자원오행·발음오행 등 다른 요소들이 보완 역할을 해준다면 전체적인 균형을 충분히 유지할 수 있습니다.${moDesc}`,
+            '흉': `형격(청년운)과 정격(전체운)의 오행 사이에 <b>상극(相剋)</b>이 발생합니다.
+                상극이란 쇠가 나무를 자르고 물이 불을 끄듯, 앞선 기운이 다음 기운을 억누르는 관계입니다.
+                청년기에 쌓은 기운이 인생 전체 흐름과 충돌하면 노력 대비 결실이 더디게 느껴질 수 있으므로,
+                자원오행과 발음오행에서 보완 기운을 강화해 균형을 잡는 것이 중요합니다.${moDesc}`,
+        };
+        const yinTexts = {
+            '길': `이름을 이루는 한자들의 획수가 홀수(양·陽)와 짝수(음·陰)로 고르게 배합되어 있습니다.
+                동양 철학에서 음양의 조화는 만물이 생성되는 근본 원리로, 이름에서 뿜어내는 기운이 한쪽으로 치우치지 않고 균형 있게 순환함을 의미합니다.
+                평생 수만 번 불릴 이름에서 이 균형이 유지된다는 것은, 아이의 기질이 편향되지 않고 유연하고 안정적으로 형성되도록 돕는다는 뜻입니다.${myDesc}`,
+            '평': `이름 획수의 음양 배합이 무난한 수준으로, 기운의 흐름이 크게 치우치지 않는 상태입니다.
+                완전한 홀짝 교차는 아니지만 극단적인 편향도 없어, 다른 수리 요소 및 자원오행과 함께 전체적인 조화를 이루어 나갑니다.
+                발음오행·자원오행이 균형을 뒷받침해준다면 이 부분은 충분히 보완될 수 있습니다.${myDesc}`,
+            '흉': `이름 획수가 홀수 또는 짝수 한쪽으로만 쏠려 있어 <b>음양의 균형이 깨진</b> 상태입니다.
+                음양의 불균형은 이름이 방출하는 기운이 한 방향으로만 지속적으로 편중됨을 뜻하며, 장기적으로 아이의 기질 형성에 영향을 줄 수 있습니다.
+                획수 홀짝이 고루 섞인 한자로 재조합하거나, 자원오행과 발음오행에서 균형을 충분히 보완하는 방향을 권합니다.${myDesc}`,
         };
 
         return `
             <!-- 수리 오행 카드 -->
             <div class="sound-unified" style="margin-bottom:16px;">
                 <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">수리 오행 (형격·정격)</span>
+                    <span class="sound-grade-label">수리 오행</span>
                     ${badge(moG)}
                 </div>
                 <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${ohengTexts[_normG(moG)]}</p>
-                ${mathOheng?.desc ? `<p style="margin:10px 0 0;font-size:0.8rem;color:var(--text-muted);">※ ${mathOheng.desc}</p>` : ''}
             </div>
             <!-- 수리 음양 카드 -->
             <div class="sound-unified">
                 ${yyChips}
                 <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">수리 음양 (획수 홀짝)</span>
+                    <span class="sound-grade-label">수리 음양</span>
                     ${badge(myG)}
                 </div>
                 <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(myG)]}</p>
-                ${mathYin?.desc ? `<p style="margin:10px 0 0;font-size:0.8rem;color:var(--text-muted);">※ ${mathYin.desc}</p>` : ''}
             </div>`;
     }
 
