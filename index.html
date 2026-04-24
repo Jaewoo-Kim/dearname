@@ -2899,7 +2899,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         /* ----------------------------------------------------
            ⑦ 자원오행 — 선택 한자의 오행 구성 요약
            ---------------------------------------------------- */
-        const _OHENG_KR_SHORT = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+        const _OHENG_KR_SHORT = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const _OHENG_C_DIAG   = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#e8ecf0','水':'#0f172a'};
         let jawonGrade = '나쁨', jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
         if (hanjaOhengs.length > 0) {
@@ -3030,7 +3030,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // ── 공통 헬퍼 ─────────────────────────────────────────────────
         const _OHENG_COLOR_R = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
-        const _OHENG_KR_R    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const _OHENG_KR_R    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const _normG      = g => _GRADE4[g] || g; // 구 등급 → 4단계 (applyBadge와 동일 맵 사용)
         const _gradeColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'}[_normG(g)]||'#64748b');
         const _gradeBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'}[_normG(g)]||'#f1f5f9');
@@ -3897,7 +3897,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const jawonChipsEl = document.getElementById('report-jawon-chips');
         if (jawonChipsEl) {
             const OHENG_C = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
-            const OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+            const OHENG_KR = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
             const hanjaItems = [h1, h2].filter(Boolean).filter(x => x.h && x.o);
             if (hanjaItems.length) {
                 const chipsHtml = hanjaItems.map(x => {
@@ -4065,7 +4065,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         '申':'빠르고 정확하게 파고드는 신금(申金)의 추진력','酉':'완벽을 추구하는 유금(酉金)의 날카로움',
         '戌':'끝까지 해내고야 마는 술토(戌土)의 뚝심','亥':'자유롭게 상상하는 해수(亥水)의 지혜',
     };
-    const _OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+    const _OHENG_KR = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
     // 오행 → 상징 색상 (OHENG_COLORS와 동일하게 유지)
     const _PILLAR_OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
 
@@ -4156,7 +4156,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 수리오행 — 오행 흐름 시각화용
         const O_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
-        const O_KR    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const O_KR    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const CYCLE   = ['木','火','土','金','水'];
         const isSS    = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
 
@@ -4454,7 +4454,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             return '?';
         };
         const OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
-        const OHENG_KR    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const OHENG_KR    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const CYCLE = ['木','火','土','金','水'];
         const isSangsaeng = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
 
@@ -4558,8 +4558,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // ── 상극 쌍 설명 생성 ────────────────────────────────────────
         const conflictPairs = [];
         const goodPairs = [];
+        const _ohengShort = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
         for (let i = 0; i < ohengs.length - 1; i++) {
-            const pair = `${OHENG_KR[ohengs[i]]||ohengs[i]}(${chars[i]}) → ${OHENG_KR[ohengs[i+1]]||ohengs[i+1]}(${chars[i+1]})`;
+            const pair = `${_ohengShort[ohengs[i]]||ohengs[i]}(${chars[i]}) → ${_ohengShort[ohengs[i+1]]||ohengs[i+1]}(${chars[i+1]})`;
             isSangsaeng(ohengs[i], ohengs[i+1]) ? goodPairs.push(pair) : conflictPairs.push(pair);
         }
         const pairNoteHtml = (conflictPairs.length || goodPairs.length) ? `
@@ -4653,7 +4654,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const GAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
         const JI_KR  = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
         const O_COLOR= {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
-        const O_KR2  = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+        const O_KR2  = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const CYCLE  = ['木','火','土','金','水'];
         const isSS   = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
         const isSK   = (a,b) => (CYCLE.indexOf(a)+2)%5===CYCLE.indexOf(b);
@@ -4737,7 +4738,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const O_EFFECT = {
             '木':'성장·창의력', '火':'명예·사교성', '土':'안정·신뢰감', '金':'결단·성취', '水':'지혜·통찰'
         };
-        const O_SHORT = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+        const O_SHORT = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
 
         // ── 대운 8개 생성 ─────────────────────────────────────────
         const daeuns = Array.from({length: 8}, (_, i) => {
@@ -5258,7 +5259,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     const _CHEONGAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
     const _JIJI_KR     = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
     const _OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
-    const _OHENG_NAME  = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+    const _OHENG_NAME  = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
     const _CG_OHENG    = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
     const _JJ_OHENG    = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
 
