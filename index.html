@@ -551,6 +551,22 @@
         .name-card-tab.active .card-kr { color: #d4af37; }
         .card-hanja { color: rgba(255, 255, 255, 0.5); font-size: 0.9rem; }    
 
+        /* ── Executive Summary Card ── */
+        .exec-summary { display:flex;align-items:center;gap:28px;background:white;border-radius:24px;border:1px solid var(--border-light);border-top:4px solid var(--gold-premium);padding:32px 36px;box-shadow:var(--shadow-premium);margin-bottom:24px; }
+        .exec-score-ring { flex-shrink:0; }
+        .exec-score-body { flex:1;min-width:0; }
+        .exec-name { font-size:1.45rem;font-weight:900;color:var(--bg-dark);margin-bottom:4px; }
+        .exec-name span { font-size:1rem;font-weight:400;color:var(--text-muted);margin-left:8px; }
+        .exec-stars { font-size:1rem;color:var(--gold-premium);letter-spacing:3px;margin-bottom:8px; }
+        .exec-msg { font-size:0.92rem;color:var(--text-secondary);font-style:italic;border-left:3px solid var(--gold-premium);padding-left:12px;margin:8px 0 14px;line-height:1.65; }
+        .exec-items { display:flex;flex-wrap:wrap;gap:7px; }
+        .exec-item { display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:0.76rem;font-weight:700; }
+        .exec-item.good { background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0; }
+        .exec-item.warn { background:#fffbeb;color:#92400e;border:1px solid #fde68a; }
+        .exec-item.bad  { background:#fee2e2;color:#991b1b;border:1px solid #fecaca; }
+        .exec-item.mid  { background:#f8fafc;color:#64748b;border:1px solid #e2e8f0; }
+        @media(max-width:640px){ .exec-summary{ flex-direction:column;align-items:flex-start;gap:16px;padding:24px 22px; } }
+
         /* ── 스토리형 셀프 보고서 ── */
         .story-intro-card { max-width:780px;margin:0 auto 8px;padding:28px 36px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:20px;border-left:4px solid var(--gold-dark);font-size:1rem;color:var(--text-secondary);line-height:1.9; }
         .story-chapter-label { font-size:0.72rem;font-weight:800;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px; }
@@ -1348,6 +1364,9 @@
 
     <main class="report-main">
 
+        <!-- Executive Summary -->
+        <div id="self-exec-summary"></div>
+
         <!-- ① 도입 브릿지 -->
         <div class="story-intro-card" id="self-story-intro">
             사주가 아이가 태어난 <b>'토양'</b>이라면, 이름은 그 위에 뿌리내릴 <b>'씨앗'</b>과 같습니다.<br>
@@ -1542,6 +1561,9 @@
     </header>
 
     <main class="report-main">
+
+        <!-- Executive Summary -->
+        <div id="report-exec-summary"></div>
 
         <!-- 도입 브릿지 -->
         <div class="story-intro-card">
@@ -2675,6 +2697,25 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const totalW     = _scored.reduce((s,x) => s+x.w, 0);
         const finalScore = Math.round(_scored.reduce((s,x) => s+(_g2s[x.g]??50)*x.w, 0) / totalW);
 
+        // ── Executive Summary 렌더링 ───────────────────────────────────
+        const _selfExecEl = document.getElementById('self-exec-summary');
+        if (_selfExecEl && typeof _buildExecSummaryHtml === 'function') {
+            const _execItems = [
+                { label:'원격 (초년운)', g: sGrades[0].grade },
+                { label:'형격 (청년운)', g: sGrades[1].grade },
+                { label:'이격 (장년운)', g: sGrades[2].grade },
+                { label:'정격 (전체운)', g: sGrades[3].grade },
+                { label:'발음 오행',    g: data.pronounceOheng.grade },
+                { label:'발음 음양',    g: data.pronounceYin.grade },
+                { label:'수리 오행',    g: data.mathOheng.grade },
+                { label:'수리 음양',    g: data.mathYin.grade },
+                { label:'사주 보완',    g: data.sajuOheng.grade },
+            ];
+            _selfExecEl.innerHTML = _buildExecSummaryHtml(
+                `${lastName}${firstName}`, hanjaStr, finalScore, _execItems
+            );
+        }
+
         // ── 공통 헬퍼 ─────────────────────────────────────────────────
         const _OHENG_COLOR_R = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
         const _OHENG_KR_R    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
@@ -3293,6 +3334,28 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             metaEl.textContent = `${_currentState.familyName.kr} ${h1.kr}${h2?.kr||''} · ${gender} · ${_saju.day.gan}${_saju.day.ji}(${_toHangul(_saju.day.gan)}${_toHangul(_saju.day.ji)}) 일주`;
         }
 
+        // ── Executive Summary ──────────────────────────────────────────
+        const _reportExecEl = document.getElementById('report-exec-summary');
+        if (_reportExecEl && typeof _buildExecSummaryHtml === 'function') {
+            const _ad = (typeof getAnalysisData === 'function')
+                ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
+            if (_ad) {
+                const _sg = _ad.suriGrades || [];
+                const _execItemsPrem = [
+                    { label:'원격 (초년운)', g: _sg[0]?.grade||'평' },
+                    { label:'형격 (청년운)', g: _sg[1]?.grade||'평' },
+                    { label:'이격 (장년운)', g: _sg[2]?.grade||'평' },
+                    { label:'정격 (전체운)', g: _sg[3]?.grade||'평' },
+                    { label:'발음 오행',    g: _ad.pronounceOheng?.grade||'평' },
+                    { label:'발음 음양',    g: _ad.pronounceYin?.grade||'평' },
+                    { label:'수리 오행',    g: _ad.mathOheng?.grade||'평' },
+                    { label:'수리 음양',    g: _ad.mathYin?.grade||'평' },
+                    { label:'사주 보완',    g: _ad.sajuOheng?.grade||'평' },
+                ];
+                _reportExecEl.innerHTML = _buildExecSummaryHtml(kr, hj, score, _execItemsPrem);
+            }
+        }
+
         // Ch1: 사주 원국
         _renderSajuGrid(_saju);
         _renderOhengBars(_scores, candidate);
@@ -3683,6 +3746,53 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }).join('');
 
         el.innerHTML = `<div class="suri-seasons-grid">${cardsHtml}</div>`;
+    }
+
+    // ── Executive Summary 카드 빌더 ────────────────────────────────
+    function _buildExecSummaryHtml(nameKr, nameHj, score, labeledItems) {
+        const _ng  = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
+        const stars = score>=90?'★★★★★':score>=75?'★★★★☆':score>=55?'★★★☆☆':score>=35?'★★☆☆☆':'★☆☆☆☆';
+        const msg   = score>=90 ? '천운과 이름이 완벽하게 어우러진 성명입니다' :
+                      score>=80 ? '사주와 조화롭고 풍요로운 기운의 이름입니다' :
+                      score>=70 ? '탄탄한 기반 위에 밝은 기운을 담은 이름입니다' :
+                      score>=55 ? '균형 잡힌 구성으로 무난한 흐름을 갖춘 이름입니다' :
+                      score>=35 ? '일부 항목의 보완이 필요한 이름입니다' :
+                                  '전반적인 재검토가 권장되는 이름입니다';
+
+        const scoreColor = score>=75?'#d4af37':score>=55?'#64748b':'#ef4444';
+        const C = 2*Math.PI*42; // circumference r=42
+        const filled = ((score/100)*C).toFixed(1);
+
+        const goodItems = labeledItems.filter(it=>_ng(it.g)==='길');
+        const badItems  = labeledItems.filter(it=>_ng(it.g)==='흉');
+        const midItems  = labeledItems.filter(it=>_ng(it.g)==='평');
+
+        const itemsHtml = [
+            ...goodItems.map(it=>`<span class="exec-item good">✓ ${it.label}</span>`),
+            ...badItems.map(it =>`<span class="exec-item bad">⚠ ${it.label}</span>`),
+            ...midItems.slice(0,2).map(it=>`<span class="exec-item mid">· ${it.label}</span>`),
+        ].join('');
+
+        return `<div class="exec-summary">
+            <div class="exec-score-ring">
+                <svg viewBox="0 0 100 100" width="110" height="110">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" stroke-width="9"/>
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="${scoreColor}" stroke-width="9"
+                        stroke-dasharray="${filled} ${C.toFixed(1)}"
+                        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                    <text x="50" y="45" text-anchor="middle" font-size="22" font-weight="900"
+                        fill="#0f172a" font-family="Pretendard,sans-serif">${score}</text>
+                    <text x="50" y="61" text-anchor="middle" font-size="9" fill="#94a3b8"
+                        font-family="Pretendard,sans-serif">/ 100점</text>
+                </svg>
+            </div>
+            <div class="exec-score-body">
+                <div class="exec-name">${nameKr}<span>${nameHj}</span></div>
+                <div class="exec-stars">${stars}</div>
+                <div class="exec-msg">"${msg}"</div>
+                <div class="exec-items">${itemsHtml}</div>
+            </div>
+        </div>`;
     }
 
     // ── 발음 섹션 렌더링 (프리미엄 풍부화 ver.) ─────────────────────
