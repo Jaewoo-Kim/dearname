@@ -16,6 +16,15 @@
 import os, json, sys
 from pathlib import Path
 
+# .env 파일 자동 로드 (로컬 개발용)
+_env_path = Path(__file__).parent / '.env'
+if _env_path.exists():
+    for _line in _env_path.read_text(encoding='utf-8').splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith('#') and '=' in _line:
+            _k, _v = _line.split('=', 1)
+            os.environ.setdefault(_k.strip(), _v.strip())
+
 try:
     from flask import Flask, request, jsonify, send_from_directory, send_file, Response
     from flask_cors import CORS
