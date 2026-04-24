@@ -1666,25 +1666,11 @@
             <div class="story-bridge-line"></div>
         </div>
 
-        <!-- Chapter 4-A: 발음 오행 -->
+        <!-- Chapter 4: 발음 오행 & 음양 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
-            <h2 class="section-title">발음 오행 분석</h2>
-            <div id="ai-sound-oheng"></div>
-        </div>
-
-        <!-- Bridge -->
-        <div class="story-bridge-wrap">
-            <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">이름의 모음이 만들어내는 음양(陰陽)의 파동입니다.</div>
-            <div class="story-bridge-line"></div>
-        </div>
-
-        <!-- Chapter 4-B: 발음 음양 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
-            <h2 class="section-title">발음 음양 분석</h2>
-            <div id="ai-sound-yin"></div>
+            <h2 class="section-title">발음 오행 & 음양 분석</h2>
+            <div id="ai-sound-body"></div>
             <div class="ai-story-block" id="ai-sound-story" style="margin-top:20px;"></div>
         </div>
 
@@ -3714,9 +3700,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // ── 발음 섹션 렌더링 (프리미엄 풍부화 ver.) ─────────────────────
     function _renderSoundSection(candidate, report) {
-        const elOheng = document.getElementById('ai-sound-oheng');
-        const elYin   = document.getElementById('ai-sound-yin');
-        if (!elOheng && !elYin) return;
+        const elBody  = document.getElementById('ai-sound-body');
+        // 구버전 개별 컨테이너도 호환
+        const elOheng = elBody || document.getElementById('ai-sound-oheng');
+        const elYin   = elBody ? null : document.getElementById('ai-sound-yin');
+        if (!elOheng && !elYin && !elBody) return;
         const { familyKr, h1, h2 } = candidate;
         const fullKr = `${familyKr}${h1.kr}${h2?.kr||''}`;
 
@@ -3844,42 +3832,39 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 ${conflictPairs.length ? `<div>⚡ <b style="color:#dc2626;">상극</b> : ${conflictPairs.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>` : ''}
             </div>` : '';
 
-        // ── 오행 카드 렌더링 ──────────────────────────────────────────
-        if (elOheng) {
-            elOheng.innerHTML = `
-                <div class="sound-unified">
-                    <!-- 초성 오행 흐름 시각화 -->
-                    <div style="margin-bottom:20px;">
-                        <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 초성 오행 흐름</div>
-                        <div class="ai-sound-flow">${flowHtml}</div>
-                        ${pairNoteHtml}
-                    </div>
-                    <!-- 오행 등급 + 설명 -->
-                    <div class="sound-grade-row" style="margin-bottom:8px;">
-                        <span class="sound-grade-label">발음 오행 (초성)</span>
-                        ${_badge(pronGrade)}
-                        <span style="font-size:0.8rem;color:var(--text-muted);margin-left:6px;">상생 ${goodCount}/${totalPairs}쌍</span>
-                    </div>
-                    <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${pronTexts[_normG(pronGrade)]||pronTexts['평']}</p>
-                </div>`;
-        }
+        // ── 통합 카드 렌더링 (오행 + 음양 한 박스) ──────────────────
+        const combinedHtml = `
+            <!-- 발음 오행 카드 -->
+            <div class="sound-unified" style="margin-bottom:16px;">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 초성 오행 흐름</div>
+                    <div class="ai-sound-flow">${flowHtml}</div>
+                    ${pairNoteHtml}
+                </div>
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">발음 오행</span>
+                    ${_badge(pronGrade)}
+                    <span style="font-size:0.8rem;color:var(--text-muted);margin-left:6px;">상생 ${goodCount}/${totalPairs}쌍</span>
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${pronTexts[_normG(pronGrade)]||pronTexts['평']}</p>
+            </div>
+            <!-- 발음 음양 카드 -->
+            <div class="sound-unified">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 모음 음양 배합</div>
+                    <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">${yyCharsHtml}</div>
+                </div>
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">발음 음양</span>
+                    ${_badge(yinGrade)}
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(yinGrade)]||yinTexts['평']}</p>
+            </div>`;
 
-        // ── 음양 카드 렌더링 ──────────────────────────────────────────
-        if (elYin) {
-            elYin.innerHTML = `
-                <div class="sound-unified">
-                    <!-- 모음 음양 시각화 -->
-                    <div style="margin-bottom:20px;">
-                        <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 모음 음양 배합</div>
-                        <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">${yyCharsHtml}</div>
-                    </div>
-                    <!-- 음양 등급 + 설명 -->
-                    <div class="sound-grade-row" style="margin-bottom:8px;">
-                        <span class="sound-grade-label">발음 음양 (모음)</span>
-                        ${_badge(yinGrade)}
-                    </div>
-                    <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(yinGrade)]||yinTexts['평']}</p>
-                </div>`;
+        if (elBody) {
+            elBody.innerHTML = combinedHtml;
+        } else {
+            if (elOheng) elOheng.innerHTML = combinedHtml;
         }
     }
 
