@@ -3430,7 +3430,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const saju = (typeof calcSaju === 'function' && birthDate)
             ? calcSaju(birthDate, birthTime, _premSajuOpts) : null;
         const scores    = (saju && typeof calcOhengScores === 'function') ? calcOhengScores(saju) : {'木':20,'火':20,'土':20,'金':20,'水':20};
-        const nameSpec  = (typeof buildNameSpec === 'function') ? buildNameSpec(saju, scores) : {prefer:[],avoid:[],minCount:{},strategy:'balance',gridType:'general'};
+
+        // 대운 계산 (성별 필요)
+        const gender = document.querySelector('[name="premium_gender"]:checked')?.value || 'M';
+        const daeun  = (saju && typeof calcDaeun === 'function')
+            ? calcDaeun(saju, birthDate, birthTime, gender) : null;
+
+        const nameSpec  = (typeof buildNameSpec === 'function') ? buildNameSpec(saju, scores, daeun) : {prefer:[],avoid:[],minCount:{},strategy:'balance',gridType:'general'};
 
         const familyKr    = document.getElementById('prem-last-name')?.value.trim() || '';
         const familyHanja = document.getElementById('prem-last-name-hanja')?.value || familyKr;
@@ -3440,7 +3446,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const dolrimHanja = document.getElementById('prem-dolrim-hanja')?.value || '';
         const hangryulHanja = document.getElementById('prem-hangryul-hanja')?.value || '';
         const traits = [...document.querySelectorAll('[name="traits"]:checked')].map(el => parseInt(el.value));
-        const gender = document.querySelector('[name="premium_gender"]:checked')?.value || 'M';
         const dolrimPos = parseInt(document.querySelector('[name="dolrim_pos"]:checked')?.value || '3');
         const hangryulPos = parseInt(document.querySelector('[name="hangryul_pos"]:checked')?.value || '2');
 
@@ -3460,7 +3465,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             },
             searchControl: { maxResults:5, qualityThreshold:60 },
             _saju:   saju,
-            _scores: scores
+            _scores: scores,
+            daeun,
+            gender
         };
     }
 
@@ -4597,16 +4604,23 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             '亥':'지지의 水(亥) 기운이 깊은 내공과 내면의 성찰을 무르익게 합니다.',
         };
 
-        // 양간 → 순행/역행
-        const YANG_GAN = new Set(['甲','丙','戊','庚','壬']);
-        const isYang   = YANG_GAN.has(saju.year?.gan||'');
-        const isMale   = gender === 'M';
-        const forward  = (isYang && isMale) || (!isYang && !isMale);
+        // calcDaeun 결과 우선 사용, 없으면 자체 계산
+        const _daeunData = state.daeun;
+        let forward, startAge;
+        if (_daeunData) {
+            forward   = _daeunData.isForward;
+            startAge  = _daeunData.startAge;
+        } else {
+            const YANG_GAN_SET = new Set(['甲','丙','戊','庚','壬']);
+            const isYang = YANG_GAN_SET.has(saju.year?.gan||'');
+            const isMale = gender === 'M';
+            forward  = (isYang && isMale) || (!isYang && !isMale);
+            startAge = 5;
+        }
 
         const monthGanji = (saju.month?.gan||'') + (saju.month?.ji||'');
         let baseIdx = G60.indexOf(monthGanji);
         if (baseIdx === -1) baseIdx = 0;
-        const startAge = 5;
 
         const nameOs = [candidate.h1?.o, candidate.h2?.o].filter(Boolean).map(o => _normOheng(o));
         const nameKr = `${candidate.familyKr}${candidate.h1.kr}${candidate.h2?.kr||''}`;
@@ -4644,11 +4658,22 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // ── 대운 8개 생성 ─────────────────────────────────────────
         const daeuns = Array.from({length: 8}, (_, i) => {
-            const idx  = ((baseIdx + (forward ? i+1 : -(i+1))) % 60 + 60) % 60;
-            const gj   = G60[idx];
-            const gan  = gj[0], ji = gj[1];
-            const ganO = GAN_O[gan]||'', jiO = JI_O[ji]||'';
-            const ageS = startAge + i * 10, ageE = ageS + 9;
+            // calcDaeun cycles가 있으면 우선 사용 (정확한 startAge, 간지)
+            let gan, ji, ganO, jiO, ageS, ageE;
+            if (_daeunData?.cycles?.[i]) {
+                const cy = _daeunData.cycles[i];
+                gan  = cy.gan;  ji  = cy.ji;
+                ganO = cy.ganOheng || GAN_O[gan]||'';
+                jiO  = cy.jiOheng  || JI_O[ji]||'';
+                ageS = cy.startAge; ageE = cy.endAge;
+            } else {
+                const idx = ((baseIdx + (forward ? i+1 : -(i+1))) % 60 + 60) % 60;
+                const gj  = G60[idx];
+                gan  = gj[0]; ji  = gj[1];
+                ganO = GAN_O[gan]||''; jiO = JI_O[ji]||'';
+                ageS = startAge + i * 10; ageE = ageS + 9;
+            }
+            const gj = gan + ji;  // 간지 조합 문자열
 
             // 천간 / 지지 1줄 설명
             const line1 = GAN_DESC[gan] || `${gan} 천간의 기운이 인생에 영향을 미칩니다.`;
