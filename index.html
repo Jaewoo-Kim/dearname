@@ -4095,7 +4095,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             elDetail.innerHTML = `
                 <div class="daeun-panel">
                     <div class="daeun-panel-head">
-                        <div class="daeun-panel-ganji" style="color:${c};">${d.gan}<br>${d.ji}</div>
+                        <div class="daeun-panel-ganji">
+                            <span style="color:${c};display:block;">${d.gan}</span>
+                            <span style="color:${O_COLOR[d.jiO]||c};display:block;">${d.ji}</span>
+                        </div>
                         <div>
                             <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;letter-spacing:1px;margin-bottom:4px;">${d.ageS} ~ ${d.ageE}세 대운</div>
                             <div style="display:flex;gap:6px;flex-wrap:wrap;">
