@@ -1853,6 +1853,8 @@
             <div class="chart-container-large" style="margin-top:20px;">
                 <canvas id="lifeFlowChart"></canvas>
             </div>
+            <!-- 차트 범례 -->
+            <div id="life-flow-legend" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:-24px 0 12px;font-size:0.78rem;font-weight:700;"></div>
             <!-- 대운 칩 바 (차트 하단) -->
             <div id="daeun-labels-bar"></div>
             <!-- 클릭 시 펼쳐지는 상세 패널 -->
@@ -2369,7 +2371,11 @@
         document.getElementById('report-nav').style.display = 'block';
         document.getElementById('load-more-btn').style.display = 'none';
         window.scrollTo(0, 0);
-        setTimeout(() => { renderCharts(); _updateRadarChart(_demoScores, _demoCandidate); }, 100);
+        setTimeout(() => {
+            renderCharts();
+            _updateRadarChart(_demoScores, _demoCandidate);
+            if (window._daeunData) _updateLifeFlowChart(window._daeunData);
+        }, 100);
     }
 
     function showTheoryDetailView() {
@@ -3092,10 +3098,34 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         _saveSelfReport({ nameKr:`${lastName}${firstName}`, nameHanja:hanjaStr, gender, birthDate:bDate, birthTime:bTime });
     }
 
+    // ── Chart.js 커스텀 플러그인: 대운 배경 음영 ─────────────────
+    const _lifeFlowZonePlugin = {
+        id: 'lifeFlowZones',
+        beforeDraw(chart) {
+            if (chart.canvas.id !== 'lifeFlowChart') return;
+            const syns = chart._synergies;
+            if (!syns || !syns.length) return;
+            const { ctx, chartArea, scales } = chart;
+            if (!chartArea || !scales.x) return;
+            const n = syns.length;
+            const half = (scales.x.getPixelForValue(1) - scales.x.getPixelForValue(0)) * 0.5;
+            ctx.save();
+            syns.forEach((syn, i) => {
+                if (syn === 'mid') return;
+                const cx = scales.x.getPixelForValue(i);
+                ctx.fillStyle = syn === 'good'
+                    ? 'rgba(34,197,94,0.10)'
+                    : 'rgba(239,68,68,0.10)';
+                ctx.fillRect(cx - half, chartArea.top, half * 2, chartArea.bottom - chartArea.top);
+            });
+            ctx.restore();
+        }
+    };
+    Chart.register(_lifeFlowZonePlugin);
+
     // Chart.js 렌더링
     let radarChartInstance = null;
     let lifeFlowChartInstance = null;
-    // v2: 전역 노출 (렌더링 후 동적 업데이트용)
     window._getRadarChart = () => radarChartInstance;
 
     function renderCharts() {
@@ -3162,35 +3192,45 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             lifeFlowChartInstance = new Chart(ctxFlow.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: (window._daeunChartLabels && window._daeunChartLabels.length === 8)
-                        ? window._daeunChartLabels
-                        : ['1운','2운','3운','4운','5운','6운','7운','8운'],
+                    labels: ['1운','2운','3운','4운','5운','6운','7운','8운'],
                     datasets: [{
                         label: '종합 운세 지수',
-                        data: [65, 78, 72, 85, 82, 92, 88, 98],
+                        data: [70, 75, 70, 80, 75, 85, 80, 88],
                         borderColor: '#d4af37',
-                        backgroundColor: 'rgba(212, 175, 55, 0.1)',
-                        borderWidth: 3,
+                        backgroundColor: 'rgba(212,175,55,0.08)',
+                        borderWidth: 2.5,
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#d4af37',
                         pointBorderWidth: 2,
                         pointRadius: 5,
                         pointHoverRadius: 8,
                         fill: true,
-                        tension: 0.4
+                        tension: 0.45
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: { duration: 600, easing: 'easeInOutQuart' },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: '#0f172a',
-                            titleFont: { family: 'Pretendard', size: 13 },
-                            bodyFont: { family: 'Pretendard', size: 14, weight: 'bold' },
-                            padding: 12,
-                            displayColors: false
+                            titleFont: { family: 'Pretendard', size: 12, weight: '700' },
+                            bodyFont: { family: 'Pretendard', size: 13, weight: '600' },
+                            padding: 14,
+                            displayColors: false,
+                            callbacks: {
+                                label: (item) => {
+                                    const syn = lifeFlowChartInstance?._synergies?.[item.dataIndex];
+                                    const synLabel = syn === 'good'
+                                        ? '★ 길운 · 이름과 상생하는 시기'
+                                        : syn === 'warn'
+                                        ? '⚡ 주의 · 에너지 점검이 필요한 시기'
+                                        : '● 중화 · 안정적인 흐름의 시기';
+                                    return [`운세지수 ${item.raw}점`, synLabel];
+                                }
+                            }
                         }
                     },
                     scales: {
@@ -3199,15 +3239,20 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                             min: 40,
                             max: 100,
                             grid: { color: 'rgba(0,0,0,0.05)' },
-                            ticks: { font: { family: 'Pretendard' } }
+                            ticks: {
+                                font: { family: 'Pretendard', size: 11 },
+                                callback: v => v + '점'
+                            }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { font: { family: 'Pretendard', weight: '700' }, color: '#0f172a' }
+                            ticks: { font: { family: 'Pretendard', size: 11, weight: '700' }, color: '#475569' }
                         }
                     }
                 }
             });
+            // 초기 데이터가 이미 있으면 즉시 업데이트
+            if (window._daeunData) _updateLifeFlowChart(window._daeunData);
         }
     }
 /* 👇👇👇 여기에 카드형 탭 전환 로직을 추가하세요 👇👇👇 */
@@ -3659,6 +3704,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         setTimeout(() => {
             renderCharts();
             _updateRadarChart(_scores, candidate);
+            // 대운 데이터로 lifeFlow 차트 업데이트
+            if (window._daeunData) _updateLifeFlowChart(window._daeunData);
             if (window._showDaeunDetail && !document.getElementById('daeun-detail-panel')?.dataset.openIdx) {
                 window._showDaeunDetail(0);
             }
@@ -4460,8 +4507,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             return { gj, gan, ji, ganO, jiO, ageS, ageE, line1, line2, daeunSummary, synergy };
         });
 
-        // ── 차트 레이블 전역 저장 ─────────────────────────────────
+        // ── 차트 데이터 전역 저장 (초기화 후 _updateLifeFlowChart 에서 사용) ──
         window._daeunChartLabels = daeuns.map(d => `${d.ageS}~${d.ageE}세`);
+        window._daeunData = daeuns;
 
         // ── 인트로 ────────────────────────────────────────────────
         if (elIntro) {
@@ -4785,6 +4833,57 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ── 양육 가이드 타임라인 ────────────────────────────────────────
+    // ── 대운 차트 실제 데이터로 업데이트 ─────────────────────────────
+    function _updateLifeFlowChart(daeuns) {
+        if (!daeuns || !daeuns.length) return;
+        // 차트가 아직 초기화 전이면 데이터만 저장, 초기화 후 자동 적용
+        window._daeunData = daeuns;
+        const chart = lifeFlowChartInstance;
+        if (!chart) return;
+
+        // synergy → 운세 점수 (결정론적 분산 포함)
+        const BASE = { good: 87, mid: 70, warn: 54 };
+        const scores = daeuns.map((d, i) => {
+            const base = BASE[d.synergy] || 70;
+            const v = ((i * 13 + 7) % 13) - 6; // -6 ~ +6 결정론적 변동
+            return Math.min(97, Math.max(44, base + v));
+        });
+
+        // 포인트 스타일 (synergy별)
+        const PT_COLOR  = { good: '#d4af37', warn: '#ef4444', mid: '#ffffff' };
+        const PT_BORDER = { good: '#d4af37', warn: '#ef4444', mid: '#d4af37' };
+        const PT_STYLE  = { good: 'star',    warn: 'triangle', mid: 'circle' };
+        const PT_RADIUS = { good: 10, warn: 9, mid: 5 };
+
+        const ds = chart.data.datasets[0];
+        chart.data.labels                  = daeuns.map(d => `${d.ageS}~${d.ageE}세`);
+        ds.data                            = scores;
+        ds.pointBackgroundColor            = daeuns.map(d => PT_COLOR[d.synergy]);
+        ds.pointBorderColor                = daeuns.map(d => PT_BORDER[d.synergy]);
+        ds.pointStyle                      = daeuns.map(d => PT_STYLE[d.synergy]);
+        ds.pointRadius                     = daeuns.map(d => PT_RADIUS[d.synergy]);
+        ds.pointHoverRadius                = daeuns.map(d => PT_RADIUS[d.synergy] + 3);
+        chart._synergies                   = daeuns.map(d => d.synergy);
+
+        chart.update('active');
+
+        // 범례 업데이트
+        const legendEl = document.getElementById('life-flow-legend');
+        if (legendEl) {
+            const goodN = daeuns.filter(d => d.synergy === 'good').length;
+            const warnN = daeuns.filter(d => d.synergy === 'warn').length;
+            const midN  = daeuns.length - goodN - warnN;
+            legendEl.innerHTML = [
+                goodN ? `<span style="display:flex;align-items:center;gap:5px;color:#92400e;background:#fefce8;border:1px solid #fcd34d;border-radius:20px;padding:4px 12px;">
+                    <span style="color:#d4af37;font-size:1rem;">★</span> 길운 ${goodN}구간</span>` : '',
+                warnN ? `<span style="display:flex;align-items:center;gap:5px;color:#991b1b;background:#fff5f5;border:1px solid #fca5a5;border-radius:20px;padding:4px 12px;">
+                    <span style="color:#ef4444;font-size:0.85rem;">▲</span> 주의 ${warnN}구간</span>` : '',
+                midN  ? `<span style="display:flex;align-items:center;gap:5px;color:#475569;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:4px 12px;">
+                    <span style="color:#94a3b8;">●</span> 중화 ${midN}구간</span>` : '',
+            ].join('');
+        }
+    }
+
     function _renderTimeline(report) {
         const el = document.getElementById('report-timeline');
         if (!el) return;
