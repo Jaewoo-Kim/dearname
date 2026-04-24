@@ -2863,22 +2863,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const totalW     = _scored.reduce((s,x) => s+x.w, 0);
         const finalScore = Math.round(_scored.reduce((s,x) => s+(_g2s[x.g]??50)*x.w, 0) / totalW);
 
-        // ── Executive Summary 렌더링 ───────────────────────────────────
+        // ── Executive Summary 렌더링 (_buildReportItems 단일 출처) ──────
         const _selfExecEl = document.getElementById('self-exec-summary');
         if (_selfExecEl && typeof _buildExecSummaryHtml === 'function') {
-            const _execItems = [
-                { label:'원격 (초년운)', g: sGrades[0].grade },
-                { label:'형격 (청년운)', g: sGrades[1].grade },
-                { label:'이격 (장년운)', g: sGrades[2].grade },
-                { label:'정격 (전체운)', g: sGrades[3].grade },
-                { label:'발음 오행',    g: data.pronounceOheng.grade },
-                { label:'발음 음양',    g: data.pronounceYin.grade },
-                { label:'수리 오행',    g: data.mathOheng.grade },
-                { label:'수리 음양',    g: data.mathYin.grade },
-                { label:'사주 보완',    g: data.sajuOheng.grade },
-            ];
+            const _execItems = _buildReportItems(lastName, firstName);
             _selfExecEl.innerHTML = _buildExecSummaryHtml(
-                `${lastName}${firstName}`, hanjaStr, finalScore, _execItems
+                `${lastName}${firstName}`, hanjaStr, finalScore,
+                _execItems.map(x => ({ label: x.label, g: x.grade }))
             );
         }
 
@@ -3083,15 +3074,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         };
         const scoreMsg = finalScore >= 80 ? scoreMsgs.high : finalScore >= 50 ? scoreMsgs.mid : scoreMsgs.low;
 
-        const suriLabelMap = ['초년 수리','청년 수리','장년 수리','말년 수리'];
-        const allItems = [
-            ...sGrades.map((s,i) => ({ label: suriLabelMap[i], grade: s.grade })),
-            { label:'발음 오행', grade: data.pronounceOheng.grade },
-            { label:'발음 음양', grade: data.pronounceYin.grade },
-            { label:'수리 오행', grade: data.mathOheng.grade },
-            { label:'수리 음양', grade: data.mathYin.grade },
-            { label:'자원 오행', grade: data.sajuOheng.grade },
-        ];
+        // _buildReportItems 단일 출처 — Exec Summary 와 완전히 동일한 항목·순서·등급
+        const allItems  = _buildReportItems(lastName, firstName);
         const goodItems = allItems.filter(x => _isGood(x.grade));
         const badItems  = allItems.filter(x => _isBad(x.grade));
         const midItems  = allItems.filter(x => !_isGood(x.grade) && !_isBad(x.grade));
@@ -3099,13 +3083,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const pointsHtml = [
             ...goodItems.map(x => `<div class="conclusion-point" style="background:#f0fdf4;">
                 <span class="conclusion-point-icon" style="color:#16a34a;">✦</span>
-                <span><b style="color:#15803d;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
+                <span><b style="color:#15803d;">${x.label}</b>&nbsp;<small style="color:var(--text-muted);font-weight:500;">${x.sub}</small>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
             ...midItems.map(x => `<div class="conclusion-point" style="background:#f8fafc;">
                 <span class="conclusion-point-icon" style="color:#64748b;">–</span>
-                <span><b style="color:#475569;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
+                <span><b style="color:#475569;">${x.label}</b>&nbsp;<small style="color:var(--text-muted);font-weight:500;">${x.sub}</small>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
             ...badItems.map(x => `<div class="conclusion-point" style="background:#fff5f5;">
                 <span class="conclusion-point-icon" style="color:#dc2626;">⚠</span>
-                <span><b style="color:#b91c1c;">${x.label}</b>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
+                <span><b style="color:#b91c1c;">${x.label}</b>&nbsp;<small style="color:var(--text-muted);font-weight:500;">${x.sub}</small>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
         ].join('');
 
         document.getElementById('self-conclusion-body').innerHTML = `
@@ -3557,22 +3541,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // ── Executive Summary ──────────────────────────────────────────
         const _reportExecEl = document.getElementById('report-exec-summary');
         if (_reportExecEl && typeof _buildExecSummaryHtml === 'function') {
-            const _ad = (typeof getAnalysisData === 'function')
-                ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
-            if (_ad) {
-                const _sg = _ad.suriGrades || [];
-                const _execItemsPrem = [
-                    { label:'원격 (초년운)', g: _sg[0]?.grade||'평' },
-                    { label:'형격 (청년운)', g: _sg[1]?.grade||'평' },
-                    { label:'이격 (장년운)', g: _sg[2]?.grade||'평' },
-                    { label:'정격 (전체운)', g: _sg[3]?.grade||'평' },
-                    { label:'발음 오행',    g: _ad.pronounceOheng?.grade||'평' },
-                    { label:'발음 음양',    g: _ad.pronounceYin?.grade||'평' },
-                    { label:'수리 오행',    g: _ad.mathOheng?.grade||'평' },
-                    { label:'수리 음양',    g: _ad.mathYin?.grade||'평' },
-                    { label:'사주 보완',    g: _ad.sajuOheng?.grade||'평' },
-                ];
-                _reportExecEl.innerHTML = _buildExecSummaryHtml(kr, hj, score, _execItemsPrem);
+            const _execItemsPrem = _buildReportItems(familyKr, `${h1.kr}${h2?.kr||''}`);
+            if (_execItemsPrem.length) {
+                _reportExecEl.innerHTML = _buildExecSummaryHtml(
+                    kr, hj, score,
+                    _execItemsPrem.map(x => ({ label: x.label, g: x.grade }))
+                );
             }
         }
 
@@ -4013,6 +3987,30 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         el.innerHTML = `<div class="suri-seasons-grid">${cardsHtml}</div>`;
     }
 
+    // ── 보고서 항목 공통 데이터 빌더 (단일 출처) ────────────────────
+    // 보고서 섹션 순서 기준 9개 항목을 getAnalysisData 로 통일
+    function _buildReportItems(familyKr, firstName) {
+        if (typeof getAnalysisData !== 'function') return [];
+        const ad = getAnalysisData(familyKr, firstName);
+        if (!ad) return [];
+        const sg = ad.suriGrades || [];
+        return [
+            // Ch.1 사주 보완
+            { label: '사주 보완',     sub: '자원오행 매칭', grade: ad.sajuOheng?.grade    || '평' },
+            // Ch.4 발음
+            { label: '발음 오행',     sub: '초성 상생 흐름', grade: ad.pronounceOheng?.grade || '평' },
+            { label: '발음 음양',     sub: '모음 음양 균형', grade: ad.pronounceYin?.grade   || '평' },
+            // Ch.5-A 사격수리
+            { label: '원격 (초년운)', sub: '초년 수리',     grade: sg[0]?.grade || '평' },
+            { label: '형격 (청년운)', sub: '청년 수리',     grade: sg[1]?.grade || '평' },
+            { label: '이격 (장년운)', sub: '장년 수리',     grade: sg[2]?.grade || '평' },
+            { label: '정격 (전체운)', sub: '말년 수리',     grade: sg[3]?.grade || '평' },
+            // Ch.5-B 수리 오행·음양
+            { label: '수리 오행',     sub: '획수 오행 상생', grade: ad.mathOheng?.grade  || '평' },
+            { label: '수리 음양',     sub: '획수 홀짝 균형', grade: ad.mathYin?.grade    || '평' },
+        ];
+    }
+
     // ── Executive Summary 카드 빌더 ────────────────────────────────
     function _buildExecSummaryHtml(nameKr, nameHj, score, labeledItems) {
         const _ng  = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
@@ -4231,90 +4229,20 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ── 종합 결론 그리드 ────────────────────────────────────────────
+    // _buildReportItems 와 동일한 단일 출처를 사용하여 Exec Summary 와 완전 동일한 데이터 표시
     function _renderConclusionGrid(candidate, state) {
         const el = document.getElementById('ai-conclusion-grid');
         if (!el) return;
-        const { h1, h2, s0, isOija } = candidate;
-        const s1 = h1.s, s2 = h2 ? h2.s : 0;
-        const g1 = isOija ? s1+1 : s1+s2;
-        const g2 = s0+s1;
-        const g3 = isOija ? s0+1 : s0+s2;
-        const g4 = isOija ? s0+s1 : s0+s1+s2;
 
-        const getSuriGrade = (n) => {
-            let num = n > 81 ? n%81 : n;
-            if(num===0) num=81;
-            return (typeof SURI_DATA!=='undefined'&&SURI_DATA[num]) ? SURI_DATA[num].grade : '평';
-        };
+        const familyKr  = candidate.familyKr;
+        const firstName = `${candidate.h1.kr}${candidate.h2?.kr||''}`;
+        const items = _buildReportItems(familyKr, firstName);
+        if (!items.length) return;
 
-        const normG = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
+        const normG      = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
         const gradeColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'}[normG(g)]||'#64748b');
         const gradeBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'}[normG(g)]||'#f1f5f9');
         const icon       = g => normG(g)==='길'?'✦':normG(g)==='흉'?'⚠':'–';
-
-        // 발음오행 길흉
-        const _OHENG_FROM_CHO = (cho) => {
-            if(['ㄱ','ㅋ','ㄲ'].includes(cho)) return '木';
-            if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho)) return '火';
-            if(['ㅇ','ㅎ'].includes(cho)) return '土';
-            if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho)) return '金';
-            if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho)) return '水';
-            return '';
-        };
-        const _getCho = (c) => {
-            const code = c.charCodeAt(0) - 0xAC00;
-            if(code < 0 || code > 11171) return '';
-            const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-            return CHO[Math.floor(code / 588)] || '';
-        };
-        const _getYY = (c) => {
-            const code = c.charCodeAt(0) - 0xAC00;
-            if(code < 0 || code > 11171) return '';
-            const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
-            const YANG = new Set(['ㅏ','ㅐ','ㅑ','ㅒ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ']);
-            const j = JUNG[Math.floor((code % 588) / 28)];
-            return YANG.has(j) ? '양' : '음';
-        };
-        const _CYCLE = ['木','火','土','金','水'];
-        const _isSangsaeng = (a,b) => a===b || (_CYCLE.indexOf(a)+1)%5===_CYCLE.indexOf(b);
-
-        const nameKr = `${candidate.familyKr}${h1.kr}${h2?.kr||''}`;
-        const chars = nameKr.split('');
-        const choOhengs = chars.map(c => {
-            const cho = typeof window.getCho==='function' ? window.getCho(c) : _getCho(c);
-            return (typeof window.getOhengFromCho==='function' ? window.getOhengFromCho(cho) : null) || _OHENG_FROM_CHO(cho);
-        });
-        const yys = chars.map(c => typeof window.getYinYangFromJung==='function' ? window.getYinYangFromJung(c) : _getYY(c));
-        const allYang = yys.every(y=>y==='양'), allYin = yys.every(y=>y==='음');
-        const yyGrade = (!allYang && !allYin) ? '길' : '평';
-        const sangsaengCount = choOhengs.filter((o,i) => i<choOhengs.length-1 && _isSangsaeng(o,choOhengs[i+1])).length;
-        const pronounceOhengGrade = sangsaengCount >= choOhengs.length-1 ? '길' : sangsaengCount > 0 ? '평' : '흉';
-
-        // 자원오행 길흉
-        const nameOhengs = [h1.o, ...(h2?[h2.o]:[])];
-        const prefer = state?.nameSpec?.prefer || [];
-        const avoid  = state?.nameSpec?.avoid  || [];
-        const matchPref = nameOhengs.filter(o => prefer.includes(o)).length;
-        const hitAvoid  = nameOhengs.filter(o => avoid.includes(o)).length;
-        const jawonGrade = hitAvoid > 0 ? '흉' : matchPref > 0 ? '길' : '평';
-
-        // 사주오행 균형
-        const scores = state?._scores || {};
-        const vals = Object.values(scores);
-        const maxV = Math.max(...vals, 1), minV = Math.min(...vals, 0);
-        const balance = (maxV - minV) / (maxV || 1);
-        const sajuOhengGrade = balance < 0.5 ? '길' : balance < 0.8 ? '평' : '흉';
-
-        const items = [
-            { label:'초년 수리',    grade: getSuriGrade(g1), sub:'원격' },
-            { label:'청년 수리',    grade: getSuriGrade(g2), sub:'형격' },
-            { label:'장년 수리',    grade: getSuriGrade(g3), sub:'이격' },
-            { label:'말년 수리',    grade: getSuriGrade(g4), sub:'정격' },
-            { label:'발음 오행',    grade: pronounceOhengGrade, sub:'상생 흐름' },
-            { label:'발음 음양',    grade: yyGrade, sub:'균형도' },
-            { label:'자원오행',     grade: jawonGrade, sub:'용신 매칭' },
-            { label:'사주 균형',    grade: sajuOhengGrade, sub:'오행 분포' },
-        ];
 
         el.innerHTML = items.map(x => `
             <div class="conclusion-point" style="background:${gradeBg(x.grade)};">
