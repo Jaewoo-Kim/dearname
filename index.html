@@ -1332,9 +1332,8 @@
 
 <div id="self-report-view">
     <header class="report-header">
-        <div style="font-size:0.78rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:18px;">1차 알고리즘 성명 분석</div>
         <h1 id="self-report-title">홍길동 <span>洪吉童</span></h1>
-        <div class="meta-info" id="self-report-meta">2026년 3월 7일 출생 &nbsp;|&nbsp; 남자 &nbsp;|&nbsp; 알고리즘 정밀 진단</div>
+        <div class="meta-info" id="self-report-meta">2026년 3월 7일 출생 &nbsp;|&nbsp; 남자</div>
     </header>
 
     <main class="report-main">
@@ -2602,7 +2601,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 헤더
         document.getElementById('self-report-title').innerHTML = `${lastName}${firstName} <span>${hanjaStr}</span>`;
-        document.getElementById('self-report-meta').innerHTML  = `${bDate} ${bTime} 출생 &nbsp;|&nbsp; ${gender} &nbsp;|&nbsp; 알고리즘 정밀 진단`;
+        document.getElementById('self-report-meta').innerHTML  = `${bDate} ${bTime} 출생 &nbsp;|&nbsp; ${gender}`;
 
         // 사주 원국 렌더링 (return: {nameOhengItems, weakList8, ohengCount})
         const sajuData = _renderSelfSajuSection(bDate, bTime, gender, lastName);
