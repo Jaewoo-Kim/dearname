@@ -2730,51 +2730,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 <p style="font-size:0.92rem;line-height:1.65;color:var(--text-secondary);margin:0;">${jawonStoryMsg}</p>
             </div>`;
 
-        // ── ④ 발음 섹션 ───────────────────────────────────────────────
-        const pronTexts = {
-            '길': `이름을 부를 때마다 초성의 기운이 서로를 북돋아주는 <b>상생(相生)</b>의 흐름이 형성됩니다.
-                상생이란 나무가 불을 키우고, 불이 흙을 만들듯 기운이 자연스럽게 이어지는 것입니다.
-                이 이름은 불릴 때마다 에너지가 막힘없이 흘러 아이에게 긍정적인 파동을 전달합니다.
-                발음 오행에서 가장 이상적인 구성입니다.`,
-            '평':   `이름 초성의 기운 흐름에 일부 마찰이 있습니다.
-                완전한 상생은 아니지만 치명적인 수준도 아닙니다.
-                한자의 자원오행이나 수리 등 다른 요소들이 보완해준다면 전체적인 균형을 유지할 수 있습니다.
-                성명학에서 발음 오행 하나만으로 이름의 길흉을 판단하지는 않으므로,
-                전체 종합 점수를 함께 참고해주세요.`,
-            '흉': `이름을 소리 내어 부를 때 초성 간에 연속적으로 <b>상극(相剋)</b>이 발생합니다.
-                상극이란 쇠가 나무를 자르고, 물이 불을 끄듯 기운이 서로 충돌하는 것입니다.
-                평생 수만 번 불릴 이름에서 이런 충돌이 반복되면 기운의 흐름이 막히는 영향을 줄 수 있습니다.
-                가능하다면 초성 오행이 상생 관계를 이루는 이름으로 재검토해보시길 권합니다.`,
+        // ── ④ 발음 섹션 — 프리미엄 보고서와 동일 디자인으로 렌더링 ─────
+        const _selfSoundCandidate = {
+            familyKr: lastName,
+            h1: { kr: firstName.charAt(0) || '' },
+            h2: firstName.length > 1 ? { kr: firstName.charAt(1) } : null,
         };
-        const yinTexts = {
-            '길': `이름의 모음이 양성(ㅏ·ㅗ·ㅐ)과 음성(ㅣ·ㅜ·ㅡ)을 조화롭게 교차합니다.
-                동양 철학에서 음양의 교차는 만물이 생성되는 근본 원리입니다.
-                이름을 부를 때 들숨과 날숨처럼 기운이 자연스럽게 순환하며,
-                아이의 성격 형성에 균형 잡힌 에너지를 꾸준히 공급합니다.`,
-            '평':   `모음의 음양 배합이 양호한 수준입니다.
-                기운의 흐름이 크게 치우치지 않아 무난한 균형을 유지합니다.
-                다른 항목들과 함께 전체적인 조화를 이루고 있습니다.`,
-            '흉': `이름의 모음이 양성 또는 음성 한쪽으로만 쏠려 있습니다.
-                음양의 균형이 무너지면 에너지가 한 방향으로만 흐르는 편향이 발생합니다.
-                한쪽 기운만 지속적으로 공급받는 것은 아이의 기질 형성에 영향을 줄 수 있습니다.
-                다양한 모음이 섞인 이름을 검토해보시길 권합니다.`,
-        };
-        const pronTxt = pronTexts[data.pronounceOheng.grade] || pronTexts['평'];
-        const yinTxt  = yinTexts[data.pronounceYin.grade]   || yinTexts['평'];
-
-        document.getElementById('self-sound-body').innerHTML = `
-            <div class="sound-unified">
-                <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">발음 오행 (초성)</span>
-                    ${_badgeHtml(data.pronounceOheng.grade)}
-                </div>
-                <p style="margin:0 0 22px;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${pronTxt}</p>
-                <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">발음 음양 (모음)</span>
-                    ${_badgeHtml(data.pronounceYin.grade)}
-                </div>
-                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTxt}</p>
-            </div>`;
+        if (typeof _renderSoundSection === 'function') {
+            _renderSoundSection(_selfSoundCandidate, null, 'self-sound-body');
+        }
 
         // ── ⑤ 81수리 사계절 섹션 ─────────────────────────────────────
         const seasons = [
@@ -3699,8 +3663,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ── 발음 섹션 렌더링 (프리미엄 풍부화 ver.) ─────────────────────
-    function _renderSoundSection(candidate, report) {
-        const elBody  = document.getElementById('ai-sound-body');
+    function _renderSoundSection(candidate, report, targetId) {
+        const elBody  = document.getElementById(targetId || 'ai-sound-body');
         // 구버전 개별 컨테이너도 호환
         const elOheng = elBody || document.getElementById('ai-sound-oheng');
         const elYin   = elBody ? null : document.getElementById('ai-sound-yin');
