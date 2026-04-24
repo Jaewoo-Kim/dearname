@@ -567,6 +567,68 @@
         .exec-item.mid  { background:#f8fafc;color:#64748b;border:1px solid #e2e8f0; }
         @media(max-width:640px){ .exec-summary{ flex-direction:column;align-items:flex-start;gap:16px;padding:24px 22px; } }
 
+        /* ── 용어 툴팁 ── */
+        .term-tip {
+            border-bottom: 1.5px dashed var(--gold-dark);
+            cursor: help;
+            position: relative;
+            display: inline-block;
+            color: inherit;
+        }
+        .term-tip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-dark);
+            color: #f1f5f9;
+            font-size: 0.78rem;
+            font-weight: 400;
+            line-height: 1.65;
+            padding: 10px 14px;
+            border-radius: 12px;
+            width: 230px;
+            text-align: left;
+            white-space: normal;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            transform: translateX(-50%) translateY(4px);
+            z-index: 300;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+        }
+        .term-tip::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--bg-dark);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            z-index: 300;
+        }
+        .term-tip:hover::after,
+        .term-tip.tip-open::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .term-tip:hover::before,
+        .term-tip.tip-open::before  { opacity: 1; }
+        /* 왼쪽 끝 툴팁 위치 보정 */
+        .term-tip.tip-left::after  { left: 0; transform: translateX(0); }
+        .term-tip.tip-left::before { left: 18px; transform: none; }
+        .term-tip.tip-left:hover::after,
+        .term-tip.tip-left.tip-open::after { transform: translateX(0); }
+        /* 오른쪽 끝 툴팁 위치 보정 */
+        .term-tip.tip-right::after  { left: auto; right: 0; transform: translateX(0); }
+        .term-tip.tip-right::before { left: auto; right: 18px; transform: none; }
+        .term-tip.tip-right:hover::after,
+        .term-tip.tip-right.tip-open::after { transform: translateX(0); }
+
         /* ── 스토리형 셀프 보고서 ── */
         .story-intro-card { max-width:780px;margin:0 auto 8px;padding:28px 36px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:20px;border-left:4px solid var(--gold-dark);font-size:1rem;color:var(--text-secondary);line-height:1.9; }
         .story-chapter-label { font-size:0.72rem;font-weight:800;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px; }
@@ -1376,7 +1438,7 @@
         <!-- ② 사주 원국 -->
         <div class="report-card" id="self-saju-section" style="display:none;">
             <div class="story-chapter-label">타고난 기운</div>
-            <h2 class="section-title">사주 원국 (四柱八字)</h2>
+            <h2 class="section-title"><span class="term-tip" data-tip="태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.">사주</span> 원국 (四柱八字)</h2>
             <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:20px;" id="self-saju-meta-label"></p>
             <div class="saju-mingsik-wrap">
                 <table class="saju-mingsik" id="self-saju-table">
@@ -1400,7 +1462,7 @@
         <!-- ④ 발음 오행·음양 -->
         <div class="report-card">
             <div class="story-chapter-label">이름의 소리</div>
-            <h2 class="section-title">발음 오행 및 음양 분석</h2>
+            <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> 및 <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
             <div id="self-sound-body"></div>
         </div>
 
@@ -1428,7 +1490,7 @@
         <!-- ⑤-2 수리 오행 & 음양 -->
         <div class="report-card">
             <div class="story-chapter-label">수리의 보조 지표</div>
-            <h2 class="section-title">수리 오행 & 음양 분석</h2>
+            <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
             <div id="self-suri-oheng-yin"></div>
         </div>
 
@@ -1605,7 +1667,7 @@
         <!-- Chapter 1: 사주 원국 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 1. 이 아이가 태어난 우주</div>
-            <h2 class="section-title">사주 원국 (四柱八字)</h2>
+            <h2 class="section-title"><span class="term-tip" data-tip="태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.">사주</span> 원국 (四柱八字)</h2>
             <div class="saju-grid" id="report-saju-grid"></div>
             <div class="oheng-layout">
                 <div style="text-align:center;">
@@ -1661,7 +1723,7 @@
         <!-- Chapter 2: 자원오행 & 레이더 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
-            <h2 class="section-title">자원오행 & 오행 균형</h2>
+            <h2 class="section-title"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
             <div class="ai-tagline" id="report-tagline">--</div>
             <div id="report-jawon-chips"></div>
             <div class="intro-grid" style="margin-top:0;">
@@ -1708,7 +1770,7 @@
         <!-- Chapter 4: 발음 오행 & 음양 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
-            <h2 class="section-title">발음 오행 & 음양 분석</h2>
+            <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> & <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
             <div id="ai-sound-body"></div>
             <div class="ai-story-block" id="ai-sound-story" style="margin-top:20px;"></div>
         </div>
@@ -1723,7 +1785,7 @@
         <!-- Chapter 5-A: 사격수리 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 5. 획수가 그리는 운명</div>
-            <h2 class="section-title">사격수리 (四格數理)</h2>
+            <h2 class="section-title"><span class="term-tip" data-tip="원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.">사격수리</span> (四格數理)</h2>
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
             <div class="ai-story-block" id="ai-suri-story"></div>
         </div>
@@ -1738,7 +1800,7 @@
         <!-- Chapter 5. 수리 오행 & 음양 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
-            <h2 class="section-title">수리 오행 & 음양 분석</h2>
+            <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
             <div id="report-suri-oheng-yin"></div>
         </div>
 
@@ -1752,7 +1814,7 @@
         <!-- Chapter 5-B: 인생 흐름 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 5. 대운과 이름의 여정</div>
-            <h2 class="section-title">인생 흐름</h2>
+            <h2 class="section-title"><span class="term-tip" data-tip="인생을 10년 단위로 나눈 운세 흐름. 사주팔자가 평생의 그릇이라면, 대운은 그 그릇이 놓이는 계절과 같습니다.">대운</span> 인생 흐름</h2>
             <div id="report-daeun-section"></div>
             <div class="chart-container-large" style="margin-top:20px;">
                 <canvas id="lifeFlowChart"></canvas>
@@ -2203,6 +2265,50 @@
 </div>
 
 <script>
+    // ================================================================
+    // 용어 툴팁 시스템
+    // ================================================================
+    const _TIPS = {
+        '대운':     '인생을 10년 단위로 나눈 운세 흐름입니다. 사주팔자가 평생의 그릇이라면, 대운은 그 그릇이 놓이는 계절과 같습니다.',
+        '원격':     '성 획수 + 이름 첫째 자 획수의 합. 유년~20세 초반까지의 학업운·성격 형성을 주관합니다.',
+        '형격':     '성 획수 + 이름 첫째 자 획수의 합. 20~40대 사회 진출·결혼 등 가장 왕성한 시기의 운세를 주관합니다.',
+        '이격':     '성 획수 + 이름 둘째 자 획수의 합. 40~60대 중년의 재물·명예·가정 안정을 반영합니다.',
+        '정격':     '성 + 이름 전체 획수의 총합. 60대 이후 말년운과 평생 종합운을 결정합니다.',
+        '사격수리': '원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.',
+        '자원오행': '한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.',
+        '오행':     '목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.',
+        '음양':     '획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 이름에서 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.',
+        '상생':     '오행이 서로 도와주는 관계. 목→화→토→금→수→목 순서로 앞 기운이 다음 기운을 키워줍니다.',
+        '상극':     '오행이 서로 억제하는 관계. 목→토, 토→수, 수→화, 화→금, 금→목 순서로 앞 기운이 다음 기운을 누릅니다.',
+        '조후':     '사주의 계절적 온도 균형. 태어난 계절에 따라 차갑거나 뜨거운 기운을 이름으로 보완해야 합니다.',
+        '용신':     '사주에서 가장 필요한 핵심 오행. 이 기운을 이름에 담으면 사주의 약점을 보완할 수 있습니다.',
+        '일간':     '태어난 날의 천간(天干). 사주에서 자기 자신을 나타내는 기준이 됩니다.',
+        '사주':     '태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.',
+        '발음오행': '이름을 소리 낼 때 입술·혀·이·목구멍의 움직임에 따라 발생하는 오행 기운입니다.',
+        '수리오행': '사격수리의 획수 합이 어떤 오행 기운을 띠는지 나타냅니다.',
+    };
+
+    // 용어를 <span class="term-tip"> 로 감싸는 헬퍼
+    function _tip(term, tipClass) {
+        const desc = _TIPS[term] || '';
+        if (!desc) return term;
+        const cls = tipClass ? `term-tip ${tipClass}` : 'term-tip';
+        return `<span class="${cls}" data-tip="${desc}">${term}</span>`;
+    }
+
+    // 모바일: 탭으로 토글 (터치 디바이스에서 hover 불가)
+    document.addEventListener('click', function(e) {
+        const tip = e.target.closest('.term-tip');
+        if (tip) {
+            e.stopPropagation();
+            const isOpen = tip.classList.contains('tip-open');
+            document.querySelectorAll('.term-tip.tip-open').forEach(t => t.classList.remove('tip-open'));
+            if (!isOpen) tip.classList.add('tip-open');
+        } else {
+            document.querySelectorAll('.term-tip.tip-open').forEach(t => t.classList.remove('tip-open'));
+        }
+    });
+
     // 뷰 전환 로직
     function showMainView() {
         document.getElementById('report-view').style.display        = 'none';
@@ -3841,7 +3947,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             <!-- 수리 오행 카드 -->
             <div class="sound-unified" style="margin-bottom:16px;">
                 <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">수리 오행</span>
+                    <span class="sound-grade-label">${_tip('수리오행','tip-left')}</span>
                     ${badge(moG)}
                 </div>
                 <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${ohengTexts[_normG(moG)]}</p>
@@ -3850,7 +3956,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             <div class="sound-unified">
                 ${yyChips}
                 <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">수리 음양</span>
+                    <span class="sound-grade-label">${_tip('음양','tip-left')}</span>
                     ${badge(myG)}
                 </div>
                 <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(myG)]}</p>
@@ -3875,10 +3981,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _isBad  = g => _normG(g)==='흉';
 
         const seasons = [
-            { emoji:'🌱', period:'봄 · 초년 (0~20대)',    label:'원격', rawNum: rawNums[0] },
-            { emoji:'☀️', period:'여름 · 청년 (20~40대)', label:'형격', rawNum: rawNums[1] },
-            { emoji:'🍂', period:'가을 · 장년 (40~60대)', label:'이격', rawNum: rawNums[2] },
-            { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:'정격', rawNum: rawNums[3] },
+            { emoji:'🌱', period:'봄 · 초년 (0~20대)',    label:_tip('원격'), rawNum: rawNums[0] },
+            { emoji:'☀️', period:'여름 · 청년 (20~40대)', label:_tip('형격'), rawNum: rawNums[1] },
+            { emoji:'🍂', period:'가을 · 장년 (40~60대)', label:_tip('이격'), rawNum: rawNums[2] },
+            { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:_tip('정격'), rawNum: rawNums[3] },
         ];
 
         const cardsHtml = seasons.map(s => {
@@ -4098,9 +4204,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     ${pairNoteHtml}
                 </div>
                 <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">발음 오행</span>
+                    <span class="sound-grade-label">${_tip('발음오행','tip-left')}</span>
                     ${_badge(pronGrade)}
-                    <span style="font-size:0.8rem;color:var(--text-muted);margin-left:6px;">상생 ${goodCount}/${totalPairs}쌍</span>
+                    <span style="font-size:0.8rem;color:var(--text-muted);margin-left:6px;">${_tip('상생','tip-left')} ${goodCount}/${totalPairs}쌍</span>
                 </div>
                 <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${pronTexts[_normG(pronGrade)]||pronTexts['평']}</p>
             </div>
@@ -4111,7 +4217,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">${yyCharsHtml}</div>
                 </div>
                 <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">발음 음양</span>
+                    <span class="sound-grade-label">${_tip('음양','tip-left')}</span>
                     ${_badge(yinGrade)}
                 </div>
                 <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(yinGrade)]||yinTexts['평']}</p>
