@@ -4062,7 +4062,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     onclick="_showDaeunDetail(${i})">
                     <span class="dc-age">${d.ageS}~${d.ageE}세</span>
                     <span class="dc-gan" style="color:${c};">${d.gan}</span>
-                    <span class="dc-ji"  style="color:${c};">${d.ji}</span>
+                    <span class="dc-ji"  style="color:${O_COLOR[d.jiO]||c};">${d.ji}</span>
                     <span class="dc-read">${GAN_KR[d.gan]||''}${JI_KR[d.ji]||''}</span>
                 </button>`;
             }).join('')}</div>
