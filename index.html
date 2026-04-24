@@ -148,11 +148,12 @@
         .btn-outline-gold { background: transparent; border: 2px solid var(--gold-premium); color: var(--gold-dark); padding: 10px 22px; border-radius: 30px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; margin-bottom: 10px;}
         .btn-outline-gold:hover { background: var(--gold-premium); color: white; box-shadow: var(--shadow-glow); }
 
-        /* 길흉 평가 뱃지 (대길, 길, 평, 흉, 대흉) */
+        /* 영역별 평가 뱃지 (매우 좋음, 좋음, 나쁨, 매우 나쁨) */
         .grade-badge { padding: 6px 16px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.5px; display: inline-block;}
-        .grade-high { background: rgba(34, 197, 94, 0.1); color: #166534; border: 1px solid rgba(34, 197, 94, 0.3); }
-        .grade-mid { background: rgba(234, 179, 8, 0.1); color: #854d0e; border: 1px solid rgba(234, 179, 8, 0.3); }
-        .grade-low { background: rgba(239, 68, 68, 0.1); color: #991b1b; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .grade-very-good { background: rgba(34, 197, 94, 0.15); color: #14532d; border: 1px solid rgba(34, 197, 94, 0.4); }
+        .grade-high      { background: rgba(34, 197, 94, 0.08); color: #166534; border: 1px solid rgba(34, 197, 94, 0.25); }
+        .grade-mid       { background: rgba(234, 179, 8,  0.1);  color: #854d0e; border: 1px solid rgba(234, 179, 8,  0.3); }
+        .grade-low       { background: rgba(239, 68,  68, 0.1);  color: #991b1b; border: 1px solid rgba(239, 68,  68, 0.3); }
 
         .tech-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden;}
         .tech-table th, .tech-table td { padding: 20px; border-bottom: 1px solid var(--border-light); text-align: left; font-size: 1.05rem; line-height: 1.6; }
@@ -2715,21 +2716,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // 뱃지 적용 함수
+    const _GRADE4 = {'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'};
+    const _toG4 = g => _GRADE4[g] || g;  // 구 등급 → 4단계 변환
     function applyBadge(elementId, grade) {
         const el = document.getElementById(elementId);
         if(!el) return;
         el.className = 'grade-badge'; // reset
-        const normGrade = grade === '대길' ? '길' : grade === '대흉' ? '흉' : grade;
-        if(normGrade === '길') {
-            el.classList.add('grade-high');
-            el.innerText = '길 (吉)';
-        } else if(normGrade === '평') {
-            el.classList.add('grade-mid');
-            el.innerText = '평 (平)';
-        } else {
-            el.classList.add('grade-low');
-            el.innerText = '흉 (凶)';
-        }
+        const ng = _toG4(grade);
+        if(ng === '매우 좋음') { el.classList.add('grade-very-good'); el.innerText = '매우 좋음'; }
+        else if(ng === '좋음') { el.classList.add('grade-high');      el.innerText = '좋음'; }
+        else if(ng === '나쁨') { el.classList.add('grade-mid');       el.innerText = '나쁨'; }
+        else                   { el.classList.add('grade-low');       el.innerText = '매우 나쁨'; }
     }
 
     // 이름 데이터를 기반으로 6가지 성명학 지표 분석 알고리즘
@@ -2784,9 +2781,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if(!isSangsaeng(pronOhengs[i], pronOhengs[i+1])) badCount++;
         }
         
-        let pronGrade = '길', pronDesc = '초성 오행이 상생 관계로 이어져 부드럽고 막힘없는 흐름입니다.';
-        if(badCount === 1) { pronGrade = '평'; pronDesc = '초성 흐름에 상극이 일부 포함되어 무난한 수준입니다.'; }
-        if(badCount >= 2) { pronGrade = '흉'; pronDesc = '초성 오행이 연이어 상극을 이루어 보완이 시급합니다.'; }
+        let pronGrade = '매우 좋음', pronDesc = '초성 오행이 상생 관계로 이어져 부드럽고 막힘없는 흐름입니다.';
+        if(badCount === 1) { pronGrade = '나쁨';     pronDesc = '초성 흐름에 상극이 일부 포함되어 있습니다.'; }
+        if(badCount >= 2)  { pronGrade = '매우 나쁨'; pronDesc = '초성 오행이 연이어 상극을 이루어 보완이 시급합니다.'; }
 
         /* ----------------------------------------------------
            ② 발음음양 (모음 기준 홀짝 밸런스)
@@ -2804,13 +2801,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const allYang = yinYangs.every(y => y === '양');
         const allYin = yinYangs.every(y => y === '음');
         
-        let pyGrade = '평', pyDesc = '음양이 적절히 혼합되어 무난한 밸런스를 보여줍니다.';
+        let pyGrade = '나쁨', pyDesc = '음양이 적절히 혼합되어 있으나 완전한 교대는 아닙니다.';
         if(allYang || allYin) {
-            pyGrade = '흉'; pyDesc = '모음의 음양이 한쪽으로 극단적으로 치우쳐 있습니다.';
+            pyGrade = '매우 나쁨'; pyDesc = '모음의 음양이 한쪽으로 극단적으로 치우쳐 있습니다.';
         } else {
             // 완벽 교대(양-음-양 또는 음-양-음): 2음절·3음절 모두 적용
             const isAlt = yinYangs.every((v, i) => i === 0 || v !== yinYangs[i - 1]);
-            if(isAlt) { pyGrade = '길'; pyDesc = '양성/음성 모음이 가장 조화롭게 배합되어 긍정적입니다.'; }
+            if(isAlt) { pyGrade = '매우 좋음'; pyDesc = '양성/음성 모음이 가장 조화롭게 배합되어 긍정적입니다.'; }
         }
 
         /* ----------------------------------------------------
@@ -2834,12 +2831,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const s3_data = getSuriData(g3_num);
         const s4_data = getSuriData(g4_num);
         
-        const goodCount = [s1_data, s2_data, s3_data, s4_data].filter(d => d.grade === '길').length;
-        let math4Grade = '길', math4Desc = '4격의 획수 합이 모두 길수에 해당합니다.';
-        if(goodCount === 3) { math4Grade = '길'; math4Desc = '대부분의 시기에서 길한 수리가 배치되어 있습니다.'; }
-        else if(goodCount === 2) { math4Grade = '평'; math4Desc = '길흉이 반반 섞여 있어 부분적인 수리 보완이 권장됩니다.'; }
-        else if(goodCount === 1) { math4Grade = '흉'; math4Desc = '흉수가 많아 삶의 굴곡이 예상되므로 보완이 필요합니다.'; }
-        else if(goodCount === 0) { math4Grade = '흉'; math4Desc = '4격이 모두 흉수입니다. 작명을 새로 하시는 것을 강력히 권장합니다.'; }
+        const goodCount = [s1_data, s2_data, s3_data, s4_data].filter(d => ['대길','길'].includes(d.grade)).length;
+        let math4Grade, math4Desc;
+        if(goodCount === 4)      { math4Grade = '매우 좋음'; math4Desc = '4격의 획수 합이 모두 길수에 해당합니다.'; }
+        else if(goodCount === 3) { math4Grade = '좋음';     math4Desc = '대부분의 시기에서 길한 수리가 배치되어 있습니다.'; }
+        else if(goodCount === 2) { math4Grade = '나쁨';     math4Desc = '길흉이 반반 섞여 있어 부분적인 수리 보완이 권장됩니다.'; }
+        else                     { math4Grade = '매우 나쁨'; math4Desc = goodCount === 0 ? '4격이 모두 흉수입니다. 작명을 새로 하시는 것을 강력히 권장합니다.' : '흉수가 많아 삶의 굴곡이 예상되므로 보완이 필요합니다.'; }
 
         /* ----------------------------------------------------
            ④ 수리오행 (형격과 정격의 끝자리 오행 상생)
@@ -2860,9 +2857,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if(!isSangsaeng(moOhengs[i], moOhengs[i + 1])) moBadCount++;
         }
         let moGrade, moDesc;
-        if(moBadCount === 0)      { moGrade = '길'; moDesc = '수리의 4격 오행이 모두 상생으로 이어져 기운이 막힘없이 흐릅니다.'; }
-        else if(moBadCount === 1) { moGrade = '평'; moDesc = '수리오행 흐름에 상극이 일부 포함되어 있으나 무난한 수준입니다.'; }
-        else                      { moGrade = '흉'; moDesc = '수리오행 간 상극이 여러 곳에서 발생하여 기운 충돌이 우려됩니다.'; }
+        if(moBadCount === 0)      { moGrade = '매우 좋음'; moDesc = '수리의 4격 오행이 모두 상생으로 이어져 기운이 막힘없이 흐릅니다.'; }
+        else if(moBadCount === 1) { moGrade = '나쁨';     moDesc = '수리오행 흐름에 상극이 일부 포함되어 있습니다.'; }
+        else                      { moGrade = '매우 나쁨'; moDesc = '수리오행 간 상극이 여러 곳에서 발생하여 기운 충돌이 우려됩니다.'; }
 
         /* ----------------------------------------------------
            ⑤ 수리음양 (획수의 홀/짝 밸런스)
@@ -2873,9 +2870,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const mAllYang = myYangs.every(y => y === '양');
         const mAllYin  = myYangs.every(y => y === '음');
 
-        let myGrade = '길', myDesc = '4격 수리의 음(짝수)과 양(홀수)이 고루 배합되어 균형이 잘 잡혀 있습니다.';
+        let myGrade = '매우 좋음', myDesc = '4격 수리의 음(짝수)과 양(홀수)이 고루 배합되어 균형이 잘 잡혀 있습니다.';
         if(mAllYang || mAllYin) {
-            myGrade = '흉'; myDesc = '4격 수리가 모두 홀수 또는 짝수로 치우쳐 음양 균형이 깨져 있습니다.';
+            myGrade = '매우 나쁨'; myDesc = '4격 수리가 모두 홀수 또는 짝수로 치우쳐 음양 균형이 깨져 있습니다.';
         }
 
         /* ----------------------------------------------------
@@ -2904,15 +2901,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
            ---------------------------------------------------- */
         const _OHENG_KR_SHORT = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
         const _OHENG_C_DIAG   = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#e8ecf0','水':'#0f172a'};
-        let jawonGrade = '평', jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
+        let jawonGrade = '나쁨', jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
         if (hanjaOhengs.length > 0) {
             const uniqueOhengs = [...new Set(hanjaOhengs)];
             const ohengLabels  = hanjaOhengs.map(o => _OHENG_KR_SHORT[o] || o).join(' · ');
             if (uniqueOhengs.length === 1) {
-                jawonGrade = '길';
+                jawonGrade = '좋음';
                 jawonDesc  = `이름의 기운이 모두 ${_OHENG_KR_SHORT[uniqueOhengs[0]]} 기운으로 구성되어 있습니다. 단일 기운이 집중되어 강한 개성을 나타냅니다.`;
             } else if (uniqueOhengs.length >= 2) {
-                jawonGrade = '길';
+                jawonGrade = '매우 좋음';
                 jawonDesc  = `${ohengLabels} 기운으로 구성된 이름입니다. 다양한 기운이 어우러져 풍부한 기질을 형성합니다.`;
             }
         }
@@ -3009,7 +3006,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const sGrades = data.suriGrades;
 
         // ── 총점 계산 ─────────────────────────────────────────────────
-        const _g2s = { '대길':100,'길':100,'평':50,'흉':10,'대흉':10 };
+        const _g2s = { '매우 좋음':100,'좋음':75,'나쁨':35,'매우 나쁨':10,
+                       '대길':100,'길':75,'평':35,'흉':10,'대흉':10 }; // SURI_DATA 내부값 호환
         const _scored = [
             { g: sGrades[0].grade, w:2 }, { g: sGrades[1].grade, w:2 },
             { g: sGrades[2].grade, w:2 }, { g: sGrades[3].grade, w:2 },
@@ -3033,12 +3031,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // ── 공통 헬퍼 ─────────────────────────────────────────────────
         const _OHENG_COLOR_R = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
         const _OHENG_KR_R    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
-        const _normG      = g => g==='대길'?'길':g==='대흉'?'흉':g;
-        const _gradeColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'}[_normG(g)]||'#64748b');
-        const _gradeBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'}[_normG(g)]||'#f1f5f9');
+        const _normG      = g => _GRADE4[g] || g; // 구 등급 → 4단계 (applyBadge와 동일 맵 사용)
+        const _gradeColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'}[_normG(g)]||'#64748b');
+        const _gradeBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'}[_normG(g)]||'#f1f5f9');
         const _badgeHtml  = (g,label) => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gradeBg(ng)};color:${_gradeColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${label||ng}</span>`; };
-        const _isGood = g => _normG(g)==='길';
-        const _isBad  = g => _normG(g)==='흉';
+        const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
+        const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
 
         // ── ③ 자원오행 섹션 ───────────────────────────────────────────
         const nameSet = [...new Set(nameOhengItems.map(it=>it.ohaeng))];
@@ -4151,9 +4149,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // ── 수리음양/수리오행 서브 섹션 HTML 빌더 (셀프/프리미엄 공통) ──
     function _buildSuriSubHtml(mathYin, mathOheng) {
-        const _normG  = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
-        const _gColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'})[_normG(g)]||'#64748b';
-        const _gBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const badge   = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
 
         // 수리오행 — 오행 흐름 시각화용
@@ -4185,25 +4183,25 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const myDesc = mathYin?.desc   ? ` ${mathYin.desc}`   : '';
 
         const ohengTexts = {
-            '길': `수리의 핵심인 형격(청년운)과 정격(전체운)의 오행이 서로를 북돋는 <b>상생(相生)</b> 관계를 이루고 있습니다.
+            '매우 좋음': `수리의 핵심인 형격(청년운)과 정격(전체운)의 오행이 서로를 북돋는 <b>상생(相生)</b> 관계를 이루고 있습니다.
                 상생이란 나무가 불을 키우고 불이 흙을 만들 듯, 앞선 기운이 다음 기운으로 자연스럽게 이어지는 것입니다.
                 청년기에 쌓은 에너지가 인생 전체의 흐름으로 막힘없이 연결되어, 노력이 결실로 이어지는 구조가 탄탄합니다.${moDesc}`,
-            '평': `형격(청년운)과 정격(전체운)의 오행이 상생도 상극도 아닌 <b>중화(中和)</b>적 관계를 맺고 있습니다.
+            '나쁨': `형격(청년운)과 정격(전체운)의 오행이 상생도 상극도 아닌 <b>중화(中和)</b>적 관계를 맺고 있습니다.
                 기운의 충돌은 없으나 서로 적극적으로 돕지도 않아, 인생 흐름이 큰 기복 없이 평탄하게 이어집니다.
                 자원오행·발음오행 등 다른 요소들이 보완 역할을 해준다면 전체적인 균형을 충분히 유지할 수 있습니다.${moDesc}`,
-            '흉': `형격(청년운)과 정격(전체운)의 오행 사이에 <b>상극(相剋)</b>이 발생합니다.
+            '매우 나쁨': `형격(청년운)과 정격(전체운)의 오행 사이에 <b>상극(相剋)</b>이 발생합니다.
                 상극이란 쇠가 나무를 자르고 물이 불을 끄듯, 앞선 기운이 다음 기운을 억누르는 관계입니다.
                 청년기에 쌓은 기운이 인생 전체 흐름과 충돌하면 노력 대비 결실이 더디게 느껴질 수 있으므로,
                 자원오행과 발음오행에서 보완 기운을 강화해 균형을 잡는 것이 중요합니다.${moDesc}`,
         };
         const yinTexts = {
-            '길': `이름을 이루는 한자들의 획수가 홀수(양·陽)와 짝수(음·陰)로 고르게 배합되어 있습니다.
+            '매우 좋음': `이름을 이루는 한자들의 획수가 홀수(양·陽)와 짝수(음·陰)로 고르게 배합되어 있습니다.
                 동양 철학에서 음양의 조화는 만물이 생성되는 근본 원리로, 이름에서 뿜어내는 기운이 한쪽으로 치우치지 않고 균형 있게 순환함을 의미합니다.
                 평생 수만 번 불릴 이름에서 이 균형이 유지된다는 것은, 아이의 기질이 편향되지 않고 유연하고 안정적으로 형성되도록 돕는다는 뜻입니다.${myDesc}`,
-            '평': `이름 획수의 음양 배합이 무난한 수준으로, 기운의 흐름이 크게 치우치지 않는 상태입니다.
+            '나쁨': `이름 획수의 음양 배합이 무난한 수준으로, 기운의 흐름이 크게 치우치지 않는 상태입니다.
                 완전한 홀짝 교차는 아니지만 극단적인 편향도 없어, 다른 수리 요소 및 자원오행과 함께 전체적인 조화를 이루어 나갑니다.
                 발음오행·자원오행이 균형을 뒷받침해준다면 이 부분은 충분히 보완될 수 있습니다.${myDesc}`,
-            '흉': `이름 획수가 홀수 또는 짝수 한쪽으로만 쏠려 있어 <b>음양의 균형이 깨진</b> 상태입니다.
+            '매우 나쁨': `이름 획수가 홀수 또는 짝수 한쪽으로만 쏠려 있어 <b>음양의 균형이 깨진</b> 상태입니다.
                 음양의 불균형은 이름이 방출하는 기운이 한 방향으로만 지속적으로 편중됨을 뜻하며, 장기적으로 아이의 기질 형성에 영향을 줄 수 있습니다.
                 획수 홀짝이 고루 섞인 한자로 재조합하거나, 자원오행과 발음오행에서 균형을 충분히 보완하는 방향을 권합니다.${myDesc}`,
         };
@@ -4238,12 +4236,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const g4 = isOija ? s0+s1 : s0+s1+s2;
         const rawNums = [g1, g2, g3, g4];
 
-        const _normG  = g => g==='대길'?'길':g==='대흉'?'흉':g;
-        const _gColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'})[_normG(g)]||'#64748b';
-        const _gBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
-        const _isGood = g => _normG(g)==='길';
-        const _isBad  = g => _normG(g)==='흉';
+        const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
+        const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
 
         const seasons = [
             { emoji:'🌱', period:'봄 · 초년 (0~20대)',    label:_tip('원격'), rawNum: rawNums[0] },
@@ -4282,7 +4280,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // candidate 객체가 있으면 DOM-독립 직접 계산 (프리미엄/예시 보고서)
     // candidate 없으면 getAnalysisData DOM 기반 (셀프 보고서)
     function _buildReportItems(familyKr, firstName, candidate) {
-        const _ng = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
+        const _ng = g => ({'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
 
         // ── 공통 발음 계산 헬퍼 ────────────────────────────────────
         const _CHO_O = c => {
@@ -4310,13 +4308,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _pronGrade = (fullKr) => {
             const os = fullKr.split('').map(_CHO_O);
             const bad = os.filter((o,i) => i < os.length-1 && o && !_isSS(o, os[i+1])).length;
-            return bad === 0 ? '길' : bad === 1 ? '평' : '흉';
+            return bad === 0 ? '매우 좋음' : bad === 1 ? '나쁨' : '매우 나쁨';
         };
         const _yinGrade = (fullKr) => {
             const ys = fullKr.split('').map(_YY);
-            if (ys.every(y=>y==='양') || ys.every(y=>y==='음')) return '흉';
-            if (ys.length === 3 && ys[0]!==ys[1] && ys[1]!==ys[2]) return '길';
-            return '평';
+            if (ys.every(y=>y==='양') || ys.every(y=>y==='음')) return '매우 나쁨';
+            const isAlt = ys.every((v,i) => i===0 || v!==ys[i-1]);
+            return isAlt ? '매우 좋음' : '나쁨';
         };
         const _numOheng = n => {
             const d = n % 10;
@@ -4341,19 +4339,22 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
             const fullKr = familyKr + firstName;
 
-            // 수리 오행 (형격·정격 오행 상생)
-            const mathOhengGrade = _isSS(_numOheng(g2), _numOheng(g4)) ? '길' : '흉';
-            // 수리 음양 (전체 획수 홀짝)
-            const stArr = [s0, s1, ...(s2 ? [s2] : [])];
-            const mathYinGrade = stArr.every(s=>s%2===0)||stArr.every(s=>s%2!==0) ? '흉' : '길';
+            // 수리 오행 (4격 인접 쌍 상극 개수)
+            const moNums4   = [g1,g2,g3,g4];
+            const moOs4     = moNums4.map(_numOheng);
+            const moBad4    = moOs4.filter((o,i)=>i<3&&!_isSS(o,moOs4[i+1])).length;
+            const mathOhengGrade = moBad4===0?'매우 좋음':moBad4===1?'나쁨':'매우 나쁨';
+            // 수리 음양 (4격 수리의 홀짝)
+            const g4Nums = [g1,g2,g3,g4];
+            const mathYinGrade = g4Nums.every(n=>n%2===0)||g4Nums.every(n=>n%2!==0) ? '매우 나쁨' : '매우 좋음';
 
             // 사주 보완 (자원오행이 saju prefer 를 얼마나 채우는가)
             const prefer    = _currentState?.nameSpec?.prefer || [];
             const nameOs    = [h1.o, h2?.o].filter(Boolean).map(o => _normOheng ? _normOheng(o) : o);
             const compCount = prefer.filter(p => nameOs.includes(p)).length;
-            const sajuGrade = prefer.length === 0 ? '평'
-                            : compCount === prefer.length ? '길'
-                            : compCount > 0 ? '평' : '흉';
+            const sajuGrade = prefer.length === 0 ? '나쁨'
+                            : compCount === prefer.length ? '매우 좋음'
+                            : compCount > 0 ? '좋음' : '매우 나쁨';
 
             return [
                 { label:'사주 보완',     sub:'자원오행 매칭',  grade: sajuGrade },
@@ -4388,7 +4389,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // ── Executive Summary 카드 빌더 ────────────────────────────────
     function _buildExecSummaryHtml(nameKr, nameHj, score, labeledItems) {
-        const _ng  = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
+        const _ng  = g => ({'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
         const stars = score>=90?'★★★★★':score>=75?'★★★★☆':score>=55?'★★★☆☆':score>=35?'★★☆☆☆':'★☆☆☆☆';
         const msg   = score>=90 ? '천운과 이름이 완벽하게 어우러진 성명입니다' :
                       score>=80 ? '사주와 조화롭고 풍요로운 기운의 이름입니다' :
@@ -4401,9 +4402,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const C = 2*Math.PI*42; // circumference r=42
         const filled = ((score/100)*C).toFixed(1);
 
-        const goodItems = labeledItems.filter(it=>_ng(it.g)==='길');
-        const badItems  = labeledItems.filter(it=>_ng(it.g)==='흉');
-        const midItems  = labeledItems.filter(it=>_ng(it.g)==='평');
+        const goodItems = labeledItems.filter(it=>{ const ng=_ng(it.g); return ng==='매우 좋음'||ng==='좋음'; });
+        const badItems  = labeledItems.filter(it=>_ng(it.g)==='매우 나쁨');
+        const midItems  = labeledItems.filter(it=>_ng(it.g)==='나쁨');
 
         const itemsHtml = [
             ...goodItems.map(it=>`<span class="exec-item good">✓ ${it.label}</span>`),
@@ -4528,27 +4529,27 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // ── 설명 텍스트 ──────────────────────────────────────────────
         const pronTexts = {
-            '길': `이름을 부를 때마다 초성의 기운이 서로를 북돋아주는 <b>상생(相生)</b>의 흐름이 형성됩니다.
+            '매우 좋음': `이름을 부를 때마다 초성의 기운이 서로를 북돋아주는 <b>상생(相生)</b>의 흐름이 형성됩니다.
                 상생이란 나무가 불을 키우고, 불이 흙을 만들듯 기운이 자연스럽게 이어지는 것입니다.
                 이름이 불릴 때마다 에너지가 막힘없이 흘러 아이에게 긍정적인 파동을 전달합니다.
                 발음 오행에서 가장 이상적인 구성으로, 이름의 소리 자체가 좋은 기운을 만들어냅니다.`,
-            '평': `이름 초성의 기운 흐름에 일부 마찰이 있으나 치명적인 수준은 아닙니다.
+            '나쁨': `이름 초성의 기운 흐름에 일부 마찰이 있으나 치명적인 수준은 아닙니다.
                 상생과 상극이 혼재하며, 좋은 흐름이 나쁜 흐름을 어느 정도 상쇄해줍니다.
                 자원오행·수리 등 다른 요소들이 보완해준다면 전체적인 균형을 유지할 수 있습니다.
-                발음 오행 하나로 이름의 길흉을 판단하지 않으므로 종합 점수를 함께 참고해주세요.`,
-            '흉': `이름을 소리 내어 부를 때 초성 간에 연속적으로 <b>상극(相剋)</b>이 발생합니다.
+                발음 오행 하나로 이름의 평가를 판단하지 않으므로 종합 점수를 함께 참고해주세요.`,
+            '매우 나쁨': `이름을 소리 내어 부를 때 초성 간에 연속적으로 <b>상극(相剋)</b>이 발생합니다.
                 상극이란 쇠가 나무를 자르고, 물이 불을 끄듯 기운이 서로 충돌하는 것입니다.
                 평생 수만 번 불릴 이름에서 이런 충돌이 반복되면 기운의 흐름이 막히는 영향을 줄 수 있습니다.
                 초성 오행이 상생 관계를 이루는 이름으로 재검토해보시길 권합니다.`,
         };
         const yinTexts = {
-            '길': `이름의 모음이 양성(ㅏ·ㅗ·ㅐ)과 음성(ㅣ·ㅜ·ㅡ)을 조화롭게 교차합니다.
+            '매우 좋음': `이름의 모음이 양성(ㅏ·ㅗ·ㅐ)과 음성(ㅣ·ㅜ·ㅡ)을 조화롭게 교차합니다.
                 동양 철학에서 음양의 교차는 만물이 생성되는 근본 원리입니다.
                 이름을 부를 때 들숨과 날숨처럼 기운이 자연스럽게 순환하며,
                 아이의 성격 형성에 균형 잡힌 에너지를 꾸준히 공급합니다.`,
-            '평': `모음의 음양 배합이 양호한 수준으로, 기운의 흐름이 크게 치우치지 않습니다.
+            '나쁨': `모음의 음양 배합이 양호한 수준으로, 기운의 흐름이 크게 치우치지 않습니다.
                 완전한 교차는 아니지만 다른 항목들과 함께 전체적인 조화를 이루고 있습니다.`,
-            '흉': `이름의 모음이 양성 또는 음성 한쪽으로만 쏠려 있습니다.
+            '매우 나쁨': `이름의 모음이 양성 또는 음성 한쪽으로만 쏠려 있습니다.
                 음양의 균형이 무너지면 에너지가 한 방향으로만 흐르는 편향이 발생합니다.
                 한쪽 기운만 지속적으로 공급받는 것은 아이의 기질 형성에 영향을 줄 수 있습니다.
                 다양한 모음이 섞인 이름을 검토해보시길 권합니다.`,
