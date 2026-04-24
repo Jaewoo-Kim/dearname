@@ -2807,8 +2807,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         let pyGrade = '평', pyDesc = '음양이 적절히 혼합되어 무난한 밸런스를 보여줍니다.';
         if(allYang || allYin) {
             pyGrade = '흉'; pyDesc = '모음의 음양이 한쪽으로 극단적으로 치우쳐 있습니다.';
-        } else if(yinYangs.length === 3 && yinYangs[0] !== yinYangs[1] && yinYangs[1] !== yinYangs[2]) {
-            pyGrade = '길'; pyDesc = '양성/음성 모음이 가장 조화롭게 배합되어 긍정적입니다.';
+        } else {
+            // 완벽 교대(양-음-양 또는 음-양-음): 2음절·3음절 모두 적용
+            const isAlt = yinYangs.every((v, i) => i === 0 || v !== yinYangs[i - 1]);
+            if(isAlt) { pyGrade = '길'; pyDesc = '양성/음성 모음이 가장 조화롭게 배합되어 긍정적입니다.'; }
         }
 
         /* ----------------------------------------------------
@@ -2850,22 +2852,30 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if(lastDigit===7||lastDigit===8) return '金';
             if(lastDigit===9||lastDigit===0) return '水';
         }
-        const mO1 = getNumOheng(g2_num); // 중심운인 형격 오행
-        const mO2 = getNumOheng(g4_num); // 전체운인 정격 오행
-        const moGrade = isSangsaeng(mO1, mO2) ? '길' : '흉';
-        const moDesc = moGrade === '길' ? '수리의 근간이 되는 오행들이 서로 돕는 길한 상생 국면입니다.' : '수리오행 간 상극이 발생하여 기운이 다소 충돌합니다.';
+        // 4격 인접 쌍(원↔형, 형↔이, 이↔정) 상극 개수로 3단계 판정
+        const moNums = [g1_num, g2_num, g3_num, g4_num];
+        const moOhengs = moNums.map(getNumOheng);
+        let moBadCount = 0;
+        for(let i = 0; i < moOhengs.length - 1; i++) {
+            if(!isSangsaeng(moOhengs[i], moOhengs[i + 1])) moBadCount++;
+        }
+        let moGrade, moDesc;
+        if(moBadCount === 0)      { moGrade = '길'; moDesc = '수리의 4격 오행이 모두 상생으로 이어져 기운이 막힘없이 흐릅니다.'; }
+        else if(moBadCount === 1) { moGrade = '평'; moDesc = '수리오행 흐름에 상극이 일부 포함되어 있으나 무난한 수준입니다.'; }
+        else                      { moGrade = '흉'; moDesc = '수리오행 간 상극이 여러 곳에서 발생하여 기운 충돌이 우려됩니다.'; }
 
         /* ----------------------------------------------------
            ⑤ 수리음양 (획수의 홀/짝 밸런스)
            ---------------------------------------------------- */
+        // 수리음양: 각 한자 획수가 아닌 4격 수리(원·형·이·정격)의 홀짝 기준
         const isYang = (s) => s % 2 !== 0;
-        const myYangs = strokes.map(s => isYang(s) ? '양' : '음');
+        const myYangs = [g1_num, g2_num, g3_num, g4_num].map(n => isYang(n) ? '양' : '음');
         const mAllYang = myYangs.every(y => y === '양');
-        const mAllYin = myYangs.every(y => y === '음');
-        
-        let myGrade = '길', myDesc = '음(짝수)과 양(홀수)이 적절히 교차 배합되어 균형이 잘 잡혀 있습니다.';
+        const mAllYin  = myYangs.every(y => y === '음');
+
+        let myGrade = '길', myDesc = '4격 수리의 음(짝수)과 양(홀수)이 고루 배합되어 균형이 잘 잡혀 있습니다.';
         if(mAllYang || mAllYin) {
-            myGrade = '흉'; myDesc = '한자 획수가 모두 홀수 또는 짝수로만 이루어져 흉합니다.';
+            myGrade = '흉'; myDesc = '4격 수리가 모두 홀수 또는 짝수로 치우쳐 음양 균형이 깨져 있습니다.';
         }
 
         /* ----------------------------------------------------
