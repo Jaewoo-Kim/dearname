@@ -263,15 +263,17 @@
         .ampm-pill span { display:inline-flex; align-items:center; padding:6px 11px; font-size:0.9rem; font-weight:700; color:var(--text-secondary); border-radius:9px; transition:all 0.2s; white-space:nowrap; user-select:none; }
         .ampm-pill input:checked ~ span { background:var(--gold-premium); color:white; }
         /* 도시 선택 */
-        .bf-city-select { appearance:none; -webkit-appearance:none; background-color:var(--bg-light); border:1.5px solid var(--border-light); border-radius:13px; padding:10px 32px 10px 14px; font-size:0.95rem; font-weight:600; color:var(--bg-dark); font-family:'Pretendard',sans-serif; cursor:pointer; flex:0 0 auto; min-width:140px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; transition:border-color 0.2s,box-shadow 0.2s; }
+        .bf-city-select { appearance:none; -webkit-appearance:none; background-color:var(--bg-light); border:1.5px solid var(--border-light); border-radius:13px; padding:8px 28px 8px 11px; font-size:0.85rem; font-weight:600; color:var(--bg-dark); font-family:'Pretendard',sans-serif; cursor:pointer; flex:0 0 auto; width:auto!important; min-width:100px; max-width:140px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; transition:border-color 0.2s,box-shadow 0.2s; }
         .bf-city-select:focus { outline:none; border-color:var(--gold-premium); box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
+        /* 시간 오류 메시지 */
+        .bf-time-err { font-size:0.78rem; color:#ef4444; font-weight:600; display:none; align-self:center; white-space:nowrap; }
         /* 레거시 호환 (prem 폼 등) */
         .ampm-group { display:flex; gap:3px; margin-right:4px; flex-shrink:0; }
         /* 윤달 서브 옵션 */
         .cal-lunar-group { display:flex; flex-direction:column; gap:4px; align-items:flex-start; }
         .cal-sub-pill { position:relative; cursor:pointer; }
         .cal-sub-pill input[type="checkbox"] { position:absolute; opacity:0; cursor:pointer; height:0; width:0; }
-        .cal-sub-label { display:inline-flex; align-items:center; padding:4px 10px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:12px; color:var(--text-secondary); font-size:0.75rem; font-weight:700; transition:all 0.2s; user-select:none; margin-left:8px; }
+        .cal-sub-label { display:inline-flex; align-items:center; padding:3px 9px; background:#fafaf8; border:1px dashed #94a3b8; border-radius:10px; color:#94a3b8; font-size:0.72rem; font-weight:700; transition:all 0.2s; user-select:none; margin-left:4px; }
         .cal-sub-pill:hover .cal-sub-label { background:#e2e8f0; }
         .cal-sub-pill input:checked ~ .cal-sub-label { background:#fff8e6; border-color:var(--gold-dark); color:var(--gold-dark); }
 
@@ -1041,15 +1043,14 @@
                                 <label class="ampm-pill"><input type="radio" name="birth-ampm" value="pm"><span>오후</span></label>
                             </div>
                             <div class="bf-chip">
-                                <input type="text" inputmode="numeric" maxlength="2" placeholder="0" class="bf-hm" id="birth-time-hour">
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="0" class="bf-hm" id="birth-time-hour" oninput="validateBirthTime('self')">
                                 <span class="bf-unit">시</span>
                             </div>
                             <div class="bf-chip">
-                                <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="birth-time-min">
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="birth-time-min" oninput="validateBirthTime('self')">
                                 <span class="bf-unit">분</span>
                             </div>
-                            <!-- 구분선 -->
-                            <span class="bf-sep"></span>
+                            <span class="bf-time-err" id="self-time-err">시(0~23)·분(0~59) 범위를 확인하세요</span>
                             <!-- 지역 -->
                             <select class="bf-city-select" id="birth-location">
                                 <option value="">도시 (선택)</option>
@@ -1191,15 +1192,14 @@
                                         <label class="ampm-pill"><input type="radio" name="prem-ampm" value="pm"><span>오후</span></label>
                                     </div>
                                     <div class="bf-chip">
-                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="0" class="bf-hm" id="prem-time-hour">
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="0" class="bf-hm" id="prem-time-hour" oninput="validateBirthTime('prem')">
                                         <span class="bf-unit">시</span>
                                     </div>
                                     <div class="bf-chip">
-                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="prem-time-min">
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="prem-time-min" oninput="validateBirthTime('prem')">
                                         <span class="bf-unit">분</span>
                                     </div>
-                                    <!-- 구분선 -->
-                                    <span class="bf-sep"></span>
+                                    <span class="bf-time-err" id="prem-time-err">시(0~23)·분(0~59) 범위를 확인하세요</span>
                                     <!-- 지역 -->
                                     <select class="bf-city-select" id="prem-city">
                                         <option value="">도시 (선택)</option>
@@ -4671,8 +4671,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             label.textContent = `→ 양력 ${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
             label.style.color = 'var(--gold-dark)';
         } else {
-            label.textContent = '→ 변환 실패';
-            label.style.color = '#ef4444';
+            if (calType === 'leap') {
+                label.textContent = '윤달 아님';
+                label.style.color = '#94a3b8';
+            } else {
+                label.textContent = '→ 변환 실패';
+                label.style.color = '#ef4444';
+            }
         }
         label.style.display = 'inline';
     }
@@ -4878,10 +4883,37 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             label.textContent = `→ 양력 ${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
             label.style.color = 'var(--gold-dark)';
         } else {
-            label.textContent = '→ 변환 실패 (날짜 확인)';
-            label.style.color = '#ef4444';
+            if (calType === 'leap') {
+                label.textContent = '윤달 아님';
+                label.style.color = '#94a3b8';
+            } else {
+                label.textContent = '→ 변환 실패 (날짜 확인)';
+                label.style.color = '#ef4444';
+            }
         }
         label.style.display = 'inline';
+    }
+
+    // ── 시간 유효성 검사 ──────────────────────────────────────────────
+    function validateBirthTime(prefix) {
+        const isP = prefix === 'prem';
+        const hourEl = document.getElementById(isP ? 'prem-time-hour' : 'birth-time-hour');
+        const minEl  = document.getElementById(isP ? 'prem-time-min'  : 'birth-time-min');
+        const errEl  = document.getElementById(isP ? 'prem-time-err'  : 'self-time-err');
+        if (!hourEl || !minEl || !errEl) return true;
+        const h = hourEl.value === '' ? 0 : parseInt(hourEl.value, 10);
+        const m = minEl.value  === '' ? 0 : parseInt(minEl.value,  10);
+        const invalid = (hourEl.value !== '' && (isNaN(h) || h < 0 || h > 23))
+                     || (minEl.value  !== '' && (isNaN(m) || m < 0 || m > 59));
+        errEl.style.display = invalid ? 'inline' : 'none';
+        if (invalid) {
+            hourEl.parentElement.style.borderColor = '#ef4444';
+            minEl.parentElement.style.borderColor  = '#ef4444';
+        } else {
+            hourEl.parentElement.style.borderColor = '';
+            minEl.parentElement.style.borderColor  = '';
+        }
+        return !invalid;
     }
 
     // ── 입력 유효성 검사 ──────────────────────────────────────────────
