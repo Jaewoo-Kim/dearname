@@ -1891,10 +1891,6 @@
                 <div class="letter-title">✦ 작명가의 총평</div>
                 <p id="ai-conclusion-letter-text"></p>
             </div>
-            <div style="margin-top:32px;">
-                <h3 style="font-size:1rem;font-weight:800;color:var(--bg-dark);margin-bottom:16px;">✦ 부모님을 위한 양육 가이드</h3>
-                <div class="timeline" id="report-timeline"></div>
-            </div>
         </div>
 
         <!-- 마지막 클로징 메시지 -->
@@ -3715,8 +3711,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             conclusionTextEl.textContent = report.conclusionLetter;
             conclusionEl.style.display = 'block';
         }
-        _renderTimeline(report);
-
         // 차트 + 첫 대운 자동 오픈
         setTimeout(() => {
             renderCharts();
