@@ -633,6 +633,30 @@
         /* ── 스토리형 셀프 보고서 ── */
         .story-intro-card { max-width:780px;margin:0 auto 8px;padding:28px 36px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:20px;border-left:4px solid var(--gold-dark);font-size:1rem;color:var(--text-secondary);line-height:1.9; }
         .story-chapter-label { font-size:0.72rem;font-weight:800;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px; }
+        .chapter-verdict-strip {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+        .cvs-badge {
+            flex-shrink: 0;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .cvs-text {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.5;
+        }
         .story-bridge-wrap { max-width:780px;margin:0 auto;display:flex;flex-direction:column;align-items:center;padding:4px 0; }
         .story-bridge-line { width:1px;height:28px;background:var(--border-light); }
         .story-bridge-pill { font-size:0.85rem;color:var(--text-secondary);font-style:italic;background:#f8fafc;padding:10px 24px;border-radius:30px;border:1px solid var(--border-light);text-align:center; }
@@ -1938,6 +1962,7 @@
         <div class="report-card">
             <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
             <h2 class="section-title"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
+            <div id="verdict-ch2" class="chapter-verdict-strip"></div>
             <div class="ai-tagline" id="report-tagline">--</div>
             <div id="report-jawon-chips"></div>
             <div class="intro-grid" style="margin-top:0;">
@@ -1970,6 +1995,7 @@
         <div class="report-card">
             <div class="story-chapter-label">Chapter 3. 한자가 품은 이야기</div>
             <h2 class="section-title">자원(字源) 심층 분석</h2>
+            <div id="verdict-ch3" class="chapter-verdict-strip"></div>
             <div id="report-hanja-details"></div>
             <div class="ai-story-block" id="ai-hanja-story" style="margin-top:24px;border-left:4px solid var(--gold-dark);background:#fffbeb;border-top:none;border-right:none;border-bottom:none;border-radius:0 14px 14px 0;"></div>
         </div>
@@ -1985,6 +2011,7 @@
         <div class="report-card">
             <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
             <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> & <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
+            <div id="verdict-ch4" class="chapter-verdict-strip"></div>
             <div id="ai-sound-body"></div>
             <div class="ai-story-block" id="ai-sound-story" style="margin-top:20px;"></div>
         </div>
@@ -2000,6 +2027,7 @@
         <div class="report-card">
             <div class="story-chapter-label">Chapter 5. 획수가 그리는 운명</div>
             <h2 class="section-title"><span class="term-tip" data-tip="원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.">사격수리</span> (四格數理)</h2>
+            <div id="verdict-ch5a" class="chapter-verdict-strip"></div>
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
             <div class="ai-story-block" id="ai-suri-story"></div>
         </div>
@@ -2015,6 +2043,7 @@
         <div class="report-card">
             <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
             <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
+            <div id="verdict-ch5b" class="chapter-verdict-strip"></div>
             <div id="report-suri-oheng-yin"></div>
         </div>
 
@@ -3925,11 +3954,37 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // Ch5: 수리 + 라이프플로우
         _renderSuriCards(s0, s1, s2, isOija);
         // Ch5: 수리음양 / 수리오행 서브 섹션
+        const _adForVerdict = (typeof getAnalysisData === 'function')
+            ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
         const suriOhengYinEl = document.getElementById('report-suri-oheng-yin');
         if (suriOhengYinEl) {
-            const ad = (typeof getAnalysisData === 'function')
-                ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
-            suriOhengYinEl.innerHTML = ad ? _buildSuriSubHtml(ad.mathYin, ad.mathOheng) : '';
+            suriOhengYinEl.innerHTML = _adForVerdict ? _buildSuriSubHtml(_adForVerdict.mathYin, _adForVerdict.mathOheng) : '';
+        }
+
+        // ── 챕터 판정 배너 ────────────────────────────────────────────
+        if (_adForVerdict) {
+            // Ch2: 사주 오행 보완 판정
+            _renderVerdict('verdict-ch2', _adForVerdict.sajuOheng.grade, _adForVerdict.sajuOheng.desc);
+            // Ch3: 자원오행 구성 판정
+            _renderVerdict('verdict-ch3', _adForVerdict.jawonohaeng.grade, _adForVerdict.jawonohaeng.desc);
+            // Ch4: 발음 오행·음양 종합 판정
+            const _p = _adForVerdict.pronounceOheng.grade, _y = _adForVerdict.pronounceYin.grade;
+            const _ch4g = (_p === '매우 나쁨' || _y === '매우 나쁨') ? '매우 나쁨'
+                        : (_p === '나쁨' && _y === '나쁨')           ? '나쁨'
+                        : (_p === '매우 좋음' && _y === '매우 좋음') ? '매우 좋음'
+                        : '좋음';
+            _renderVerdict('verdict-ch4', _ch4g,
+                `발음 오행 <b>${_p}</b> · 발음 음양 <b>${_y}</b>`);
+            // Ch5-A: 사격수리
+            _renderVerdict('verdict-ch5a', _adForVerdict.math4.grade, _adForVerdict.math4.desc);
+            // Ch5-B: 수리오행·음양 종합
+            const _mo = _adForVerdict.mathOheng.grade, _my = _adForVerdict.mathYin.grade;
+            const _ch5bg = (_mo === '매우 나쁨' || _my === '매우 나쁨') ? '매우 나쁨'
+                         : (_mo === '나쁨' || _my === '나쁨')           ? '나쁨'
+                         : (_mo === '매우 좋음' && _my === '매우 좋음') ? '매우 좋음'
+                         : '좋음';
+            _renderVerdict('verdict-ch5b', _ch5bg,
+                `수리 오행 <b>${_mo}</b> · 수리 음양 <b>${_my}</b>`);
         }
         const suriStoryEl = document.getElementById('ai-suri-story');
         if (suriStoryEl) {
@@ -4524,30 +4579,14 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // ── 설명 텍스트 ──────────────────────────────────────────────
         const pronTexts = {
-            '매우 좋음': `이름을 부를 때마다 초성의 기운이 서로를 북돋아주는 <b>상생(相生)</b>의 흐름이 형성됩니다.
-                상생이란 나무가 불을 키우고, 불이 흙을 만들듯 기운이 자연스럽게 이어지는 것입니다.
-                이름이 불릴 때마다 에너지가 막힘없이 흘러 아이에게 긍정적인 파동을 전달합니다.
-                발음 오행에서 가장 이상적인 구성으로, 이름의 소리 자체가 좋은 기운을 만들어냅니다.`,
-            '나쁨': `이름 초성의 기운 흐름에 일부 마찰이 있으나 치명적인 수준은 아닙니다.
-                상생과 상극이 혼재하며, 좋은 흐름이 나쁜 흐름을 어느 정도 상쇄해줍니다.
-                자원오행·수리 등 다른 요소들이 보완해준다면 전체적인 균형을 유지할 수 있습니다.
-                발음 오행 하나로 이름의 평가를 판단하지 않으므로 종합 점수를 함께 참고해주세요.`,
-            '매우 나쁨': `이름을 소리 내어 부를 때 초성 간에 연속적으로 <b>상극(相剋)</b>이 발생합니다.
-                상극이란 쇠가 나무를 자르고, 물이 불을 끄듯 기운이 서로 충돌하는 것입니다.
-                평생 수만 번 불릴 이름에서 이런 충돌이 반복되면 기운의 흐름이 막히는 영향을 줄 수 있습니다.
-                초성 오행이 상생 관계를 이루는 이름으로 재검토해보시길 권합니다.`,
+            '매우 좋음': `초성의 기운이 <b>상생(相生)</b>으로 이어져 이름이 불릴 때마다 막힘없는 에너지 흐름이 형성됩니다. 나무가 불을 키우듯, 각 음절의 기운이 다음 음절을 자연스럽게 북돋아줍니다.`,
+            '나쁨':      `상생과 상극이 혼재하나 치명적 수준은 아닙니다. 자원오행·수리 등 다른 항목들이 보완해주면 전체 균형을 유지할 수 있으며, 종합 점수를 함께 참고해주세요.`,
+            '매우 나쁨': `초성 간 연속 <b>상극(相剋)</b>이 발생합니다. 쇠가 나무를 자르듯 기운이 충돌하는 흐름으로, 상생 구성의 이름으로 재검토를 권장합니다.`,
         };
         const yinTexts = {
-            '매우 좋음': `이름의 모음이 양성(ㅏ·ㅗ·ㅐ)과 음성(ㅣ·ㅜ·ㅡ)을 조화롭게 교차합니다.
-                동양 철학에서 음양의 교차는 만물이 생성되는 근본 원리입니다.
-                이름을 부를 때 들숨과 날숨처럼 기운이 자연스럽게 순환하며,
-                아이의 성격 형성에 균형 잡힌 에너지를 꾸준히 공급합니다.`,
-            '나쁨': `모음의 음양 배합이 양호한 수준으로, 기운의 흐름이 크게 치우치지 않습니다.
-                완전한 교차는 아니지만 다른 항목들과 함께 전체적인 조화를 이루고 있습니다.`,
-            '매우 나쁨': `이름의 모음이 양성 또는 음성 한쪽으로만 쏠려 있습니다.
-                음양의 균형이 무너지면 에너지가 한 방향으로만 흐르는 편향이 발생합니다.
-                한쪽 기운만 지속적으로 공급받는 것은 아이의 기질 형성에 영향을 줄 수 있습니다.
-                다양한 모음이 섞인 이름을 검토해보시길 권합니다.`,
+            '매우 좋음': `양성(ㅏ·ㅗ) 모음과 음성(ㅣ·ㅜ) 모음이 조화롭게 교차합니다. 들숨·날숨처럼 음양이 순환하여 아이에게 균형 잡힌 에너지를 공급합니다.`,
+            '나쁨':      `음양 배합이 양호하나 완전한 교차는 아닙니다. 다른 항목들과 함께 전체적인 조화를 이루고 있어 큰 문제는 없습니다.`,
+            '매우 나쁨': `모음이 양성 또는 음성 한쪽으로 쏠려 에너지 편향이 발생합니다. 다양한 모음이 섞인 이름 구성을 검토해보세요.`,
         };
 
         // ── 상극 쌍 설명 생성 ────────────────────────────────────────
@@ -4780,6 +4819,25 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
 
         el.innerHTML = html;
+    }
+
+    // ── 챕터 판정 배너 헬퍼 ────────────────────────────────────────
+    function _renderVerdict(elId, grade, text) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const G4_COLOR = {
+            '매우 좋음': '#15803d', '좋음': '#1d4ed8',
+            '나쁨': '#d97706', '매우 나쁨': '#dc2626'
+        };
+        const G4_BG = {
+            '매우 좋음': '#f0fdf4', '좋음': '#eff6ff',
+            '나쁨': '#fffbeb', '매우 나쁨': '#fee2e2'
+        };
+        const color = G4_COLOR[grade] || '#64748b';
+        const bg    = G4_BG[grade]    || '#f8fafc';
+        el.style.background   = bg;
+        el.style.borderColor  = color + '40';
+        el.innerHTML = `<span class="cvs-badge" style="background:${color}22;color:${color};">${grade}</span><span class="cvs-text">${text}</span>`;
     }
 
     // ── 종합 결론 그리드 ────────────────────────────────────────────
