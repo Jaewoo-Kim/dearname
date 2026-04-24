@@ -241,10 +241,9 @@
         .input-label { display: block; font-size: 0.9rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 12px; }
         input, select, textarea { width: 100%; padding: 16px 20px; border: 1px solid var(--border-light); border-radius: 16px; font-size: 1.05rem; box-sizing: border-box; background: var(--bg-light); transition: all 0.3s ease; color: var(--text-primary); font-family: 'Pretendard', sans-serif;}
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold-premium); background: white; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
-        /* ── 출생 정보 입력 (리디자인) ── */
-        .birth-form-area { display:flex; flex-direction:column; gap:12px; }
-        .birth-form-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-        .birth-row-lbl { font-size:0.73rem; font-weight:800; color:var(--text-secondary); letter-spacing:0.4px; flex-shrink:0; min-width:54px; }
+        /* ── 출생 정보 입력 (1줄 인라인) ── */
+        .birth-form-area { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .bf-sep { width:1px; height:26px; background:var(--border-light); flex-shrink:0; margin:0 2px; }
         /* 년도·시·분 입력 칩 */
         .bf-chip { display:inline-flex; align-items:center; gap:5px; background:var(--bg-light); border:1.5px solid var(--border-light); border-radius:13px; padding:10px 14px; transition:border-color 0.2s,box-shadow 0.2s,background 0.2s; }
         .bf-chip:focus-within { border-color:var(--gold-premium); background:white; box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
@@ -264,7 +263,7 @@
         .ampm-pill span { display:inline-flex; align-items:center; padding:6px 11px; font-size:0.9rem; font-weight:700; color:var(--text-secondary); border-radius:9px; transition:all 0.2s; white-space:nowrap; user-select:none; }
         .ampm-pill input:checked ~ span { background:var(--gold-premium); color:white; }
         /* 도시 선택 */
-        .bf-city-select { appearance:none; -webkit-appearance:none; background-color:var(--bg-light); border:1.5px solid var(--border-light); border-radius:13px; padding:10px 32px 10px 14px; font-size:0.95rem; font-weight:600; color:var(--bg-dark); font-family:'Pretendard',sans-serif; cursor:pointer; flex:1; min-width:0; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; transition:border-color 0.2s,box-shadow 0.2s; }
+        .bf-city-select { appearance:none; -webkit-appearance:none; background-color:var(--bg-light); border:1.5px solid var(--border-light); border-radius:13px; padding:10px 32px 10px 14px; font-size:0.95rem; font-weight:600; color:var(--bg-dark); font-family:'Pretendard',sans-serif; cursor:pointer; flex:0 0 auto; min-width:140px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; transition:border-color 0.2s,box-shadow 0.2s; }
         .bf-city-select:focus { outline:none; border-color:var(--gold-premium); box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
         /* 레거시 호환 (prem 폼 등) */
         .ampm-group { display:flex; gap:3px; margin-right:4px; flex-shrink:0; }
@@ -1012,68 +1011,63 @@
                         <input type="hidden" id="birth-date">
                         <input type="hidden" id="birth-time">
                         <div class="birth-form-area">
-                            <!-- 생년월일 -->
-                            <div class="birth-form-row">
-                                <span class="birth-row-lbl">생년월일</span>
-                                <div class="bf-chip">
-                                    <input type="text" inputmode="numeric" maxlength="4" placeholder="1990" class="bf-year" id="birth-date-year">
-                                    <span class="bf-unit">년</span>
-                                </div>
-                                <select class="bf-select" id="birth-date-month">
-                                    <option value="">월</option>
-                                    <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                </select>
-                                <select class="bf-select" id="birth-date-day">
-                                    <option value="">일</option>
-                                    <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
-                                </select>
-                                <div class="cal-pill-group">
-                                    <label class="cal-pill"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"><span class="cal-label">양력</span></label>
-                                    <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
-                                    <label class="cal-sub-pill" id="self-leap-label" style="display:none;">
-                                        <input type="checkbox" id="self-leap-check" onchange="updateSelfLunarLabel()">
-                                        <span class="cal-sub-label">윤달</span>
-                                    </label>
-                                </div>
-                                <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;align-self:center;"></span>
+                            <!-- 날짜 -->
+                            <div class="bf-chip">
+                                <input type="text" inputmode="numeric" maxlength="4" placeholder="1990" class="bf-year" id="birth-date-year">
+                                <span class="bf-unit">년</span>
                             </div>
-                            <!-- 출생 시간 -->
-                            <div class="birth-form-row">
-                                <span class="birth-row-lbl">출생 시간</span>
-                                <div class="bf-ampm-chip">
-                                    <label class="ampm-pill"><input type="radio" name="birth-ampm" value="am" checked><span>오전</span></label>
-                                    <label class="ampm-pill"><input type="radio" name="birth-ampm" value="pm"><span>오후</span></label>
-                                </div>
-                                <div class="bf-chip">
-                                    <input type="text" inputmode="numeric" maxlength="2" placeholder="0" class="bf-hm" id="birth-time-hour">
-                                    <span class="bf-unit">시</span>
-                                </div>
-                                <div class="bf-chip">
-                                    <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="birth-time-min">
-                                    <span class="bf-unit">분</span>
-                                </div>
+                            <select class="bf-select" id="birth-date-month">
+                                <option value="">월</option>
+                                <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                            </select>
+                            <select class="bf-select" id="birth-date-day">
+                                <option value="">일</option>
+                                <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+                            </select>
+                            <div class="cal-pill-group">
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="solar" checked onchange="updateSelfLunarLabel()"><span class="cal-label">양력</span></label>
+                                <label class="cal-pill"><input type="radio" name="self_cal_type" value="lunar" onchange="updateSelfLunarLabel()"><span class="cal-label">음력</span></label>
+                                <label class="cal-sub-pill" id="self-leap-label" style="display:none;">
+                                    <input type="checkbox" id="self-leap-check" onchange="updateSelfLunarLabel()">
+                                    <span class="cal-sub-label">윤달</span>
+                                </label>
                             </div>
-                            <!-- 출생 지역 -->
-                            <div class="birth-form-row">
-                                <span class="birth-row-lbl">출생 지역</span>
-                                <select class="bf-city-select" id="birth-location">
-                                    <option value="">태어난 도시 (선택)</option>
-                                    <option value="서울">서울</option>
-                                    <option value="부산">부산</option>
-                                    <option value="인천">인천</option>
-                                    <option value="대구">대구</option>
-                                    <option value="대전">대전</option>
-                                    <option value="광주">광주</option>
-                                    <option value="울산">울산</option>
-                                    <option value="세종">세종</option>
-                                    <option value="수원">수원</option>
-                                    <option value="고양">고양</option>
-                                    <option value="청주">청주</option>
-                                    <option value="전주">전주</option>
-                                    <option value="창원">창원</option>
-                                    <option value="제주">제주</option>
-                                </select>
+                            <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;align-self:center;"></span>
+                            <!-- 구분선 -->
+                            <span class="bf-sep"></span>
+                            <!-- 시간 -->
+                            <div class="bf-ampm-chip">
+                                <label class="ampm-pill"><input type="radio" name="birth-ampm" value="am" checked><span>오전</span></label>
+                                <label class="ampm-pill"><input type="radio" name="birth-ampm" value="pm"><span>오후</span></label>
                             </div>
+                            <div class="bf-chip">
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="0" class="bf-hm" id="birth-time-hour">
+                                <span class="bf-unit">시</span>
+                            </div>
+                            <div class="bf-chip">
+                                <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="birth-time-min">
+                                <span class="bf-unit">분</span>
+                            </div>
+                            <!-- 구분선 -->
+                            <span class="bf-sep"></span>
+                            <!-- 지역 -->
+                            <select class="bf-city-select" id="birth-location">
+                                <option value="">도시 (선택)</option>
+                                <option value="서울">서울</option>
+                                <option value="부산">부산</option>
+                                <option value="인천">인천</option>
+                                <option value="대구">대구</option>
+                                <option value="대전">대전</option>
+                                <option value="광주">광주</option>
+                                <option value="울산">울산</option>
+                                <option value="세종">세종</option>
+                                <option value="수원">수원</option>
+                                <option value="고양">고양</option>
+                                <option value="청주">청주</option>
+                                <option value="전주">전주</option>
+                                <option value="창원">창원</option>
+                                <option value="제주">제주</option>
+                            </select>
                         </div>
                     </div>
                     <div class="full-width-form" style="margin-top: 20px;">
@@ -1167,68 +1161,63 @@
                                 <input type="hidden" id="prem-birth-date">
                                 <input type="hidden" id="prem-birth-time">
                                 <div class="birth-form-area">
-                                    <!-- 생년월일 -->
-                                    <div class="birth-form-row">
-                                        <span class="birth-row-lbl">생년월일</span>
-                                        <div class="bf-chip">
-                                            <input type="text" inputmode="numeric" maxlength="4" placeholder="1990" class="bf-year" id="prem-birth-date-year">
-                                            <span class="bf-unit">년</span>
-                                        </div>
-                                        <select class="bf-select" id="prem-birth-date-month">
-                                            <option value="">월</option>
-                                            <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                        </select>
-                                        <select class="bf-select" id="prem-birth-date-day">
-                                            <option value="">일</option>
-                                            <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
-                                        </select>
-                                        <div class="cal-pill-group">
-                                            <label class="cal-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="cal-label">양력</span></label>
-                                            <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
-                                            <label class="cal-sub-pill" id="prem-leap-label" style="display:none;">
-                                                <input type="checkbox" id="prem-leap-check" onchange="updateLunarLabel()">
-                                                <span class="cal-sub-label">윤달</span>
-                                            </label>
-                                            <span id="lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
-                                        </div>
+                                    <!-- 날짜 -->
+                                    <div class="bf-chip">
+                                        <input type="text" inputmode="numeric" maxlength="4" placeholder="1990" class="bf-year" id="prem-birth-date-year">
+                                        <span class="bf-unit">년</span>
                                     </div>
-                                    <!-- 출생 시간 -->
-                                    <div class="birth-form-row">
-                                        <span class="birth-row-lbl">출생 시간</span>
-                                        <div class="bf-ampm-chip">
-                                            <label class="ampm-pill"><input type="radio" name="prem-ampm" value="am" checked><span>오전</span></label>
-                                            <label class="ampm-pill"><input type="radio" name="prem-ampm" value="pm"><span>오후</span></label>
-                                        </div>
-                                        <div class="bf-chip">
-                                            <input type="text" inputmode="numeric" maxlength="2" placeholder="0" class="bf-hm" id="prem-time-hour">
-                                            <span class="bf-unit">시</span>
-                                        </div>
-                                        <div class="bf-chip">
-                                            <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="prem-time-min">
-                                            <span class="bf-unit">분</span>
-                                        </div>
+                                    <select class="bf-select" id="prem-birth-date-month">
+                                        <option value="">월</option>
+                                        <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                    </select>
+                                    <select class="bf-select" id="prem-birth-date-day">
+                                        <option value="">일</option>
+                                        <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+                                    </select>
+                                    <div class="cal-pill-group">
+                                        <label class="cal-pill"><input type="radio" name="cal_type" value="solar" checked onchange="updateLunarLabel()"><span class="cal-label">양력</span></label>
+                                        <label class="cal-pill"><input type="radio" name="cal_type" value="lunar" onchange="updateLunarLabel()"><span class="cal-label">음력</span></label>
+                                        <label class="cal-sub-pill" id="prem-leap-label" style="display:none;">
+                                            <input type="checkbox" id="prem-leap-check" onchange="updateLunarLabel()">
+                                            <span class="cal-sub-label">윤달</span>
+                                        </label>
+                                        <span id="lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
                                     </div>
-                                    <!-- 출생 지역 -->
-                                    <div class="birth-form-row">
-                                        <span class="birth-row-lbl">출생 지역</span>
-                                        <select class="bf-city-select" id="prem-city">
-                                            <option value="">태어난 도시 (선택)</option>
-                                            <option value="서울">서울</option>
-                                            <option value="부산">부산</option>
-                                            <option value="인천">인천</option>
-                                            <option value="대구">대구</option>
-                                            <option value="대전">대전</option>
-                                            <option value="광주">광주</option>
-                                            <option value="울산">울산</option>
-                                            <option value="세종">세종</option>
-                                            <option value="수원">수원</option>
-                                            <option value="고양">고양</option>
-                                            <option value="청주">청주</option>
-                                            <option value="전주">전주</option>
-                                            <option value="창원">창원</option>
-                                            <option value="제주">제주</option>
-                                        </select>
+                                    <!-- 구분선 -->
+                                    <span class="bf-sep"></span>
+                                    <!-- 시간 -->
+                                    <div class="bf-ampm-chip">
+                                        <label class="ampm-pill"><input type="radio" name="prem-ampm" value="am" checked><span>오전</span></label>
+                                        <label class="ampm-pill"><input type="radio" name="prem-ampm" value="pm"><span>오후</span></label>
                                     </div>
+                                    <div class="bf-chip">
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="0" class="bf-hm" id="prem-time-hour">
+                                        <span class="bf-unit">시</span>
+                                    </div>
+                                    <div class="bf-chip">
+                                        <input type="text" inputmode="numeric" maxlength="2" placeholder="00" class="bf-hm" id="prem-time-min">
+                                        <span class="bf-unit">분</span>
+                                    </div>
+                                    <!-- 구분선 -->
+                                    <span class="bf-sep"></span>
+                                    <!-- 지역 -->
+                                    <select class="bf-city-select" id="prem-city">
+                                        <option value="">도시 (선택)</option>
+                                        <option value="서울">서울</option>
+                                        <option value="부산">부산</option>
+                                        <option value="인천">인천</option>
+                                        <option value="대구">대구</option>
+                                        <option value="대전">대전</option>
+                                        <option value="광주">광주</option>
+                                        <option value="울산">울산</option>
+                                        <option value="세종">세종</option>
+                                        <option value="수원">수원</option>
+                                        <option value="고양">고양</option>
+                                        <option value="청주">청주</option>
+                                        <option value="전주">전주</option>
+                                        <option value="창원">창원</option>
+                                        <option value="제주">제주</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
