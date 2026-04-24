@@ -1652,12 +1652,26 @@
             <div class="story-bridge-line"></div>
         </div>
 
-        <!-- Chapter 4: 발음 -->
+        <!-- Chapter 4-A: 발음 오행 -->
         <div class="report-card">
             <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
-            <h2 class="section-title">발음 오행 및 음양 분석</h2>
-            <div id="ai-sound-section"></div>
-            <div class="ai-story-block" id="ai-sound-story"></div>
+            <h2 class="section-title">발음 오행 분석</h2>
+            <div id="ai-sound-oheng"></div>
+        </div>
+
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">이름의 모음이 만들어내는 음양(陰陽)의 파동입니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- Chapter 4-B: 발음 음양 -->
+        <div class="report-card">
+            <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
+            <h2 class="section-title">발음 음양 분석</h2>
+            <div id="ai-sound-yin"></div>
+            <div class="ai-story-block" id="ai-sound-story" style="margin-top:20px;"></div>
         </div>
 
         <!-- Bridge -->
@@ -1667,15 +1681,30 @@
             <div class="story-bridge-line"></div>
         </div>
 
-        <!-- Chapter 5: 수리 -->
+        <!-- Chapter 5-A: 사격수리 -->
         <div class="report-card">
-            <div class="story-chapter-label">Chapter 5. 인생의 사계절</div>
-            <h2 class="section-title">81수리 & 인생 흐름</h2>
+            <div class="story-chapter-label">Chapter 5. 획수가 그리는 운명</div>
+            <h2 class="section-title">사격수리 (四格數理)</h2>
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
+            <div class="ai-story-block" id="ai-suri-story"></div>
+        </div>
+
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">이 이름이 아이의 대운 흐름에서 어떤 힘이 되어줄까요?</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- Chapter 5-B: 인생 흐름 & 대운 -->
+        <div class="report-card">
+            <div class="story-chapter-label">Chapter 5. 대운과 이름의 여정</div>
+            <h2 class="section-title">인생 흐름 & 대운 분석</h2>
+            <div id="report-daeun-section"></div>
             <div class="chart-container-large" style="margin-top:28px;">
                 <canvas id="lifeFlowChart"></canvas>
             </div>
-            <div class="ai-story-block" id="ai-suri-story"></div>
+            <div id="report-timeline" style="margin-top:28px;"></div>
         </div>
 
         <!-- Bridge -->
@@ -3330,6 +3359,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (suriStoryEl) {
             suriStoryEl.textContent = report.suriStory || '';
         }
+        _renderDaeunSection(candidate, _currentState, report);
 
         // Ch6: 종합 결론
         _renderConclusionGrid(candidate, _currentState);
@@ -3622,8 +3652,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // ── 발음 섹션 렌더링 (프리미엄 풍부화 ver.) ─────────────────────
     function _renderSoundSection(candidate, report) {
-        const el = document.getElementById('ai-sound-section');
-        if (!el) return;
+        const elOheng = document.getElementById('ai-sound-oheng');
+        const elYin   = document.getElementById('ai-sound-yin');
+        if (!elOheng && !elYin) return;
         const { familyKr, h1, h2 } = candidate;
         const fullKr = `${familyKr}${h1.kr}${h2?.kr||''}`;
 
@@ -3751,34 +3782,43 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 ${conflictPairs.length ? `<div>⚡ <b style="color:#dc2626;">상극</b> : ${conflictPairs.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>` : ''}
             </div>` : '';
 
-        el.innerHTML = `
-            <!-- ① 초성 오행 흐름 시각화 -->
-            <div style="margin-bottom:22px;">
-                <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 초성 오행 흐름</div>
-                <div class="ai-sound-flow">${flowHtml}</div>
-                ${pairNoteHtml}
-            </div>
+        // ── 오행 카드 렌더링 ──────────────────────────────────────────
+        if (elOheng) {
+            elOheng.innerHTML = `
+                <div class="sound-unified">
+                    <!-- 초성 오행 흐름 시각화 -->
+                    <div style="margin-bottom:20px;">
+                        <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 초성 오행 흐름</div>
+                        <div class="ai-sound-flow">${flowHtml}</div>
+                        ${pairNoteHtml}
+                    </div>
+                    <!-- 오행 등급 + 설명 -->
+                    <div class="sound-grade-row" style="margin-bottom:8px;">
+                        <span class="sound-grade-label">발음 오행 (초성)</span>
+                        ${_badge(pronGrade)}
+                        <span style="font-size:0.8rem;color:var(--text-muted);margin-left:6px;">상생 ${goodCount}/${totalPairs}쌍</span>
+                    </div>
+                    <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${pronTexts[_normG(pronGrade)]||pronTexts['평']}</p>
+                </div>`;
+        }
 
-            <!-- ② 발음 오행 + 음양 분석 카드 -->
-            <div class="sound-unified">
-                <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">발음 오행 (초성)</span>
-                    ${_badge(pronGrade)}
-                    <span style="font-size:0.8rem;color:var(--text-muted);margin-left:4px;">상생 ${goodCount}/${totalPairs}쌍</span>
-                </div>
-                <p style="margin:0 0 24px;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${pronTexts[_normG(pronGrade)]||pronTexts['평']}</p>
-
-                <div style="margin-bottom:18px;">
-                    <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 모음 음양 배합</div>
-                    <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">${yyCharsHtml}</div>
-                </div>
-
-                <div class="sound-grade-row" style="margin-bottom:8px;">
-                    <span class="sound-grade-label">발음 음양 (모음)</span>
-                    ${_badge(yinGrade)}
-                </div>
-                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(yinGrade)]||yinTexts['평']}</p>
-            </div>`;
+        // ── 음양 카드 렌더링 ──────────────────────────────────────────
+        if (elYin) {
+            elYin.innerHTML = `
+                <div class="sound-unified">
+                    <!-- 모음 음양 시각화 -->
+                    <div style="margin-bottom:20px;">
+                        <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 모음 음양 배합</div>
+                        <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">${yyCharsHtml}</div>
+                    </div>
+                    <!-- 음양 등급 + 설명 -->
+                    <div class="sound-grade-row" style="margin-bottom:8px;">
+                        <span class="sound-grade-label">발음 음양 (모음)</span>
+                        ${_badge(yinGrade)}
+                    </div>
+                    <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(yinGrade)]||yinTexts['평']}</p>
+                </div>`;
+        }
     }
 
     // ── 종합 결론 그리드 ────────────────────────────────────────────
@@ -3876,6 +3916,122 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">${x.sub}</div>
                 </div>
             </div>`).join('');
+    }
+
+    // ── 대운 계산 & 렌더링 ─────────────────────────────────────────
+    function _renderDaeunSection(candidate, state, report) {
+        const el = document.getElementById('report-daeun-section');
+        if (!el) return;
+
+        const saju   = state._saju || {};
+        const gender = state.constraints?.gender || 'M';
+
+        // 60갑자 순서
+        const G60 = ['甲子','乙丑','丙寅','丁卯','戊辰','己巳','庚午','辛未','壬申','癸酉',
+                     '甲戌','乙亥','丙子','丁丑','戊寅','己卯','庚辰','辛巳','壬午','癸未',
+                     '甲申','乙酉','丙戌','丁亥','戊子','己丑','庚寅','辛卯','壬辰','癸巳',
+                     '甲午','乙未','丙申','丁酉','戊戌','己亥','庚子','辛丑','壬寅','癸卯',
+                     '甲辰','乙巳','丙午','丁未','戊申','己酉','庚戌','辛亥','壬子','癸丑',
+                     '甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥'];
+
+        const GAN_O  = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+        const JI_O   = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+        const GAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
+        const JI_KR  = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
+        const O_COLOR= {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#94a3b8','水':'#3b82f6'};
+        const O_KR   = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+        const CYCLE  = ['木','火','土','金','水'];
+        const isSS   = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
+        const isSK   = (a,b) => (CYCLE.indexOf(a)+2)%5===CYCLE.indexOf(b);
+
+        // 양간 여부 → 순행/역행
+        const YANG_GAN = new Set(['甲','丙','戊','庚','壬']);
+        const yearGan  = saju.year?.gan || '';
+        const isYang   = YANG_GAN.has(yearGan);
+        const isMale   = gender === 'M';
+        const forward  = (isYang && isMale) || (!isYang && !isMale);
+
+        const monthGanji = (saju.month?.gan||'') + (saju.month?.ji||'');
+        let baseIdx = G60.indexOf(monthGanji);
+        if (baseIdx === -1) baseIdx = 0;
+
+        // 대운 시작 나이 (절기 기반 정밀 계산 필요하나, 간략화로 5세 적용)
+        const startAge = 5;
+
+        // 이름 자원오행 목록
+        const nameOs = [candidate.h1?.o, candidate.h2?.o].filter(Boolean).map(o => _normOheng(o));
+
+        // 대운 생성 (8개)
+        const daeuns = Array.from({length: 8}, (_, i) => {
+            const idx = ((baseIdx + (forward ? i+1 : -(i+1))) % 60 + 60) % 60;
+            const gj  = G60[idx];
+            const gan = gj[0], ji = gj[1];
+            const ganO = GAN_O[gan]||'', jiO = JI_O[ji]||'';
+            const ageS = startAge + i * 10;
+            const ageE = ageS + 9;
+
+            // 이름과의 관계 분석 (천간 오행 기준)
+            let rel = '', relColor = '#64748b', relBg = '#f1f5f9';
+            if (ganO && nameOs.length) {
+                const helpNames = nameOs.filter(no => isSS(no, ganO));
+                const hurtNames = nameOs.filter(no => isSK(no, ganO));
+                if (helpNames.length) {
+                    rel = `이름의 ${helpNames.map(o=>O_KR[o]).join('·')} 기운이 대운 ${O_KR[ganO]} 기운을 상생(相生)하여 시너지를 만듭니다.`;
+                    relColor = '#15803d'; relBg = '#f0fdf4';
+                } else if (hurtNames.length) {
+                    rel = `대운 ${O_KR[ganO]} 기운과 이름 오행이 상극 관계이나, 지지 ${O_KR[jiO]||''} 기운이 완충하여 큰 작용은 없습니다.`;
+                    relColor = '#b45309'; relBg = '#fffbeb';
+                } else {
+                    rel = `이름의 오행과 대운이 중화(中和)적 관계로, 안정된 흐름을 유지합니다.`;
+                    relColor = '#1d4ed8'; relBg = '#eff6ff';
+                }
+            }
+
+            return { gj, gan, ji, ganO, jiO, ageS, ageE, rel, relColor, relBg };
+        });
+
+        // 현재 연도 기준으로 가장 관련된 대운(초년~청년)에 하이라이트
+        const birthYear = parseInt(saju.year?.ji ? '2000' : '2000'); // fallback
+        const lf = report.lifeFlow || {};
+
+        const colorsMap = ['#16a34a','#0891b2','#2563eb','#7c3aed','#db2777','#ea580c','#b45309','#64748b'];
+
+        const daeunHtml = daeuns.map((d, i) => `
+            <div style="display:flex;gap:14px;align-items:flex-start;padding:18px;border-radius:14px;
+                        background:${i<2?'#fffcf5':'#f8fafc'};border:1.5px solid ${i<2?'#f0d070':'#e2e8f0'};margin-bottom:12px;">
+                <!-- 나이 + 간지 -->
+                <div style="flex-shrink:0;text-align:center;min-width:72px;">
+                    <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;letter-spacing:1px;margin-bottom:4px;">${d.ageS}~${d.ageE}세</div>
+                    <div style="font-size:1.35rem;font-weight:900;color:var(--bg-dark);line-height:1;">${d.gj[0]}</div>
+                    <div style="font-size:1.1rem;font-weight:800;color:var(--bg-dark);">${d.gj[1]}</div>
+                    <div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">${GAN_KR[d.gan]||''}${JI_KR[d.ji]||''}</div>
+                </div>
+                <!-- 오행 뱃지 + 분석 -->
+                <div style="flex:1;">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+                        <span style="font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;
+                            background:${O_COLOR[d.ganO]||'#94a3b8'}20;color:${O_COLOR[d.ganO]||'#64748b'};
+                            border:1px solid ${O_COLOR[d.ganO]||'#94a3b8'}50;">
+                            천간 ${O_KR[d.ganO]||d.ganO}</span>
+                        <span style="font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;
+                            background:${O_COLOR[d.jiO]||'#94a3b8'}15;color:${O_COLOR[d.jiO]||'#64748b'};
+                            border:1px solid ${O_COLOR[d.jiO]||'#94a3b8'}40;">
+                            지지 ${O_KR[d.jiO]||d.jiO}</span>
+                    </div>
+                    ${d.rel ? `<div style="font-size:0.85rem;line-height:1.7;padding:10px 14px;border-radius:10px;
+                        background:${d.relBg};color:${d.relColor};font-weight:600;">
+                        ✦ ${d.rel}</div>` : ''}
+                </div>
+            </div>`).join('');
+
+        el.innerHTML = `
+            <div style="font-size:0.88rem;line-height:1.75;color:var(--text-secondary);padding:14px 18px;
+                background:#f8fafc;border-radius:12px;border-left:3px solid var(--gold-dark);margin-bottom:20px;">
+                대운(大運)은 사주의 <b>월주(月柱)</b>에서 출발하여 10년 주기로 흐르는 인생의 큰 파도입니다.
+                이 아이의 사주는 <b>${forward?'순행(順行)':'역행(逆行)'}</b> 대운으로 흘러, ${startAge}세 무렵부터 아래의 대운이 시작됩니다.
+                이름의 자원오행이 각 대운에서 어떤 역할을 하는지 살펴봅니다.
+            </div>
+            ${daeunHtml}`;
     }
 
     // ── 양육 가이드 타임라인 ────────────────────────────────────────
