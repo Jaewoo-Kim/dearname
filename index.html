@@ -1706,6 +1706,20 @@
         <!-- Bridge -->
         <div class="story-bridge-wrap">
             <div class="story-bridge-line"></div>
+            <div class="story-bridge-pill">획수의 홀짝 배합과 오행 상생, 수리의 숨겨진 두 지표를 살펴봅니다.</div>
+            <div class="story-bridge-line"></div>
+        </div>
+
+        <!-- Chapter 5. 수리 오행 & 음양 -->
+        <div class="report-card">
+            <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
+            <h2 class="section-title">수리 오행 & 음양 분석</h2>
+            <div id="report-suri-oheng-yin"></div>
+        </div>
+
+        <!-- Bridge -->
+        <div class="story-bridge-wrap">
+            <div class="story-bridge-line"></div>
             <div class="story-bridge-pill">이 이름이 아이의 대운 흐름에서 어떤 힘이 되어줄까요?</div>
             <div class="story-bridge-line"></div>
         </div>
@@ -1725,19 +1739,6 @@
         </div>
 
         <!-- Bridge -->
-        <div class="story-bridge-wrap">
-            <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">획수의 홀짝 배합과 오행 상생, 수리의 숨겨진 두 지표를 살펴봅니다.</div>
-            <div class="story-bridge-line"></div>
-        </div>
-
-        <!-- Chapter 5-2: 수리 오행 & 음양 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
-            <h2 class="section-title">수리 오행 & 음양 분석</h2>
-            <div id="report-suri-oheng-yin"></div>
-        </div>
-
         <!-- Bridge -->
         <div class="story-bridge-wrap">
             <div class="story-bridge-line"></div>
@@ -3582,41 +3583,63 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _gColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'})[_normG(g)]||'#64748b';
         const _gBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const badge   = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
-        const cardBorder = g => _normG(g)==='길' ? '#bbf7d0' : _normG(g)==='흉' ? '#fecaca' : '#e2e8f0';
-        const cardBg     = g => _normG(g)==='길' ? '#f0fdf4' : _normG(g)==='흉' ? '#fff5f5' : '#f8fafc';
+
+        // 수리오행 — 오행 흐름 시각화용
+        const O_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
+        const O_KR    = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const CYCLE   = ['木','火','土','金','水'];
+        const isSS    = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
+
+        // 형격·정격 오행 파싱 (desc에서 추출 or grade로 추론)
+        const moG = mathOheng?.grade || '평';
+        const myG = mathYin?.grade   || '평';
+
+        // 수리음양 — 획수 배열 시각화
+        const yinSeq  = mathYin?.seq  || [];   // e.g. [{val:획수, yin:'양'/'음'}, ...]
+        const yyChips = yinSeq.length
+            ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">${
+                yinSeq.map(s => {
+                    const isYang = s.yin === '양';
+                    return `<div style="text-align:center;">
+                        <div style="font-size:1rem;font-weight:800;color:var(--bg-dark);">${s.val}</div>
+                        <div style="margin-top:3px;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:20px;
+                            background:${isYang?'#fff7ed':'#eff6ff'};color:${isYang?'#c2410c':'#1d4ed8'};display:inline-block;">${s.yin||'?'}</div>
+                    </div>`;
+                }).join(`<div style="font-size:0.9rem;color:var(--text-muted);align-self:flex-start;padding-top:4px;">·</div>`)
+              }</div>`
+            : '';
 
         const yinTexts = {
-            '길': `획수의 홀(양·陽)과 짝(음·陰)이 균형 있게 배합되어 있습니다. 음양의 조화는 이름이 뿜어내는 기운이 한쪽으로 치우치지 않고 고르게 순환함을 뜻합니다.`,
+            '길': `획수의 홀(양·陽)과 짝(음·陰)이 균형 있게 배합되어 있습니다. 음양의 조화는 이름이 뿜어내는 기운이 한쪽으로 치우치지 않고 고르게 순환함을 뜻하며, 아이의 기질 형성에 안정적인 에너지를 공급합니다.`,
             '평': `획수의 음양 배합이 무난한 수준입니다. 완전한 균형은 아니지만 다른 수리 요소들과 함께 전체적인 조화를 유지합니다.`,
             '흉': `획수가 홀수 또는 짝수 한쪽으로만 쏠려 있어 음양 균형이 깨져 있습니다. 이름에서 방출되는 기운이 한 방향으로 편중될 수 있습니다.`,
         };
         const ohengTexts = {
-            '길': `수리의 핵심인 형격과 정격의 오행이 서로를 돕는 <b>상생(相生)</b> 관계입니다. 청년기의 기운과 전체 운이 서로 조화롭게 이어져 인생 흐름이 막힘 없이 흐릅니다.`,
+            '길': `수리의 핵심인 형격과 정격의 오행이 서로를 돕는 <b>상생(相生)</b> 관계입니다. 청년기의 기운과 전체 운이 조화롭게 이어져 인생 흐름이 막힘없이 흐릅니다.`,
             '평': `형격과 정격의 오행이 상생도 상극도 아닌 중립 관계입니다. 다른 수리 요소들과의 조화를 함께 고려해 주세요.`,
             '흉': `형격과 정격의 오행 사이에 <b>상극(相剋)</b>이 발생합니다. 청년기에 쌓은 기운이 전체 운과 충돌하여 인생 흐름에 불협화음이 생길 수 있습니다.`,
         };
 
-        const myG = mathYin?.grade  || '평';
-        const moG = mathOheng?.grade || '평';
-
-        return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;">
-            <div style="padding:16px 18px;background:${cardBg(myG)};border-radius:14px;border:1.5px solid ${cardBorder(myG)};box-sizing:border-box;">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                    <span style="font-size:0.8rem;font-weight:800;color:var(--text-secondary);">수리음양 (획수 홀짝)</span>
-                    ${badge(myG)}
-                </div>
-                <p style="margin:0;font-size:0.85rem;line-height:1.75;color:var(--text-secondary);">${yinTexts[_normG(myG)]}</p>
-                ${mathYin?.desc ? `<p style="margin:10px 0 0;font-size:0.78rem;color:var(--text-muted);">※ ${mathYin.desc}</p>` : ''}
-            </div>
-            <div style="padding:16px 18px;background:${cardBg(moG)};border-radius:14px;border:1.5px solid ${cardBorder(moG)};box-sizing:border-box;">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                    <span style="font-size:0.8rem;font-weight:800;color:var(--text-secondary);">수리오행 (형격·정격)</span>
+        return `
+            <!-- 수리 오행 카드 -->
+            <div class="sound-unified" style="margin-bottom:16px;">
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">수리 오행 (형격·정격)</span>
                     ${badge(moG)}
                 </div>
-                <p style="margin:0;font-size:0.85rem;line-height:1.75;color:var(--text-secondary);">${ohengTexts[_normG(moG)]}</p>
-                ${mathOheng?.desc ? `<p style="margin:10px 0 0;font-size:0.78rem;color:var(--text-muted);">※ ${mathOheng.desc}</p>` : ''}
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${ohengTexts[_normG(moG)]}</p>
+                ${mathOheng?.desc ? `<p style="margin:10px 0 0;font-size:0.8rem;color:var(--text-muted);">※ ${mathOheng.desc}</p>` : ''}
             </div>
-        </div>`;
+            <!-- 수리 음양 카드 -->
+            <div class="sound-unified">
+                ${yyChips}
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">수리 음양 (획수 홀짝)</span>
+                    ${badge(myG)}
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(myG)]}</p>
+                ${mathYin?.desc ? `<p style="margin:10px 0 0;font-size:0.8rem;color:var(--text-muted);">※ ${mathYin.desc}</p>` : ''}
+            </div>`;
     }
 
     // ── 사격수리 카드 렌더링 (시즌 카드 디자인) ─────────────────────
