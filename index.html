@@ -1424,10 +1424,27 @@
         </div>
 
         <!-- 하단 버튼 -->
-        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:60px;">
-            <button onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView({behavior:'smooth'});}, 100);" class="btn btn-gold" style="width:auto;padding:18px 36px;font-size:1rem;">AI 프리미엄 작명 의뢰</button>
-            <button onclick="openEmailModal('self-report')" class="btn btn-navy" style="width:auto;padding:18px 36px;font-size:1rem;background:#1e40af;">이메일로 받기</button>
-            <button onclick="window.print();" class="btn btn-navy" style="width:auto;padding:18px 36px;font-size:1rem;">PDF로 출력하기</button>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:60px;">
+            <button onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView({behavior:'smooth'});}, 100);"
+                style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
+                onmouseover="this.style.borderColor='var(--gold-dark)';this.style.color='var(--gold-dark)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
+                ✦ 프리미엄 작명 의뢰
+            </button>
+            <button onclick="openEmailModal('self-report')"
+                style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
+                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
+                🔗 공유하기
+            </button>
+            <button onclick="window.print();"
+                style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
+                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
+                🖨️ 인쇄 / PDF
+            </button>
+            <button onclick="openEmailModal('self-report')"
+                style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold-premium),var(--gold-dark));border:none;color:white;padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.35);transition:all 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(212,175,55,0.45)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.35)'">
+                ✉️ 이메일로 보내기
+            </button>
         </div>
     </main>
 </div>
@@ -1795,13 +1812,19 @@
 
         <!-- 하단 공유/인쇄 버튼 -->
         <div style="display:flex;gap:12px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap;">
-            <button onclick="shareReport()" style="background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:12px 24px;border-radius:50px;font-size:0.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+            <button onclick="shareReport()"
+                style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
+                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
                 🔗 공유하기
             </button>
-            <button onclick="printReport()" style="background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:12px 24px;border-radius:50px;font-size:0.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+            <button onclick="printReport()"
+                style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
+                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
                 🖨️ 인쇄 / PDF
             </button>
-            <button onclick="emailReport()" style="background:linear-gradient(135deg,var(--gold-dark),var(--gold-premium));border:none;color:white;padding:12px 24px;border-radius:50px;font-size:0.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+            <button onclick="emailReport()"
+                style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold-premium),var(--gold-dark));border:none;color:white;padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.35);transition:all 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(212,175,55,0.45)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.35)'">
                 ✉️ 이메일로 보내기
             </button>
         </div>
