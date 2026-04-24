@@ -1790,7 +1790,7 @@
                 <button onclick="sendChatMessage()" id="chat-send-btn">전송</button>
             </div>
 
-            <p id="chat-disclaimer">🔮 AI 답변은 명리학 데이터 기반 참고 정보이며, 실제 전문 작명가의 의견과 다를 수 있습니다.</p>
+            <p id="chat-disclaimer">🔮 AI 답변은 명리학 데이터 기반 정보이므로 참고로만 활용해주세요.</p>
         </div>
 
         <!-- 하단 공유/인쇄 버튼 -->
@@ -4151,8 +4151,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 </div>`;
         };
 
-        // 첫 번째 칩 자동 선택 (차트 렌더 100ms 이후에 실행)
-        setTimeout(() => window._showDaeunDetail && window._showDaeunDetail(0), 150);
+        // 첫 번째 칩 자동 선택은 차트 렌더 콜백(100ms) 에서 처리
     }
 
     // ── 양육 가이드 타임라인 ────────────────────────────────────────
