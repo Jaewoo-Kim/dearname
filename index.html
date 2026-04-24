@@ -4126,6 +4126,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     </div>
                 </div>`;
         };
+
+        // 첫 번째 칩 자동 선택
+        setTimeout(() => window._showDaeunDetail && window._showDaeunDetail(0), 50);
     }
 
     // ── 양육 가이드 타임라인 ────────────────────────────────────────
