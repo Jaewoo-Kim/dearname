@@ -4007,6 +4007,22 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const nameOs = [candidate.h1?.o, candidate.h2?.o].filter(Boolean).map(o => _normOheng(o));
         const nameKr = `${candidate.familyKr}${candidate.h1.kr}${candidate.h2?.kr||''}`;
 
+        // ── 나이대별 인생 맥락 ────────────────────────────────────
+        const AGE_CTX = [
+            '유년기의 인성과 기초 기질이 형성되는 결정적 시기입니다.',
+            '학업과 진로를 결정짓는 청소년~청년기의 핵심 분기점입니다.',
+            '사회 첫 발걸음과 자기 영역 개척이 본격화되는 시기입니다.',
+            '직업적 도약과 가정의 안정이 교차하는 장년 초입니다.',
+            '인생의 절정에서 지금까지의 노력이 결실을 맺는 시기입니다.',
+            '원숙한 지혜로 사회적 영향력이 깊어지는 성숙기입니다.',
+            '평생의 공이 인정받으며 내면의 풍요를 누리는 시기입니다.',
+            '깊은 지혜와 온화함으로 주변을 감싸는 완성의 시기입니다.',
+        ];
+        const O_EFFECT = {
+            '木':'성장·창의력', '火':'명예·사교성', '土':'안정·신뢰감', '金':'결단·성취', '水':'지혜·통찰'
+        };
+        const O_SHORT = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+
         // ── 대운 8개 생성 ─────────────────────────────────────────
         const daeuns = Array.from({length: 8}, (_, i) => {
             const idx  = ((baseIdx + (forward ? i+1 : -(i+1))) % 60 + 60) % 60;
@@ -4015,26 +4031,29 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const ganO = GAN_O[gan]||'', jiO = JI_O[ji]||'';
             const ageS = startAge + i * 10, ageE = ageS + 9;
 
-            // 3줄 해석
-            const line1 = GAN_DESC[gan] || `${gan} 대운의 기운이 인생에 영향을 미칩니다.`;
+            // 천간 / 지지 1줄 설명
+            const line1 = GAN_DESC[gan] || `${gan} 천간의 기운이 인생에 영향을 미칩니다.`;
             const line2 = JI_DESC[ji]   || `${ji} 지지의 기운이 뒷받침합니다.`;
-            let line3 = '';
+
+            // 대운 종합 설명 (이름 보완 부분 bold)
+            let daeunSummary = AGE_CTX[i] || '';
             if (nameOs.length && ganO) {
                 const helps = nameOs.filter(no => isSS(no, ganO));
                 const hurts = nameOs.filter(no => isSK(no, ganO));
                 if (helps.length) {
                     const rel = helps[0] === ganO ? '동기상조(同氣相助)' : '상생(相生)';
-                    line3 = `이름 "${nameKr}"의 ${helps.map(o=>O_KR2[o]).join('·')} 기운이 대운과 ${rel}하여, 이 시기 잠재력이 한층 극대화됩니다.`;
+                    const eff = O_EFFECT[ganO] || '';
+                    daeunSummary += ` <b>이름 "${nameKr}"에 담긴 ${helps.map(o=>O_SHORT[o]).join('·')} 기운이 대운과 ${rel}하여 ${eff}이 한층 극대화됩니다.</b>`;
                 } else if (hurts.length) {
-                    line3 = `이름의 ${hurts.map(o=>O_KR2[o]).join('·')} 기운이 대운과 상극 관계이나, 지지 ${O_KR2[jiO]||''}의 완충 작용으로 큰 충돌 없이 안정적으로 흘러갑니다.`;
+                    daeunSummary += ` 이름의 ${hurts.map(o=>O_SHORT[o]).join('·')} 기운과 대운 사이에 마찰이 있으나, <b>지지 ${O_SHORT[jiO]||''}의 완충 작용으로 안정적으로 극복해나갑니다.</b>`;
                 } else {
-                    line3 = `이름의 오행과 대운이 중화(中和)적으로 작용하며, 꾸준하고 무탈한 흐름이 지속됩니다.`;
+                    daeunSummary += ` <b>이름의 오행이 대운과 조화롭게 어우러져 꾸준하고 무탈한 흐름이 지속됩니다.</b>`;
                 }
             }
 
-            // 이름 시너지 유형 (칩 배경에 쓸 키)
+            // 칩 synergy 유형
             const synergy = nameOs.some(no=>isSS(no,ganO)) ? 'good' : nameOs.some(no=>isSK(no,ganO)) ? 'warn' : 'mid';
-            return { gj, gan, ji, ganO, jiO, ageS, ageE, line1, line2, line3, synergy };
+            return { gj, gan, ji, ganO, jiO, ageS, ageE, line1, line2, daeunSummary, synergy };
         });
 
         // ── 차트 레이블 전역 저장 ─────────────────────────────────
@@ -4112,17 +4131,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     </div>
                     <div style="display:flex;flex-direction:column;gap:10px;">
                         <div style="display:flex;gap:10px;align-items:flex-start;">
-                            <span style="font-size:0.75rem;font-weight:800;color:white;background:${c};border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">대운</span>
+                            <span style="font-size:0.75rem;font-weight:800;color:white;background:${c};border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">천간</span>
                             <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);">${d.line1}</p>
                         </div>
                         <div style="display:flex;gap:10px;align-items:flex-start;">
                             <span style="font-size:0.75rem;font-weight:800;color:white;background:${O_COLOR[d.jiO]||'#94a3b8'};border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">지지</span>
                             <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);">${d.line2}</p>
                         </div>
-                        ${d.line3 ? `<div style="display:flex;gap:10px;align-items:flex-start;">
-                            <span style="font-size:0.75rem;font-weight:800;color:white;background:#d4af37;border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">이름</span>
-                            <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);font-weight:600;">${d.line3}</p>
-                        </div>` : ''}
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="font-size:0.75rem;font-weight:800;color:white;background:#d4af37;border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">대운</span>
+                            <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);">${d.daeunSummary}</p>
+                        </div>
                     </div>
                 </div>`;
         };
