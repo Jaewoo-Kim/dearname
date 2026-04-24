@@ -3541,7 +3541,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // ── Executive Summary ──────────────────────────────────────────
         const _reportExecEl = document.getElementById('report-exec-summary');
         if (_reportExecEl && typeof _buildExecSummaryHtml === 'function') {
-            const _execItemsPrem = _buildReportItems(familyKr, `${h1.kr}${h2?.kr||''}`);
+            const _execItemsPrem = _buildReportItems(familyKr, `${h1.kr}${h2?.kr||''}`, candidate);
             if (_execItemsPrem.length) {
                 _reportExecEl.innerHTML = _buildExecSummaryHtml(
                     kr, hj, score,
@@ -3988,26 +3988,110 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ── 보고서 항목 공통 데이터 빌더 (단일 출처) ────────────────────
-    // 보고서 섹션 순서 기준 9개 항목을 getAnalysisData 로 통일
-    function _buildReportItems(familyKr, firstName) {
+    // candidate 객체가 있으면 DOM-독립 직접 계산 (프리미엄/예시 보고서)
+    // candidate 없으면 getAnalysisData DOM 기반 (셀프 보고서)
+    function _buildReportItems(familyKr, firstName, candidate) {
+        const _ng = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
+
+        // ── 공통 발음 계산 헬퍼 ────────────────────────────────────
+        const _CHO_O = c => {
+            const code = c.charCodeAt(0) - 44032;
+            if (code < 0 || code > 11171) return '';
+            const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+            const cho = CHO[Math.floor(code / 588)] || '';
+            if(['ㄱ','ㅋ','ㄲ'].includes(cho)) return '木';
+            if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho)) return '火';
+            if(['ㅇ','ㅎ'].includes(cho)) return '土';
+            if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho)) return '金';
+            if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho)) return '水';
+            return '';
+        };
+        const _YY = c => {
+            const code = c.charCodeAt(0) - 44032;
+            if (code < 0 || code > 11171) return '음';
+            const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+            const YANG = new Set(['ㅏ','ㅐ','ㅑ','ㅒ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ']);
+            return YANG.has(JUNG[Math.floor((code % 588) / 28)]) ? '양' : '음';
+        };
+        const _CYCLE = ['木','火','土','金','水'];
+        const _isSS  = (a,b) => a===b || (_CYCLE.indexOf(a)+1)%5===_CYCLE.indexOf(b);
+
+        const _pronGrade = (fullKr) => {
+            const os = fullKr.split('').map(_CHO_O);
+            const bad = os.filter((o,i) => i < os.length-1 && o && !_isSS(o, os[i+1])).length;
+            return bad === 0 ? '길' : bad === 1 ? '평' : '흉';
+        };
+        const _yinGrade = (fullKr) => {
+            const ys = fullKr.split('').map(_YY);
+            if (ys.every(y=>y==='양') || ys.every(y=>y==='음')) return '흉';
+            if (ys.length === 3 && ys[0]!==ys[1] && ys[1]!==ys[2]) return '길';
+            return '평';
+        };
+        const _numOheng = n => {
+            const d = n % 10;
+            if(d===1||d===2) return '木'; if(d===3||d===4) return '火';
+            if(d===5||d===6) return '土'; if(d===7||d===8) return '金';
+            return '水';
+        };
+        const _getSuriGrade = n => {
+            let num = n > 81 ? n % 81 : n; if (!num) num = 81;
+            if (typeof SURI_DATA==='undefined' || !SURI_DATA[num]) return '평';
+            return _ng(SURI_DATA[num].grade);
+        };
+
+        // ── candidate 직접 계산 경로 (프리미엄 / 예시 보고서) ─────
+        if (candidate) {
+            const { h1, h2, s0, isOija } = candidate;
+            const s1 = h1.s || 10, s2 = h2 ? (h2.s || 10) : 0;
+            const g1 = isOija ? s1+1 : s1+s2;
+            const g2 = s0+s1;
+            const g3 = isOija ? s0+1 : s0+s2;
+            const g4 = isOija ? s0+s1 : s0+s1+s2;
+
+            const fullKr = familyKr + firstName;
+
+            // 수리 오행 (형격·정격 오행 상생)
+            const mathOhengGrade = _isSS(_numOheng(g2), _numOheng(g4)) ? '길' : '흉';
+            // 수리 음양 (전체 획수 홀짝)
+            const stArr = [s0, s1, ...(s2 ? [s2] : [])];
+            const mathYinGrade = stArr.every(s=>s%2===0)||stArr.every(s=>s%2!==0) ? '흉' : '길';
+
+            // 사주 보완 (자원오행이 saju prefer 를 얼마나 채우는가)
+            const prefer    = _currentState?.nameSpec?.prefer || [];
+            const nameOs    = [h1.o, h2?.o].filter(Boolean).map(o => _normOheng ? _normOheng(o) : o);
+            const compCount = prefer.filter(p => nameOs.includes(p)).length;
+            const sajuGrade = prefer.length === 0 ? '평'
+                            : compCount === prefer.length ? '길'
+                            : compCount > 0 ? '평' : '흉';
+
+            return [
+                { label:'사주 보완',     sub:'자원오행 매칭',  grade: sajuGrade },
+                { label:'발음 오행',     sub:'초성 상생 흐름', grade: _pronGrade(fullKr) },
+                { label:'발음 음양',     sub:'모음 음양 균형', grade: _yinGrade(fullKr) },
+                { label:'원격 (초년운)', sub:'초년 수리',      grade: _getSuriGrade(g1) },
+                { label:'형격 (청년운)', sub:'청년 수리',      grade: _getSuriGrade(g2) },
+                { label:'이격 (장년운)', sub:'장년 수리',      grade: _getSuriGrade(g3) },
+                { label:'정격 (전체운)', sub:'말년 수리',      grade: _getSuriGrade(g4) },
+                { label:'수리 오행',     sub:'획수 오행 상생', grade: mathOhengGrade },
+                { label:'수리 음양',     sub:'획수 홀짝 균형', grade: mathYinGrade },
+            ];
+        }
+
+        // ── getAnalysisData DOM 기반 (셀프 보고서 — 드롭다운 선택 후) ─
         if (typeof getAnalysisData !== 'function') return [];
         const ad = getAnalysisData(familyKr, firstName);
         if (!ad) return [];
         const sg = ad.suriGrades || [];
         return [
-            // Ch.1 사주 보완
-            { label: '사주 보완',     sub: '자원오행 매칭', grade: ad.sajuOheng?.grade    || '평' },
-            // Ch.4 발음
-            { label: '발음 오행',     sub: '초성 상생 흐름', grade: ad.pronounceOheng?.grade || '평' },
-            { label: '발음 음양',     sub: '모음 음양 균형', grade: ad.pronounceYin?.grade   || '평' },
-            // Ch.5-A 사격수리
-            { label: '원격 (초년운)', sub: '초년 수리',     grade: sg[0]?.grade || '평' },
-            { label: '형격 (청년운)', sub: '청년 수리',     grade: sg[1]?.grade || '평' },
-            { label: '이격 (장년운)', sub: '장년 수리',     grade: sg[2]?.grade || '평' },
-            { label: '정격 (전체운)', sub: '말년 수리',     grade: sg[3]?.grade || '평' },
-            // Ch.5-B 수리 오행·음양
-            { label: '수리 오행',     sub: '획수 오행 상생', grade: ad.mathOheng?.grade  || '평' },
-            { label: '수리 음양',     sub: '획수 홀짝 균형', grade: ad.mathYin?.grade    || '평' },
+            { label:'사주 보완',     sub:'자원오행 매칭',  grade: _ng(ad.sajuOheng?.grade)    },
+            { label:'발음 오행',     sub:'초성 상생 흐름', grade: _ng(ad.pronounceOheng?.grade) },
+            { label:'발음 음양',     sub:'모음 음양 균형', grade: _ng(ad.pronounceYin?.grade)   },
+            { label:'원격 (초년운)', sub:'초년 수리',      grade: _ng(sg[0]?.grade) },
+            { label:'형격 (청년운)', sub:'청년 수리',      grade: _ng(sg[1]?.grade) },
+            { label:'이격 (장년운)', sub:'장년 수리',      grade: _ng(sg[2]?.grade) },
+            { label:'정격 (전체운)', sub:'말년 수리',      grade: _ng(sg[3]?.grade) },
+            { label:'수리 오행',     sub:'획수 오행 상생', grade: _ng(ad.mathOheng?.grade)  },
+            { label:'수리 음양',     sub:'획수 홀짝 균형', grade: _ng(ad.mathYin?.grade)    },
         ];
     }
 
@@ -4236,7 +4320,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         const familyKr  = candidate.familyKr;
         const firstName = `${candidate.h1.kr}${candidate.h2?.kr||''}`;
-        const items = _buildReportItems(familyKr, firstName);
+        const items = _buildReportItems(familyKr, firstName, candidate);
         if (!items.length) return;
 
         const normG      = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
