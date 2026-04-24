@@ -1,13 +1,17 @@
 ﻿#!/usr/bin/env python3
 # server.py — DearName v2 로컬/배포 서버
-# Claude API 프록시 + 정적 파일 서빙
+# Claude API 프록시 + Gemini API 프록시 + 정적 파일 서빙
 #
 # 사용법:
-#   pip install anthropic flask flask-cors
-#   ANTHROPIC_API_KEY=sk-... python server.py
+#   pip install anthropic flask flask-cors google-generativeai
+#   ANTHROPIC_API_KEY=sk-...  python server.py   # Claude 사용
+#   GEMINI_API_KEY=AIza...    python server.py   # Gemini 사용 (무료 테스트)
 #
 # 배포: Render / Railway / Vercel(서버리스) 모두 지원
-# 환경변수: ANTHROPIC_API_KEY (필수), PORT (기본 3000)
+# 환경변수:
+#   ANTHROPIC_API_KEY — Claude API (소견서 생성용)
+#   GEMINI_API_KEY    — Google Gemini API (채팅 상담용, 무료 티어)
+#   PORT              — 기본 3000
 
 import os, json, sys
 from pathlib import Path
@@ -18,14 +22,28 @@ try:
     import anthropic
 except ImportError:
     print("필수 패키지 설치:")
-    print("  pip install flask flask-cors anthropic")
+    print("  pip install flask flask-cors anthropic google-generativeai")
     sys.exit(1)
 
+# Gemini는 선택적 임포트 (없어도 서버 동작)
+try:
+    from google import genai as google_genai
+    _GENAI_OK = True
+except ImportError:
+    _GENAI_OK = False
+
 # ── 설정 ─────────────────────────────────────────────────
-BASE_DIR   = Path(__file__).parent
-PORT       = int(os.environ.get('PORT', 3000))
-API_KEY    = os.environ.get('ANTHROPIC_API_KEY', '')
-CLIENT     = anthropic.Anthropic(api_key=API_KEY) if API_KEY else None
+BASE_DIR        = Path(__file__).parent
+PORT            = int(os.environ.get('PORT', 3000))
+API_KEY         = os.environ.get('ANTHROPIC_API_KEY', '')
+GEMINI_API_KEY  = os.environ.get('GEMINI_API_KEY', '')
+CLIENT          = anthropic.Anthropic(api_key=API_KEY) if API_KEY else None
+
+# Gemini 클라이언트 초기화
+if GEMINI_API_KEY and _GENAI_OK:
+    _GEMINI_CLIENT = google_genai.Client(api_key=GEMINI_API_KEY)
+else:
+    _GEMINI_CLIENT = None
 
 app = Flask(__name__, static_folder=str(BASE_DIR))
 CORS(app, origins=['http://localhost:*', 'https://*.dearname.kr', 'https://*.onrender.com'])
@@ -192,13 +210,77 @@ def claude_chat():
         return jsonify({'error': f'서버 오류: {str(e)}', 'reply': None}), 500
 
 
+# ── Gemini 채팅 프록시 ────────────────────────────────────
+@app.route('/proxy/gemini-chat', methods=['POST'])
+def gemini_chat():
+    """
+    브라우저 → 이 서버 → Google Gemini API
+    무료 티어: gemini-2.0-flash (15 req/분, 1M 토큰/일)
+    발급: https://aistudio.google.com/apikey
+    """
+    if not _GEMINI_CLIENT:
+        msg = 'google-genai 미설치 (pip install google-genai)' if not _GENAI_OK else 'GEMINI_API_KEY 미설정'
+        return jsonify({'error': msg, 'reply': None}), 500
+
+    try:
+        body     = request.get_json(force=True)
+        user_msg = (body.get('message') or '').strip()
+        context  = body.get('context') or {}
+        history  = body.get('history') or []
+
+        if not user_msg:
+            return jsonify({'error': '질문이 비어 있습니다.', 'reply': None}), 400
+
+        # 시스템 프롬프트 (Claude 버전 재사용)
+        system_prompt = _build_chat_system_prompt(context)
+
+        # google-genai SDK 히스토리 형식
+        # role: 'user' | 'model' (assistant → model 변환)
+        from google.genai import types as genai_types
+        gemini_history = []
+        for turn in history[-20:]:
+            role    = 'model' if turn.get('role') == 'assistant' else 'user'
+            content = (turn.get('content') or '').strip()
+            if content:
+                gemini_history.append(
+                    genai_types.Content(role=role, parts=[genai_types.Part(text=content)])
+                )
+
+        # 현재 사용자 메시지 추가
+        gemini_history.append(
+            genai_types.Content(role='user', parts=[genai_types.Part(text=user_msg)])
+        )
+
+        resp = _GEMINI_CLIENT.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=gemini_history,
+            config=genai_types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                max_output_tokens=600,
+                temperature=0.7,
+            )
+        )
+
+        reply = resp.text
+        return jsonify({'reply': reply, 'usage': len(reply)})
+
+    except Exception as e:
+        err = str(e)
+        if 'API_KEY' in err or 'credential' in err.lower() or '401' in err:
+            return jsonify({'error': 'Gemini API 키 오류: ' + err, 'reply': None}), 401
+        if 'quota' in err.lower() or 'rate' in err.lower() or '429' in err:
+            return jsonify({'error': '요청 한도 초과. 잠시 후 다시 시도해주세요.', 'reply': None}), 429
+        return jsonify({'error': f'Gemini 오류: {err}', 'reply': None}), 500
+
+
 # ── 헬스체크 ─────────────────────────────────────────────
 @app.route('/health')
 def health():
     return jsonify({
-        'status': 'ok',
-        'api_key': 'set' if API_KEY else 'missing',
-        'version': 'v2.0.0'
+        'status':     'ok',
+        'claude':     'set' if API_KEY else 'missing',
+        'gemini':     'set' if GEMINI_API_KEY else 'missing',
+        'version':    'v2.0.0'
     })
 
 # ── 토스페이먼츠 결제 검증 (선택적) ──────────────────────
@@ -243,6 +325,7 @@ def toss_verify():
 if __name__ == '__main__':
     print(f"DearName v2 서버 시작")
     print(f"  주소: http://localhost:{PORT}")
-    print(f"  API키: {'[OK] 설정됨' if API_KEY else '[NO] 미설정 (ANTHROPIC_API_KEY 필요)'}")
+    print(f"  Claude:  {'[OK]' if API_KEY        else '[NO] ANTHROPIC_API_KEY 미설정 (소견서 생성 불가)'}")
+    print(f"  Gemini:  {'[OK]' if GEMINI_API_KEY  else '[NO] GEMINI_API_KEY 미설정  (채팅 상담 불가)'}")
     print(f"  정적파일: {BASE_DIR}")
-    app.run(host='0.0.0.0', port=PORT, debug=not API_KEY)
+    app.run(host='0.0.0.0', port=PORT, debug=True)

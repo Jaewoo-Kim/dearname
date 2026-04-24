@@ -25,6 +25,11 @@
     window.APPLE_SERVICE_ID = null;
     // window.APPLE_SERVICE_ID = 'com.crazystudio.dearname';
 
+    // ── Gemini API (채팅 상담용, 무료 테스트) ───────────────────────
+    // 발급처: https://aistudio.google.com/apikey (무료, 로그인 후 즉시 발급)
+    // 서버 환경변수 GEMINI_API_KEY 로 설정 — 이 파일에는 키를 넣지 마세요
+    // (이 항목은 클라이언트에 노출되지 않음, 서버사이드에서만 사용)
+
     // ── 서비스 설정 ──────────────────────────────────────────────────
     window.DN_CONFIG = {
         serviceName:  'DearName',
