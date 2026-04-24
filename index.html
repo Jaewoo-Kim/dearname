@@ -727,6 +727,36 @@
         .oheng-layout { display:grid; grid-template-columns:220px 1fr; gap:28px; margin-top:28px; align-items:center; }
         @media(max-width:640px){ .oheng-layout{ grid-template-columns:1fr; } }
 
+        /* ── 후보 비교 테이블 ── */
+        #report-compare-section { max-width:780px; margin:0 auto 12px; }
+        .compare-table-wrap { overflow-x:auto; border-radius:18px; border:1px solid var(--border-light); box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+        .compare-table { width:100%; border-collapse:collapse; min-width:380px; }
+        .compare-table thead tr { background:var(--bg-dark); }
+        .ct-label-col { padding:10px 16px; text-align:left; }
+        .ct-name-col { padding:14px 10px; text-align:center; cursor:pointer; transition:background 0.15s; min-width:110px; }
+        .ct-name-col:hover { background:rgba(255,255,255,0.08); }
+        .ct-name-col.ct-active { background:rgba(212,175,55,0.22); }
+        .ct-name-kr { font-size:1.05rem; font-weight:900; color:white; line-height:1.2; }
+        .ct-name-hj { font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:2px; }
+        .ct-now-badge { display:inline-block; font-size:0.6rem; font-weight:800; color:#d4af37; background:rgba(212,175,55,0.2); border:1px solid rgba(212,175,55,0.4); border-radius:20px; padding:2px 8px; margin-top:5px; }
+        thead .ct-label-col { font-size:0.7rem; font-weight:700; color:rgba(255,255,255,0.45); letter-spacing:1px; text-transform:uppercase; vertical-align:bottom; padding-bottom:12px; }
+        .compare-table tbody tr { border-bottom:1px solid var(--border-light); transition:background 0.12s; }
+        .compare-table tbody tr:last-child { border-bottom:none; }
+        .compare-table tbody tr:hover { background:#fafaf8; }
+        .ct-val-col { padding:9px 10px; text-align:center; font-size:0.88rem; }
+        .ct-val-col.ct-active { background:#fffcf3; }
+        .ct-score-row td { background:#f8f7f3; }
+        .ct-score-row td.ct-active { background:#fffbea; }
+        .ct-score-num { font-size:1.15rem; font-weight:900; color:var(--gold-dark); }
+        .ct-rank { display:inline-block; font-size:0.6rem; font-weight:800; color:white; background:#d4af37; border-radius:20px; padding:1px 7px; margin-left:3px; vertical-align:middle; }
+        .ct-rank.r2 { background:#94a3b8; }
+        .ct-rank.r3 { background:#b45309; }
+        .ct-row-label { font-size:0.83rem; font-weight:700; color:var(--bg-dark); line-height:1.3; }
+        .ct-row-sub { font-size:0.68rem; color:var(--text-muted); margin-top:1px; }
+        .ct-good { color:#15803d; font-weight:800; }
+        .ct-bad  { color:#dc2626; font-weight:800; }
+        .ct-mid  { color:#94a3b8; font-weight:600; }
+
         /* ── AI 작명 상담 채팅 ── */
         #report-chat-section { margin-top:12px; }
         #chat-example-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
@@ -1657,6 +1687,9 @@
     </header>
 
     <main class="report-main">
+
+        <!-- 후보 비교 테이블 (2개 이상일 때만 표시) -->
+        <div id="report-compare-section" style="display:none;"></div>
 
         <!-- Executive Summary -->
         <div id="report-exec-summary"></div>
@@ -3500,6 +3533,87 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
     }
 
+    // ── 후보 비교 테이블 ─────────────────────────────────────────────
+    function _renderCompareTable(currentIdx) {
+        const el = document.getElementById('report-compare-section');
+        if (!el) return;
+        const candidates = (_allCandidates || []).slice(0, Math.min(3, (_allCandidates||[]).length));
+        if (candidates.length < 2) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+
+        // 등수: 점수 내림차순 정렬 후 rank 매핑
+        const ranked = [...candidates].map((c,i) => ({score:c.score,origIdx:i}))
+            .sort((a,b) => b.score - a.score);
+        const rankOf = (i) => ranked.findIndex(r => r.origIdx === i) + 1;
+
+        // 각 후보 지표 빌드
+        const allItems = candidates.map(c =>
+            _buildReportItems(c.familyKr, `${c.h1.kr}${c.h2?.kr||''}`, c)
+        );
+        const rowDefs = allItems[0].map(x => ({ label: x.label, sub: x.sub }));
+
+        const gradeHtml = (g) => {
+            if (_isGood && _isGood(g))  return `<span class="ct-good">✦ 길</span>`;
+            if (_isBad  && _isBad(g))   return `<span class="ct-bad">▼ 흉</span>`;
+            return `<span class="ct-mid">– 평</span>`;
+        };
+
+        const rankBadge = (i) => {
+            const r = rankOf(i);
+            const cls = r === 1 ? '' : r === 2 ? ' r2' : ' r3';
+            const label = r === 1 ? '1위 ★' : r === 2 ? '2위' : '3위';
+            return `<span class="ct-rank${cls}">${label}</span>`;
+        };
+
+        el.innerHTML = `
+            <div style="margin-bottom:10px;">
+                <h3 style="font-size:0.88rem;font-weight:800;color:var(--text-secondary);letter-spacing:1.5px;text-transform:uppercase;margin:0 0 2px;">이름 후보 비교</h3>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">이름을 클릭하면 해당 보고서로 전환됩니다.</p>
+            </div>
+            <div class="compare-table-wrap">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th class="ct-label-col">항목</th>
+                            ${candidates.map((c,i) => {
+                                const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
+                                const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
+                                return `<th class="ct-name-col${i===currentIdx?' ct-active':''}"
+                                    onclick="document.querySelectorAll('.name-card-tab')[${i}]&&_selectReportTab(document.querySelectorAll('.name-card-tab')[${i}],${i})">
+                                    <div class="ct-name-kr">${kr}</div>
+                                    <div class="ct-name-hj">${hj}</div>
+                                    ${i===currentIdx?'<div class="ct-now-badge">현재 보고서</div>':''}
+                                </th>`;
+                            }).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="ct-score-row">
+                            <td class="ct-label-col">
+                                <div class="ct-row-label">종합 점수</div>
+                                <div class="ct-row-sub">성명학 종합</div>
+                            </td>
+                            ${candidates.map((c,i) => `
+                                <td class="ct-val-col${i===currentIdx?' ct-active':''}">
+                                    <span class="ct-score-num">${c.score}점</span>${rankBadge(i)}
+                                </td>`).join('')}
+                        </tr>
+                        ${rowDefs.map((row, ri) => `
+                            <tr>
+                                <td class="ct-label-col">
+                                    <div class="ct-row-label">${row.label}</div>
+                                    <div class="ct-row-sub">${row.sub}</div>
+                                </td>
+                                ${allItems.map((items, ci) => `
+                                    <td class="ct-val-col${ci===currentIdx?' ct-active':''}">
+                                        ${gradeHtml(items[ri]?.grade)}
+                                    </td>`).join('')}
+                            </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
     // ── 이름 탭 렌더링 ──────────────────────────────────────────────
     function _renderReportTabs(candidates) {
         const area = document.getElementById('report-selector-area');
@@ -3526,14 +3640,14 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const c   = _allCandidates[idx];
         const rpt = _allReports[idx];
         if (c && rpt) _renderReportContent(c, rpt, idx);
-        // 탭 전환 시 차트 재렌더 (switchReportV2 호환)
         const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
         const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
-        // 기존 switchReportV2의 score-badge 업데이트도 수행
         const scoreBadge = document.getElementById('main-score-badge');
         if(scoreBadge) scoreBadge.textContent = `프리미엄 작명 종합 점수 : ${c.score} / 100 점`;
         const titleArea = document.getElementById('premium-report-title');
         if(titleArea) titleArea.innerHTML = `${kr} <span>${hj}</span>`;
+        // 비교 테이블 활성 열 갱신
+        _renderCompareTable(idx);
     }
 
     // ── 보고서 본문 렌더링 ───────────────────────────────────────────
@@ -3543,6 +3657,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const kr = `${familyKr}${h1.kr}${h2?.kr||''}`;
         const hj = `${familyHanja}${h1.h}${h2?.h||''}`;
         const s1 = h1.s, s2 = h2 ? h2.s : 0;
+
+        // 후보 비교 테이블
+        _renderCompareTable(idx);
 
         // 헤더
         document.getElementById('main-score-badge').textContent = `프리미엄 작명 종합 점수 : ${score} / 100 점`;
