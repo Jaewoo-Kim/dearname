@@ -689,8 +689,8 @@
         .conclusion-msg { font-size:0.97rem;line-height:1.85;color:var(--text-primary);margin-bottom:22px;padding:20px 22px;border-radius:14px;border-left:4px solid; }
 
         /* ── Report Guide 그리드 ── */
-        .report-guide-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-        @media(max-width:640px){ .report-guide-grid{ grid-template-columns:repeat(2,1fr); } }
+        .report-guide-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+        @media(max-width:720px){ .report-guide-grid{ grid-template-columns:repeat(2,1fr); } }
         .report-guide-item { display:flex;align-items:center;gap:8px;padding:9px 10px;background:white;border-radius:10px;border:1px solid var(--border-light); }
         .report-guide-num { font-size:0.95rem;font-weight:900;color:var(--gold-dark);min-width:22px;flex-shrink:0; }
         .report-guide-title { font-size:0.83rem;font-weight:800;color:var(--bg-dark);line-height:1.3; }
@@ -757,19 +757,6 @@
         .ct-bad  { color:#dc2626; font-weight:800; }
         .ct-mid  { color:#94a3b8; font-weight:600; }
 
-        /* ── 유명인 코호트 카드 ── */
-        .cohort-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:4px; }
-        @media(max-width:600px){ .cohort-cards{ grid-template-columns:1fr; } }
-        .cohort-card { background:white; border-radius:16px; border:1.5px solid var(--border-light); padding:18px 16px; display:flex; flex-direction:column; gap:10px; transition:box-shadow 0.2s; }
-        .cohort-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.08); }
-        .cohort-card-top { display:flex; align-items:center; gap:12px; }
-        .cohort-avatar { width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; border:2px solid; }
-        .cohort-meta { flex:1; min-width:0; }
-        .cohort-name { font-size:0.98rem; font-weight:900; color:var(--bg-dark); }
-        .cohort-field { font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-top:2px; }
-        .cohort-oheng-tag { display:inline-flex; align-items:center; gap:4px; font-size:0.68rem; font-weight:800; color:white; border-radius:20px; padding:2px 9px; }
-        .cohort-desc { font-size:0.82rem; line-height:1.7; color:var(--text-secondary); }
-        .cohort-quote { font-size:0.78rem; color:var(--text-muted); font-style:italic; border-left:3px solid var(--gold-dark); padding-left:10px; line-height:1.6; margin-top:2px; }
 
         /* ── AI 작명 상담 채팅 ── */
         #report-chat-section { margin-top:12px; }
@@ -1736,11 +1723,19 @@
                 </div>
                 <div class="report-guide-item">
                     <span class="report-guide-num">05</span>
-                    <div><div class="report-guide-title">81수리 인생 흐름</div><div class="report-guide-desc">획수로 읽는 초년~말년 사계절</div></div>
+                    <div><div class="report-guide-title">대운 인생 흐름</div><div class="report-guide-desc">10년 주기 운세 곡선 & 수리 사계절</div></div>
                 </div>
                 <div class="report-guide-item">
                     <span class="report-guide-num">06</span>
-                    <div><div class="report-guide-title">종합 결론 & 가이드</div><div class="report-guide-desc">총평·양육 방향·진로 제시</div></div>
+                    <div><div class="report-guide-title">실천 가이드</div><div class="report-guide-desc">오행 생활 팁 & 시기별 부모 가이드</div></div>
+                </div>
+                <div class="report-guide-item">
+                    <span class="report-guide-num">07</span>
+                    <div><div class="report-guide-title">종합 결론</div><div class="report-guide-desc">총점·9개 지표·작명가 총평</div></div>
+                </div>
+                <div class="report-guide-item" style="border-color:var(--gold-dark);background:linear-gradient(135deg,#fffbeb,#fff8e6);">
+                    <span class="report-guide-num" style="color:var(--bg-dark);">✦</span>
+                    <div><div class="report-guide-title" style="color:var(--bg-dark);">AI 작명 상담</div><div class="report-guide-desc">분석 데이터 기반 맞춤 Q&A</div></div>
                 </div>
             </div>
         </div>
@@ -1824,14 +1819,6 @@
                     <p style="font-size:0.88rem;color:var(--text-secondary);margin-top:16px;font-weight:700;">▲ 작명 후 변화된 잠재력 밸런스</p>
                 </div>
             </div>
-        </div>
-
-        <!-- 유명인 코호트 -->
-        <div class="report-card" id="report-cohort-section" style="display:none;">
-            <div class="story-chapter-label">같은 기운, 다른 이야기</div>
-            <h2 class="section-title">✦ 이 이름의 기운과 닮은 인물들</h2>
-            <p style="font-size:0.88rem;color:var(--text-secondary);margin:0 0 18px;line-height:1.7;" id="report-cohort-intro"></p>
-            <div class="cohort-cards" id="report-cohort-cards"></div>
         </div>
 
         <!-- Bridge -->
@@ -3803,9 +3790,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const jawonStoryEl = document.getElementById('ai-jawon-story');
         if (jawonStoryEl) jawonStoryEl.textContent = report.jawonStory || report.namingLogic || '';
 
-        // 유명인 코호트 (Ch2 뒤)
-        _renderCohortSection(candidate);
-
         // Ch3: 한자 의미
         _renderHanjaDetails(report.hanjaDetails || [], h1, h2);
         const hanjaStoryEl = document.getElementById('ai-hanja-story');
@@ -4741,94 +4725,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         };
 
         // 첫 번째 칩 자동 선택은 차트 렌더 콜백(100ms) 에서 처리
-    }
-
-    // ── 유명인 코호트 ──────────────────────────────────────────────────
-    function _renderCohortSection(candidate) {
-        const sec  = document.getElementById('report-cohort-section');
-        const cardsEl = document.getElementById('report-cohort-cards');
-        const introEl = document.getElementById('report-cohort-intro');
-        if (!sec || !cardsEl || !introEl) return;
-
-        const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#3b82f6'};
-        const _OBG= {'木':'#f0fdf4','火':'#fff5f5','土':'#fefce8','金':'#f8fafc','水':'#eff6ff'};
-        const _ON = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
-
-        // 오행별 유명인 데이터
-        const _COHORT = {
-            '木': [
-                { name:'손흥민', field:'축구선수 · 토트넘 홋스퍼', emoji:'⚽', quote:'새로운 땅에 뿌리내리는 나무처럼', desc:'유럽 무대에서 동양인 최다 득점 기록을 세우며 끊임없이 성장한 선수입니다. 逆경을 거름 삼아 더 높이 뻗는 나무의 기운이 그의 삶 전체에 깔려 있습니다.' },
-                { name:'BTS RM', field:'아티스트 · 인문학도', emoji:'🎤', quote:'하늘을 향해 뻗는 가지처럼', desc:'음악과 철학의 경계를 자유롭게 넘나들며, 예술이라는 씨앗을 세계 곳곳에 심은 창의 나무의 화신입니다.' },
-                { name:'유재석', field:'방송인 · 국민 MC', emoji:'🎙️', quote:'뿌리 깊은 나무는 바람에 흔들리지 않는다', desc:'30년간 꾸준히 성장하며 흔들림 없이 한국 예능의 버팀목이 된 대표적 木 기운의 인물입니다.' },
-            ],
-            '火': [
-                { name:'아이유', field:'가수 · 배우', emoji:'🌟', quote:'불꽃처럼, 그러나 따뜻하게', desc:'뜨거운 열정과 섬세한 감수성이 공존하는 火의 화신. 무대 위 강렬함과 일상 속 따뜻함으로 수천만 팬의 마음에 불을 지폈습니다.' },
-                { name:'박지성', field:'전 축구선수 · 맨유 레전드', emoji:'🔥', quote:'꺼지지 않는 불씨', desc:'아시아인 최초 UEFA 챔피언스리그 우승. 재능보다 열정을 연료 삼아 불가능을 가능으로 만든 火 기운의 산 증인입니다.' },
-                { name:'이효리', field:'가수 · 아티스트', emoji:'💫', quote:'시대를 앞서 타오른 불꽃', desc:'무대 위 강렬한 존재감과 솔직한 매력으로 한국 대중문화의 흐름 자체를 바꾼 火형 인물입니다.' },
-            ],
-            '土': [
-                { name:'김연아', field:'전 피겨선수 · 올림픽 금메달', emoji:'🥇', quote:'흙이 모든 생명을 품듯이', desc:'묵묵한 성실함으로 세계 정상을 정복하고, 수많은 후배들의 토양이 된 土 기운의 귀감입니다.' },
-                { name:'박세리', field:'전 골프선수 · LPGA 명예의 전당', emoji:'⛳', quote:'맨발로 딛는 흙의 힘', desc:'맨발 투혼으로 상징되는 위기에도 흔들리지 않는 土의 뿌리. IMF 시대 국민에게 용기를 심어준 전설입니다.' },
-                { name:'반기문', field:'전 UN 사무총장', emoji:'🌏', quote:'모든 것을 품는 대지처럼', desc:'土의 안정성과 중립성으로 세계 분쟁 사이에서 중심을 잡고 평화의 토대를 18년간 다진 지도자입니다.' },
-            ],
-            '金': [
-                { name:'류현진', field:'야구선수 · MLB 올스타', emoji:'⚾', quote:'예리한 쇠날 같은 제구', desc:'완벽한 분석력과 집중력으로 동양인 MLB 역대 최고 방어율을 기록한 金형 인재입니다.' },
-                { name:'이병헌', field:'배우 · 할리우드 진출', emoji:'🎬', quote:'금처럼 단련된 집중력', desc:'단단한 원칙과 극한의 집중으로 한국 최초 할리우드 블록버스터 주연을 거머쥔 金 기운의 배우입니다.' },
-                { name:'세종대왕', field:'조선 4대왕 · 훈민정음 창제', emoji:'👑', quote:'쇠의 결단, 만민을 위하여', desc:'金의 결단력과 원칙으로 한글을 창제하고 과학·음악·법 전 분야를 혁신한 역사 속 최고의 금형 지도자입니다.' },
-            ],
-            '水': [
-                { name:'이순신 장군', field:'조선 명장 · 임진왜란', emoji:'⚓', quote:'물처럼 유연하게, 바다처럼 깊게', desc:'水의 지혜로 지형을 읽고 23전 23승의 불패 신화를 쓴 동아시아 역사상 최고의 전략가입니다.' },
-                { name:'황희 정승', field:'조선 재상 · 18년 영의정', emoji:'📜', quote:'물이 낮은 곳으로 흐르듯', desc:'겸손하고 깊은 통찰로 조선 역사상 가장 오래 영의정을 지낸 水형 지혜의 상징입니다.' },
-                { name:'봉준호', field:'영화감독 · 아카데미 수상', emoji:'🎥', quote:'깊은 물이 소리없이 흐르듯', desc:'水의 유연함과 통찰로 장르 경계를 자유자재로 넘나들며 한국 영화를 세계 정상에 올린 감독입니다.' },
-            ],
-        };
-
-        // 이름의 주요 오행 추출 (h1 우선, h2 보조)
-        const normO = o => {
-            if (!o) return '';
-            const map = {'나무':'木','불':'火','흙':'土','쇠':'金','물':'水'};
-            return map[o] || o;
-        };
-        const o1 = normO(candidate?.h1?.o || '');
-        const o2 = normO(candidate?.h2?.o || '');
-        const primaryO = o1 || o2;
-        const secondaryO = o2 && o2 !== o1 ? o2 : '';
-
-        if (!primaryO || !_COHORT[primaryO]) { sec.style.display = 'none'; return; }
-        sec.style.display = 'block';
-
-        // 주 오행 2명 + 보조 오행 1명 (있을 때)
-        let people = [...(_COHORT[primaryO] || [])].slice(0, secondaryO ? 2 : 3);
-        if (secondaryO && _COHORT[secondaryO]) {
-            people.push(_COHORT[secondaryO][0]);
-        }
-        people = people.slice(0, 3);
-
-        // 소개 텍스트
-        const nameKr = `${candidate.familyKr}${candidate.h1.kr}${candidate.h2?.kr||''}`;
-        const ohengLabel = secondaryO
-            ? `${_ON[primaryO]} + ${_ON[secondaryO]}`
-            : _ON[primaryO];
-        introEl.innerHTML = `<b>${nameKr}</b>의 이름에는 <b style="color:${_OC[primaryO]};">${ohengLabel}</b> 기운이 깃들어 있습니다. 이 에너지를 삶으로 펼쳐낸 인물들의 이야기에서 아이의 미래 가능성을 발견해보세요.`;
-
-        // 카드 렌더
-        cardsEl.innerHTML = people.map(p => {
-            const pO = _COHORT[primaryO]?.includes(p) ? primaryO : secondaryO;
-            const color = _OC[pO] || '#d4af37';
-            const bg    = _OBG[pO] || '#fffcf5';
-            return `<div class="cohort-card">
-                <div class="cohort-card-top">
-                    <div class="cohort-avatar" style="background:${bg};border-color:${color}30;">${p.emoji}</div>
-                    <div class="cohort-meta">
-                        <div class="cohort-name">${p.name}</div>
-                        <div class="cohort-field">${p.field}</div>
-                        <span class="cohort-oheng-tag" style="background:${color};margin-top:4px;">${_ON[pO]||pO}</span>
-                    </div>
-                </div>
-                <div class="cohort-quote">${p.quote}</div>
-                <div class="cohort-desc">${p.desc}</div>
-            </div>`;
-        }).join('');
     }
 
     // ── 실천 가이드 (오행 생활 팁 + 시기별 부모 행동 가이드) ─────────────
