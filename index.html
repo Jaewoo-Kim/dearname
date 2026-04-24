@@ -1449,7 +1449,7 @@
                 onmouseover="this.style.borderColor='var(--gold-dark)';this.style.color='var(--gold-dark)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
                 ✦ 프리미엄 작명 의뢰
             </button>
-            <button onclick="openEmailModal('self-report')"
+            <button id="self-share-btn" onclick="openShareModal(_selfReportName)"
                 style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
                 onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
                 🔗 공유하기
@@ -1459,7 +1459,7 @@
                 onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
                 🖨️ 인쇄 / PDF
             </button>
-            <button onclick="openEmailModal('self-report')"
+            <button onclick="openEmailModal()"
                 style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold-premium),var(--gold-dark));border:none;color:white;padding:13px 28px;border-radius:50px;font-size:0.92rem;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.35);transition:all 0.2s;"
                 onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(212,175,55,0.45)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.35)'">
                 ✉️ 이메일로 보내기
@@ -2127,6 +2127,65 @@
     </div>
 </div>
 
+<!-- ── 공유하기 모달 ── -->
+<div id="share-modal" class="modal-overlay" style="z-index:var(--z-modal);" onclick="if(event.target===this)closeShareModal()">
+    <div class="modal-content" style="max-width:400px;padding:0;overflow:hidden;border-radius:24px;">
+        <!-- 헤더 -->
+        <div style="background:linear-gradient(135deg,var(--bg-dark),#1e293b);padding:32px 32px 24px;position:relative;">
+            <button class="close-modal" onclick="closeShareModal()" style="color:rgba(255,255,255,0.6);font-size:1.6rem;top:16px;right:20px;">&times;</button>
+            <div style="font-size:1.25rem;font-weight:900;color:white;margin-bottom:4px;">보고서 공유하기</div>
+            <div id="share-modal-name" style="color:rgba(255,255,255,0.55);font-size:0.88rem;"></div>
+        </div>
+        <!-- 링크 복사 -->
+        <div style="padding:24px 28px 8px;">
+            <div style="font-size:0.73rem;font-weight:800;color:var(--text-secondary);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">링크 복사</div>
+            <div style="display:flex;gap:8px;align-items:center;background:#f8fafc;border:1.5px solid var(--border-light);border-radius:14px;padding:11px 16px;">
+                <span id="share-url-display" style="flex:1;font-size:0.8rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                <button onclick="copyShareLink()" id="share-copy-btn"
+                    style="background:var(--bg-dark);color:white;border:none;border-radius:8px;padding:7px 16px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.2s;">
+                    복사
+                </button>
+            </div>
+        </div>
+        <!-- 공유 수단 -->
+        <div style="padding:20px 28px 32px;">
+            <div style="font-size:0.73rem;font-weight:800;color:var(--text-secondary);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;">공유 방법 선택</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                <!-- 카카오톡 -->
+                <button onclick="shareKakaoTalk()"
+                    style="display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 10px;background:#FEE500;border:none;border-radius:18px;cursor:pointer;font-size:0.8rem;font-weight:800;color:#3A1D1D;transition:all 0.2s;"
+                    onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 20px rgba(254,229,0,0.5)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="#3A1D1D">
+                        <path d="M12 3C6.477 3 2 6.701 2 11.246c0 2.925 1.808 5.49 4.537 6.993-.17.594-.588 2.025-.675 2.34-.107.394.145.389.305.283.125-.083 1.992-1.354 2.796-1.903A11.4 11.4 0 0 0 12 20.366C17.523 20.366 22 16.665 22 12.246 22 7.701 17.523 4 12 4z"/>
+                    </svg>
+                    카카오톡
+                </button>
+                <!-- 이메일 -->
+                <button onclick="closeShareModal();openEmailModal()"
+                    style="display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 10px;background:#f1f5f9;border:none;border-radius:18px;cursor:pointer;font-size:0.8rem;font-weight:800;color:var(--text-primary);transition:all 0.2s;"
+                    onmouseover="this.style.background='#e2e8f0';this.style.transform='translateY(-3px)'" onmouseout="this.style.background='#f1f5f9';this.style.transform='none'">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.2" stroke-linecap="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                    이메일
+                </button>
+                <!-- 인쇄 / PDF -->
+                <button onclick="closeShareModal();setTimeout(()=>window.print(),200)"
+                    style="display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 10px;background:#f1f5f9;border:none;border-radius:18px;cursor:pointer;font-size:0.8rem;font-weight:800;color:var(--text-primary);transition:all 0.2s;"
+                    onmouseover="this.style.background='#e2e8f0';this.style.transform='translateY(-3px)'" onmouseout="this.style.background='#f1f5f9';this.style.transform='none'">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.2" stroke-linecap="round">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                        <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    인쇄 · PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ── 이메일 발송 팝업 ── -->
 <div id="email-modal" class="modal-overlay" style="z-index:var(--z-modal);">
     <div class="modal-content" style="max-width:400px;padding:44px 40px;">
@@ -2676,6 +2735,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // 헤더
         document.getElementById('self-report-title').innerHTML = `${lastName}${firstName} <span>${hanjaStr}</span>`;
         document.getElementById('self-report-meta').innerHTML  = `${bDate} ${bTime} 출생 &nbsp;|&nbsp; ${gender}`;
+        window._selfReportName = `${lastName}${firstName}`; // 공유 모달에서 사용
 
         // 사주 원국 렌더링 (return: {nameOhengItems, weakList8, ohengCount})
         const sajuData = _renderSelfSajuSection(bDate, bTime, gender, lastName);
@@ -5450,23 +5510,75 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         window.print();
     }
 
-    function shareReport() {
-        const c = _allCandidates[_currentIdx];
-        if (!c) return;
-        const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
-        const text = `AI 프리미엄 작명 소견서 — ${kr} (${c.score}점)\n디어네임에서 분석됨`;
-        if (navigator.share) {
-            navigator.share({ title: `${kr} 작명 소견서`, text, url: location.href }).catch(()=>{});
+    // ================================================================
+    // 공유 모달
+    // ================================================================
+    function openShareModal(name) {
+        const el = document.getElementById('share-modal');
+        if (!el) return;
+        document.getElementById('share-modal-name').textContent = name ? `${name} 작명 보고서` : '작명 보고서';
+        document.getElementById('share-url-display').textContent = location.href;
+        // 복사 버튼 초기화
+        const btn = document.getElementById('share-copy-btn');
+        if (btn) { btn.textContent = '복사'; btn.style.background = 'var(--bg-dark)'; }
+        el.style.display = 'flex';
+    }
+
+    function closeShareModal() {
+        const el = document.getElementById('share-modal');
+        if (el) el.style.display = 'none';
+    }
+
+    function copyShareLink() {
+        const url = location.href;
+        const btn = document.getElementById('share-copy-btn');
+        navigator.clipboard.writeText(url).then(() => {
+            if (btn) { btn.textContent = '✓ 복사됨'; btn.style.background = '#15803d'; }
+            _showToast('링크가 클립보드에 복사되었습니다!');
+            setTimeout(() => {
+                if (btn) { btn.textContent = '복사'; btn.style.background = 'var(--bg-dark)'; }
+            }, 2500);
+        }).catch(() => {
+            // 구형 브라우저 fallback
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                if (btn) { btn.textContent = '✓ 복사됨'; btn.style.background = '#15803d'; }
+                _showToast('링크가 복사되었습니다!');
+                setTimeout(() => { if (btn) { btn.textContent = '복사'; btn.style.background = 'var(--bg-dark)'; } }, 2500);
+            } catch(e) { _showToast('링크를 직접 복사해주세요.'); }
+        });
+    }
+
+    function shareKakaoTalk() {
+        const name  = document.getElementById('share-modal-name')?.textContent || '작명 보고서';
+        const url   = location.href;
+        // Kakao SDK 초기화 확인
+        if (window.Kakao && window.Kakao.isInitialized && window.Kakao.isInitialized()) {
+            window.Kakao.Share.sendDefault({
+                objectType: 'text',
+                text: `DearName — ${name}\n사주 기반 AI 작명 보고서를 확인해보세요.`,
+                link: { mobileWebUrl: url, webUrl: url }
+            });
         } else {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('결과가 클립보드에 복사되었습니다.');
-            }).catch(() => alert('공유 기능을 지원하지 않는 브라우저입니다.'));
+            // fallback: 카카오톡 공유 웹 URL
+            const shareUrl = `https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`DearName — ${name}`)}`;
+            window.open(shareUrl, '_blank', 'width=430,height=520');
         }
     }
 
+    function shareReport() {
+        // 프리미엄 보고서 공유 버튼 → 새 공유 모달로 위임
+        const c  = _allCandidates?.[_currentIdx];
+        const kr = c ? `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}` : '';
+        openShareModal(kr);
+    }
+
     function emailReport() {
-        const title = document.getElementById('premium-report-title')?.textContent || '작명 보고서';
-        window.location.href = `mailto:?subject=DearName 프리미엄 작명 보고서 - ${title}&body=DearName 프리미엄 보고서를 공유합니다. ${window.location.href}`;
+        openEmailModal();
     }
 
     // ── 이름 후보 PDF/이미지 저장 안내 ──────────────────────────────
