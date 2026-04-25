@@ -633,6 +633,127 @@
         /* ── 스토리형 셀프 보고서 ── */
         .story-intro-card { max-width:780px;margin:0 auto 8px;padding:28px 36px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:20px;border-left:4px solid var(--gold-dark);font-size:1rem;color:var(--text-secondary);line-height:1.9; }
         .story-chapter-label { font-size:0.72rem;font-weight:800;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px; }
+
+        /* ── 편지형 서문 ─────────────────────────────────────── */
+        .conclusion-letter-wrap {
+            background: linear-gradient(135deg,#fffef7 0%,#fff9e8 100%);
+            border: 1.5px solid #dab85b;
+            border-radius: 18px;
+            padding: 32px 36px 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .conclusion-letter-wrap::before {
+            content: '\201C';
+            position: absolute;
+            top: 4px; left: 16px;
+            font-size: 6rem;
+            color: var(--gold-premium);
+            opacity: 0.13;
+            font-family: Georgia, serif;
+            line-height: 1;
+            pointer-events: none;
+        }
+        .conclusion-letter-greeting {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--gold-dark);
+            letter-spacing: 0.06em;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #dab85b55;
+        }
+        .conclusion-letter-body {
+            font-size: 0.98rem;
+            line-height: 2.1;
+            color: #1e293b;
+            white-space: pre-line;
+            margin: 0 0 20px;
+        }
+        .conclusion-letter-sig {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-weight: 600;
+        }
+
+        /* ── 기준별 시각 스코어카드 ─────────────────────────── */
+        .score-criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 10px;
+            margin: 4px 0 8px;
+        }
+        .score-criteria-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+            padding: 14px 8px 12px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1.5px solid transparent;
+            text-align: center;
+            transition: transform 0.15s;
+        }
+        .score-criteria-item:hover { transform: translateY(-2px); }
+        .sci-dot {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; color: white; font-weight: 800;
+        }
+        .sci-label {
+            font-size: 0.72rem; font-weight: 700;
+            color: var(--text-secondary); line-height: 1.3;
+        }
+        .sci-grade-pill {
+            font-size: 0.68rem; font-weight: 800;
+            padding: 2px 9px; border-radius: 20px;
+        }
+
+        /* ── 아코디언 챕터 ──────────────────────────────────── */
+        .report-card-acc { overflow: hidden; }
+        .chapter-acc-header { cursor: pointer; }
+        .chapter-acc-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .chapter-toggle-btn {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            padding: 5px 14px;
+            border: 1.5px solid var(--border-light);
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+        .chapter-toggle-btn:hover {
+            background: var(--bg-warm);
+            border-color: var(--gold-light);
+            color: var(--gold-dark);
+        }
+        .chapter-acc-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.45s ease-in-out;
+        }
+        .chapter-acc-body.open {
+            max-height: 14000px;
+        }
+        .chapter-acc-body > *:first-child { margin-top: 12px; }
         .chapter-verdict-strip {
             display: flex;
             align-items: center;
@@ -1846,19 +1967,24 @@
         <!-- 후보 비교 테이블 (2개 이상일 때만 표시) -->
         <div id="report-compare-section" style="display:none;"></div>
 
-        <!-- 종합 결론 (상단 배치 — 전체 보고서 요약 카드) -->
+        <!-- 종합 결론 (상단 배치 — 편지 + 스코어카드) -->
         <div class="report-card" id="report-conclusion-card" style="border-top:3px solid var(--gold-premium);">
+            <!-- ① 편지형 서문 (AI 생성 후 표시) -->
+            <div id="ai-conclusion-letter" style="display:none;margin-bottom:28px;">
+                <div class="conclusion-letter-wrap">
+                    <div class="conclusion-letter-greeting" id="ai-conclusion-letter-greeting">이 이름에 담긴 이야기</div>
+                    <p class="conclusion-letter-body" id="ai-conclusion-letter-text"></p>
+                    <div class="conclusion-letter-sig">— DearName 프리미엄 작명 연구소</div>
+                </div>
+            </div>
+            <!-- ② 종합 점수 + 기준별 스코어카드 -->
             <div class="story-chapter-label">작명가의 총평</div>
             <h2 class="section-title">종합 결론</h2>
             <div class="ai-score-display">
                 <div><span class="ai-score-num" id="ai-score-num">--</span><span class="ai-score-denom"> / 100</span></div>
                 <div class="ai-score-label">프리미엄 작명 종합 점수</div>
             </div>
-            <div class="ai-conclusion-grid" id="ai-conclusion-grid"></div>
-            <div class="ai-conclusion-letter" id="ai-conclusion-letter" style="display:none;">
-                <div class="letter-title">✦ 작명가의 총평</div>
-                <p id="ai-conclusion-letter-text"></p>
-            </div>
+            <div id="ai-conclusion-grid"></div>
         </div>
 
         <!-- 도입 브릿지 -->
@@ -1903,9 +2029,17 @@
         </div>
 
         <!-- Chapter 1: 사주 원국 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 1. 이 아이가 태어난 우주</div>
-            <h2 class="section-title"><span class="term-tip" data-tip="태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.">사주</span> 원국 (四柱八字)</h2>
+        <div class="report-card report-card-acc">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch1')">
+                <div class="chapter-acc-title-row">
+                    <div>
+                        <div class="story-chapter-label">Chapter 1. 이 아이가 태어난 우주</div>
+                        <h2 class="section-title"><span class="term-tip" data-tip="태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.">사주</span> 원국 (四柱八字)</h2>
+                    </div>
+                    <button class="chapter-toggle-btn" id="toggle-btn-ch1">자세히 보기 ↓</button>
+                </div>
+            </div>
+            <div class="chapter-acc-body" id="acc-body-ch1">
             <div class="saju-grid" id="report-saju-grid"></div>
             <div class="oheng-layout">
                 <div style="text-align:center;">
@@ -1949,6 +2083,7 @@
                 <div class="oheng-bars" id="report-oheng-bars"></div>
             </div>
             <div class="ai-story-block" id="ai-saju-story"></div>
+            </div><!-- /acc-body-ch1 -->
         </div>
 
         <!-- Bridge -->
@@ -1959,10 +2094,18 @@
         </div>
 
         <!-- Chapter 2: 자원오행 & 레이더 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
-            <h2 class="section-title"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
-            <div id="verdict-ch2" class="chapter-verdict-strip"></div>
+        <div class="report-card report-card-acc">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch2')">
+                <div class="chapter-acc-title-row">
+                    <div>
+                        <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
+                        <h2 class="section-title"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
+                    </div>
+                    <button class="chapter-toggle-btn" id="toggle-btn-ch2">자세히 보기 ↓</button>
+                </div>
+                <div id="verdict-ch2" class="chapter-verdict-strip"></div>
+            </div>
+            <div class="chapter-acc-body" id="acc-body-ch2">
             <div class="ai-tagline" id="report-tagline">--</div>
             <div id="report-jawon-chips"></div>
             <div class="intro-grid" style="margin-top:0;">
@@ -1982,6 +2125,7 @@
                     <p style="font-size:0.88rem;color:var(--text-secondary);margin-top:16px;font-weight:700;">▲ 작명 후 변화된 잠재력 밸런스</p>
                 </div>
             </div>
+            </div><!-- /acc-body-ch2 -->
         </div>
 
         <!-- Bridge -->
@@ -1992,12 +2136,21 @@
         </div>
 
         <!-- Chapter 3: 한자 의미 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 3. 한자가 품은 이야기</div>
-            <h2 class="section-title">자원(字源) 심층 분석</h2>
-            <div id="verdict-ch3" class="chapter-verdict-strip"></div>
+        <div class="report-card report-card-acc">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch3')">
+                <div class="chapter-acc-title-row">
+                    <div>
+                        <div class="story-chapter-label">Chapter 3. 한자가 품은 이야기</div>
+                        <h2 class="section-title">자원(字源) 심층 분석</h2>
+                    </div>
+                    <button class="chapter-toggle-btn" id="toggle-btn-ch3">자세히 보기 ↓</button>
+                </div>
+                <div id="verdict-ch3" class="chapter-verdict-strip"></div>
+            </div>
+            <div class="chapter-acc-body" id="acc-body-ch3">
             <div id="report-hanja-details"></div>
             <div class="ai-story-block" id="ai-hanja-story" style="margin-top:24px;border-left:4px solid var(--gold-dark);background:#fffbeb;border-top:none;border-right:none;border-bottom:none;border-radius:0 14px 14px 0;"></div>
+            </div><!-- /acc-body-ch3 -->
         </div>
 
         <!-- Bridge -->
@@ -2008,12 +2161,21 @@
         </div>
 
         <!-- Chapter 4: 발음 오행 & 음양 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
-            <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> & <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
-            <div id="verdict-ch4" class="chapter-verdict-strip"></div>
+        <div class="report-card report-card-acc">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch4')">
+                <div class="chapter-acc-title-row">
+                    <div>
+                        <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
+                        <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> & <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
+                    </div>
+                    <button class="chapter-toggle-btn" id="toggle-btn-ch4">자세히 보기 ↓</button>
+                </div>
+                <div id="verdict-ch4" class="chapter-verdict-strip"></div>
+            </div>
+            <div class="chapter-acc-body" id="acc-body-ch4">
             <div id="ai-sound-body"></div>
             <div class="ai-story-block" id="ai-sound-story" style="margin-top:20px;"></div>
+            </div><!-- /acc-body-ch4 -->
         </div>
 
         <!-- Bridge -->
@@ -2024,12 +2186,21 @@
         </div>
 
         <!-- Chapter 5-A: 사격수리 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 5. 획수가 그리는 운명</div>
-            <h2 class="section-title"><span class="term-tip" data-tip="원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.">사격수리</span> (四格數理)</h2>
-            <div id="verdict-ch5a" class="chapter-verdict-strip"></div>
+        <div class="report-card report-card-acc">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch5a')">
+                <div class="chapter-acc-title-row">
+                    <div>
+                        <div class="story-chapter-label">Chapter 5. 획수가 그리는 운명</div>
+                        <h2 class="section-title"><span class="term-tip" data-tip="원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.">사격수리</span> (四格數理)</h2>
+                    </div>
+                    <button class="chapter-toggle-btn" id="toggle-btn-ch5a">자세히 보기 ↓</button>
+                </div>
+                <div id="verdict-ch5a" class="chapter-verdict-strip"></div>
+            </div>
+            <div class="chapter-acc-body" id="acc-body-ch5a">
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
             <div class="ai-story-block" id="ai-suri-story"></div>
+            </div><!-- /acc-body-ch5a -->
         </div>
 
         <!-- Bridge -->
@@ -2040,11 +2211,20 @@
         </div>
 
         <!-- Chapter 5. 수리 오행 & 음양 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
-            <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
-            <div id="verdict-ch5b" class="chapter-verdict-strip"></div>
+        <div class="report-card report-card-acc">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch5b')">
+                <div class="chapter-acc-title-row">
+                    <div>
+                        <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
+                        <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
+                    </div>
+                    <button class="chapter-toggle-btn" id="toggle-btn-ch5b">자세히 보기 ↓</button>
+                </div>
+                <div id="verdict-ch5b" class="chapter-verdict-strip"></div>
+            </div>
+            <div class="chapter-acc-body" id="acc-body-ch5b">
             <div id="report-suri-oheng-yin"></div>
+            </div><!-- /acc-body-ch5b -->
         </div>
 
         <!-- Bridge -->
@@ -2055,9 +2235,17 @@
         </div>
 
         <!-- Chapter 5-B: 인생 흐름 -->
-        <div class="report-card">
-            <div class="story-chapter-label">Chapter 5. 대운과 이름의 여정</div>
-            <h2 class="section-title"><span class="term-tip" data-tip="인생을 10년 단위로 나눈 운세 흐름. 사주팔자가 평생의 그릇이라면, 대운은 그 그릇이 놓이는 계절과 같습니다.">대운</span> 인생 흐름</h2>
+        <div class="report-card report-card-acc">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch5c')">
+                <div class="chapter-acc-title-row">
+                    <div>
+                        <div class="story-chapter-label">Chapter 5. 대운과 이름의 여정</div>
+                        <h2 class="section-title"><span class="term-tip" data-tip="인생을 10년 단위로 나눈 운세 흐름. 사주팔자가 평생의 그릇이라면, 대운은 그 그릇이 놓이는 계절과 같습니다.">대운</span> 인생 흐름</h2>
+                    </div>
+                    <button class="chapter-toggle-btn" id="toggle-btn-ch5c">자세히 보기 ↓</button>
+                </div>
+            </div>
+            <div class="chapter-acc-body" id="acc-body-ch5c">
             <div id="report-daeun-section"></div>
             <div class="chart-container-large" style="margin-top:20px;">
                 <canvas id="lifeFlowChart"></canvas>
@@ -2068,6 +2256,7 @@
             <div id="daeun-labels-bar"></div>
             <!-- 클릭 시 펼쳐지는 상세 패널 -->
             <div id="daeun-detail-panel" style="display:none;margin-top:12px;"></div>
+            </div><!-- /acc-body-ch5c -->
         </div>
 
         <!-- Bridge to Career -->
@@ -2078,10 +2267,19 @@
         </div>
 
         <!-- Chapter 6: 미래 직업 탐색 -->
-        <div class="report-card" id="report-career-section">
-            <div class="story-chapter-label">Chapter 6. 이 아이의 미래 이야기</div>
-            <h2 class="section-title">사주로 보는 미래 직업</h2>
+        <div class="report-card report-card-acc" id="report-career-section">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch6')">
+                <div class="chapter-acc-title-row">
+                    <div>
+                        <div class="story-chapter-label">Chapter 6. 이 아이의 미래 이야기</div>
+                        <h2 class="section-title">사주로 보는 미래 직업</h2>
+                    </div>
+                    <button class="chapter-toggle-btn" id="toggle-btn-ch6">자세히 보기 ↓</button>
+                </div>
+            </div>
+            <div class="chapter-acc-body" id="acc-body-ch6">
             <div id="report-career-body"></div>
+            </div><!-- /acc-body-ch6 -->
         </div>
 
         <!-- 마지막 클로징 메시지 -->
@@ -3997,10 +4195,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 종합 결론 (상단 카드)
         _renderConclusionGrid(candidate, _currentState);
-        const conclusionEl = document.getElementById('ai-conclusion-letter');
-        const conclusionTextEl = document.getElementById('ai-conclusion-letter-text');
+        const conclusionEl       = document.getElementById('ai-conclusion-letter');
+        const conclusionTextEl   = document.getElementById('ai-conclusion-letter-text');
+        const conclusionGreetEl  = document.getElementById('ai-conclusion-letter-greeting');
         if (conclusionEl && conclusionTextEl && report.conclusionLetter) {
             conclusionTextEl.textContent = report.conclusionLetter;
+            if (conclusionGreetEl) conclusionGreetEl.textContent = `${kr} 부모님께 드리는 작명 서신`;
             conclusionEl.style.display = 'block';
         }
         // 차트 + 첫 대운 자동 오픈
@@ -4821,6 +5021,33 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         el.innerHTML = html;
     }
 
+    // ── 챕터 아코디언 토글 ────────────────────────────────────────
+    function _toggleChapter(id) {
+        const body = document.getElementById('acc-body-' + id);
+        const btn  = document.getElementById('toggle-btn-' + id);
+        if (!body) return;
+        const opening = !body.classList.contains('open');
+        body.classList.toggle('open', opening);
+        if (btn) btn.innerHTML = opening ? '접기 ↑' : '자세히 보기 ↓';
+        // 대운 차트가 숨겨진 상태에서 렌더되면 크기가 0이 됨 → 열릴 때 재렌더
+        if (opening && id === 'ch5c') {
+            setTimeout(() => {
+                if (typeof renderCharts === 'function') renderCharts();
+                if (window._daeunData && typeof _updateLifeFlowChart === 'function')
+                    _updateLifeFlowChart(window._daeunData);
+            }, 100);
+        }
+        // 레이더 차트도 동일
+        if (opening && id === 'ch2') {
+            setTimeout(() => {
+                if (typeof _updateRadarChart === 'function' && window._currentScores)
+                    _updateRadarChart(window._currentScores, window._currentCandidate);
+            }, 100);
+        }
+    }
+    // 전역 노출 (onclick에서 호출)
+    window._toggleChapter = _toggleChapter;
+
     // ── 챕터 판정 배너 헬퍼 ────────────────────────────────────────
     function _renderVerdict(elId, grade, text) {
         const el = document.getElementById(elId);
@@ -4851,20 +5078,44 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const items = _buildReportItems(familyKr, firstName, candidate);
         if (!items.length) return;
 
-        const normG      = g => g==='대길'?'길':g==='대흉'?'흉':(g||'평');
-        const gradeColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'}[normG(g)]||'#64748b');
-        const gradeBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'}[normG(g)]||'#f1f5f9');
-        const icon       = g => normG(g)==='길'?'✦':normG(g)==='흉'?'⚠':'–';
+        // 4단계 색상 매핑
+        const G4_C  = {'매우 좋음':'#15803d','좋음':'#2563eb','나쁨':'#d97706','매우 나쁨':'#dc2626'};
+        const G4_BG = {'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fffbeb','매우 나쁨':'#fef2f2'};
+        const G4_ICON = {'매우 좋음':'★','좋음':'✦','나쁨':'△','매우 나쁨':'✗'};
 
-        el.innerHTML = items.map(x => `
-            <div class="conclusion-point" style="background:${gradeBg(x.grade)};">
-                <span class="conclusion-point-icon" style="color:${gradeColor(x.grade)};">${icon(x.grade)}</span>
-                <div style="flex:1;">
-                    <b style="color:${gradeColor(x.grade)};font-size:0.88rem;">${x.label}</b>
-                    <span style="display:inline-block;margin-left:6px;background:${gradeBg(x.grade)};color:${gradeColor(x.grade)};border-radius:20px;padding:2px 9px;font-size:0.72rem;font-weight:800;border:1px solid ${gradeColor(x.grade)}33;">${normG(x.grade)}</span>
-                    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">${x.sub}</div>
-                </div>
-            </div>`).join('');
+        // 요약 통계 (좋은 항목 개수)
+        const goodCnt = items.filter(x => x.grade==='매우 좋음'||x.grade==='좋음').length;
+        const total   = items.length;
+
+        const summaryHtml = `
+        <div style="display:flex;align-items:center;justify-content:space-between;
+             padding:12px 16px;background:#f8fafc;border-radius:12px;margin-bottom:14px;
+             border:1px solid var(--border-light);">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">
+                9개 평가 기준
+            </span>
+            <span style="font-size:0.85rem;font-weight:800;color:${goodCnt>=7?'#15803d':goodCnt>=5?'#2563eb':'#d97706'};">
+                ${goodCnt}/${total} 좋음 이상
+            </span>
+        </div>`;
+
+        const gridHtml = `<div class="score-criteria-grid">` +
+            items.map(x => {
+                const c  = G4_C[x.grade]  || '#64748b';
+                const bg = G4_BG[x.grade] || '#f8fafc';
+                const ic = G4_ICON[x.grade] || '–';
+                return `<div class="score-criteria-item" style="border-color:${c}40;background:${bg};">
+                    <div class="sci-dot" style="background:${c};">${ic}</div>
+                    <div class="sci-label">${x.label}</div>
+                    <div class="sci-grade-pill" style="background:${c}20;color:${c};">${x.grade}</div>
+                </div>`;
+            }).join('') + `</div>`;
+
+        el.innerHTML = summaryHtml + gridHtml;
+
+        // 현재 스코어와 후보를 전역 저장 (레이더 재렌더용)
+        window._currentScores    = state?._scores;
+        window._currentCandidate = candidate;
     }
 
     // ── 대운 계산 & 칩 렌더링 ──────────────────────────────────────
