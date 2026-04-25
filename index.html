@@ -4729,16 +4729,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                             : compCount === prefer.length ? '매우 좋음'
                             : compCount > 0 ? '나쁨' : '매우 나쁨';
 
+            const _sg4 = [g1,g2,g3,g4].map(_getSuriGrade);
+            const _sg4Good = _sg4.filter(g=>g==='매우 좋음'||g==='좋음').length;
+            const _sg4Grade = _sg4Good===4?'매우 좋음':_sg4Good>=2?'좋음':_sg4Good===1?'나쁨':'매우 나쁨';
             return [
-                { label:'사주 보완',     sub:'자원오행 매칭',  grade: sajuGrade },
-                { label:'발음 오행',     sub:'초성 상생 흐름', grade: _pronGrade(fullKr) },
-                { label:'발음 음양',     sub:'모음 음양 균형', grade: _yinGrade(fullKr) },
-                { label:'원격 (초년운)', sub:'초년 수리',      grade: _getSuriGrade(g1) },
-                { label:'형격 (청년운)', sub:'청년 수리',      grade: _getSuriGrade(g2) },
-                { label:'이격 (장년운)', sub:'장년 수리',      grade: _getSuriGrade(g3) },
-                { label:'정격 (전체운)', sub:'말년 수리',      grade: _getSuriGrade(g4) },
-                { label:'수리 오행',     sub:'획수 오행 상생', grade: mathOhengGrade },
-                { label:'수리 음양',     sub:'획수 홀짝 균형', grade: mathYinGrade },
+                { label:'사주 보완',  sub:'자원오행 매칭',  grade: sajuGrade },
+                { label:'발음 오행',  sub:'초성 상생 흐름', grade: _pronGrade(fullKr) },
+                { label:'발음 음양',  sub:'모음 음양 균형', grade: _yinGrade(fullKr) },
+                { label:'사격수리',   sub:'원·형·이·정격',  grade: _sg4Grade },
+                { label:'수리 오행',  sub:'획수 오행 상생', grade: mathOhengGrade },
+                { label:'수리 음양',  sub:'획수 홀짝 균형', grade: mathYinGrade },
             ];
         }
 
@@ -4747,16 +4747,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const ad = getAnalysisData(familyKr, firstName);
         if (!ad) return [];
         const sg = ad.suriGrades || [];
+        const _sgG = [sg[0],sg[1],sg[2],sg[3]].map(s=>_ng(s?.grade));
+        const _sgGood = _sgG.filter(g=>g==='매우 좋음'||g==='좋음').length;
+        const _sgGrade = _sgGood===4?'매우 좋음':_sgGood>=2?'좋음':_sgGood===1?'나쁨':'매우 나쁨';
         return [
-            { label:'사주 보완',     sub:'자원오행 매칭',  grade: _ng(ad.sajuOheng?.grade)    },
-            { label:'발음 오행',     sub:'초성 상생 흐름', grade: _ng(ad.pronounceOheng?.grade) },
-            { label:'발음 음양',     sub:'모음 음양 균형', grade: _ng(ad.pronounceYin?.grade)   },
-            { label:'원격 (초년운)', sub:'초년 수리',      grade: _ng(sg[0]?.grade) },
-            { label:'형격 (청년운)', sub:'청년 수리',      grade: _ng(sg[1]?.grade) },
-            { label:'이격 (장년운)', sub:'장년 수리',      grade: _ng(sg[2]?.grade) },
-            { label:'정격 (전체운)', sub:'말년 수리',      grade: _ng(sg[3]?.grade) },
-            { label:'수리 오행',     sub:'획수 오행 상생', grade: _ng(ad.mathOheng?.grade)  },
-            { label:'수리 음양',     sub:'획수 홀짝 균형', grade: _ng(ad.mathYin?.grade)    },
+            { label:'사주 보완',  sub:'자원오행 매칭',  grade: _ng(ad.sajuOheng?.grade)     },
+            { label:'발음 오행',  sub:'초성 상생 흐름', grade: _ng(ad.pronounceOheng?.grade) },
+            { label:'발음 음양',  sub:'모음 음양 균형', grade: _ng(ad.pronounceYin?.grade)   },
+            { label:'사격수리',   sub:'원·형·이·정격',  grade: _sgGrade },
+            { label:'수리 오행',  sub:'획수 오행 상생', grade: _ng(ad.mathOheng?.grade)  },
+            { label:'수리 음양',  sub:'획수 홀짝 균형', grade: _ng(ad.mathYin?.grade)    },
         ];
     }
 
