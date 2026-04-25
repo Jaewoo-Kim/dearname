@@ -2947,7 +2947,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // 뱃지 적용 함수
-    const _GRADE4 = {'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'};
+    const _GRADE4 = {'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'};
     const _toG4 = g => _GRADE4[g] || g;  // 구 등급 → 4단계 변환
     function applyBadge(elementId, grade) {
         const el = document.getElementById(elementId);
@@ -3013,9 +3013,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if(!isSangsaeng(pronOhengs[i], pronOhengs[i+1])) badCount++;
         }
         
-        let pronGrade = '매우 좋음', pronDesc = '초성 오행이 상생 관계로 이어져 부드럽고 막힘없는 흐름입니다.';
-        if(badCount === 1) { pronGrade = '나쁨';     pronDesc = '초성 흐름에 상극이 일부 포함되어 있습니다.'; }
-        if(badCount >= 2)  { pronGrade = '매우 나쁨'; pronDesc = '초성 오행이 연이어 상극을 이루어 보완이 시급합니다.'; }
+        const _pronTotal = pronOhengs.length - 1;
+        let pronGrade, pronDesc;
+        if (badCount === 0)                          { pronGrade = '매우 좋음'; pronDesc = '초성 오행이 상생 관계로 이어져 부드럽고 막힘없는 흐름입니다.'; }
+        else if (badCount * 2 <= _pronTotal)         { pronGrade = '좋음';     pronDesc = '상생과 상극이 혼재하나 상생이 우세해 전반적으로 좋은 흐름입니다.'; }
+        else if (badCount === _pronTotal)            { pronGrade = '매우 나쁨'; pronDesc = '초성 오행이 연이어 상극을 이루어 보완이 시급합니다.'; }
+        else                                         { pronGrade = '나쁨';     pronDesc = '상극이 상생보다 많아 기운의 충돌이 우려됩니다.'; }
 
         /* ----------------------------------------------------
            ② 발음음양 (모음 기준 홀짝 밸런스)
@@ -3065,8 +3068,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         let math4Grade, math4Desc;
         if(goodCount === 4)      { math4Grade = '매우 좋음'; math4Desc = '4격의 획수 합이 모두 길수에 해당합니다.'; }
         else if(goodCount === 3) { math4Grade = '좋음';     math4Desc = '대부분의 시기에서 길한 수리가 배치되어 있습니다.'; }
-        else if(goodCount === 2) { math4Grade = '나쁨';     math4Desc = '길흉이 반반 섞여 있어 부분적인 수리 보완이 권장됩니다.'; }
-        else                     { math4Grade = '매우 나쁨'; math4Desc = goodCount === 0 ? '4격이 모두 흉수입니다. 작명을 새로 하시는 것을 강력히 권장합니다.' : '흉수가 많아 삶의 굴곡이 예상되므로 보완이 필요합니다.'; }
+        else if(goodCount === 2) { math4Grade = '좋음';     math4Desc = '길수와 흉수가 균형을 이루고 있습니다. 자원오행과 발음으로 보완하면 좋습니다.'; }
+        else if(goodCount === 1) { math4Grade = '나쁨';     math4Desc = '흉수가 많아 삶의 굴곡이 예상되므로 보완이 필요합니다.'; }
+        else                     { math4Grade = '매우 나쁨'; math4Desc = '4격이 모두 흉수입니다. 작명을 새로 하시는 것을 강력히 권장합니다.'; }
 
         /* ----------------------------------------------------
            ④ 수리오행 (형격과 정격의 끝자리 오행 상생)
@@ -3088,8 +3092,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
         let moGrade, moDesc;
         if(moBadCount === 0)      { moGrade = '매우 좋음'; moDesc = '수리의 4격 오행이 모두 상생으로 이어져 기운이 막힘없이 흐릅니다.'; }
-        else if(moBadCount === 1) { moGrade = '나쁨';     moDesc = '수리오행 흐름에 상극이 일부 포함되어 있습니다.'; }
-        else                      { moGrade = '매우 나쁨'; moDesc = '수리오행 간 상극이 여러 곳에서 발생하여 기운 충돌이 우려됩니다.'; }
+        else if(moBadCount === 1) { moGrade = '좋음';     moDesc = '수리오행 흐름에 상극이 일부 포함되어 있으나 상생이 우세합니다.'; }
+        else if(moBadCount === 2) { moGrade = '나쁨';     moDesc = '수리오행 간 상극이 여러 곳에서 발생하여 기운 충돌이 우려됩니다.'; }
+        else                      { moGrade = '매우 나쁨'; moDesc = '수리오행 전 구간에서 상극이 발생합니다.'; }
 
         /* ----------------------------------------------------
            ⑤ 수리음양 (획수의 홀/짝 밸런스)
@@ -4398,7 +4403,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // ── 수리음양/수리오행 서브 섹션 HTML 빌더 (셀프/프리미엄 공통) ──
     function _buildSuriSubHtml(mathYin, mathOheng) {
-        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
         const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
         const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const badge   = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
@@ -4485,7 +4490,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const g4 = isOija ? s0+s1 : s0+s1+s2;
         const rawNums = [g1, g2, g3, g4];
 
-        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
         const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
         const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
@@ -4529,7 +4534,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // candidate 객체가 있으면 DOM-독립 직접 계산 (프리미엄/예시 보고서)
     // candidate 없으면 getAnalysisData DOM 기반 (셀프 보고서)
     function _buildReportItems(familyKr, firstName, candidate) {
-        const _ng = g => ({'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _ng = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
 
         // ── 공통 발음 계산 헬퍼 ────────────────────────────────────
         const _CHO_O = c => {
@@ -4561,7 +4566,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _pronGrade = (fullKr) => {
             const os = fullKr.split('').map(_CHO_O);
             const bad = os.filter((o,i) => i < os.length-1 && o && !_isSS(o, os[i+1])).length;
-            return bad === 0 ? '매우 좋음' : bad === 1 ? '나쁨' : '매우 나쁨';
+            const total = os.length - 1;
+            if (bad === 0) return '매우 좋음';
+            if (bad === total) return '매우 나쁨';
+            if (bad * 2 <= total) return '좋음';
+            return '나쁨';
         };
         const _yinGrade = (fullKr) => {
             const ys = fullKr.split('').map(_YY);
@@ -4595,7 +4604,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const moNums4   = [g1,g2,g3,g4];
             const moOs4     = moNums4.map(_numOheng);
             const moBad4    = moOs4.filter((o,i)=>i<3&&!_isSS(o,moOs4[i+1])).length;
-            const mathOhengGrade = moBad4===0?'매우 좋음':moBad4===1?'나쁨':'매우 나쁨';
+            const mathOhengGrade = moBad4===0?'매우 좋음':moBad4===1?'좋음':moBad4===2?'나쁨':'매우 나쁨';
             // 수리 음양 (4격 수리의 홀짝)
             const g4Nums = [g1,g2,g3,g4];
             const mathYinGrade = g4Nums.every(n=>n%2===0)||g4Nums.every(n=>n%2!==0) ? '매우 나쁨' : '매우 좋음';
@@ -4641,7 +4650,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // ── Executive Summary 카드 빌더 ────────────────────────────────
     function _buildExecSummaryHtml(nameKr, nameHj, score, labeledItems) {
-        const _ng  = g => ({'대길':'매우 좋음','길':'좋음','평':'나쁨','흉':'매우 나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _ng  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
         const stars = score>=90?'★★★★★':score>=75?'★★★★☆':score>=55?'★★★☆☆':score>=35?'★★☆☆☆':'★☆☆☆☆';
         const msg   = score>=90 ? '천운과 이름이 완벽하게 어우러진 성명입니다' :
                       score>=80 ? '사주와 조화롭고 풍요로운 기운의 이름입니다' :
