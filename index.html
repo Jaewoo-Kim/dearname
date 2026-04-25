@@ -316,6 +316,19 @@
 
         .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .premium-form select option { background: var(--bg-dark); color: white; }
+        .parent-saju-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .parent-saju-who {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--gold-dark);
+            white-space: nowrap;
+            min-width: 44px;
+        }
 
         /* 셀프작명 양력/음력 토글 */
         .cal-pill-group { display:flex; gap:6px; }
@@ -1789,9 +1802,24 @@
                                     <select id="prem-fav-hanja" style="flex:1.5;margin-bottom:0;"><option value="">한자 선택</option></select>
                                 </div>
                             </div>
+                            <div class="full-width-form">
+                                <label class="input-label">운 중심 설정
+                                    <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);margin-left:6px;">선택 — 특정 운이 강한 수리(획수 조합)를 우선합니다</span>
+                                </label>
+                                <div class="cal-pill-group" style="flex-wrap:wrap;gap:8px;">
+                                    <label class="cal-pill"><input type="radio" name="luck_focus" value="balanced" checked><span class="cal-label">기본 (균형)</span></label>
+                                    <label class="cal-pill"><input type="radio" name="luck_focus" value="wealth"><span class="cal-label">💰 재물·풍요운</span></label>
+                                    <label class="cal-pill"><input type="radio" name="luck_focus" value="leadership"><span class="cal-label">👑 리더십·명예운</span></label>
+                                    <label class="cal-pill"><input type="radio" name="luck_focus" value="wisdom"><span class="cal-label">📚 지혜·학업운</span></label>
+                                    <label class="cal-pill"><input type="radio" name="luck_focus" value="health"><span class="cal-label">🌿 건강·장수운</span></label>
+                                </div>
+                            </div>
                             <div>
-                                <label class="input-label">가족 중 피해야 할 이름 (동명이인 방지)</label>
-                                <input type="text" id="prem-avoid" placeholder="예: 조부모, 삼촌, 친척 이름">
+                                <label class="input-label">친인척 이름 — 동일 음절 제외
+                                    <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);margin-left:4px;">선택</span>
+                                </label>
+                                <input type="text" id="prem-avoid" placeholder="예: 지우, 서연, 민준 (형제·친척 이름)">
+                                <p style="font-size:0.78rem;color:var(--text-secondary);margin:6px 0 0;">입력한 이름과 같은 음절의 한자를 후보에서 자동 제외합니다.</p>
                             </div>
                         </div>
                         <div class="wizard-nav">
@@ -1807,12 +1835,42 @@
                         <div class="form-grid">
                             <div class="full-width-form">
                                 <label class="input-label">
-                                    부모님 사주
-                                    <span class="tooltip-icon" title="부모님과 기운이 조화로운 이름을 짓기 위해 활용합니다. 생년월일시를 입력해주세요.">?</span>
-                                    <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);margin-left:8px;">선택 사항</span>
+                                    부모님 생년월일
+                                    <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);margin-left:8px;">선택 — 부모 오행과의 조화를 분석합니다</span>
                                 </label>
-                                <div style="display:flex;gap:12px;flex-direction:column;">
-                                    <input type="text" id="prem-parent-saju" placeholder="예: 아버지 1985년 5월 12일 오전 9시 / 어머니 1987년 8월 3일 오후 2시">
+                                <div style="display:flex;flex-direction:column;gap:10px;">
+                                    <div class="parent-saju-row">
+                                        <span class="parent-saju-who">아버지</span>
+                                        <select class="bf-select" id="parent-father-year" style="min-width:84px;"><option value="">연도</option></select>
+                                        <select class="bf-select" id="parent-father-month">
+                                            <option value="">월</option>
+                                            <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option><option value="04">4월</option><option value="05">5월</option><option value="06">6월</option><option value="07">7월</option><option value="08">8월</option><option value="09">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                                        </select>
+                                        <select class="bf-select" id="parent-father-day">
+                                            <option value="">일</option>
+                                            <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+                                        </select>
+                                        <select class="bf-select" id="parent-father-hour" style="min-width:72px;">
+                                            <option value="">시간</option>
+                                            <option value="00">자시(밤12)</option><option value="01">축시(새벽1)</option><option value="03">인시(새벽3)</option><option value="05">묘시(새벽5)</option><option value="07">진시(아침7)</option><option value="09">사시(오전9)</option><option value="11">오시(낮11)</option><option value="13">미시(오후1)</option><option value="15">신시(오후3)</option><option value="17">유시(오후5)</option><option value="19">술시(저녁7)</option><option value="21">해시(밤9)</option><option value="23">자시(밤11)</option>
+                                        </select>
+                                    </div>
+                                    <div class="parent-saju-row">
+                                        <span class="parent-saju-who">어머니</span>
+                                        <select class="bf-select" id="parent-mother-year" style="min-width:84px;"><option value="">연도</option></select>
+                                        <select class="bf-select" id="parent-mother-month">
+                                            <option value="">월</option>
+                                            <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option><option value="04">4월</option><option value="05">5월</option><option value="06">6월</option><option value="07">7월</option><option value="08">8월</option><option value="09">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                                        </select>
+                                        <select class="bf-select" id="parent-mother-day">
+                                            <option value="">일</option>
+                                            <option value="01">1</option><option value="02">2</option><option value="03">3</option><option value="04">4</option><option value="05">5</option><option value="06">6</option><option value="07">7</option><option value="08">8</option><option value="09">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
+                                        </select>
+                                        <select class="bf-select" id="parent-mother-hour" style="min-width:72px;">
+                                            <option value="">시간</option>
+                                            <option value="00">자시(밤12)</option><option value="01">축시(새벽1)</option><option value="03">인시(새벽3)</option><option value="05">묘시(새벽5)</option><option value="07">진시(아침7)</option><option value="09">사시(오전9)</option><option value="11">오시(낮11)</option><option value="13">미시(오후1)</option><option value="15">신시(오후3)</option><option value="17">유시(오후5)</option><option value="19">술시(저녁7)</option><option value="21">해시(밤9)</option><option value="23">자시(밤11)</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="full-width-form">
@@ -3978,8 +4036,44 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const dolrimPos = parseInt(document.querySelector('[name="dolrim_pos"]:checked')?.value || '3');
         const hangryulPos = parseInt(document.querySelector('[name="hangryul_pos"]:checked')?.value || '2');
 
+        // ── 운 중심 설정 ─────────────────────────────────
+        const luckFocus = document.querySelector('[name="luck_focus"]:checked')?.value || 'balanced';
+
+        // ── 친인척 이름 → 한글 음절 Set 추출 ────────────
+        const avoidRaw = document.getElementById('prem-avoid')?.value || '';
+        const avoidKrSyllables = [...new Set(
+            avoidRaw.replace(/[,\s·\/]+/g, ' ').trim().split(/\s+/)
+                .flatMap(name => [...name])                // 각 글자로 분리
+                .filter(ch => ch >= '가' && ch <= '힣') // 한글 완성형만
+        )];
+
+        // ── 부모 사주 계산 ────────────────────────────────
+        const _calcParentOheng = (person) => {
+            const y = document.getElementById(`parent-${person}-year`)?.value;
+            const m = document.getElementById(`parent-${person}-month`)?.value;
+            const d = document.getElementById(`parent-${person}-day`)?.value;
+            const h = document.getElementById(`parent-${person}-hour`)?.value || '12';
+            if (!y || !m || !d) return null;
+            const dateStr = `${y}-${m}-${d}`;
+            const timeStr = `${String(h).padStart(2,'0')}:00`;
+            try {
+                const pSaju   = (typeof calcSaju === 'function') ? calcSaju(dateStr, timeStr, {}) : null;
+                const pScores = (pSaju && typeof calcOhengScores === 'function') ? calcOhengScores(pSaju) : null;
+                if (!pScores) return null;
+                const sorted   = Object.entries(pScores).sort((a,b) => b[1]-a[1]);
+                return { scores: pScores, dominant: sorted[0]?.[0], weakest: sorted[4]?.[0] };
+            } catch(e) { return null; }
+        };
+        const parentOheng = {
+            father: _calcParentOheng('father'),
+            mother: _calcParentOheng('mother')
+        };
+
+        // nameSpec에 avoidKrSyllables 포함
+        const extendedNameSpec = { ...nameSpec, avoidKrSyllables };
+
         return {
-            nameSpec,
+            nameSpec: extendedNameSpec,
             familyName: {
                 kr:      familyKr,
                 hanja:   familyHanja,
@@ -3990,13 +4084,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 dolrim:   dolrimHanja ? { kr: document.getElementById('prem-dolrim')?.value||'', hanja:dolrimHanja, strokes:getHanjaStrokes(dolrimHanja), pos:dolrimPos } : null,
                 hangryul: hangryulHanja ? { kr: document.getElementById('prem-hangryul')?.value||'', hanja:hangryulHanja, strokes:getHanjaStrokes(hangryulHanja), pos:hangryulPos } : null,
                 traits,
-                nameType: parseInt(document.querySelector('[name="self_name_type"]:checked')?.value || '2')
+                nameType:  parseInt(document.querySelector('[name="self_name_type"]:checked')?.value || '2'),
+                luckFocus
             },
             searchControl: { maxResults:5, qualityThreshold:60 },
-            _saju:   saju,
-            _scores: scores,
+            _saju:       saju,
+            _scores:     scores,
             daeun,
-            gender
+            gender,
+            parentOheng
         };
     }
 
@@ -4040,7 +4136,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
             showLoadingOverlay('AI 명리학 대가의 소견서를 작성 중입니다... (약 20~30초)');
 
-            _currentState.parentSaju = document.getElementById('prem-parent-saju')?.value || '';
+            // parentOheng은 _buildSearchState()에서 이미 계산됨 (구조화된 데이터)
             _allReports = await generateAllReports(top3, _currentState);
             _currentIdx = 0;
 
@@ -7395,6 +7491,20 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     if (this.value !== 'lunar' && chk) chk.checked = false;
                 });
             });
+        });
+    });
+
+    // 부모 연도 선택기 동적 생성 (1940-2005)
+    document.addEventListener('DOMContentLoaded', () => {
+        ['parent-father-year','parent-mother-year'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            for (let y = 2005; y >= 1940; y--) {
+                const opt = document.createElement('option');
+                opt.value = String(y);
+                opt.textContent = y + '년';
+                sel.appendChild(opt);
+            }
         });
     });
 
