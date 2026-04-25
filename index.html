@@ -728,41 +728,70 @@
 
         /* ── 2-Section 구조 ────────────────────────────────── */
         #report-section-story { }
-        #report-section-expert { margin-top: 32px; }
+        #report-section-expert { margin-top: 36px; }
         #expert-toggle-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 20px;
-            padding: 24px 28px;
-            background: linear-gradient(135deg, var(--bg-warm) 0%, #fff 100%);
-            border: 2px solid var(--gold-light);
-            border-radius: 20px;
+            padding: 28px 32px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f2744 100%);
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            border-radius: 24px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(212,175,55,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        #expert-toggle-bar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent);
         }
         #expert-toggle-bar:hover {
-            border-color: var(--gold-dark);
-            box-shadow: 0 4px 20px rgba(180, 140, 60, 0.12);
+            border-color: var(--gold-premium);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.22), 0 0 0 1px rgba(212,175,55,0.3);
+            transform: translateY(-1px);
         }
         .expert-toggle-eyebrow {
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 800;
-            color: var(--gold-dark);
-            letter-spacing: 0.12em;
+            color: var(--gold-premium);
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            opacity: 0.85;
         }
         .expert-toggle-title {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: var(--bg-dark);
-            margin-bottom: 6px;
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
         .expert-toggle-desc {
-            font-size: 0.83rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
+            font-size: 0.84rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.65;
+        }
+        #expert-toggle-btn {
+            background: linear-gradient(135deg, var(--gold-premium) 0%, var(--gold-dark) 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 12px 24px !important;
+            border-radius: 50px !important;
+            font-size: 0.88rem !important;
+            font-weight: 800 !important;
+            white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(212,175,55,0.35);
+            transition: all 0.2s;
+        }
+        #expert-toggle-btn:hover {
+            box-shadow: 0 6px 24px rgba(212,175,55,0.5);
+            transform: scale(1.03);
         }
         #expert-master-body {
             max-height: 0;
@@ -1004,8 +1033,118 @@
         .parent-step-tips li::before { content:'→'; font-size:0.75rem; flex-shrink:0; margin-top:1px; opacity:0.6; }
 
         /* ── 오행 순환도 + 바 레이아웃 ── */
-        .oheng-layout { display:grid; grid-template-columns:220px 1fr; gap:28px; margin-top:28px; align-items:center; }
+        .oheng-layout { display:grid; grid-template-columns:170px 1fr; gap:20px; margin-top:24px; align-items:start; }
         @media(max-width:640px){ .oheng-layout{ grid-template-columns:1fr; } }
+
+        /* ── 사주 이론 설명 박스 ── */
+        .chapter-theory-box {
+            background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+            border: 1.5px solid #c7d2fe;
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin: 14px 0 20px;
+            font-size: 0.85rem;
+            line-height: 1.75;
+            color: var(--text-primary);
+        }
+        .chapter-theory-box b { color: #1e40af; }
+        .chapter-theory-title {
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: #3b82f6;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+        .chapter-theory-pillars {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            margin: 12px 0 10px;
+        }
+        @media(max-width:540px){ .chapter-theory-pillars { grid-template-columns: 1fr; } }
+        .pillar-explain {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            padding: 7px 10px;
+            background: white;
+            border-radius: 9px;
+            border: 1px solid #e0e7ff;
+        }
+        .pillar-explain.pe-me {
+            border-color: var(--gold-premium);
+            background: #fffbeb;
+            font-weight: 700;
+        }
+        .pe-year, .pe-month, .pe-day, .pe-time {
+            font-size: 0.72rem;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .pe-year  { background: #dbeafe; color: #1e40af; }
+        .pe-month { background: #dcfce7; color: #15803d; }
+        .pe-day   { background: var(--gold-premium); color: white; }
+        .pe-time  { background: #f1f5f9; color: #475569; }
+
+        /* ── 일주 '나' 배지 ── */
+        .saju-me-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--gold-premium);
+            color: white;
+            font-size: 0.68rem;
+            font-weight: 900;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.04em;
+            margin-bottom: 7px;
+        }
+
+        /* ── 이름 기여 카드 ── */
+        .oheng-contrib-card {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef9c3 100%);
+            border: 1.5px solid var(--gold-dark);
+            border-radius: 14px;
+            padding: 13px 16px;
+            margin-bottom: 14px;
+        }
+        .oheng-contrib-title {
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: var(--gold-dark);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 9px;
+        }
+        .oheng-contrib-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .oheng-contrib-pill {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: white;
+            border-radius: 10px;
+            padding: 7px 13px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .oheng-contrib-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .oheng-contrib-hint {
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            margin: 9px 0 0;
+            line-height: 1.6;
+        }
 
         /* ── 후보 비교 테이블 ── */
         #report-compare-section { max-width:780px; margin:0 auto 12px; }
@@ -2239,6 +2378,20 @@
                 </div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch1">
+
+            <!-- 사주 이론 설명 박스 -->
+            <div class="chapter-theory-box">
+                <div class="chapter-theory-title">📖 사주(四柱)란 무엇인가요?</div>
+                사주(四柱)는 <b>인생을 지탱하는 4개의 기둥</b>을 뜻합니다. 태어난 해·달·날·시가 각각 하나의 기둥이 되고, 각 기둥마다 <b>하늘의 기운(천간 天干)</b>과 <b>땅의 기운(지지 地支)</b>을 나타내는 한자가 1글자씩 들어가 총 <b>8글자(팔자 八字)</b>가 만들어집니다.
+                <div class="chapter-theory-pillars">
+                    <div class="pillar-explain"><span class="pe-year">年柱 연주</span> 조상·초년운 (0~20대)</div>
+                    <div class="pillar-explain"><span class="pe-month">月柱 월주</span> 부모형제·청장년운</div>
+                    <div class="pillar-explain pe-me"><span class="pe-day">日柱 일주 ★</span> <b>이 아이 본인</b> · 배우자궁</div>
+                    <div class="pillar-explain"><span class="pe-time">時柱 시주</span> 자식·말년운 (60대~)</div>
+                </div>
+                <span style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;">★ 일주(日柱)는 아이 본인을 나타내는 핵심 기둥으로 금색 강조 표시됩니다. 각 칸의 위 글자가 천간(하늘), 아래 글자가 지지(땅)입니다.</span>
+            </div>
+
             <div class="saju-grid" id="report-saju-grid"></div>
             <div class="oheng-layout">
                 <div style="text-align:center;">
@@ -2304,6 +2457,10 @@
                 <div id="verdict-ch2" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch2">
+            <div class="chapter-theory-box">
+                <div class="chapter-theory-title">📖 자원오행(字源五行)이란?</div>
+                한자 한 글자 한 글자에는 <b>목(木)·화(火)·토(土)·금(金)·수(水)</b> 다섯 기운 중 하나가 내재되어 있습니다. 이름의 한자가 가진 이 기운을 <b>자원오행</b>이라 하며, 이름을 부를 때마다 그 기운이 아이에게 스며들어 사주의 부족한 기운을 보완해 줍니다. 오른쪽 레이더 차트에서 금색 면적이 클수록 이름의 보완 효과가 큽니다.
+            </div>
             <div class="ai-tagline" id="report-tagline">--</div>
             <div id="report-jawon-chips"></div>
             <div class="intro-grid" style="margin-top:0;">
@@ -2345,6 +2502,10 @@
                 <div id="verdict-ch3" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch3">
+            <div class="chapter-theory-box">
+                <div class="chapter-theory-title">📖 자원(字源) 분석이란?</div>
+                한자 한 글자에는 <b>뜻(의미)</b>과 <b>소리(음)</b>, 그리고 <b>오행 기운</b>이 모두 담겨 있습니다. 수천 년 동안 수많은 학자들이 한자의 어원을 연구해왔으며, 좋은 이름이란 뜻이 아름답고, 소리가 좋으며, 사주에 맞는 오행을 가진 한자로 구성됩니다. 아래 카드에서 각 한자의 의미와 사주와의 시너지를 확인하세요.
+            </div>
             <div id="report-hanja-details"></div>
             <div class="ai-story-block" id="ai-hanja-story" style="margin-top:24px;border-left:4px solid var(--gold-dark);background:#fffbeb;border-top:none;border-right:none;border-bottom:none;border-radius:0 14px 14px 0;"></div>
             </div><!-- /acc-body-ch3 -->
@@ -2369,6 +2530,10 @@
                 <div id="verdict-ch4" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch4">
+            <div class="chapter-theory-box">
+                <div class="chapter-theory-title">📖 발음 오행 & 음양이란?</div>
+                이름을 소리 낼 때 <b>첫 소리(초성)의 발음 위치</b>에 따라 오행이 결정됩니다. 예: ㄱ·ㅋ = 木, ㄴ·ㄷ·ㄹ = 火, ㅇ·ㅎ = 土, ㅅ·ㅈ·ㅊ = 金, ㅁ·ㅂ·ㅍ = 水. 성씨부터 이름까지 이 오행이 <b>서로 돕는(상생) 흐름</b>을 이루면 기운이 막힘없이 흐릅니다. 또한 모음의 밝고 어두운 배합(음양)이 균형을 이루면 소리에서 조화로운 에너지가 나옵니다.
+            </div>
             <div id="ai-sound-body"></div>
             <div class="ai-story-block" id="ai-sound-story" style="margin-top:20px;"></div>
             </div><!-- /acc-body-ch4 -->
@@ -2393,6 +2558,10 @@
                 <div id="verdict-ch5a" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch5a">
+            <div class="chapter-theory-box">
+                <div class="chapter-theory-title">📖 사격수리(四格數理)란?</div>
+                이름을 이루는 <b>성씨와 이름 각 글자의 획수 합</b>으로 4가지 '격(格)'을 만들고, 각 격에 해당하는 수(1~81)의 길흉을 분석합니다. <b>원격(源格)</b>은 이름 두 글자의 합으로 초년 기질, <b>형격(亨格)</b>은 성+첫째 글자로 청장년 사회운, <b>이격(利格)</b>은 성+둘째 글자로 이성·가정운, <b>정격(正格)</b>은 성+이름 전체로 총운을 나타냅니다. 동양에서는 1~81 각 수에 고유한 기운과 길흉이 있다고 봅니다.
+            </div>
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
             <div class="ai-story-block" id="ai-suri-story"></div>
             </div><!-- /acc-body-ch5a -->
@@ -2439,6 +2608,10 @@
                 </div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch5c">
+            <div class="chapter-theory-box">
+                <div class="chapter-theory-title">📖 대운(大運)이란?</div>
+                대운은 <b>10년 단위로 바뀌는 인생의 큰 흐름</b>입니다. 월주(月柱)에서 출발해 순행 또는 역행하며 한 사람의 인생 계절을 이끕니다. 좋은 대운 시기에는 기회가 많아지고, 힘든 대운 시기에는 이름의 오행이 그 약점을 보완하는 역할을 합니다. 아래 차트에서 대운 칩을 클릭하면 각 시기별 분석을 확인할 수 있습니다.
+            </div>
             <div id="report-daeun-section"></div>
             <div class="chart-container-large" style="margin-top:20px;">
                 <canvas id="lifeFlowChart"></canvas>
@@ -4592,11 +4765,25 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
               }).join(' · ')
             : '';
 
-        // 이름 기여 배지
-        const badgeHtml = hanjaLabel
-            ? `<div style="margin-bottom:14px;font-size:0.82rem;font-weight:700;color:var(--text-secondary);">
-                ✦ 이름이 채운 기운 &nbsp;
-                ${nameOhengs.map(o=>`<span style="display:inline-block;background:${OHENG_COLORS[o]};color:white;border-radius:20px;padding:2px 10px;margin:2px 2px;font-size:0.78rem;">${_ohengToKr(o)} +15</span>`).join('')}
+        // 오행 한글+한자 통일 표기 헬퍼
+        const _OHKR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const _ohengFull = o => { const k = _ohengToKr(o); const h = {'나무':'木','불':'火','흙':'土','쇠':'金','물':'水'}[k]||o; return `${h}(${k})`; };
+
+        // 이름 기여 카드 (개선된 시각화)
+        const badgeHtml = nameOhengs.length
+            ? `<div class="oheng-contrib-card">
+                <div class="oheng-contrib-title">✦ 이름이 채워주는 기운</div>
+                <div class="oheng-contrib-pills">
+                    ${nameOhengs.map(o => {
+                        const oc = OHENG_COLORS[o] || '#888';
+                        return `<div class="oheng-contrib-pill" style="border:1.5px solid ${oc}40;">
+                            <div class="oheng-contrib-dot" style="background:${oc};"></div>
+                            <span style="color:${oc};">${_ohengFull(o)}</span>
+                            <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;">+15점</span>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <p class="oheng-contrib-hint">이름이 매일 불릴 때마다 위 기운이 아이에게 스며듭니다. 아래 막대의 <b>연한 색 부분</b>이 이름이 더해주는 기운입니다.</p>
                </div>`
             : '';
 
@@ -4612,7 +4799,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 ? `<div class="oheng-bar-fill" style="width:${totalPct - basePct}%;background:${OHENG_COLORS[o]};opacity:0.45;"></div>`
                 : '';
             return `<div class="oheng-item">
-                <span class="oheng-label">${_ohengToKr(o)} (${Math.round(s)}${contrib>0?`<span style="color:${OHENG_COLORS[o]};font-size:0.72rem;">+${contrib}</span>`:''})</span>
+                <span class="oheng-label" style="width:76px;">${_ohengFull(o)} <span style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">${Math.round(s)}${contrib>0?`<span style="color:${OHENG_COLORS[o]};">+${contrib}</span>`:''}</span></span>
                 <div class="oheng-bar-bg" style="position:relative;display:flex;">
                     <div class="oheng-bar-fill" style="width:${basePct}%;background:${OHENG_COLORS[o]||'#888'};"></div>
                     ${contribBar}
@@ -4693,17 +4880,20 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const ganO = CHEONGAN_OHENG_KR[p.gan] || '';
             const jiO  = JIJI_OHENG_KR[p.ji]  || '';
             const pillColor = _KR_COLOR[ganO] || '#888';
+            const jiColor   = _KR_COLOR[jiO]  || '#888';
             const story = _getPillarStory(p, key);
+            // 천간/지지 오행 — 같더라도 항상 두 개 표시 (예: 쇠쇠)
+            const ohengPills = `
+                <span class="saju-oheng-pill" style="background:${pillColor};" title="천간(天干) — 하늘의 기운">${ganO}</span>
+                <span class="saju-oheng-pill" style="background:${jiColor};margin-left:4px;" title="지지(地支) — 땅의 기운">${jiO}</span>`;
             return `<div class="saju-box${isPoint ? ' point' : ''}">
                 <div class="saju-box-bar" style="${isPoint ? '' : `background:${pillColor}33;`}"></div>
                 <div class="saju-box-inner">
+                    ${isPoint ? `<div class="saju-me-badge">👤 나 · 이 아이</div>` : ''}
                     <div class="saju-label">${label}</div>
                     <div class="saju-hanja">${p.gan} ${p.ji}</div>
                     <div class="saju-kor">${_toHangul(p.gan)}${_toHangul(p.ji)}</div>
-                    <div>
-                        <span class="saju-oheng-pill" style="background:${pillColor};">${ganO}</span>
-                        ${ganO !== jiO ? `<span class="saju-oheng-pill" style="background:${_KR_COLOR[jiO]||'#888'};margin-left:4px;">${jiO}</span>` : ''}
-                    </div>
+                    <div style="margin-top:4px;">${ohengPills}</div>
                     <div class="saju-story">${story}</div>
                     <div class="saju-gungwi">${period}</div>
                 </div>
@@ -4760,20 +4950,26 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             { hanja:h1.h, kr:h1.kr, meaning:h1.m, strokes:h1.s, oheng:h1.o, synergyWithSaju:'' },
             ...(h2 ? [{ hanja:h2.h, kr:h2.kr, meaning:h2.m, strokes:h2.s, oheng:h2.o, synergyWithSaju:'' }] : [])
         ];
-        const OHENG_COLOR_MAP = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
-        el.innerHTML = src.map(d => `
+        const OHENG_COLOR_MAP = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#1e3a5f'};
+        const OHENG_KR_MAP2   = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        el.innerHTML = src.map(d => {
+            const oc  = OHENG_COLOR_MAP[d.oheng] || '#888';
+            const okr = OHENG_KR_MAP2[d.oheng]  || d.oheng || '';
+            const ohengLabel = d.oheng ? `${d.oheng}(${okr})` : '';
+            return `
             <div class="ai-hanja-card">
-                <div class="ai-hanja-char" style="background:${OHENG_COLOR_MAP[d.oheng]||'#888'};">${d.hanja}</div>
+                <div class="ai-hanja-char" style="color:${oc};background:${oc}14;border:2.5px solid ${oc}55;">${d.hanja}</div>
                 <div class="ai-hanja-body" style="flex:1;">
                     <div class="ai-hanja-meta">
-                        <span>${d.kr||''} (${d.hanja})</span>
-                        <span>${d.oheng||''} 기운</span>
+                        <span style="font-weight:800;">${d.kr||''} (${d.hanja})</span>
+                        <span style="color:${oc};font-weight:800;">${ohengLabel} 기운</span>
                         <span>${d.strokes||''}획</span>
                     </div>
                     <p style="font-size:0.95rem;color:var(--text-primary);line-height:1.7;margin:6px 0;">${d.meaning||''}</p>
                     ${d.synergyWithSaju ? `<div class="ai-hanja-synergy">✦ 사주 시너지 &nbsp;${d.synergyWithSaju}</div>` : ''}
                 </div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
     }
 
     // ── 수리음양/수리오행 서브 섹션 HTML 빌더 (셀프/프리미엄 공통) ──
@@ -5510,9 +5706,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
              padding:12px 16px;background:#f8fafc;border-radius:12px;margin-bottom:14px;
              border:1px solid var(--border-light);">
             <span style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">
-                9개 평가 기준
+                ${total}개 평가 기준
             </span>
-            <span style="font-size:0.85rem;font-weight:800;color:${goodCnt>=7?'#15803d':goodCnt>=5?'#2563eb':'#d97706'};">
+            <span style="font-size:0.85rem;font-weight:800;color:${goodCnt>=Math.ceil(total*0.75)?'#15803d':goodCnt>=Math.ceil(total*0.5)?'#2563eb':'#d97706'};">
                 ${goodCnt}/${total} 좋음 이상
             </span>
         </div>`;
