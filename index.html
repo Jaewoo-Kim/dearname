@@ -4604,9 +4604,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const prefer    = _currentState?.nameSpec?.prefer || [];
             const nameOs    = [h1.o, h2?.o].filter(Boolean).map(o => _normOheng ? _normOheng(o) : o);
             const compCount = prefer.filter(p => nameOs.includes(p)).length;
-            const sajuGrade = prefer.length === 0 ? '나쁨'
+            const sajuGrade = prefer.length === 0 ? '매우 좋음'
                             : compCount === prefer.length ? '매우 좋음'
-                            : compCount > 0 ? '좋음' : '매우 나쁨';
+                            : compCount > 0 ? '나쁨' : '매우 나쁨';
 
             return [
                 { label:'사주 보완',     sub:'자원오행 매칭',  grade: sajuGrade },
