@@ -2022,9 +2022,17 @@
                                                 <label class="cal-pill"><input type="radio" name="parent_father_cal" value="lunar"><span class="cal-label">음력</span></label>
                                             </div>
                                             <span class="bf-sep"></span>
-                                            <select class="bf-select" id="parent-father-hour" style="min-width:130px;">
-                                                <option value="">출생 시간 (선택)</option>
-                                                <option value="00">자시 (밤 12시)</option><option value="01">축시 (새벽 1시)</option><option value="03">인시 (새벽 3시)</option><option value="05">묘시 (새벽 5시)</option><option value="07">진시 (아침 7시)</option><option value="09">사시 (오전 9시)</option><option value="11">오시 (낮 11시)</option><option value="13">미시 (오후 1시)</option><option value="15">신시 (오후 3시)</option><option value="17">유시 (오후 5시)</option><option value="19">술시 (저녁 7시)</option><option value="21">해시 (밤 9시)</option><option value="23">자시 (밤 11시)</option>
+                                            <div class="bf-ampm-chip">
+                                                <label class="ampm-pill"><input type="radio" name="parent_father_ampm" value="am" checked><span>오전</span></label>
+                                                <label class="ampm-pill"><input type="radio" name="parent_father_ampm" value="pm"><span>오후</span></label>
+                                            </div>
+                                            <select class="bf-select" id="parent-father-time-hour" style="min-width:70px;">
+                                                <option value="">시</option>
+                                                <option value="1">1시</option><option value="2">2시</option><option value="3">3시</option><option value="4">4시</option><option value="5">5시</option><option value="6">6시</option><option value="7">7시</option><option value="8">8시</option><option value="9">9시</option><option value="10">10시</option><option value="11">11시</option><option value="12">12시</option>
+                                            </select>
+                                            <select class="bf-select" id="parent-father-time-min" style="min-width:74px;">
+                                                <option value="">분</option>
+                                                <option value="00">0분</option><option value="05">5분</option><option value="10">10분</option><option value="15">15분</option><option value="20">20분</option><option value="25">25분</option><option value="30">30분</option><option value="35">35분</option><option value="40">40분</option><option value="45">45분</option><option value="50">50분</option><option value="55">55분</option>
                                             </select>
                                         </div>
                                     </div>
@@ -2046,9 +2054,17 @@
                                                 <label class="cal-pill"><input type="radio" name="parent_mother_cal" value="lunar"><span class="cal-label">음력</span></label>
                                             </div>
                                             <span class="bf-sep"></span>
-                                            <select class="bf-select" id="parent-mother-hour" style="min-width:130px;">
-                                                <option value="">출생 시간 (선택)</option>
-                                                <option value="00">자시 (밤 12시)</option><option value="01">축시 (새벽 1시)</option><option value="03">인시 (새벽 3시)</option><option value="05">묘시 (새벽 5시)</option><option value="07">진시 (아침 7시)</option><option value="09">사시 (오전 9시)</option><option value="11">오시 (낮 11시)</option><option value="13">미시 (오후 1시)</option><option value="15">신시 (오후 3시)</option><option value="17">유시 (오후 5시)</option><option value="19">술시 (저녁 7시)</option><option value="21">해시 (밤 9시)</option><option value="23">자시 (밤 11시)</option>
+                                            <div class="bf-ampm-chip">
+                                                <label class="ampm-pill"><input type="radio" name="parent_mother_ampm" value="am" checked><span>오전</span></label>
+                                                <label class="ampm-pill"><input type="radio" name="parent_mother_ampm" value="pm"><span>오후</span></label>
+                                            </div>
+                                            <select class="bf-select" id="parent-mother-time-hour" style="min-width:70px;">
+                                                <option value="">시</option>
+                                                <option value="1">1시</option><option value="2">2시</option><option value="3">3시</option><option value="4">4시</option><option value="5">5시</option><option value="6">6시</option><option value="7">7시</option><option value="8">8시</option><option value="9">9시</option><option value="10">10시</option><option value="11">11시</option><option value="12">12시</option>
+                                            </select>
+                                            <select class="bf-select" id="parent-mother-time-min" style="min-width:74px;">
+                                                <option value="">분</option>
+                                                <option value="00">0분</option><option value="05">5분</option><option value="10">10분</option><option value="15">15분</option><option value="20">20분</option><option value="25">25분</option><option value="30">30분</option><option value="35">35분</option><option value="40">40분</option><option value="45">45분</option><option value="50">50분</option><option value="55">55분</option>
                                             </select>
                                         </div>
                                     </div>
@@ -4255,8 +4271,14 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const y = document.getElementById(`parent-${person}-year`)?.value;
             const m = document.getElementById(`parent-${person}-month`)?.value;
             const d = document.getElementById(`parent-${person}-day`)?.value;
-            const h = document.getElementById(`parent-${person}-hour`)?.value || '12';
             if (!y || !m || !d) return null;
+            // 오전/오후 + 시 + 분 → 24시간
+            const ampm   = document.querySelector(`[name="parent_${person}_ampm"]:checked`)?.value || 'am';
+            const hRaw   = parseInt(document.getElementById(`parent-${person}-time-hour`)?.value || '0');
+            const minRaw = document.getElementById(`parent-${person}-time-min`)?.value || '00';
+            let h24 = hRaw;
+            if (ampm === 'am' && hRaw === 12) h24 = 0;
+            else if (ampm === 'pm' && hRaw !== 12) h24 = hRaw + 12;
             const isLunar = document.querySelector(`[name="parent_${person}_cal"]:checked`)?.value === 'lunar';
             let dateStr = `${y}-${m}-${d}`;
             // 음력 → 양력 변환
@@ -4266,7 +4288,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     if (sol) dateStr = `${sol.year}-${String(sol.month).padStart(2,'0')}-${String(sol.day).padStart(2,'0')}`;
                 } catch(e) {}
             }
-            const timeStr = `${String(h).padStart(2,'0')}:00`;
+            const timeStr = hRaw ? `${String(h24).padStart(2,'0')}:${String(minRaw).padStart(2,'0')}` : '12:00';
             try {
                 const pSaju   = (typeof calcSaju === 'function') ? calcSaju(dateStr, timeStr, {}) : null;
                 const pScores = (pSaju && typeof calcOhengScores === 'function') ? calcOhengScores(pSaju) : null;
