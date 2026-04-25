@@ -379,9 +379,9 @@
         .oheng-count { width: 35px; text-align: right; font-size: 0.95rem; font-weight: 800; color: var(--text-secondary); }
         
         /* 사주 그리드 */
-        .saju-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 30px; align-items: start; }
+        .saju-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 44px; align-items: start; }
         .saju-box { background: var(--bg-light); border-radius: 20px; text-align: center; border: 1px solid var(--border-light); transition: 0.3s; overflow: visible; display: flex; flex-direction: column; }
-        .saju-box.point { border-color: var(--gold-premium); background: #fffcf5; box-shadow: 0 4px 20px rgba(212,175,55,0.12); margin-top: 14px; }
+        .saju-box.point { border-color: var(--gold-premium); background: #fffcf5; box-shadow: 0 4px 20px rgba(212,175,55,0.12); }
         .saju-box-bar { height: 4px; width: 100%; background: var(--border-light); }
         .saju-box.point .saju-box-bar { background: var(--gold-premium); }
         .saju-box-inner { padding: 24px 18px 20px; flex: 1; }
@@ -488,7 +488,7 @@
             .theory-grid-uniform { grid-template-columns: 1fr; }
             .result-row-4, .result-row-3 { grid-template-columns: 1fr; }
             /* 사주 그리드: 2×2 유지 */
-            .saju-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .saju-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 44px; }
             .saju-box-inner { padding: 16px 12px 14px; }
             .saju-hanja { font-size: 2.1rem; }
             .saju-story { font-size: 0.74rem; line-height: 1.7; }
@@ -1059,7 +1059,8 @@
         .parent-step-tips li::before { content:'→'; font-size:0.75rem; flex-shrink:0; margin-top:1px; opacity:0.6; }
 
         /* ── 오행 순환도 + 바 레이아웃 ── */
-        .oheng-layout { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px; align-items:start; }
+        .oheng-layout { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px; align-items:stretch; }
+        .oheng-pentagon-col { display:flex; flex-direction:column; justify-content:center; align-items:center; }
         @media(max-width:640px){ .oheng-layout{ grid-template-columns:1fr; } }
 
         /* ── 사주 이론 설명 박스 ── */
@@ -2419,22 +2420,22 @@
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch1">
 
-            <!-- 사주 이론 설명 박스 -->
-            <div class="chapter-theory-box">
-                <div class="chapter-theory-title">📖 사주(四柱)란 무엇인가요?</div>
-                사주(四柱)는 <b>인생을 지탱하는 4개의 기둥</b>을 뜻합니다. 태어난 해·달·날·시가 각각 하나의 기둥이 되고, 각 기둥마다 <b>하늘의 기운(천간 天干)</b>과 <b>땅의 기운(지지 地支)</b>을 나타내는 한자가 1글자씩 들어가 총 <b>8글자(팔자 八字)</b>가 만들어집니다.
+            <!-- 사주 이론 설명 박스 (동적) -->
+            <div class="chapter-theory-box" id="ch1-theory-box">
+                <div class="chapter-theory-title">📖 왜 사주를 먼저 파악해야 할까요?</div>
+                좋은 이름을 짓기 위해서는 먼저 <b>아이가 타고난 기운의 지도</b>를 읽어야 합니다. 사주(四柱)는 태어난 해·달·날·시, 네 기둥이 이루는 <b>8글자의 우주</b>입니다. 이 지도에서 <b>어떤 기운이 넘치고, 어떤 기운이 부족한지</b>를 파악해야만 — 이름이 정확히 그 빈자리를 채워줄 수 있습니다.
                 <div class="chapter-theory-pillars">
                     <div class="pillar-explain"><span class="pe-year">연주(年柱)</span> 조상·초년운 (0~20대)</div>
                     <div class="pillar-explain"><span class="pe-month">월주(月柱)</span> 부모형제·청장년운</div>
                     <div class="pillar-explain pe-me"><span class="pe-day">일주(日柱) ★</span> <b>이 아이 본인</b> · 배우자궁</div>
                     <div class="pillar-explain"><span class="pe-time">시주(時柱)</span> 자식·말년운 (60대~)</div>
                 </div>
-                <span style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;">★ 일주(日柱)는 아이 본인을 나타내는 핵심 기둥으로 금색 강조 표시됩니다. 각 칸의 위 글자가 천간(하늘), 아래 글자가 지지(땅)입니다.</span>
+                <span style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;" id="ch1-theory-footer">아래 사주 원국을 확인한 뒤, 부족한 기운이 무엇인지 살펴보세요. 그 답이 챕터 2의 자원오행으로 이어집니다.</span>
             </div>
 
             <div class="saju-grid" id="report-saju-grid"></div>
             <div class="oheng-layout">
-                <div style="text-align:center;">
+                <div class="oheng-pentagon-col">
                     <div style="font-size:0.75rem;font-weight:800;color:var(--text-secondary);letter-spacing:0.08em;margin-bottom:10px;">오행 순환도</div>
                     <svg viewBox="0 0 200 200" width="100%" style="display:block;margin:0 auto;max-width:220px;">
                         <!-- 오행 순환 화살표 원 -->
@@ -2481,7 +2482,7 @@
         <!-- Bridge -->
         <div class="story-bridge-wrap">
             <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">이 사주 원국 위에, 선택된 이름이 어떤 기운을 더하는지 살펴봅니다.</div>
+            <div class="story-bridge-pill">사주의 부족한 기운을 파악했습니다. 이제 이름이 그 빈자리를 어떻게 채우는지 살펴봅니다.</div>
             <div class="story-bridge-line"></div>
         </div>
 
@@ -2499,9 +2500,9 @@
                 </div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch2">
-            <div class="chapter-theory-box">
-                <div class="chapter-theory-title">📖 자원오행(字源五行)이란?</div>
-                한자 한 글자 한 글자에는 <b>목(木)·화(火)·토(土)·금(金)·수(水)</b> 다섯 기운 중 하나가 내재되어 있습니다. 이름의 한자가 가진 이 기운을 <b>자원오행</b>이라 하며, 이름을 부를 때마다 그 기운이 아이에게 스며들어 사주의 부족한 기운을 보완해 줍니다. 오른쪽 레이더 차트에서 금색 면적이 클수록 이름의 보완 효과가 큽니다.
+            <div class="chapter-theory-box" id="ch2-theory-box">
+                <div class="chapter-theory-title" id="ch2-theory-title">📖 이름이 사주를 채우는 방법</div>
+                <span id="ch2-theory-body">한자 한 글자마다 <b>목(木)·화(火)·토(土)·금(金)·수(水)</b> 다섯 기운 중 하나가 담겨 있습니다. 이름을 매일 수십 번 부를 때마다 그 기운이 아이에게 자연스럽게 스며들어, 사주에서 부족한 자리를 채워줍니다. 오른쪽 레이더 차트의 <b>금색 면적</b>이 넓을수록 이름의 보완 효과가 큽니다.</span>
             </div>
             <div class="ai-tagline" id="report-tagline">--</div>
             <div id="report-jawon-chips"></div>
@@ -2544,9 +2545,9 @@
                 <div id="verdict-ch3" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch3">
-            <div class="chapter-theory-box">
-                <div class="chapter-theory-title">📖 자원(字源) 분석이란?</div>
-                한자 한 글자에는 <b>뜻(의미)</b>과 <b>소리(음)</b>, 그리고 <b>오행 기운</b>이 모두 담겨 있습니다. 수천 년 동안 수많은 학자들이 한자의 어원을 연구해왔으며, 좋은 이름이란 뜻이 아름답고, 소리가 좋으며, 사주에 맞는 오행을 가진 한자로 구성됩니다. 아래 카드에서 각 한자의 의미와 사주와의 시너지를 확인하세요.
+            <div class="chapter-theory-box" id="ch3-theory-box">
+                <div class="chapter-theory-title">📖 오행을 담은 한자, 의미까지 담다</div>
+                <span id="ch3-theory-body">앞서 필요한 기운을 파악했다면, 이제 <b>그 기운을 품으면서도 뜻이 아름다운 한자</b>를 고를 차례입니다. 오행 보완이 목적이더라도, 매일 불릴 이름의 한자가 좋은 뜻을 가져야 아이의 인생에 긍정적 에너지가 쌓입니다. 아래에서 각 한자가 어떤 오행을 담고 있으며, 어떤 뜻과 어원을 가지는지 확인하세요.</span>
             </div>
             <div id="report-hanja-details"></div>
             <div class="ai-story-block" id="ai-hanja-story" style="margin-top:24px;border-left:4px solid var(--gold-dark);background:#fffbeb;border-top:none;border-right:none;border-bottom:none;border-radius:0 14px 14px 0;"></div>
@@ -2556,7 +2557,7 @@
         <!-- Bridge -->
         <div class="story-bridge-wrap">
             <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">이 이름이 귀에 닿을 때, 소리는 어떤 기운을 전달할까요?</div>
+            <div class="story-bridge-pill">오행과 뜻을 담은 한자를 골랐습니다. 이제 이름이 소리로 불릴 때 그 기운이 제대로 전달되는지 검증합니다.</div>
             <div class="story-bridge-line"></div>
         </div>
 
@@ -2572,9 +2573,9 @@
                 <div id="verdict-ch4" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch4">
-            <div class="chapter-theory-box">
-                <div class="chapter-theory-title">📖 발음 오행 & 음양이란?</div>
-                이름을 소리 낼 때 <b>첫 소리(초성)의 발음 위치</b>에 따라 오행이 결정됩니다. 예: ㄱ·ㅋ = 木, ㄴ·ㄷ·ㄹ = 火, ㅇ·ㅎ = 土, ㅅ·ㅈ·ㅊ = 金, ㅁ·ㅂ·ㅍ = 水. 성씨부터 이름까지 이 오행이 <b>서로 돕는(상생) 흐름</b>을 이루면 기운이 막힘없이 흐릅니다. 또한 모음의 밝고 어두운 배합(음양)이 균형을 이루면 소리에서 조화로운 에너지가 나옵니다.
+            <div class="chapter-theory-box" id="ch4-theory-box">
+                <div class="chapter-theory-title">📖 이름이 귀에 닿을 때 — 소리로 검증하다</div>
+                한자의 오행과 뜻을 골랐다면, 마지막으로 <b>소리가 편하고 긍정적인지</b>를 과학적 이론으로 검증합니다. 이름을 소리 낼 때 <b>초성의 발음 위치</b>에 따라 오행이 결정되며(예: ㄱ·ㅋ=木, ㄴ·ㄷ·ㄹ=火, ㅅ·ㅈ·ㅊ=金, ㅁ·ㅂ=水, ㅇ·ㅎ=土), 성씨→이름 순서로 이 오행이 <b>상생(相生) 흐름</b>을 이루어야 기운이 막힘없이 전달됩니다. 모음의 음양 균형까지 맞으면 소리 자체에서 조화로운 에너지가 흘러나옵니다.
             </div>
             <div id="ai-sound-body"></div>
             <div class="ai-story-block" id="ai-sound-story" style="margin-top:20px;"></div>
@@ -2584,7 +2585,7 @@
         <!-- Bridge -->
         <div class="story-bridge-wrap">
             <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">마지막으로, 이름의 획수가 그리는 인생의 사계절입니다.</div>
+            <div class="story-bridge-pill">소리의 검증까지 마쳤습니다. 이제 이름 획수가 그리는 인생의 사계절 — 수리 지도를 확인합니다.</div>
             <div class="story-bridge-line"></div>
         </div>
 
@@ -2600,9 +2601,9 @@
                 <div id="verdict-ch5a" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch5a">
-            <div class="chapter-theory-box">
-                <div class="chapter-theory-title">📖 사격수리(四格數理)란?</div>
-                이름을 이루는 <b>성씨와 이름 각 글자의 획수 합</b>으로 4가지 '격(格)'을 만들고, 각 격에 해당하는 수(1~81)의 길흉을 분석합니다. <b>원격(源格)</b>은 이름 두 글자의 합으로 초년 기질, <b>형격(亨格)</b>은 성+첫째 글자로 청장년 사회운, <b>이격(利格)</b>은 성+둘째 글자로 이성·가정운, <b>정격(正格)</b>은 성+이름 전체로 총운을 나타냅니다. 동양에서는 1~81 각 수에 고유한 기운과 길흉이 있다고 봅니다.
+            <div class="chapter-theory-box" id="ch5a-theory-box">
+                <div class="chapter-theory-title">📖 사격수리 — 이름이 그리는 인생의 지도</div>
+                사격수리(四格數理)는 이름 한자의 <b>획수 합</b>으로 인생 초년부터 말년까지의 운세 지도를 그립니다. 동양에서는 1~81 각 수마다 고유한 기운과 길흉이 있다고 봅니다. <b>원격(源格)</b>은 초년의 기질, <b>형격(亨格)</b>은 청장년기 사회운, <b>이격(利格)</b>은 가정·이성운, <b>정격(正格)</b>은 총운을 나타냅니다. 앞서 자원오행·발음오행으로 기운의 질(質)을 맞췄다면, 수리는 <b>기운의 양(量)과 인생 타이밍</b>을 조율합니다.
             </div>
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
             <div class="ai-story-block" id="ai-suri-story"></div>
@@ -2612,7 +2613,7 @@
         <!-- Bridge -->
         <div class="story-bridge-wrap">
             <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">획수의 홀짝 배합과 오행 상생, 수리의 숨겨진 두 지표를 살펴봅니다.</div>
+            <div class="story-bridge-pill">사격수리의 큰 그림에 더해, 획수의 오행·음양 균형까지 미세 조정합니다.</div>
             <div class="story-bridge-line"></div>
         </div>
 
@@ -2628,6 +2629,10 @@
                 <div id="verdict-ch5b" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch5b">
+            <div class="chapter-theory-box" id="ch5b-theory-box">
+                <div class="chapter-theory-title">📖 사격수리를 보완하는 두 가지 지표</div>
+                사격수리가 <b>인생의 큰 그림</b>을 보여준다면, 수리 오행·음양은 <b>그 그림의 균형을 미세 조정</b>합니다. 획수의 합이 짝수(음)와 홀수(양)로 균형 있게 섞여야 기운이 막히지 않고 흐르며, 각 격의 끝자리 오행이 서로 상생하면 수리가 사주 오행 흐름과도 조화를 이룹니다.
+            </div>
             <div id="report-suri-oheng-yin"></div>
             </div><!-- /acc-body-ch5b -->
         </div>
@@ -2635,7 +2640,7 @@
         <!-- Bridge -->
         <div class="story-bridge-wrap">
             <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">이 이름이 아이의 대운 흐름에서 어떤 힘이 되어줄까요?</div>
+            <div class="story-bridge-pill">모든 분석이 완성됐습니다. 이제 이 이름이 아이의 인생 대운 속에서 실제로 어떤 힘이 되는지 확인합니다.</div>
             <div class="story-bridge-line"></div>
         </div>
 
@@ -2650,10 +2655,10 @@
                 </div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch5c">
-            <div class="chapter-theory-box">
-                <div class="chapter-theory-title">📖 대운(大運)이란?</div>
-                대운은 <b>10년 단위로 바뀌는 인생의 큰 흐름</b>입니다. 월주(月柱)에서 출발해 순행 또는 역행하며 한 사람의 인생 계절을 이끕니다. 좋은 대운 시기에는 기회가 많아지고, 힘든 대운 시기에는 이름의 오행이 그 약점을 보완하는 역할을 합니다. 아래 차트에서 대운 칩을 클릭하면 각 시기별 분석을 확인할 수 있습니다.
-            </div>
+            <div class="chapter-theory-box" id="ch6-theory-box">
+                <div class="chapter-theory-title">📖 이름이 인생의 계절과 만나다 — 대운 흐름</div>
+                <span id="ch6-theory-body">사주·자원오행·발음·수리 모든 분석이 완성되면, 마지막으로 <b>이 이름이 아이의 인생 흐름 속에서 실제로 어떤 힘이 되는지</b>를 확인합니다. 대운(大運)은 10년 단위로 바뀌는 인생의 큰 계절입니다. 좋은 대운엔 날개를 달아주고, 어려운 대운엔 이름이 담은 오행이 버팀목이 됩니다. 아래 차트의 각 대운 칩을 클릭해 시기별 기운과 이름의 역할을 확인하세요.</span>
+</div>
             <div id="report-daeun-section"></div>
             <div class="chart-container-large" style="margin-top:20px;">
                 <canvas id="lifeFlowChart"></canvas>
@@ -4660,6 +4665,59 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             el.innerHTML = intro;
         })();
 
+        // ── Chapter 1 theory box 동적 업데이트 ────────────────────────
+        (function _updateCh1Theory() {
+            const footEl = document.getElementById('ch1-theory-footer');
+            if (!footEl) return;
+            const prefList = (_currentState.nameSpec?.prefer || []);
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _bw = o => `<b style="color:${_OC[o]||'#64748b'};">${_OK[o]||o}</b>`;
+            if (prefList.length) {
+                const wkStr = prefList.map(_bw).join(', ');
+                footEl.innerHTML = `★ 이 아이의 사주 원국에서 ${wkStr} 기운이 부족합니다. 이름이 이 빈자리를 어떻게 채우는지, 챕터 2에서 바로 확인합니다.`;
+            } else {
+                footEl.innerHTML = `★ 이 아이의 사주는 다섯 기운이 고르게 분포된 균형형입니다. 이름이 그 풍요로운 기질을 어떻게 더욱 빛내는지 챕터 2에서 확인합니다.`;
+            }
+        })();
+
+        // ── Chapter 2 theory box 동적 업데이트 ────────────────────────
+        (function _updateCh2Theory() {
+            const bodyEl = document.getElementById('ch2-theory-body');
+            if (!bodyEl) return;
+            const prefList = (_currentState.nameSpec?.prefer || []);
+            const nameOhengSet = [h1, h2].filter(Boolean).map(x => _normOheng(x.o)).filter(Boolean);
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _bw = o => `<b style="color:${_OC[o]||'#64748b'};">${_OK[o]||o}</b>`;
+            const _OHENG_KR2 = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+
+            // 한자별 기운 설명 생성
+            const hanjaDesc = [h1, h2].filter(Boolean).filter(x => x.h && x.o).map(x => {
+                const no = _normOheng(x.o);
+                const meaning = (x.m || x.meaning || '').split(',')[0].trim();
+                return `'${x.kr||x.h}'(${x.h})는 <b style="color:${_OC[no]||'#64748b'};">${_OK[no]||no}</b>의 기운을 담으며, '${meaning}'을 뜻합니다`;
+            }).join('; ');
+
+            let bodyText = '';
+            if (prefList.length) {
+                const wkStr = prefList.map(_bw).join(', ');
+                const compOs = prefList.filter(o => nameOhengSet.includes(o));
+                const compStr = compOs.map(_bw).join(', ');
+                bodyText = `챕터 1에서 확인한 대로, 이 아이의 사주에는 ${wkStr} 기운이 비어 있습니다. `
+                    + (compOs.length
+                        ? `이름 <b>${kr}</b>은 바로 그 ${compStr} 기운을 담은 한자로 구성해, 매일 이름이 불릴 때마다 부족한 기운이 자연스럽게 채워집니다. `
+                        : `이름 <b>${kr}</b>의 한자가 담은 기운이 아래 오행 그래프를 어떻게 채우는지 확인하세요. `)
+                    + (hanjaDesc ? `${hanjaDesc}. ` : '')
+                    + `오른쪽 레이더 차트의 <b>금색 면적</b>이 넓을수록 보완 효과가 큽니다.`;
+            } else {
+                bodyText = `이 아이의 사주는 균형형입니다. 이름 <b>${kr}</b>은 `
+                    + (hanjaDesc ? `${hanjaDesc}으로, ` : '')
+                    + `아이의 풍요로운 기질을 한층 더 뚜렷하게 빛내줍니다. 오른쪽 레이더 차트에서 변화를 확인하세요.`;
+            }
+            bodyEl.innerHTML = bodyText;
+        })();
+
         // Ch1: 사주 원국
         _renderSajuGrid(_saju);
         _renderOhengBars(_scores, candidate);
@@ -4695,6 +4753,37 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         const jawonStoryEl = document.getElementById('ai-jawon-story');
         if (jawonStoryEl) jawonStoryEl.textContent = report.jawonStory || report.namingLogic || '';
+
+        // ── Chapter 3 theory box 동적 업데이트 ────────────────────────
+        (function _updateCh3Theory() {
+            const bodyEl = document.getElementById('ch3-theory-box');
+            if (!bodyEl) return;
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _OHENG_DESC_SHORT = {
+                '木':'생명력과 성장의 에너지를 상징합니다',
+                '火':'지혜와 열정, 밝은 빛을 상징합니다',
+                '土':'안정과 포용, 든든한 대지를 상징합니다',
+                '金':'결단력과 청명함, 단단한 순수함을 상징합니다',
+                '水':'지혜와 유연함, 깊은 내면의 힘을 상징합니다'
+            };
+            const hanjaList = [h1, h2].filter(Boolean).filter(x => x.h && x.o);
+            const hanjaDescParts = hanjaList.map(x => {
+                const no = _normOheng(x.o);
+                const c = _OC[no] || '#64748b';
+                const meanings = (x.m || x.meaning || '').split(',').slice(0,2).join('·');
+                const desc = _OHENG_DESC_SHORT[no] || '';
+                return `<b style="color:${c};">'${x.kr||x.h}'(${x.h})</b>은 '${meanings}'을 뜻하며, <b style="color:${c};">${_OK[no]}</b>으로 ${desc}`;
+            });
+            const titleEl = bodyEl.querySelector('.chapter-theory-title');
+            const existingBody = bodyEl.querySelector('#ch3-theory-body-dyn');
+            const dynSpan = existingBody || document.createElement('span');
+            dynSpan.id = 'ch3-theory-body-dyn';
+            if (hanjaDescParts.length) {
+                dynSpan.innerHTML = ' ' + hanjaDescParts.join('. ') + `. 한자의 오행이 사주를 보완하면서도, 뜻 자체가 아이의 인생에 좋은 에너지를 더하도록 선별했습니다.`;
+            }
+            if (!existingBody && titleEl) titleEl.after(dynSpan);
+        })();
 
         // Ch3: 한자 의미
         _renderHanjaDetails(report.hanjaDetails || [], h1, h2);
@@ -4747,6 +4836,26 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (suriStoryEl) {
             suriStoryEl.textContent = report.suriStory || '';
         }
+
+        // ── Chapter 대운 theory box 동적 업데이트 ─────────────────────
+        (function _updateCh6Theory() {
+            const bodyEl = document.getElementById('ch6-theory-body');
+            if (!bodyEl) return;
+            const prefList = (_currentState.nameSpec?.prefer || []);
+            const nameOhengSet = [h1, h2].filter(Boolean).map(x => _normOheng(x.o)).filter(Boolean);
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _bw = o => `<b style="color:${_OC[o]||'#64748b'};">${_OK[o]||o}</b>`;
+            const compOs = prefList.filter(o => nameOhengSet.includes(o));
+            let bodyText = `사주·자원오행·발음·수리 모든 분석이 완성됐습니다. 이제 <b>이름 <b>${kr}</b>이 아이의 인생 흐름 속에서 실제로 어떤 힘이 되는지</b>를 확인합니다. 대운(大運)은 10년 단위로 바뀌는 인생의 큰 계절입니다.`;
+            if (compOs.length) {
+                const compStr = compOs.map(_bw).join(', ');
+                bodyText += ` 이름이 담은 ${compStr} 기운이 힘든 대운 시기에 든든한 버팀목이 되어줍니다.`;
+            }
+            bodyText += ` 아래 차트의 각 대운 칩을 클릭해 시기별 기운과 이름의 역할을 확인하세요.`;
+            bodyEl.innerHTML = bodyText;
+        })();
+
         _renderDaeunSection(candidate, _currentState, report);
 
         // Ch6: 미래 직업 탐색
