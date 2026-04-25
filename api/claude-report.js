@@ -37,7 +37,20 @@ async function generatePremiumReport(candidate, state) {
   const ohengStr  = Object.entries(_scores||{})
     .map(([o,s])=>`${o}:${s.toFixed(1)}점(${SEORYEOK_KR[getSeoryeokStatus(s)]||''})`)
     .join(' ');
-  const parentSaju = state.parentSaju || '';
+  // 부모 오행 정보 → 읽기 좋은 문자열로 변환
+  const _ohengKr = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+  const parentOheng = state.parentOheng;
+  const parentOhengStr = parentOheng
+    ? ['father','mother'].map(p => {
+        const d = parentOheng[p];
+        if (!d?.dominant) return null;
+        const who = p === 'father' ? '아버지' : '어머니';
+        const dom  = _ohengKr[d.dominant] || d.dominant;
+        const weak = _ohengKr[d.weakest]  || d.weakest || '미상';
+        return `${who}: 지배오행 ${dom} / 결핍오행 ${weak}`;
+      }).filter(Boolean).join(' | ')
+    : '';
+  const specialRequest = state.specialRequest || '';
 
   const systemPrompt =
 `당신은 30년 경력의 최고 명리학 대가이자 작명 전문가입니다.
@@ -67,7 +80,8 @@ NameSpec Prefer: [${nameSpec?.prefer?.join(', ')||''}] / Avoid: [${nameSpec?.avo
 한자 뜻: ${h1.kr}(${h1.h}) = ${h1.m}${h2?' / '+h2.kr+'('+h2.h+') = '+h2.m:''}
 사격수리: 원격 ${getSuriInfo(g1)} / 형격 ${getSuriInfo(g2)} / 이격 ${getSuriInfo(g3)} / 정격 ${getSuriInfo(g4)}
 종합 점수: ${score}/100점
-${parentSaju ? `\n[부모님 사주]\n${parentSaju}` : ''}
+${parentOhengStr ? `\n[부모 오행 분석]\n${parentOhengStr}` : ''}
+${specialRequest ? `\n[부모 특별 요청사항]\n${specialRequest}` : ''}
 
 [부모 희망 성향]
 ${traitStr}
