@@ -380,8 +380,8 @@
         
         /* 사주 그리드 */
         .saju-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 30px; align-items: start; }
-        .saju-box { background: var(--bg-light); border-radius: 20px; text-align: center; border: 1px solid var(--border-light); transition: 0.3s; overflow: hidden; display: flex; flex-direction: column; }
-        .saju-box.point { border-color: var(--gold-premium); background: #fffcf5; box-shadow: 0 4px 20px rgba(212,175,55,0.12); }
+        .saju-box { background: var(--bg-light); border-radius: 20px; text-align: center; border: 1px solid var(--border-light); transition: 0.3s; overflow: visible; display: flex; flex-direction: column; }
+        .saju-box.point { border-color: var(--gold-premium); background: #fffcf5; box-shadow: 0 4px 20px rgba(212,175,55,0.12); margin-top: 14px; }
         .saju-box-bar { height: 4px; width: 100%; background: var(--border-light); }
         .saju-box.point .saju-box-bar { background: var(--gold-premium); }
         .saju-box-inner { padding: 24px 18px 20px; flex: 1; }
@@ -1059,7 +1059,7 @@
         .parent-step-tips li::before { content:'→'; font-size:0.75rem; flex-shrink:0; margin-top:1px; opacity:0.6; }
 
         /* ── 오행 순환도 + 바 레이아웃 ── */
-        .oheng-layout { display:grid; grid-template-columns:170px 1fr; gap:20px; margin-top:24px; align-items:start; }
+        .oheng-layout { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px; align-items:start; }
         @media(max-width:640px){ .oheng-layout{ grid-template-columns:1fr; } }
 
         /* ── 사주 이론 설명 박스 ── */
@@ -1117,6 +1117,7 @@
         .pe-time  { background: #f1f5f9; color: #475569; }
 
         /* ── 일주 '나' 배지 ── */
+        .saju-box-bar { position: relative; }
         .saju-me-badge {
             display: inline-flex;
             align-items: center;
@@ -1128,7 +1129,13 @@
             padding: 3px 10px;
             border-radius: 20px;
             letter-spacing: 0.04em;
-            margin-bottom: 7px;
+            position: absolute;
+            top: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(212,175,55,0.35);
+            z-index: 2;
         }
 
         /* ── 이름 기여 카드 ── */
@@ -2417,10 +2424,10 @@
                 <div class="chapter-theory-title">📖 사주(四柱)란 무엇인가요?</div>
                 사주(四柱)는 <b>인생을 지탱하는 4개의 기둥</b>을 뜻합니다. 태어난 해·달·날·시가 각각 하나의 기둥이 되고, 각 기둥마다 <b>하늘의 기운(천간 天干)</b>과 <b>땅의 기운(지지 地支)</b>을 나타내는 한자가 1글자씩 들어가 총 <b>8글자(팔자 八字)</b>가 만들어집니다.
                 <div class="chapter-theory-pillars">
-                    <div class="pillar-explain"><span class="pe-year">年柱 연주</span> 조상·초년운 (0~20대)</div>
-                    <div class="pillar-explain"><span class="pe-month">月柱 월주</span> 부모형제·청장년운</div>
-                    <div class="pillar-explain pe-me"><span class="pe-day">日柱 일주 ★</span> <b>이 아이 본인</b> · 배우자궁</div>
-                    <div class="pillar-explain"><span class="pe-time">時柱 시주</span> 자식·말년운 (60대~)</div>
+                    <div class="pillar-explain"><span class="pe-year">연주(年柱)</span> 조상·초년운 (0~20대)</div>
+                    <div class="pillar-explain"><span class="pe-month">월주(月柱)</span> 부모형제·청장년운</div>
+                    <div class="pillar-explain pe-me"><span class="pe-day">일주(日柱) ★</span> <b>이 아이 본인</b> · 배우자궁</div>
+                    <div class="pillar-explain"><span class="pe-time">시주(時柱)</span> 자식·말년운 (60대~)</div>
                 </div>
                 <span style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;">★ 일주(日柱)는 아이 본인을 나타내는 핵심 기둥으로 금색 강조 표시됩니다. 각 칸의 위 글자가 천간(하늘), 아래 글자가 지지(땅)입니다.</span>
             </div>
@@ -2484,10 +2491,12 @@
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
-                        <h2 class="section-title"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
+                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;">
+                            <h2 class="section-title" style="margin:0;"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
+                            <div id="verdict-ch2" class="chapter-verdict-strip" style="margin:0;flex-shrink:0;"></div>
+                        </div>
                     </div>
                 </div>
-                <div id="verdict-ch2" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-ch2">
             <div class="chapter-theory-box">
@@ -4858,10 +4867,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // 순서: 시주, 일주(★), 월주, 연주
     const PILLAR_META = [
-        { key: 'time',  label: '時柱 시주', period: '말년운 · 자식궁',    isPoint: false },
-        { key: 'day',   label: '日柱 일주', period: '나의 본질 · 배우자궁', isPoint: true  },
-        { key: 'month', label: '月柱 월주', period: '청장년운 · 부모형제궁', isPoint: false },
-        { key: 'year',  label: '年柱 연주', period: '초년운 · 조상궁',    isPoint: false },
+        { key: 'time',  label: '시주(時柱)', period: '말년운 · 자식궁',    isPoint: false },
+        { key: 'day',   label: '일주(日柱)', period: '나의 본질 · 배우자궁', isPoint: true  },
+        { key: 'month', label: '월주(月柱)', period: '청장년운 · 부모형제궁', isPoint: false },
+        { key: 'year',  label: '연주(年柱)', period: '초년운 · 조상궁',    isPoint: false },
     ];
 
     const _GAN_STORY = {
@@ -4889,10 +4898,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const ganO = CHEONGAN_OHENG_KR[p.gan] || '';
         const jiO  = JIJI_OHENG_KR[p.ji]  || '';
         const sameOheng = ganO === jiO;
+        const _KR2FULL = {'나무':'나무(木)','불':'불(火)','흙':'흙(土)','쇠':'쇠(金)','물':'물(水)'};
+        const ganOF = _KR2FULL[ganO] || ganO;
+        const jiOF  = _KR2FULL[jiO]  || jiO;
 
         const combDesc = sameOheng
-            ? `천간과 지지 모두 ${ganO} 기운으로 가득해, 이 힘이 두 배로 응축되어 있습니다.`
-            : `천간의 ${ganO} 기운과 지지의 ${jiO} 기운이 서로 어우러져 복합적인 매력을 만들어냅니다.`;
+            ? `천간과 지지 모두 ${ganOF} 기운으로 가득해, 이 힘이 두 배로 응축되어 있습니다.`
+            : `천간의 ${ganOF} 기운과 지지의 ${jiOF} 기운이 서로 어우러져 복합적인 매력을 만들어냅니다.`;
 
         if (type === 'year') return `${gan}이(가) 삶의 출발점을 열어줍니다. 초년(0~20세), ${ji}이 더해져 어린 시절부터 또래와 다른 개성으로 빛납니다. ${combDesc} 조상의 든든한 기반 위에서 세상을 향한 첫 발을 힘차게 내딛습니다.`;
 
@@ -4926,11 +4938,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 <span class="saju-oheng-pill" style="background:${pillColor};" title="천간(天干) — 하늘의 기운">${ganO}</span>
                 <span class="saju-oheng-pill" style="background:${jiColor};margin-left:4px;" title="지지(地支) — 땅의 기운">${jiO}</span>`;
             return `<div class="saju-box${isPoint ? ' point' : ''}">
-                <div class="saju-box-bar" style="${isPoint ? '' : `background:${pillColor}33;`}"></div>
-                <div class="saju-box-inner">
+                <div class="saju-box-bar" style="${isPoint ? '' : `background:${pillColor}33;`}">
                     ${isPoint ? `<div class="saju-me-badge">👤 나 · 이 아이</div>` : ''}
+                </div>
+                <div class="saju-box-inner">
                     <div class="saju-label">${label}</div>
-                    <div class="saju-hanja">${p.gan} ${p.ji}</div>
+                    <div class="saju-hanja"><span style="color:${pillColor};">${p.gan}</span> <span style="color:${jiColor};">${p.ji}</span></div>
                     <div class="saju-kor">${_toHangul(p.gan)}${_toHangul(p.ji)}</div>
                     <div style="margin-top:4px;">${ohengPills}</div>
                     <div class="saju-story">${story}</div>
@@ -5556,11 +5569,19 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             <p style="font-size:0.92rem;color:#374151;line-height:1.85;margin:0;">
                 ${careerStory
                     ? careerStory
-                    : `일간 <b style="color:var(--gold-dark);">${ilgan}</b>의 기운을 가진 이 아이는 <b>${traitWord}</b> 성향을 타고났습니다.
-                       사주에서 <b style="color:${primaryColor};">${OHENG_KR[primaryOheng]||primaryOheng}</b> 기운이 강하게 흐르고 있으며,
-                       ${uniqueNameOhengs.length ? `이 이름은 <b>${uniqueNameOhengs.map(o=>OHENG_KR[o]||o).join(' · ')}</b> 기운을 더해` : '이 이름은'}
-                       사주의 균형을 맞추며 더 넓은 가능성을 열어줍니다.
-                       이 이름과 함께 아이의 인생이 더욱 풍요롭게 펼쳐지길 바랍니다.`
+                    : (() => {
+                        const suppStr = uniqueNameOhengs.length
+                            ? `이 이름에 담긴 <b style="color:var(--gold-dark);">${uniqueNameOhengs.map(o=>OHENG_KR[o]||o).join(' · ')}</b> 기운은 사주에서 부족했던 영역을 정확히 채워줍니다.`
+                            : '이 이름은 사주의 균형을 맞추는 데 중요한 역할을 합니다.';
+                        return `일간 <b style="color:var(--gold-dark);">${ilgan}</b>의 기운을 가진 이 아이는 <b>${traitWord}</b> 성향을 타고났습니다.
+                            사주에서 <b style="color:${primaryColor};">${OHENG_KR[primaryOheng]||primaryOheng}</b> 기운이 가장 강하게 흐르며,
+                            이 기운이 인생 전반의 방향성과 기질의 핵심 동력이 됩니다.
+                            ${suppStr}
+                            그 보완된 기운은 단순히 적성을 넓히는 것을 넘어,
+                            아이가 사회에 나아갈 때 더 유연하게 적응하고 다양한 환경에서 자신의 능력을 발휘하도록 든든히 뒷받침합니다.
+                            이름은 평생 불리는 주문(呪文)과 같습니다 — 매일 이름이 불릴 때마다 이 기운이 아이에게 스며들어
+                            원하는 방향으로 인생의 항로를 열어주는 나침반이 되어줄 것입니다.`;
+                      })()
                 }
             </p>
         </div>`;
@@ -5897,6 +5918,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     대운(大運)은 <b>월주(月柱)</b>에서 출발해 10년 주기로 흐르는 인생의 큰 파도입니다. 이 아이의 사주는
                     <b>${forward?'순행(順行)':'역행(逆行)'}</b> 대운으로 약 <b>${startAge}세</b>부터 시작됩니다.
                     아래 그래프의 대운 칩을 클릭하면 각 시기의 해석과 이름의 작용을 확인할 수 있습니다.
+                </div>
+                <div style="font-size:0.78rem;line-height:1.7;color:#92400e;padding:10px 14px;background:#fffbeb;border-radius:10px;border:1px solid #fcd34d;margin-top:8px;margin-bottom:0;">
+                    <b>📊 그래프 읽는 법</b> — 이 그래프는 절대적인 인생의 성공·실패를 예측하는 것이 아닙니다.
+                    추천된 이름은 이미 사주와 잘 어울리는 이름이 선별된 것이므로 전반적으로 높은 수준을 유지합니다.
+                    <b>★ 길운</b> 구간(노란 별)은 이름 기운이 대운과 상생하여 특히 빛나는 시기,
+                    <b>▲ 주의</b> 구간(빨간 삼각)은 상대적으로 에너지 조절이 필요한 시기입니다.
+                    다운된 구간도 충분히 좋은 시기이며, 이 이름은 그 시기에도 아이의 든든한 버팀목이 됩니다.
                 </div>`;
         }
 
