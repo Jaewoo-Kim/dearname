@@ -2922,6 +2922,118 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         selectEl.innerHTML = optionsHTML;
     }
 
+    // 성씨별 표준 한자 우선순위 (1순위 한자가 맨 앞)
+    const SURNAME_PRIORITY = {
+        '김':['金'],'이':['李'],'박':['朴'],'최':['崔'],'정':['鄭','丁','程'],
+        '강':['姜','康'],'조':['趙','曺'],'윤':['尹'],'장':['張','蔣'],'임':['林','任'],
+        '한':['韓'],'오':['吳'],'서':['徐'],'신':['申','辛','愼'],'권':['權'],
+        '황':['黃'],'안':['安'],'송':['宋'],'류':['柳','劉'],'유':['劉','兪','柳'],
+        '전':['全','田','錢'],'홍':['洪'],'고':['高'],'문':['文'],'양':['梁','楊'],
+        '손':['孫'],'배':['裵','裴'],'백':['白'],'허':['許'],'남':['南'],
+        '심':['沈'],'노':['盧','魯'],'하':['河','夏'],'곽':['郭'],'성':['成','盛'],
+        '차':['車'],'주':['朱','周'],'우':['禹','宇'],'구':['具','丘'],'민':['閔'],
+        '나':['羅'],'라':['羅'],'진':['陳','晉'],'엄':['嚴'],'채':['蔡'],
+        '원':['元','袁'],'천':['千'],'방':['方','房'],'공':['孔'],'현':['玄'],
+        '함':['咸'],'변':['卞','邊'],'염':['廉'],'석':['石','昔'],'길':['吉'],
+        '소':['蘇'],'설':['薛'],'여':['呂','余'],'추':['秋','鄒'],'도':['都'],
+        '마':['馬'],'어':['魚'],'위':['魏'],'표':['表'],'반':['潘'],'왕':['王'],
+        '금':['琴'],'옥':['玉'],'육':['陸'],'지':['池'],'탁':['卓'],'봉':['奉'],
+        '국':['鞠'],'선':['宣'],'기':['奇','箕'],'복':['卜'],'피':['皮'],
+        '모':['牟'],'명':['明'],'인':['印'],'사':['史'],'팽':['彭']
+    };
+
+    // 자주 쓰는 이름 한자 목록
+    const NAME_POPULAR_HANJA = new Set([
+        '俊','準','濬','竣','埈','晙',
+        '民','珉','敏','旼','玟','忞',
+        '瑞','西','棲','曙','署',
+        '賢','鉉','玄','炫','顯',
+        '宇','祐','佑','禹','雨','羽',
+        '智','知','志','地','芝',
+        '允','侖','崙','倫','潤','胤','尹',
+        '秀','洙','秀','璲','琇',
+        '恩','銀','殷','垠','誾',
+        '載','在','才','材','財','栽',
+        '浚','峻','焌','儁',
+        '雅','芽','亞','娥','雅',
+        '林','琳','臨','霖',
+        '妍','娟','姸','涓','淵','燕','蓮','連','鍊',
+        '璟','景','京','炅','耿','勁',
+        '泰','太','兌',
+        '昊','灝','皓','澔','顥',
+        '仁','寅','忍','認',
+        '哲','澈','喆',
+        '誠','星','晟','成','珹',
+        '婉','姿','紫','慈',
+        '河','夏','霞','荷',
+        '芸','雲','耘','芸',
+        '亮','諒','良','樑',
+        '明','銘','鳴','冥',
+        '宣','璿','旋',
+        '彩','采','菜',
+        '娜','那','羅',
+        '一','逸','日','溢',
+        '昇','承','丞','陞',
+        '修','修','秀','守','壽','壽',
+        '炯','泂','逈',
+        '澤','擇','宅',
+        '弘','紅','虹',
+        '國','菊','鞠',
+        '成','盛','城','晟',
+        '建','健','乾','謇',
+        '煥','桓','歡','環',
+        '用','勇','鏞','湧',
+        '俱','龜','究','具',
+        '도','導','到','度',
+        '葉','燁','曄','爗',
+        '永','泳','映','瑛','煐',
+        '熙','希','姬','喜','禧',
+        '恒','恒','恒',
+        '雄','熊',
+        '鍾','鐘','宗','種','鍾',
+        '憲','軒','赫','爀'
+    ]);
+
+    function _sortHanjaList(hanjaList, isSurname, surnameChar) {
+        if (isSurname && SURNAME_PRIORITY[surnameChar]) {
+            const order = SURNAME_PRIORITY[surnameChar];
+            return [...hanjaList].sort((a, b) => {
+                const ia = order.indexOf(a.h), ib = order.indexOf(b.h);
+                if (ia !== -1 && ib !== -1) return ia - ib;
+                if (ia !== -1) return -1;
+                if (ib !== -1) return 1;
+                return 0;
+            });
+        }
+        // 이름: 자주 쓰는 한자 우선
+        return [...hanjaList].sort((a, b) => {
+            const pa = NAME_POPULAR_HANJA.has(a.h) ? 0 : 1;
+            const pb = NAME_POPULAR_HANJA.has(b.h) ? 0 : 1;
+            return pa - pb;
+        });
+    }
+
+    function _buildHanjaOptions(hanjaList, isSurname, surnameChar) {
+        const sorted = _sortHanjaList(hanjaList, isSurname, surnameChar);
+        const toOpt = h => `<option value="${h.s}|${h.o}|${h.h}">${h.h} (${h.m}) - ${h.s}획 / ${h.o}</option>`;
+
+        if (isSurname) {
+            const priority = SURNAME_PRIORITY[surnameChar] || [];
+            const top = sorted.filter(h => priority.includes(h.h));
+            const rest = sorted.filter(h => !priority.includes(h.h));
+            if (top.length === 0) return sorted.map(toOpt).join('');
+            return top.map(toOpt).join('') +
+                (rest.length ? `<optgroup label="── 기타 한자 ──"></optgroup>` + rest.map(toOpt).join('') : '');
+        }
+
+        // 이름: 자주 쓰는 / 기타 구분
+        const popular = sorted.filter(h => NAME_POPULAR_HANJA.has(h.h));
+        const others  = sorted.filter(h => !NAME_POPULAR_HANJA.has(h.h));
+        if (popular.length === 0) return sorted.map(toOpt).join('');
+        return popular.map(toOpt).join('') +
+            (others.length ? `<optgroup label="── 기타 한자 ──"></optgroup>` + others.map(toOpt).join('') : '');
+    }
+
     function generateHanjaSelectors() {
         const lastName = document.getElementById('kr-last-name').value.trim();
         const firstName = document.getElementById('kr-first-name').value.trim();
@@ -2929,16 +3041,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const selectionArea = document.getElementById('hanja-selection-area');
         const dropdownContainer = document.getElementById('hanja-dropdowns');
         if (fullName.length === 0) { selectionArea.style.display = 'none'; return; }
-        
+
         selectionArea.style.display = 'block';
         dropdownContainer.innerHTML = '';
-        
+
         for (let i = 0; i < fullName.length; i++) {
             const char = fullName[i];
+            const isSurname = (i < lastName.length);
             const hanjaList = (HANJA_DB_FULL||{})[char] || [{h: char, m: '기본(DB없음)', s: 10, o: '水'}];
-            // Value에 '획수|오행|한자' 포맷으로 데이터 은닉
-            let optionsHTML = hanjaList.map(h => `<option value="${h.s}|${h.o}|${h.h}">${h.h} (${h.m}) - ${h.s}획 / ${h.o}</option>`).join('');
-            
+            const optionsHTML = _buildHanjaOptions(hanjaList, isSurname, char);
+
             const block = document.createElement('div');
             block.className = 'hanja-block';
             block.innerHTML = `<span>${char}</span><select id="hanja-sel-${i}">${optionsHTML}</select>`;
