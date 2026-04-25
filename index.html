@@ -713,9 +713,130 @@
             padding: 2px 9px; border-radius: 20px;
         }
 
+        /* ── 2-Section 구조 ────────────────────────────────── */
+        #report-section-story { }
+        #report-section-expert { margin-top: 32px; }
+        #expert-toggle-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 24px 28px;
+            background: linear-gradient(135deg, var(--bg-warm) 0%, #fff 100%);
+            border: 2px solid var(--gold-light);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #expert-toggle-bar:hover {
+            border-color: var(--gold-dark);
+            box-shadow: 0 4px 20px rgba(180, 140, 60, 0.12);
+        }
+        .expert-toggle-eyebrow {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--gold-dark);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .expert-toggle-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--bg-dark);
+            margin-bottom: 6px;
+        }
+        .expert-toggle-desc {
+            font-size: 0.83rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        #expert-master-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s ease-in-out;
+        }
+        #expert-master-body.open {
+            max-height: 100000px;
+            padding-top: 24px;
+        }
+
+        /* ── 한자이야기 카드 (Section 1) ──────────────────────────── */
+        .hanja-s1-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .hanja-s1-card {
+            text-align: center;
+            padding: 24px 16px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--gold-light);
+            background: linear-gradient(160deg, #fffbeb 0%, #fff 100%);
+        }
+        .hanja-s1-char {
+            font-size: 3.6rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        .hanja-s1-kr {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--bg-dark);
+            margin-bottom: 4px;
+        }
+        .hanja-s1-meaning {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .hanja-s1-badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+        .hanja-s1-story {
+            margin-top: 20px;
+            padding: 16px 20px;
+            background: #fffbeb;
+            border-left: 4px solid var(--gold-dark);
+            border-radius: 0 14px 14px 0;
+            font-size: 0.92rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+
+        /* ── 부모한마디 ─────────────────────────────────────────────── */
+        #parent-message-input {
+            width: 100%;
+            border: 1.5px solid var(--border-light);
+            border-radius: 14px;
+            padding: 16px 18px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--bg-dark);
+            resize: vertical;
+            line-height: 1.8;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+        #parent-message-input:focus {
+            outline: none;
+            border-color: var(--gold-dark);
+            background: white;
+        }
+
         /* ── 아코디언 챕터 ──────────────────────────────────── */
         .report-card-acc { overflow: hidden; }
         .chapter-acc-header { cursor: pointer; }
+        /* 전문 분석 섹션 내부 챕터는 항상 오픈 — 클릭 불필요 */
+        #expert-master-body .chapter-acc-header { cursor: default; }
         .chapter-acc-title-row {
             display: flex;
             justify-content: space-between;
@@ -1967,6 +2088,9 @@
         <!-- 후보 비교 테이블 (2개 이상일 때만 표시) -->
         <div id="report-compare-section" style="display:none;"></div>
 
+        <!-- ═══ Section 1: Story — 이야기와 결론 ═══ -->
+        <div id="report-section-story">
+
         <!-- 종합 결론 (상단 배치 — 편지 + 스코어카드) -->
         <div class="report-card" id="report-conclusion-card" style="border-top:3px solid var(--gold-premium);">
             <!-- ① 편지형 서문 (AI 생성 후 표시) -->
@@ -1987,59 +2111,60 @@
             <div id="ai-conclusion-grid"></div>
         </div>
 
-        <!-- 도입 브릿지 -->
+        <!-- 한자이야기 (Section 1 신규) -->
+        <div class="report-card" id="report-hanja-story-s1" style="margin-top:24px;display:none;">
+            <div class="story-chapter-label">이 이름에 담긴 글자</div>
+            <h2 class="section-title">한자(漢字)의 이야기</h2>
+            <div id="report-hanja-story-s1-body"></div>
+        </div>
+
+        <!-- 미래 직업 (Section 1 — 항상 오픈) -->
+        <div class="report-card" id="report-career-section" style="margin-top:24px;">
+            <div class="story-chapter-label">이 아이의 미래 이야기</div>
+            <h2 class="section-title">사주로 보는 미래 직업</h2>
+            <div id="report-career-body"></div>
+        </div>
+
+        <!-- 부모한마디 (Section 1 신규) -->
+        <div class="report-card" id="report-parent-message" style="margin-top:24px;">
+            <div class="story-chapter-label">부모님의 마음</div>
+            <h2 class="section-title">이 이름을 지어주며</h2>
+            <p style="font-size:0.88rem;color:var(--text-secondary);margin:0 0 16px;line-height:1.7;">아이에게 전하고 싶은 마음을 기록해보세요. 이름과 함께 간직할 소중한 한 마디가 됩니다.</p>
+            <textarea id="parent-message-input" placeholder="사랑하는 OO아,&#10;&#10;이 이름을 지어주며 엄마 아빠가 바라는 것은..." rows="6"></textarea>
+            <p style="font-size:0.75rem;color:var(--text-secondary);margin:10px 0 0;text-align:right;opacity:0.6;">✏️ 화면 인쇄 시 함께 저장됩니다</p>
+        </div>
+
+        </div><!-- /report-section-story -->
+
+        <!-- ═══ Section 2: Expert — 전문 분석 ═══ -->
+        <div id="report-section-expert">
+            <div id="expert-toggle-bar" onclick="_toggleExpertSection()">
+                <div id="expert-toggle-content">
+                    <div class="expert-toggle-eyebrow">Expert Analysis · 전문 분석</div>
+                    <div class="expert-toggle-title">사주·한자·오행·수리 심층 리포트</div>
+                    <div class="expert-toggle-desc">작명의 과학적 근거가 궁금하다면 — 사주 원국부터 수리 흐름까지 전문 분석 전체를 확인하세요.</div>
+                </div>
+                <button id="expert-toggle-btn" class="chapter-toggle-btn" style="flex-shrink:0;">전문 분석 열기 ↓</button>
+            </div>
+            <div id="expert-master-body">
+
+        <!-- 도입 카드 -->
         <div class="story-intro-card" id="report-story-intro">
             사주가 이 아이가 태어난 <b>'토양'</b>이라면, 이름은 그 위에 심는 <b>'씨앗'</b>입니다.<br>
             이 보고서는 사주 원국부터 한자의 의미, 소리의 기운, 수리의 흐름까지 — 이 이름이 탄생하기까지의 모든 이야기를 담고 있습니다.
         </div>
 
-        <!-- 보고서 구성 안내 -->
-        <div style="background:var(--bg-warm);border:1px solid var(--border-light);border-radius:16px;padding:16px 20px;margin-bottom:28px;">
-            <div style="font-size:0.72rem;font-weight:800;color:var(--gold-dark);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Report Guide · 보고서 구성 안내</div>
-            <div class="report-guide-grid">
-                <div class="report-guide-item">
-                    <span class="report-guide-num">01</span>
-                    <div><div class="report-guide-title">사주 원국</div><div class="report-guide-desc">타고난 기질과 사주 지형</div></div>
-                </div>
-                <div class="report-guide-item">
-                    <span class="report-guide-num">02</span>
-                    <div><div class="report-guide-title">자원오행 & 균형</div><div class="report-guide-desc">이름이 사주를 보완하는 방식</div></div>
-                </div>
-                <div class="report-guide-item">
-                    <span class="report-guide-num">03</span>
-                    <div><div class="report-guide-title">한자 심층 분석</div><div class="report-guide-desc">한 글자 한 글자의 의미와 기운</div></div>
-                </div>
-                <div class="report-guide-item">
-                    <span class="report-guide-num">04</span>
-                    <div><div class="report-guide-title">발음 오행·음양</div><div class="report-guide-desc">소리가 전달하는 에너지 흐름</div></div>
-                </div>
-                <div class="report-guide-item">
-                    <span class="report-guide-num">05</span>
-                    <div><div class="report-guide-title">대운 인생 흐름</div><div class="report-guide-desc">10년 주기 운세 곡선 & 수리 사계절</div></div>
-                </div>
-                <div class="report-guide-item">
-                    <span class="report-guide-num">06</span>
-                    <div><div class="report-guide-title">미래 직업 탐색</div><div class="report-guide-desc">사주·이름 기운으로 보는 직업 적성</div></div>
-                </div>
-                <div class="report-guide-item" style="border-color:var(--gold-dark);background:linear-gradient(135deg,#fffbeb,#fff8e6);">
-                    <span class="report-guide-num" style="color:var(--bg-dark);">✦</span>
-                    <div><div class="report-guide-title" style="color:var(--bg-dark);">AI 작명 상담</div><div class="report-guide-desc">분석 데이터 기반 맞춤 Q&A</div></div>
-                </div>
-            </div>
-        </div>
-
         <!-- Chapter 1: 사주 원국 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header" onclick="_toggleChapter('ch1')">
+            <div class="chapter-acc-header">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 1. 이 아이가 태어난 우주</div>
                         <h2 class="section-title"><span class="term-tip" data-tip="태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.">사주</span> 원국 (四柱八字)</h2>
                     </div>
-                    <button class="chapter-toggle-btn" id="toggle-btn-ch1">자세히 보기 ↓</button>
                 </div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch1">
+            <div class="chapter-acc-body open" id="acc-body-ch1">
             <div class="saju-grid" id="report-saju-grid"></div>
             <div class="oheng-layout">
                 <div style="text-align:center;">
@@ -2095,17 +2220,16 @@
 
         <!-- Chapter 2: 자원오행 & 레이더 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header" onclick="_toggleChapter('ch2')">
+            <div class="chapter-acc-header">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
                         <h2 class="section-title"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
                     </div>
-                    <button class="chapter-toggle-btn" id="toggle-btn-ch2">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch2" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch2">
+            <div class="chapter-acc-body open" id="acc-body-ch2">
             <div class="ai-tagline" id="report-tagline">--</div>
             <div id="report-jawon-chips"></div>
             <div class="intro-grid" style="margin-top:0;">
@@ -2137,17 +2261,16 @@
 
         <!-- Chapter 3: 한자 의미 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header" onclick="_toggleChapter('ch3')">
+            <div class="chapter-acc-header">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 3. 한자가 품은 이야기</div>
                         <h2 class="section-title">자원(字源) 심층 분석</h2>
                     </div>
-                    <button class="chapter-toggle-btn" id="toggle-btn-ch3">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch3" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch3">
+            <div class="chapter-acc-body open" id="acc-body-ch3">
             <div id="report-hanja-details"></div>
             <div class="ai-story-block" id="ai-hanja-story" style="margin-top:24px;border-left:4px solid var(--gold-dark);background:#fffbeb;border-top:none;border-right:none;border-bottom:none;border-radius:0 14px 14px 0;"></div>
             </div><!-- /acc-body-ch3 -->
@@ -2162,17 +2285,16 @@
 
         <!-- Chapter 4: 발음 오행 & 음양 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header" onclick="_toggleChapter('ch4')">
+            <div class="chapter-acc-header">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
                         <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> & <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
                     </div>
-                    <button class="chapter-toggle-btn" id="toggle-btn-ch4">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch4" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch4">
+            <div class="chapter-acc-body open" id="acc-body-ch4">
             <div id="ai-sound-body"></div>
             <div class="ai-story-block" id="ai-sound-story" style="margin-top:20px;"></div>
             </div><!-- /acc-body-ch4 -->
@@ -2187,17 +2309,16 @@
 
         <!-- Chapter 5-A: 사격수리 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header" onclick="_toggleChapter('ch5a')">
+            <div class="chapter-acc-header">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 5. 획수가 그리는 운명</div>
                         <h2 class="section-title"><span class="term-tip" data-tip="원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.">사격수리</span> (四格數理)</h2>
                     </div>
-                    <button class="chapter-toggle-btn" id="toggle-btn-ch5a">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch5a" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch5a">
+            <div class="chapter-acc-body open" id="acc-body-ch5a">
             <div id="report-suri-cards" class="suri-cards-wrap"></div>
             <div class="ai-story-block" id="ai-suri-story"></div>
             </div><!-- /acc-body-ch5a -->
@@ -2212,17 +2333,16 @@
 
         <!-- Chapter 5. 수리 오행 & 음양 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header" onclick="_toggleChapter('ch5b')">
+            <div class="chapter-acc-header">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
                         <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
                     </div>
-                    <button class="chapter-toggle-btn" id="toggle-btn-ch5b">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch5b" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch5b">
+            <div class="chapter-acc-body open" id="acc-body-ch5b">
             <div id="report-suri-oheng-yin"></div>
             </div><!-- /acc-body-ch5b -->
         </div>
@@ -2236,16 +2356,15 @@
 
         <!-- Chapter 5-B: 인생 흐름 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header" onclick="_toggleChapter('ch5c')">
+            <div class="chapter-acc-header">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 5. 대운과 이름의 여정</div>
                         <h2 class="section-title"><span class="term-tip" data-tip="인생을 10년 단위로 나눈 운세 흐름. 사주팔자가 평생의 그릇이라면, 대운은 그 그릇이 놓이는 계절과 같습니다.">대운</span> 인생 흐름</h2>
                     </div>
-                    <button class="chapter-toggle-btn" id="toggle-btn-ch5c">자세히 보기 ↓</button>
                 </div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch5c">
+            <div class="chapter-acc-body open" id="acc-body-ch5c">
             <div id="report-daeun-section"></div>
             <div class="chart-container-large" style="margin-top:20px;">
                 <canvas id="lifeFlowChart"></canvas>
@@ -2259,28 +2378,8 @@
             </div><!-- /acc-body-ch5c -->
         </div>
 
-        <!-- Bridge to Career -->
-        <div class="story-bridge-wrap">
-            <div class="story-bridge-line"></div>
-            <div class="story-bridge-pill">사주와 이름으로 그려보는 아이의 미래</div>
-            <div class="story-bridge-line"></div>
-        </div>
-
-        <!-- Chapter 6: 미래 직업 탐색 -->
-        <div class="report-card report-card-acc" id="report-career-section">
-            <div class="chapter-acc-header" onclick="_toggleChapter('ch6')">
-                <div class="chapter-acc-title-row">
-                    <div>
-                        <div class="story-chapter-label">Chapter 6. 이 아이의 미래 이야기</div>
-                        <h2 class="section-title">사주로 보는 미래 직업</h2>
-                    </div>
-                    <button class="chapter-toggle-btn" id="toggle-btn-ch6">자세히 보기 ↓</button>
-                </div>
-            </div>
-            <div class="chapter-acc-body" id="acc-body-ch6">
-            <div id="report-career-body"></div>
-            </div><!-- /acc-body-ch6 -->
-        </div>
+            </div><!-- /expert-master-body -->
+        </div><!-- /report-section-expert -->
 
         <!-- 마지막 클로징 메시지 -->
         <div id="report-closing-message" style="display:none;text-align:center;margin:48px 0 32px;padding:48px 32px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:28px;color:white;">
@@ -4259,6 +4358,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         _renderHanjaDetails(report.hanjaDetails || [], h1, h2);
         const hanjaStoryEl = document.getElementById('ai-hanja-story');
         if (hanjaStoryEl) hanjaStoryEl.textContent = report.hanjaStory || '';
+        // Section 1: 한자이야기
+        _renderHanjaStoryS1(candidate);
 
         // Ch4: 발음
         _renderSoundSection(candidate, report);
@@ -4487,6 +4588,47 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 </div>
             </div>`;
         }).join('');
+    }
+
+    // ── 한자이야기 Section 1 렌더링 ─────────────────────────────────
+    function _renderHanjaStoryS1(candidate) {
+        const el   = document.getElementById('report-hanja-story-s1');
+        const body = document.getElementById('report-hanja-story-s1-body');
+        if (!el || !body || !candidate) return;
+
+        const OHENG_C  = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+        const OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const OHENG_DESC = {
+            '木':'나무처럼 곧게 자라나는 기운. 생명력과 창의성, 성장의 에너지를 담고 있습니다.',
+            '火':'빛과 온기를 전하는 기운. 열정, 지혜, 밝은 에너지로 주변을 따뜻하게 합니다.',
+            '土':'대지처럼 포근하게 품어주는 기운. 안정, 신뢰, 든든한 터전의 에너지입니다.',
+            '金':'단단하고 빛나는 기운. 결단력, 순수함, 세상을 밝히는 청명한 에너지를 품고 있습니다.',
+            '水':'물처럼 유연하게 흐르는 기운. 지혜, 적응력, 깊은 내면의 힘을 나타냅니다.'
+        };
+        const _no = o => ({'Wood':'木','Fire':'火','Earth':'土','Metal':'金','Water':'水'}[o] || o);
+
+        const hanjas = [candidate.h1, candidate.h2].filter(Boolean);
+        const cardsHtml = hanjas.map(h => {
+            const o = _no(h.o || '');
+            const c = OHENG_C[o] || '#888';
+            const meanings = (h.m || h.meaning || '').split(',').slice(0, 2).join(', ');
+            return `<div class="hanja-s1-card">
+                <div class="hanja-s1-char" style="color:${c};">${h.h}</div>
+                <div class="hanja-s1-kr">${h.kr || ''} (${h.h})</div>
+                <div class="hanja-s1-meaning">${meanings}</div>
+                <span class="hanja-s1-badge" style="background:${c}20;color:${c};">${OHENG_KR[o] || o}(${o}) 기운</span>
+            </div>`;
+        }).join('');
+
+        const uniqueOs = [...new Set(hanjas.map(h => _no(h.o || '')).filter(Boolean))];
+        const storyHtml = uniqueOs.map(o => {
+            const d = OHENG_DESC[o];
+            return d ? `<span style="color:${OHENG_C[o]};font-weight:800;">${OHENG_KR[o]}(${o})</span> — ${d}` : '';
+        }).filter(Boolean).join('<br>');
+
+        body.innerHTML = `<div class="hanja-s1-grid">${cardsHtml}</div>`
+                       + (storyHtml ? `<div class="hanja-s1-story">${storyHtml}</div>` : '');
+        el.style.display = '';
     }
 
     // ── 한자 풀이 렌더링 ────────────────────────────────────────────
@@ -5174,6 +5316,25 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // 전역 노출 (onclick에서 호출)
     window._toggleChapter = _toggleChapter;
 
+    function _toggleExpertSection() {
+        const body = document.getElementById('expert-master-body');
+        const btn  = document.getElementById('expert-toggle-btn');
+        if (!body) return;
+        const opening = !body.classList.contains('open');
+        body.classList.toggle('open', opening);
+        if (btn) btn.innerHTML = opening ? '접기 ↑' : '전문 분석 열기 ↓';
+        if (opening) {
+            setTimeout(() => {
+                if (typeof _updateRadarChart === 'function' && window._currentScores)
+                    _updateRadarChart(window._currentScores, window._currentCandidate);
+                if (typeof renderCharts === 'function') renderCharts();
+                if (window._daeunData && typeof _updateLifeFlowChart === 'function')
+                    _updateLifeFlowChart(window._daeunData);
+            }, 100);
+        }
+    }
+    window._toggleExpertSection = _toggleExpertSection;
+
     // ── 챕터 판정 배너 헬퍼 ────────────────────────────────────────
     function _renderVerdict(elId, grade, text) {
         const el = document.getElementById(elId);
@@ -5204,7 +5365,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const items = _buildReportItems(familyKr, firstName, candidate);
         if (!items.length) return;
 
-        // 4단계 색상 매핑
+        // 4단계: Section 1 전용어 순화 맵
+        const CONSUMER_LABEL = {
+            '사주 보완': '기운 조화',
+            '발음 오행': '소리의 기운',
+            '발음 음양': '소리의 균형',
+            '사격수리':  '이름의 수리',
+            '수리 오행': '수리 기운',
+            '수리 음양': '수리 균형',
+        };
+
+        // 색상 매핑
         const G4_C  = {'매우 좋음':'#15803d','좋음':'#2563eb','나쁨':'#d97706','매우 나쁨':'#dc2626'};
         const G4_BG = {'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fffbeb','매우 나쁨':'#fef2f2'};
         const G4_ICON = {'매우 좋음':'★','좋음':'✦','나쁨':'△','매우 나쁨':'✗'};
@@ -5230,9 +5401,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 const c  = G4_C[x.grade]  || '#64748b';
                 const bg = G4_BG[x.grade] || '#f8fafc';
                 const ic = G4_ICON[x.grade] || '–';
+                const dispLabel = CONSUMER_LABEL[x.label] || x.label;
                 return `<div class="score-criteria-item" style="border-color:${c}40;background:${bg};">
                     <div class="sci-dot" style="background:${c};">${ic}</div>
-                    <div class="sci-label">${x.label}</div>
+                    <div class="sci-label">${dispLabel}</div>
                     <div class="sci-grade-pill" style="background:${c}20;color:${c};">${x.grade}</div>
                 </div>`;
             }).join('') + `</div>`;
