@@ -57,27 +57,34 @@ else:
 app = Flask(__name__, static_folder=str(BASE_DIR))
 CORS(app, origins=['http://localhost:*', 'https://*.dearname.kr', 'https://*.onrender.com'])
 
+# ── 캐시 비활성화 헬퍼 ───────────────────────────────────
+def _no_cache(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 # ── 정적 파일 서빙 ────────────────────────────────────────
 @app.route('/')
 def index():
-    return send_file(BASE_DIR / 'index.html')
+    return _no_cache(send_file(BASE_DIR / 'index.html'))
 
 @app.route('/config.js')
 def config_js():
-    return send_file(BASE_DIR / 'config.js')
+    return _no_cache(send_file(BASE_DIR / 'config.js'))
 
 @app.route('/data/<path:filename>')
 def data_files(filename):
-    return send_from_directory(BASE_DIR / 'data', filename)
+    return _no_cache(send_from_directory(BASE_DIR / 'data', filename))
 
 @app.route('/lib/<path:filename>')
 def lib_files(filename):
-    return send_from_directory(BASE_DIR / 'lib', filename)
+    return _no_cache(send_from_directory(BASE_DIR / 'lib', filename))
 
 @app.route('/api/<path:filename>')
 def api_files(filename):
     # api/claude-report.js 같은 정적 파일
-    return send_from_directory(BASE_DIR / 'api', filename)
+    return _no_cache(send_from_directory(BASE_DIR / 'api', filename))
 
 # ── Claude API 프록시 ─────────────────────────────────────
 @app.route('/proxy/claude', methods=['POST'])

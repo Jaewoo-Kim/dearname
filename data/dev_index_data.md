@@ -11,6 +11,7 @@
 2. [manjuryeok.js — 동추원 만세력](#2-manjuryeokjs--동추원-만세력)
 3. [suri-data.js — 81수리](#3-suri-datajs--81수리)
 4. [lunar-calendar.js — 음력 변환](#4-lunar-calendarjs--음력-변환)
+5. [modern-name-db.js — 현대 이름 음절 점수 DB](#5-modern-name-dbjs--현대-이름-음절-점수-db)
 
 ---
 
@@ -228,3 +229,36 @@ const _LUNAR_BASE = new Date(Date.UTC(1900, 0, 1));
 - `index.html` → `updateLunarLabel()` — 실시간 변환 라벨 표시
 - `index.html` → `updateSelfLunarLabel()` — 셀프작명 변환 라벨 표시
 - `index.html` → `validatePremiumForm()` — 입력값 검증
+
+---
+
+## 5. modern-name-db.js — 현대 이름 음절 점수 DB
+
+### 출처
+2020–2025 통계청 신생아 출생신고 통계 기반 인기 음절 순위
+
+### 선언하는 전역 변수
+
+#### `MODERN_SYLLABLE_SCORE`
+```js
+// 구조: { '한글음절': 점수(0~100) }
+const MODERN_SYLLABLE_SCORE = {
+  '서': 100, '윤': 95, '아': 92, '이': 90, ...
+};
+```
+- 여아·남아 모두 포함
+- 점수 범위: 0 (미등록/구식) ~ 100 (최상위 인기)
+
+#### `OLDFASHIONED_SYLLABLES`
+```js
+// Set<string> — 구식으로 분류된 한글 음절
+const OLDFASHIONED_SYLLABLES = new Set(['순', '자', '복', ...]);
+```
+
+#### `calcModernBonus(h1Kr, h2Kr) → number`
+- 두 이름 음절의 현대성 점수를 계산해 -5 ~ +5 범위의 보너스 반환
+
+### 사용처
+- `lib/name-search.js` → Worker INIT 메시지에 포함하여 전달
+- `lib/name-search-worker.js` → `_scoreCombo()` `[K] 현대성 보너스` (최대 +5점)
+- `index.html` → 데모 이름 후보 (김서윤·김리서·김채서) 우선 선택 기준
