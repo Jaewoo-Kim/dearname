@@ -4668,6 +4668,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if(titleArea) titleArea.innerHTML = `${kr} <span>${hj}</span>`;
         // 비교 테이블 활성 열 갱신
         _renderCompareTable(idx);
+        // 탭 전환 시 보고서 최상단으로 스크롤
+        const reportView = document.getElementById('report-view');
+        if (reportView) window.scrollTo({ top: reportView.offsetTop - 60, behavior: 'smooth' });
     }
 
     // ── 보고서 본문 렌더링 ───────────────────────────────────────────
