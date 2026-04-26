@@ -2437,22 +2437,38 @@
             <div class="oheng-layout">
                 <div class="oheng-pentagon-col">
                     <div style="font-size:0.75rem;font-weight:800;color:var(--text-secondary);letter-spacing:0.08em;margin-bottom:10px;">오행 순환도</div>
-                    <svg viewBox="0 0 200 200" width="100%" style="display:block;margin:0 auto;max-width:220px;">
-                        <!-- 오행 순환 화살표 원 -->
+                    <svg viewBox="0 0 200 200" width="100%" style="display:block;margin:0 auto;max-width:340px;flex:1;">
                         <defs>
+                            <!-- 상생 화살표 (각 오행 색) -->
                             <marker id="arrowG" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#22c55e"/></marker>
                             <marker id="arrowR" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#ef4444"/></marker>
                             <marker id="arrowY" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#eab308"/></marker>
                             <marker id="arrowS" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#94a3b8"/></marker>
                             <marker id="arrowB" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#0f172a"/></marker>
+                            <!-- 상극 화살표 (빨강) -->
+                            <marker id="arrowSK" markerWidth="5" markerHeight="5" refX="3" refY="2.5" orient="auto"><path d="M0,0 L0,5 L5,2.5 z" fill="#ef4444"/></marker>
                         </defs>
-                        <!-- 상생 순환 오각형 -->
-                        <line x1="100" y1="22" x2="173" y2="70" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowG)" opacity="0.7"/>
-                        <line x1="175" y1="78" x2="147" y2="148" stroke="#ef4444" stroke-width="2" marker-end="url(#arrowR)" opacity="0.7"/>
-                        <line x1="143" y1="155" x2="57" y2="155" stroke="#eab308" stroke-width="2" marker-end="url(#arrowY)" opacity="0.7"/>
-                        <line x1="50" y1="148" x2="26" y2="78" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowS)" opacity="0.7"/>
-                        <line x1="25" y1="70" x2="96" y2="22" stroke="#0f172a" stroke-width="2" marker-end="url(#arrowB)" opacity="0.7"/>
-                        <!-- 오행 노드 -->
+
+                        <!-- 상생(相生) 순환 — 외곽 오각형, 실선 -->
+                        <line x1="100" y1="22" x2="173" y2="70" stroke="#22c55e" stroke-width="2.2" marker-end="url(#arrowG)"/>
+                        <line x1="175" y1="78" x2="147" y2="148" stroke="#ef4444" stroke-width="2.2" marker-end="url(#arrowR)"/>
+                        <line x1="143" y1="155" x2="57" y2="155" stroke="#eab308" stroke-width="2.2" marker-end="url(#arrowY)"/>
+                        <line x1="50" y1="148" x2="26" y2="78" stroke="#94a3b8" stroke-width="2.2" marker-end="url(#arrowS)"/>
+                        <line x1="25" y1="70" x2="96" y2="22" stroke="#0f172a" stroke-width="2.2" marker-end="url(#arrowB)"/>
+
+                        <!-- 상극(相剋) 내부 오각성 — 빨강 점선 -->
+                        <!-- 木克土 (100,18)→(150,158) -->
+                        <line x1="106" y1="35" x2="144" y2="141" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrowSK)" opacity="0.65"/>
+                        <!-- 土克水 (150,158)→(22,73) -->
+                        <line x1="135" y1="148" x2="37" y2="83" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrowSK)" opacity="0.65"/>
+                        <!-- 水克火 (22,73)→(178,73) -->
+                        <line x1="40" y1="73" x2="160" y2="73" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrowSK)" opacity="0.65"/>
+                        <!-- 火克金 (178,73)→(50,158) -->
+                        <line x1="163" y1="83" x2="65" y2="148" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrowSK)" opacity="0.65"/>
+                        <!-- 金克木 (50,158)→(100,18) -->
+                        <line x1="56" y1="141" x2="94" y2="35" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrowSK)" opacity="0.65"/>
+
+                        <!-- 오행 노드 (lines 위에) -->
                         <circle cx="100" cy="18" r="18" fill="#22c55e"/>
                         <text x="100" y="15" text-anchor="middle" fill="white" font-size="11" font-weight="bold">木</text>
                         <text x="100" y="26" text-anchor="middle" fill="white" font-size="9">나무</text>
@@ -2468,9 +2484,10 @@
                         <circle cx="22" cy="73" r="18" fill="#0f172a"/>
                         <text x="22" y="70" text-anchor="middle" fill="white" font-size="11" font-weight="bold">水</text>
                         <text x="22" y="81" text-anchor="middle" fill="white" font-size="9">물</text>
-                        <!-- 중앙 레이블 -->
-                        <text x="100" y="97" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">상생(相生)</text>
-                        <text x="100" y="109" text-anchor="middle" fill="#94a3b8" font-size="8">순환의 흐름</text>
+
+                        <!-- 중앙 레전드 -->
+                        <text x="100" y="95" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="700">━ 상생(相生)</text>
+                        <text x="100" y="108" text-anchor="middle" fill="#ef4444" font-size="8" font-weight="700">- - 상극(相剋)</text>
                     </svg>
                 </div>
                 <div class="oheng-bars" id="report-oheng-bars"></div>
@@ -3114,16 +3131,16 @@
         };
         const _report1 = {
             tagline: '"맑은 옥소리처럼, 무궁화처럼 꿋꿋이 피어나는 아이"',
-            sajuStory: '甲子 일주의 아이는 하늘을 향해 곧게 자라는 나무(甲木)가 깊은 물(子水) 위에 뿌리를 내린 형상입니다. 일간 甲木은 子水의 장생지에 앉아 탄탄한 학습 능력과 창의적 기질을 품고 태어났습니다. 丙午년의 환한 태양 기운과 壬辰·戊辰의 넉넉한 土·水 기운이 더해져 총명하고 적응력 있는 성품이 형성됩니다. 그러나 이 풍요로운 사주 원국에서 金 기운이 전혀 없고 木도 甲木 하나뿐이라, 결단력·추진력·단단한 의지를 담당하는 金의 기운을 이름으로 채워주는 것이 가장 중요한 작명 과제입니다.',
-            jawonStory: '玲(령)의 金 기운이 사주에 전무한 쇠(金)의 기운을 직접 채워, 아이에게 매일 맑고 단단한 결단의 에너지를 심어줍니다. 槿(근)의 木 기운은 일간 甲木과 같은 기운으로, 뿌리를 더욱 단단하게 하고 성장의 힘을 북돋습니다. 두 글자가 더해지며 金→木의 흐름이 자리 잡고, 子水·壬水의 수생목(水生木) 흐름과도 아름답게 연결됩니다.',
+            sajuStory: '갑자(甲子) 일주의 아이는 하늘을 향해 곧게 자라는 나무(갑목·甲木)가 깊은 물(자수·子水) 위에 뿌리를 내린 형상입니다. 일간 갑목(甲木)은 자수(子水)의 장생지에 앉아 탄탄한 학습 능력과 창의적 기질을 품고 태어났습니다. 병오(丙午)년의 환한 태양 기운과 임진(壬辰)·무진(戊辰)의 넉넉한 土·水 기운이 더해져 총명하고 적응력 있는 성품이 형성됩니다. 그러나 이 풍요로운 사주 원국에서 金 기운이 전혀 없고 木도 갑목(甲木) 하나뿐이라, 결단력·추진력·단단한 의지를 담당하는 金의 기운을 이름으로 채워주는 것이 가장 중요한 작명 과제입니다.',
+            jawonStory: '玲(령)의 金 기운이 사주에 전무한 쇠(金)의 기운을 직접 채워, 아이에게 매일 맑고 단단한 결단의 에너지를 심어줍니다. 槿(근)의 木 기운은 일간 갑목(甲木)과 같은 기운으로, 뿌리를 더욱 단단하게 하고 성장의 힘을 북돋습니다. 두 글자가 더해지며 金→木의 흐름이 자리 잡고, 자수(子水)·임수(壬水)의 수생목(水生木) 흐름과도 아름답게 연결됩니다.',
             hanjaDetails: [
                 { hanja:'玲', kr:'령', meaning:'옥소리 령(玲). 옥(玉)이 맑게 울리는 소리를 형상화한 글자입니다. 맑고 영롱한 빛과 소리를 품어, 주변을 밝히는 청명한 에너지를 상징합니다. 金 기운을 지녀 예리한 직관과 단단한 중심을 선물합니다.', strokes:10, oheng:'金', synergyWithSaju:'사주에 전혀 없는 金 기운을 직접 보완하여, 자칫 부드럽기만 할 수 있는 기질에 날카로운 결단력과 집중력을 더합니다.' },
-                { hanja:'槿', kr:'근', meaning:'무궁화 근(槿). 우리나라의 국화로, 아침마다 새 꽃을 피워 백일 동안 피고 지는 끈질긴 생명력을 상징합니다. 木 기운을 품어 성장·창조·유연한 적응의 에너지를 담고 있습니다.', strokes:15, oheng:'木', synergyWithSaju:'일간 甲木과 같은 木 기운으로 뿌리를 더욱 강화하고, 어떤 환경에서도 꺾이지 않는 생명력과 성장의 에너지를 불어넣습니다.' }
+                { hanja:'槿', kr:'근', meaning:'무궁화 근(槿). 우리나라의 국화로, 아침마다 새 꽃을 피워 백일 동안 피고 지는 끈질긴 생명력을 상징합니다. 木 기운을 품어 성장·창조·유연한 적응의 에너지를 담고 있습니다.', strokes:15, oheng:'木', synergyWithSaju:'일간 갑목(甲木)과 같은 木 기운으로 뿌리를 더욱 강화하고, 어떤 환경에서도 꺾이지 않는 생명력과 성장의 에너지를 불어넣습니다.' }
             ],
             hanjaStory: '玲(령)은 맑은 옥소리처럼 예리하고 영롱한 기운이며, 槿(근)은 매일 새 꽃을 피우는 무궁화의 끈질긴 생명력입니다. "령근"이라는 두 글자가 어우러져, 맑은 지성으로 빛나면서도 어떤 시련도 꺾지 못하는 강인한 아이의 이야기가 됩니다. 부모님의 바람—빛나고, 굳건하며, 아름답게—이 이 두 한자 안에 고스란히 담겨 있습니다.',
             soundStory: '김·령·근의 초성 기운(木→火→木)을 살펴보면, 김(ㄱ=木)이 령(ㄹ=火)을 낳고(木生火 상생), 령(火)은 근(ㄱ=木)으로 이어집니다. 목과 화의 상생 흐름이 이름을 부를 때마다 긍정적인 에너지를 전달합니다. 또한 세 음절이 부드럽게 연결되어 발음하기 편안하고, 듣는 이에게도 경쾌하고 맑은 인상을 줍니다.',
             suriStory: '초년(원격 25수·안전격)에 탄탄한 기초를 다지며 학업과 인간관계에서 빛을 발합니다. 청장년(형격 18수·발전격)에는 뛰어난 업무 능력으로 빠르게 성장하고 사회적 신뢰를 쌓습니다. 이격(23수·공명격)은 원만한 대인관계와 이성운을 뒷받침하며, 말년(정격 33수·대길)에는 오랜 노력이 빚은 풍요로운 성취와 넓은 인덕으로 존경받는 삶을 완성합니다.',
-            conclusionLetter: '김령근(金玲槿)은 이 아이의 사주에서 가장 부족한 金 기운을 玲으로, 약한 木 기운을 槿으로 정확히 채운 이름입니다.\n\n玲(령)의 맑은 금속음은 매일 이름이 불릴 때마다 사주에 없던 金의 결단력과 집중력을 심어줍니다. 槿(근)의 무궁화 기운은 일간 甲木을 뒷받침해 어떤 환경에서도 꿋꿋이 피어나는 생명력을 더합니다. 발음 오행(木→火)의 상생 흐름과 사격수리 전격 길운(25·18·23·33)이 어우러져, 초년부터 말년까지 고른 운세의 흐름이 이어집니다. 玲의 맑음과 槿의 강인함을 함께 지닌 령근이가 세상을 향해 힘차게 자라나기를 진심으로 축원합니다.',
+            conclusionLetter: '김령근(金玲槿)은 이 아이의 사주에서 가장 부족한 金 기운을 玲으로, 약한 木 기운을 槿으로 정확히 채운 이름입니다.\n\n玲(령)의 맑은 금속음은 매일 이름이 불릴 때마다 사주에 없던 金의 결단력과 집중력을 심어줍니다. 槿(근)의 무궁화 기운은 일간 갑목(甲木)을 뒷받침해 어떤 환경에서도 꿋꿋이 피어나는 생명력을 더합니다. 발음 오행(木→火)의 상생 흐름과 사격수리 전격 길운(25·18·23·33)이 어우러져, 초년부터 말년까지 고른 운세의 흐름이 이어집니다. 玲의 맑음과 槿의 강인함을 함께 지닌 령근이가 세상을 향해 힘차게 자라나기를 진심으로 축원합니다.',
             lifeFlow: {
                 early:  '탄탄한 원격 25수(안전격)의 기운으로 총명한 학업 능력과 뛰어난 적응력을 발휘하는 시기',
                 middle: '형격 18수(발전격)로 직업·사회적 역량이 빠르게 성장하며 신뢰를 쌓아가는 시기',
@@ -3144,7 +3161,7 @@
         };
         const _report2 = {
             tagline: '"보배로운 옥처럼, 세상에 단 하나뿐인 빛을 지닌 아이"',
-            sajuStory: '甲子 일주의 아이는 하늘을 향해 곧게 자라는 나무(甲木)가 깊은 물(子水) 위에 뿌리를 내린 형상입니다. 丙午의 태양 기운, 壬辰·戊辰의 대지 기운이 어우러져 총명하고 따뜻한 성품을 만들어내지만, 금 기운이 전혀 없는 것이 이 사주의 가장 큰 약점입니다. 金 기운이 없으면 자신의 재능을 과감히 세상에 드러내거나 경쟁에서 결단력을 발휘하는 것이 어려울 수 있습니다. 이름의 金 기운이 이 빈자리를 채워줘야 합니다.',
+            sajuStory: '갑자(甲子) 일주의 아이는 하늘을 향해 곧게 자라는 나무(갑목·甲木)가 깊은 물(자수·子水) 위에 뿌리를 내린 형상입니다. 병오(丙午)의 태양 기운, 임진(壬辰)·무진(戊辰)의 대지 기운이 어우러져 총명하고 따뜻한 성품을 만들어내지만, 금 기운이 전혀 없는 것이 이 사주의 가장 큰 약점입니다. 金 기운이 없으면 자신의 재능을 과감히 세상에 드러내거나 경쟁에서 결단력을 발휘하는 것이 어려울 수 있습니다. 이름의 金 기운이 이 빈자리를 채워줘야 합니다.',
             jawonStory: '珍(진)의 金 기운과 琳(임)의 金 기운이 겹쳐, 사주에 전무한 金을 강력하게 보완합니다. 이름을 매일 부를 때마다 두 배의 금 기운이 아이에게 스며들어, 타고난 목(木)·수(水)의 유연함 위에 금(金)의 단단한 결단력과 순수함을 더합니다. 金生水의 흐름이 이름과 사주 원국을 자연스럽게 연결합니다.',
             hanjaDetails: [
                 { hanja:'珍', kr:'진', meaning:'보배 진(珍). 세상에 드문 귀한 보배를 뜻하며, 金 기운을 품어 맑고 순수한 가치를 상징합니다. 유일무이한 존재로서의 소중함과 빛나는 기품을 담고 있습니다.', strokes:10, oheng:'金', synergyWithSaju:'사주에 전혀 없는 金 기운을 직접 보완하여, 자신만의 고유한 가치와 결단력을 키워주는 힘이 됩니다.' },
@@ -3174,16 +3191,16 @@
         };
         const _report3 = {
             tagline: '"맑게 빛나는 옥처럼, 숲처럼 풍성하게 자라나는 아이"',
-            sajuStory: '甲子 일주의 아이는 하늘을 향해 자라는 나무(甲木)가 깊은 물(子水)을 품은 형상으로, 丙午의 태양이 따뜻하게 비추고 戊辰·壬辰의 대지와 물이 뒷받침하는 풍요로운 사주 원국을 타고났습니다. 총명하고 직관력이 뛰어나며 배움에 대한 욕구가 강합니다. 다만 金 기운이 전혀 없어 결단의 순간에 망설임이 생길 수 있고, 木 기운도 상대적으로 약해 창의적 에너지를 보완할 필요가 있습니다. 이 두 기운을 이름이 정확히 채워줍니다.',
-            jawonStory: '瑩(영)의 金 기운이 사주에 없는 쇠(金)의 결단력을 채우고, 林(림)의 木 기운은 일간 甲木에게 동기(同氣)의 힘을 더해 창의적 에너지를 북돋습니다. 두 글자의 자원오행(金·木)이 이름과 사주 원국의 甲木 사이에서 金生→木의 에너지 순환을 이루며, 사주의 풍부한 수(水) 기운이 이를 자연스럽게 뒷받침합니다.',
+            sajuStory: '갑자(甲子) 일주의 아이는 하늘을 향해 자라는 나무(갑목·甲木)가 깊은 물(자수·子水)을 품은 형상으로, 병오(丙午)의 태양이 따뜻하게 비추고 무진(戊辰)·임진(壬辰)의 대지와 물이 뒷받침하는 풍요로운 사주 원국을 타고났습니다. 총명하고 직관력이 뛰어나며 배움에 대한 욕구가 강합니다. 다만 金 기운이 전혀 없어 결단의 순간에 망설임이 생길 수 있고, 木 기운도 상대적으로 약해 창의적 에너지를 보완할 필요가 있습니다. 이 두 기운을 이름이 정확히 채워줍니다.',
+            jawonStory: '瑩(영)의 金 기운이 사주에 없는 쇠(金)의 결단력을 채우고, 林(림)의 木 기운은 일간 갑목(甲木)에게 동기(同氣)의 힘을 더해 창의적 에너지를 북돋습니다. 두 글자의 자원오행(金·木)이 이름과 사주 원국의 갑목(甲木) 사이에서 金生→木의 에너지 순환을 이루며, 사주의 풍부한 수(水) 기운이 이를 자연스럽게 뒷받침합니다.',
             hanjaDetails: [
                 { hanja:'瑩', kr:'영', meaning:'빛날 영(瑩). 옥(玉)이 맑고 투명하게 빛나는 모습을 나타내는 글자입니다. 한 점 흐림도 없이 맑게 빛나는 金 기운을 품어, 순수하고 영롱한 지성과 정직한 기품을 상징합니다.', strokes:15, oheng:'金', synergyWithSaju:'사주에 전혀 없는 金 기운을 보완하여, 타고난 유연한 기질에 맑고 투명한 결단력과 집중력을 더합니다.' },
-                { hanja:'林', kr:'림', meaning:'숲 림(林). 나무(木)가 모여 이룬 숲의 풍요로움과 생명력을 담은 글자입니다. 木 기운으로 성장·창조·포용의 에너지를 상징하며, 많은 이들이 모여드는 넉넉함도 내포합니다.', strokes:8, oheng:'木', synergyWithSaju:'일간 甲木과 같은 기운으로 뿌리를 강화하고, 숲처럼 풍성하게 자라며 주변을 아우르는 넉넉한 기질을 키웁니다.' }
+                { hanja:'林', kr:'림', meaning:'숲 림(林). 나무(木)가 모여 이룬 숲의 풍요로움과 생명력을 담은 글자입니다. 木 기운으로 성장·창조·포용의 에너지를 상징하며, 많은 이들이 모여드는 넉넉함도 내포합니다.', strokes:8, oheng:'木', synergyWithSaju:'일간 갑목(甲木)과 같은 기운으로 뿌리를 강화하고, 숲처럼 풍성하게 자라며 주변을 아우르는 넉넉한 기질을 키웁니다.' }
             ],
             hanjaStory: '瑩(영)은 한 점 흐림도 없이 맑게 빛나는 옥의 영롱함이고, 林(림)은 생명이 넘치는 숲의 풍요로움입니다. "영림"이라는 이름은 빛나는 지성으로 세상을 밝히면서도 숲처럼 넉넉한 포용력으로 많은 이들을 품는 아이의 이야기를 담습니다. 작고 소중한 나무 하나(甲木)가 빛나는 옥(瑩)의 도움으로 더욱 맑게 자라 마침내 풍성한 숲(林)이 되는 이야기이기도 합니다.',
             soundStory: '김·영·림의 초성 기운(木→土→火)을 살펴보면, 영(ㅇ=土)과 림(ㄹ=火)의 흐름 속에 이름을 부를 때 부드럽고 따뜻한 에너지가 전해집니다. 세 음절이 자연스럽게 이어져 발음하기 편안하고, 밝고 생동감 있는 인상을 줍니다. 영(瑩)의 맑은 소리와 림(林)의 깊은 여운이 어우러져 기품 있으면서도 친근한 이름이 됩니다.',
             suriStory: '초년(원격 23수·공명격)에 총명한 자질이 빛을 발하며 학업·예술 방면에서 이름을 알립니다. 청장년(형격 23수·공명격)은 초년의 빛나는 재능이 사회로 이어지는 연속된 좋은 운으로, 전문 분야에서 탁월한 성취를 이룹니다. 이격(16수·덕망격)은 가정과 이성운에서 따뜻한 신뢰를 받으며, 말년(정격 31수·대길)에는 빛나는 지성과 넉넉한 인덕이 어우러진 풍요로운 완성의 시기를 맞이합니다.',
-            conclusionLetter: '김영림(金瑩林)은 맑게 빛나는 金 기운(瑩)으로 사주의 가장 큰 빈자리를 채우고, 풍성한 木 기운(林)으로 일간 甲木의 성장을 돕는 이름입니다.\n\n瑩의 맑고 영롱한 빛은 매일 이름이 불릴 때마다 아이에게 금의 결단력과 순수한 지성을 더해주고, 林의 숲 기운은 창의적 성장 에너지를 끊임없이 공급합니다. 사격수리(23·23·16·31) 전격 길운이 초년의 빛나는 자질을 청장년의 사회적 성취로, 다시 말년의 풍요로운 완성으로 자연스럽게 이어줍니다. 맑고 풍성한 영림이의 인생이 봄의 숲처럼 눈부시게 피어나기를 진심으로 응원합니다.',
+            conclusionLetter: '김영림(金瑩林)은 맑게 빛나는 金 기운(瑩)으로 사주의 가장 큰 빈자리를 채우고, 풍성한 木 기운(林)으로 일간 갑목(甲木)의 성장을 돕는 이름입니다.\n\n瑩의 맑고 영롱한 빛은 매일 이름이 불릴 때마다 아이에게 금의 결단력과 순수한 지성을 더해주고, 林의 숲 기운은 창의적 성장 에너지를 끊임없이 공급합니다. 사격수리(23·23·16·31) 전격 길운이 초년의 빛나는 자질을 청장년의 사회적 성취로, 다시 말년의 풍요로운 완성으로 자연스럽게 이어줍니다. 맑고 풍성한 영림이의 인생이 봄의 숲처럼 눈부시게 피어나기를 진심으로 응원합니다.',
             lifeFlow: {
                 early:  '원격 23수(공명격)로 총명한 재능이 또래 사이에서 빛을 발하는 시기',
                 middle: '형격 23수(공명격) 연속으로 전문 분야에서 탁월한 성취를 이루는 시기',
@@ -4682,7 +4699,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const metaEl = document.getElementById('premium-report-meta');
         if (metaEl && _saju) {
             const gender = _currentState.constraints.gender === 'F' ? '여성' : '남성';
-            metaEl.textContent = `${_currentState.familyName.kr} ${h1.kr}${h2?.kr||''} · ${gender} · ${_saju.day.gan}${_saju.day.ji}(${_toHangul(_saju.day.gan)}${_toHangul(_saju.day.ji)}) 일주`;
+            metaEl.textContent = `${_currentState.familyName.kr} ${h1.kr}${h2?.kr||''} · ${gender} · ${_toHangul(_saju.day.gan)}${_toHangul(_saju.day.ji)}(${_saju.day.gan}${_saju.day.ji}) 일주`;
         }
 
         // ── 챕터 0 연결 서사 (프리미엄 보고서 동적) ───────────────────
@@ -4864,39 +4881,122 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // Ch5: 수리 + 라이프플로우
         _renderSuriCards(s0, s1, s2, isOija);
-        // Ch5: 수리음양 / 수리오행 서브 섹션
-        const _adForVerdict = (typeof getAnalysisData === 'function')
-            ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
-        const suriOhengYinEl = document.getElementById('report-suri-oheng-yin');
-        if (suriOhengYinEl) {
-            suriOhengYinEl.innerHTML = _adForVerdict ? _buildSuriSubHtml(_adForVerdict.mathYin, _adForVerdict.mathOheng) : '';
-        }
 
-        // ── 챕터 판정 배너 ────────────────────────────────────────────
-        if (_adForVerdict) {
-            // Ch2: 사주 오행 보완 판정
-            _renderVerdict('verdict-ch2', _adForVerdict.sajuOheng.grade, _adForVerdict.sajuOheng.desc);
-            // Ch3: 자원오행 구성 판정
-            _renderVerdict('verdict-ch3', _adForVerdict.jawonohaeng.grade, _adForVerdict.jawonohaeng.desc);
-            // Ch4: 발음 오행·음양 종합 판정
-            const _p = _adForVerdict.pronounceOheng.grade, _y = _adForVerdict.pronounceYin.grade;
-            const _ch4g = (_p === '매우 나쁨' || _y === '매우 나쁨') ? '매우 나쁨'
-                        : (_p === '나쁨' && _y === '나쁨')           ? '나쁨'
-                        : (_p === '매우 좋음' && _y === '매우 좋음') ? '매우 좋음'
-                        : '좋음';
-            _renderVerdict('verdict-ch4', _ch4g,
-                `발음 오행 <b>${_p}</b> · 발음 음양 <b>${_y}</b>`);
-            // Ch5-A: 사격수리
-            _renderVerdict('verdict-ch5a', _adForVerdict.math4.grade, _adForVerdict.math4.desc);
-            // Ch5-B: 수리오행·음양 종합
-            const _mo = _adForVerdict.mathOheng.grade, _my = _adForVerdict.mathYin.grade;
-            const _ch5bg = (_mo === '매우 나쁨' || _my === '매우 나쁨') ? '매우 나쁨'
-                         : (_mo === '나쁨' || _my === '나쁨')           ? '나쁨'
-                         : (_mo === '매우 좋음' && _my === '매우 좋음') ? '매우 좋음'
-                         : '좋음';
-            _renderVerdict('verdict-ch5b', _ch5bg,
-                `수리 오행 <b>${_mo}</b> · 수리 음양 <b>${_my}</b>`);
-        }
+        // ── 챕터 판정 배너 — candidate 직접 계산 (DOM 독립) ──────────
+        // getAnalysisData()는 셀프진단 DOM 드롭다운 기반이라 리포트 뷰에서
+        // 획수가 모두 기본값(10)으로 잘못 계산됨. 반드시 candidate 직접 사용.
+        (function _applyVerdicts() {
+            const _ng  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'평');
+            const _CYCLE = ['木','火','土','金','水'];
+            const _isSS  = (a,b) => a===b || (_CYCLE.indexOf(a)+1)%5===_CYCLE.indexOf(b)
+                                          || (_CYCLE.indexOf(b)+1)%5===_CYCLE.indexOf(a);
+            const _numO  = n => { const d=n%10; if(d===1||d===2)return'木'; if(d===3||d===4)return'火';
+                                  if(d===5||d===6)return'土'; if(d===7||d===8)return'金'; return'水'; };
+            const _CHO_O = c => {
+                const code=c.charCodeAt(0)-44032; if(code<0||code>11171)return'';
+                const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+                const cho=CHO[Math.floor(code/588)]||'';
+                if(['ㄱ','ㅋ','ㄲ'].includes(cho))return'木'; if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho))return'火';
+                if(['ㅇ','ㅎ'].includes(cho))return'土'; if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho))return'金';
+                if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho))return'水'; return'';
+            };
+            const _YY = c => {
+                const code=c.charCodeAt(0)-44032; if(code<0||code>11171)return'음';
+                const JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+                const YANG=new Set(['ㅏ','ㅐ','ㅑ','ㅒ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ']);
+                return YANG.has(JUNG[Math.floor((code%588)/28)])?'양':'음';
+            };
+            const _getSG = n => {
+                let num=n>81?n%81:n; if(!num)num=81;
+                if(typeof SURI_DATA==='undefined'||!SURI_DATA[num])return'평';
+                return _ng(SURI_DATA[num].grade);
+            };
+
+            // 사격수리 4격 (candidate 획수 직접 사용)
+            const _g1 = isOija ? s1+1   : s1+s2;
+            const _g2 = s0+s1;
+            const _g3 = isOija ? s0+1   : s0+s2;
+            const _g4 = isOija ? s0+s1  : s0+s1+s2;
+            const _g4Ns = [_g1,_g2,_g3,_g4];
+
+            const _sg4     = _g4Ns.map(_getSG);
+            const _sg4Good = _sg4.filter(g=>g==='매우 좋음'||g==='좋음').length;
+            const math4Grade = _sg4Good===4?'매우 좋음':_sg4Good>=2?'좋음':_sg4Good===1?'나쁨':'매우 나쁨';
+            const math4Desc  = _sg4Good===4?'4격의 획수 합이 모두 길수에 해당합니다.'
+                             : _sg4Good>=2?'길수와 흉수가 혼재합니다. 다른 지표로 보완하세요.'
+                             : _sg4Good===1?'흉수가 많아 보완이 필요합니다.'
+                             :'4격이 모두 흉수입니다. 작명을 새로 하시는 것을 권장합니다.';
+
+            // 수리오행 (4격 인접 쌍 상생 여부)
+            const _moOs  = _g4Ns.map(_numO);
+            const _moBad = _moOs.filter((o,i)=>i<3&&!_isSS(o,_moOs[i+1])).length;
+            const mathOhengGrade = _moBad===0?'매우 좋음':_moBad===1?'좋음':_moBad===2?'나쁨':'매우 나쁨';
+            const mathOhengDesc  = _moBad===0?'수리의 4격 오행이 모두 상생으로 이어져 기운이 막힘없이 흐릅니다.'
+                                 : _moBad===1?'수리오행 흐름에 상극이 일부 포함되어 있으나 상생이 우세합니다.'
+                                 : _moBad===2?'수리오행 간 상극이 여러 곳에서 발생합니다.'
+                                 :'수리오행 전 구간에서 상극이 발생합니다.';
+
+            // 수리음양 (4격 홀짝 균형)
+            const _myYs       = _g4Ns.map(n=>n%2!==0?'양':'음');
+            const mathYinGrade = (_myYs.every(y=>y==='양')||_myYs.every(y=>y==='음'))?'매우 나쁨':'매우 좋음';
+            const mathYinDesc  = mathYinGrade==='매우 좋음'
+                               ?'4격 수리의 음과 양이 고루 배합되어 균형이 잡혀 있습니다.'
+                               :'4격 수리가 모두 홀수 또는 짝수로 치우쳐 음양 균형이 깨져 있습니다.';
+
+            // 자원오행 (candidate 한자 오행 직접 사용)
+            const _nameOs   = [h1,h2].filter(Boolean).map(x=>(_normOheng?_normOheng(x.o):x.o)).filter(Boolean);
+            const _uniqueOs = [...new Set(_nameOs)];
+            const _OK_S = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            let jawonGrade, jawonDesc;
+            if(!_uniqueOs.length) { jawonGrade='나쁨'; jawonDesc='한자를 선택하면 자원오행이 표시됩니다.'; }
+            else if(_uniqueOs.length===1) {
+                jawonGrade='좋음';
+                jawonDesc=`이름의 기운이 모두 ${_OK_S[_uniqueOs[0]]||_uniqueOs[0]} 기운으로 구성되어 있습니다. 단일 기운이 집중되어 강한 개성을 나타냅니다.`;
+            } else {
+                jawonGrade='매우 좋음';
+                jawonDesc=`${_nameOs.map(o=>_OK_S[o]||o).join(' · ')} 기운으로 구성된 이름입니다. 다양한 기운이 어우러져 풍부한 기질을 형성합니다.`;
+            }
+
+            // 사주 보완 (candidate 오행 vs nameSpec.prefer)
+            const _prefer    = _currentState?.nameSpec?.prefer || [];
+            const _compCount = _prefer.filter(p=>_nameOs.includes(p)).length;
+            const sajuGrade  = _prefer.length===0?'매우 좋음':_compCount===_prefer.length?'매우 좋음':_compCount>0?'나쁨':'매우 나쁨';
+            const sajuDesc   = _prefer.length===0?'사주 오행이 균형을 이루고 있습니다.'
+                             : _compCount===_prefer.length?'이름이 사주의 부족한 기운을 모두 채워줍니다.'
+                             : _compCount>0?'이름이 일부 부족한 오행을 채워줍니다.'
+                             :'이름이 부족한 오행을 채우지 못하고 있습니다.';
+
+            // 발음오행 / 발음음양
+            const _fullKr = familyKr+(h1.kr||'')+(h2?.kr||'');
+            const _pOs    = _fullKr.split('').map(_CHO_O);
+            const _pBad   = _pOs.filter((o,i)=>i<_pOs.length-1&&o&&!_isSS(o,_pOs[i+1])).length;
+            const _pTotal = _pOs.length-1;
+            const pronGrade = _pBad===0?'매우 좋음':_pBad===_pTotal?'매우 나쁨':_pBad*2<=_pTotal?'좋음':'나쁨';
+            const _yys = _fullKr.split('').map(_YY);
+            const yinGrade = (_yys.every(y=>y==='양')||_yys.every(y=>y==='음'))?'매우 나쁨':'매우 좋음';
+
+            // 판정 배너 적용
+            _renderVerdict('verdict-ch2', sajuGrade, sajuDesc);
+            _renderVerdict('verdict-ch3', jawonGrade, jawonDesc);
+            const _ch4g = (pronGrade==='매우 나쁨'||yinGrade==='매우 나쁨')?'매우 나쁨'
+                        : (pronGrade==='나쁨'&&yinGrade==='나쁨')?'나쁨'
+                        : (pronGrade==='매우 좋음'&&yinGrade==='매우 좋음')?'매우 좋음':'좋음';
+            _renderVerdict('verdict-ch4', _ch4g, `발음 오행 <b>${pronGrade}</b> · 발음 음양 <b>${yinGrade}</b>`);
+            _renderVerdict('verdict-ch5a', math4Grade, math4Desc);
+            const _ch5bg = (mathOhengGrade==='매우 나쁨'||mathYinGrade==='매우 나쁨')?'매우 나쁨'
+                         : (mathOhengGrade==='나쁨'||mathYinGrade==='나쁨')?'나쁨'
+                         : (mathOhengGrade==='매우 좋음'&&mathYinGrade==='매우 좋음')?'매우 좋음':'좋음';
+            _renderVerdict('verdict-ch5b', _ch5bg, `수리 오행 <b>${mathOhengGrade}</b> · 수리 음양 <b>${mathYinGrade}</b>`);
+
+            // 수리오행·음양 섹션 콘텐츠
+            const suriOhengYinEl = document.getElementById('report-suri-oheng-yin');
+            if (suriOhengYinEl) {
+                suriOhengYinEl.innerHTML = _buildSuriSubHtml(
+                    { grade: mathYinGrade, desc: mathYinDesc, seq: _g4Ns.map((v,i)=>({val:v,yin:_myYs[i]})) },
+                    { grade: mathOhengGrade, desc: mathOhengDesc }
+                );
+            }
+        })();
         const suriStoryEl = document.getElementById('ai-suri-story');
         if (suriStoryEl) {
             suriStoryEl.textContent = report.suriStory || '';
@@ -5747,7 +5847,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                         const suppStr = uniqueNameOhengs.length
                             ? `이 이름에 담긴 <b style="color:var(--gold-dark);">${uniqueNameOhengs.map(o=>OHENG_KR[o]||o).join(' · ')}</b> 기운은 사주에서 부족했던 영역을 정확히 채워줍니다.`
                             : '이 이름은 사주의 균형을 맞추는 데 중요한 역할을 합니다.';
-                        return `일간 <b style="color:var(--gold-dark);">${ilgan}</b>의 기운을 가진 이 아이는 <b>${traitWord}</b> 성향을 타고났습니다.
+                        return `일간 <b style="color:var(--gold-dark);">${_toHangul?.(ilgan)||ilgan}(${ilgan})</b>의 기운을 가진 이 아이는 <b>${traitWord}</b> 성향을 타고났습니다.
                             사주에서 <b style="color:${primaryColor};">${OHENG_KR[primaryOheng]||primaryOheng}</b> 기운이 가장 강하게 흐르며,
                             이 기운이 인생 전반의 방향성과 기질의 핵심 동력이 됩니다.
                             ${suppStr}
@@ -7570,15 +7670,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 사주에 왜 좋은가
         if (/사주|좋은|왜좋|잘맞|어울|궁합/.test(m)) {
-            return `김나윤의 사주 원국을 보면 <b>金 기운(26.5pt)이 가장 강하고, 水(13.75pt)와 土(16.75pt)가 상대적으로 부족</b>합니다.\n\n이름 <b>娜(나) — 土 기운</b>은 부족한 土를 직접 채워 안정감과 포용력을 더해주고, <b>奫(윤) — 水 기운</b>은 일간 癸水를 강화해 깊은 사색력과 직관을 키워줍니다.\n\n특히 金→水→木 상생 흐름이 완성되어 이름이 사주의 빈자리를 정확히 메워주는 이상적인 구성이에요. 오행 균형이 잡히면 대인관계, 학업, 정서 안정 모두에 긍정적 영향을 줍니다.`;
+            return `김나윤의 사주 원국을 보면 <b>金 기운(26.5pt)이 가장 강하고, 水(13.75pt)와 土(16.75pt)가 상대적으로 부족</b>합니다.\n\n이름 <b>娜(나) — 土 기운</b>은 부족한 土를 직접 채워 안정감과 포용력을 더해주고, <b>奫(윤) — 水 기운</b>은 일간 계수(癸水)를 강화해 깊은 사색력과 직관을 키워줍니다.\n\n특히 金→水→木 상생 흐름이 완성되어 이름이 사주의 빈자리를 정확히 메워주는 이상적인 구성이에요. 오행 균형이 잡히면 대인관계, 학업, 정서 안정 모두에 긍정적 영향을 줍니다.`;
         }
         // 한자 의미
         if (/한자|의미|뜻|자원|글자/.test(m)) {
-            return `이름에 담긴 두 한자를 자세히 풀어드릴게요.\n\n<b>娜 (나) — 아리따울 나, 土 기운</b>\n획수 10획. 여성의 우아한 자태와 인품을 뜻하며, 대지(土)처럼 모든 것을 포용하는 성질을 담고 있어요. 娜 자를 품은 아이는 어디서든 자연스럽게 주변을 따뜻하게 아우르는 힘을 가집니다.\n\n<b>奫 (윤) — 물 깊고 넓을 윤, 水 기운</b>\n획수 15획. 깊고 넓은 물이 고요하게 담긴 형상으로, 겉으로는 차분하지만 내면에 무한한 지혜와 통찰을 품은 글자예요. 癸水 일간과 오행이 같아 아이의 본래 기질을 더욱 강화해 줍니다.`;
+            return `이름에 담긴 두 한자를 자세히 풀어드릴게요.\n\n<b>娜 (나) — 아리따울 나, 土 기운</b>\n획수 10획. 여성의 우아한 자태와 인품을 뜻하며, 대지(土)처럼 모든 것을 포용하는 성질을 담고 있어요. 娜 자를 품은 아이는 어디서든 자연스럽게 주변을 따뜻하게 아우르는 힘을 가집니다.\n\n<b>奫 (윤) — 물 깊고 넓을 윤, 水 기운</b>\n획수 15획. 깊고 넓은 물이 고요하게 담긴 형상으로, 겉으로는 차분하지만 내면에 무한한 지혜와 통찰을 품은 글자예요. 계수(癸水) 일간과 오행이 같아 아이의 본래 기질을 더욱 강화해 줍니다.`;
         }
         // 성격
         if (/성격|기질|어떤아이|어떻게될|인성|성품|특징/.test(m)) {
-            return `사주와 이름 기운을 종합해 보면 김나윤 아이는 이런 기질을 보일 가능성이 높아요.\n\n<b>🌊 깊고 고요한 내면</b>\n癸水 일간 특유의 조용하고 섬세한 감수성을 가져요. 겉으로는 차분해 보이지만 내면에 강한 의지와 풍부한 상상력을 품고 있습니다.\n\n<b>🌱 유연한 적응력</b>\n乙木(을목)의 기운으로 어떤 환경에서도 자연스럽게 녹아드는 사교성을 보여요. 고집보다 배려로 사람들의 마음을 얻는 타입입니다.\n\n<b>✨ 학문·예술 재능</b>\n己卯 월의 기운과 水·土 이름 기운이 합쳐져 학습 능력과 예술적 감각이 뛰어날 수 있어요. 글쓰기, 음악, 미술 등 창의 분야에서 두각을 나타낼 가능성이 높습니다.`;
+            return `사주와 이름 기운을 종합해 보면 김나윤 아이는 이런 기질을 보일 가능성이 높아요.\n\n<b>🌊 깊고 고요한 내면</b>\n계수(癸水) 일간 특유의 조용하고 섬세한 감수성을 가져요. 겉으로는 차분해 보이지만 내면에 강한 의지와 풍부한 상상력을 품고 있습니다.\n\n<b>🌱 유연한 적응력</b>\n을목(乙木)의 기운으로 어떤 환경에서도 자연스럽게 녹아드는 사교성을 보여요. 고집보다 배려로 사람들의 마음을 얻는 타입입니다.\n\n<b>✨ 학문·예술 재능</b>\n기묘(己卯) 월의 기운과 水·土 이름 기운이 합쳐져 학습 능력과 예술적 감각이 뛰어날 수 있어요. 글쓰기, 음악, 미술 등 창의 분야에서 두각을 나타낼 가능성이 높습니다.`;
         }
         // 오행 보완 원리
         if (/오행|보완|원리|상생|균형|기운/.test(m)) {
