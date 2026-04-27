@@ -1756,9 +1756,9 @@
                         진단 결과 요약 <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-light); padding: 5px 15px; border-radius: 20px;">총 6개 지표 평가 완료</span>
                     </h3>
                     <div class="result-grid">
-                        <!-- 핵심 지표: 자원 오행 + 사격 수리 -->
+                        <!-- 핵심 지표: 사주 보완 + 사격 수리 -->
                         <div class="result-row result-row-2">
-                            <div class="result-box"><div class="result-header"><h4>자원 오행</h4><span class="grade-badge" id="res-jawonohaeng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-jawonohaeng">한자를 선택하면 자원오행이 표시됩니다.</p></div>
+                            <div class="result-box"><div class="result-header"><h4>사주 보완</h4><span class="grade-badge" id="res-saju-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-saju-oheng">생년월일을 입력하면 사주 보완 분석이 표시됩니다.</p></div>
                             <div class="result-box"><div class="result-header"><h4>사격 수리</h4><span class="grade-badge" id="res-math-4"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-4"></p></div>
                         </div>
                         <!-- 보조 지표: 발음 오행·음양 + 수리 오행·음양 -->
@@ -3847,12 +3847,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         applyBadge('res-math-yin', data.mathYin.grade);
         document.getElementById('res-desc-math-yin').innerText = data.mathYin.desc;
         
-        if (document.getElementById('res-saju-oheng')) applyBadge('res-saju-oheng', data.sajuOheng.grade);
-        const _saohEl = document.getElementById('res-desc-saju-oheng');
-        if (_saohEl) _saohEl.innerText = data.sajuOheng.desc;
-
-        applyBadge('res-jawonohaeng', data.jawonohaeng.grade);
-        document.getElementById('res-desc-jawonohaeng').innerText = data.jawonohaeng.desc;
+        applyBadge('res-saju-oheng', data.sajuOheng.grade);
+        document.getElementById('res-desc-saju-oheng').innerText = data.sajuOheng.desc;
 
         const resultArea = document.getElementById('analysis-result-area');
         resultArea.style.display = 'block';
@@ -5605,17 +5601,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (typeof getAnalysisData !== 'function') return [];
         const ad = getAnalysisData(familyKr, firstName);
         if (!ad) return [];
-        const sg = ad.suriGrades || [];
-        const _sgG = [sg[0],sg[1],sg[2],sg[3]].map(s=>_ng(s?.grade));
-        const _sgGood = _sgG.filter(g=>g==='매우 좋음'||g==='좋음').length;
-        const _sgGrade = _sgGood===4?'매우 좋음':_sgGood>=2?'좋음':_sgGood===1?'나쁨':'매우 나쁨';
         return [
-            { label:'사주 보완',  sub:'자원오행 매칭',  grade: _ng(ad.sajuOheng?.grade)     },
-            { label:'발음 오행',  sub:'초성 상생 흐름', grade: _ng(ad.pronounceOheng?.grade) },
-            { label:'발음 음양',  sub:'모음 음양 균형', grade: _ng(ad.pronounceYin?.grade)   },
-            { label:'사격수리',   sub:'원·형·이·정격',  grade: _sgGrade },
-            { label:'수리 오행',  sub:'획수 오행 상생', grade: _ng(ad.mathOheng?.grade)  },
-            { label:'수리 음양',  sub:'획수 홀짝 균형', grade: _ng(ad.mathYin?.grade)    },
+            { label:'사주 보완',  sub:'사주 오행 보완',  grade: _ng(ad.sajuOheng?.grade)     },
+            { label:'발음 오행',  sub:'초성 상생 흐름',  grade: _ng(ad.pronounceOheng?.grade) },
+            { label:'발음 음양',  sub:'모음 음양 균형',  grade: _ng(ad.pronounceYin?.grade)   },
+            { label:'사격수리',   sub:'원·형·이·정격',   grade: _ng(ad.math4?.grade)          },
+            { label:'수리 오행',  sub:'획수 오행 상생',  grade: _ng(ad.mathOheng?.grade)      },
+            { label:'수리 음양',  sub:'획수 홀짝 균형',  grade: _ng(ad.mathYin?.grade)        },
         ];
     }
 
