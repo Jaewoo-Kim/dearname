@@ -1450,16 +1450,15 @@
         .name-style-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
         .name-style-card { position:relative; cursor:pointer; }
         .name-style-card input { position:absolute; opacity:0; cursor:pointer; height:0; width:0; }
-        .nsc-inner { padding:14px 14px 12px; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1); border-radius:14px; transition:all 0.2s; position:relative; }
+        .nsc-inner { padding:10px 12px; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1); border-radius:12px; transition:all 0.2s; position:relative; }
         .name-style-card:hover .nsc-inner { background:rgba(255,255,255,0.09); border-color:rgba(255,255,255,0.22); }
         .name-style-card input:checked ~ .nsc-inner { background:rgba(212,175,55,0.13); border-color:var(--gold-premium); box-shadow:0 0 0 1px var(--gold-premium)30; }
-        .nsc-check { position:absolute; top:10px; right:10px; width:18px; height:18px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:0.62rem; color:transparent; transition:all 0.2s; }
+        .nsc-check { position:absolute; top:8px; right:8px; width:16px; height:16px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:0.58rem; color:transparent; transition:all 0.2s; }
         .name-style-card input:checked ~ .nsc-inner .nsc-check { border-color:var(--gold-premium); background:var(--gold-premium); color:white; }
-        .nsc-top { display:flex; align-items:center; gap:7px; margin-bottom:5px; padding-right:22px; }
-        .nsc-icon { font-size:1.05rem; line-height:1; }
-        .nsc-name { font-size:0.88rem; font-weight:800; color:rgba(255,255,255,0.95); }
-        .nsc-desc { font-size:0.75rem; color:rgba(255,255,255,0.5); margin-bottom:7px; line-height:1.45; }
-        .nsc-examples { font-size:0.73rem; color:var(--gold-premium); font-weight:700; opacity:0.85; }
+        .nsc-top { display:flex; align-items:center; gap:6px; margin-bottom:4px; padding-right:20px; }
+        .nsc-icon { font-size:0.95rem; line-height:1; }
+        .nsc-name { font-size:0.85rem; font-weight:800; color:rgba(255,255,255,0.95); }
+        .nsc-examples { font-size:0.72rem; color:var(--gold-premium); font-weight:600; opacity:0.8; }
         .tooltip-icon { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; background:rgba(255,255,255,0.15); border-radius:50%; font-size:0.68rem; font-weight:800; color:rgba(255,255,255,0.5); cursor:help; margin-left:5px; vertical-align:middle; }
 </style>
 </head>
@@ -1951,8 +1950,7 @@
                                     <div class="nsc-inner">
                                         <div class="nsc-check">✓</div>
                                         <div class="nsc-top"><span class="nsc-icon">🌏</span><span class="nsc-name">글로벌</span></div>
-                                        <div class="nsc-desc">영어 이름으로도 자연스럽게<br>쓸 수 있는 세련된 이름</div>
-                                        <div class="nsc-examples">예: 서아 · 지아 · 하나</div>
+                                        <div class="nsc-examples">서아 · 지아 · 하나</div>
                                     </div>
                                 </label>
                                 <label class="name-style-card">
@@ -1960,8 +1958,7 @@
                                     <div class="nsc-inner">
                                         <div class="nsc-check">✓</div>
                                         <div class="nsc-top"><span class="nsc-icon">✨</span><span class="nsc-name">트렌디</span></div>
-                                        <div class="nsc-desc">지금 신생아 사이에서<br>가장 많이 쓰이는 이름</div>
-                                        <div class="nsc-examples">예: 하율 · 이든 · 시우</div>
+                                        <div class="nsc-examples">하율 · 이든 · 시우</div>
                                     </div>
                                 </label>
                                 <label class="name-style-card">
@@ -1969,8 +1966,7 @@
                                     <div class="nsc-inner">
                                         <div class="nsc-check">✓</div>
                                         <div class="nsc-top"><span class="nsc-icon">🍀</span><span class="nsc-name">무난한</span></div>
-                                        <div class="nsc-desc">오랫동안 꾸준히 사랑받는<br>친근하고 편안한 이름</div>
-                                        <div class="nsc-examples">예: 지윤 · 서윤 · 민준</div>
+                                        <div class="nsc-examples">지윤 · 서윤 · 민준</div>
                                     </div>
                                 </label>
                                 <label class="name-style-card">
@@ -1978,8 +1974,7 @@
                                     <div class="nsc-inner">
                                         <div class="nsc-check">✓</div>
                                         <div class="nsc-top"><span class="nsc-icon">📜</span><span class="nsc-name">전통</span></div>
-                                        <div class="nsc-desc">한자 뜻을 중시하는<br>격조 있고 무게 있는 이름</div>
-                                        <div class="nsc-examples">예: 영근 · 정호 · 현숙</div>
+                                        <div class="nsc-examples">영근 · 정호 · 현숙</div>
                                     </div>
                                 </label>
                             </div>
