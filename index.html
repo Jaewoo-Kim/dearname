@@ -1443,6 +1443,23 @@
         .wizard-step-hint { font-size:0.78rem; color:var(--text-secondary); margin-top:10px; text-align:center; }
         .wizard-step-title { color:var(--bg-dark); font-size:1.25rem; font-weight:800; margin:0 0 6px; }
         .wizard-step-sub { color:var(--text-secondary); font-size:0.9rem; margin:0 0 30px; }
+        /* 이름 스타일 선택 */
+        .name-style-section { margin-top:28px; }
+        .name-style-section-label { font-size:0.8rem; font-weight:800; color:rgba(255,255,255,0.5); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+        .name-style-section-label .required-badge { background:rgba(220,38,38,0.25); color:#fca5a5; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:20px; }
+        .name-style-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .name-style-card { position:relative; cursor:pointer; }
+        .name-style-card input { position:absolute; opacity:0; cursor:pointer; height:0; width:0; }
+        .nsc-inner { padding:14px 14px 12px; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1); border-radius:14px; transition:all 0.2s; position:relative; }
+        .name-style-card:hover .nsc-inner { background:rgba(255,255,255,0.09); border-color:rgba(255,255,255,0.22); }
+        .name-style-card input:checked ~ .nsc-inner { background:rgba(212,175,55,0.13); border-color:var(--gold-premium); box-shadow:0 0 0 1px var(--gold-premium)30; }
+        .nsc-check { position:absolute; top:10px; right:10px; width:18px; height:18px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:0.62rem; color:transparent; transition:all 0.2s; }
+        .name-style-card input:checked ~ .nsc-inner .nsc-check { border-color:var(--gold-premium); background:var(--gold-premium); color:white; }
+        .nsc-top { display:flex; align-items:center; gap:7px; margin-bottom:5px; padding-right:22px; }
+        .nsc-icon { font-size:1.05rem; line-height:1; }
+        .nsc-name { font-size:0.88rem; font-weight:800; color:rgba(255,255,255,0.95); }
+        .nsc-desc { font-size:0.75rem; color:rgba(255,255,255,0.5); margin-bottom:7px; line-height:1.45; }
+        .nsc-examples { font-size:0.73rem; color:var(--gold-premium); font-weight:700; opacity:0.85; }
         .tooltip-icon { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; background:rgba(255,255,255,0.15); border-radius:50%; font-size:0.68rem; font-weight:800; color:rgba(255,255,255,0.5); cursor:help; margin-left:5px; vertical-align:middle; }
 </style>
 </head>
@@ -1920,6 +1937,51 @@
                                         </optgroup>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                        <!-- 이름 스타일 선택 -->
+                        <div class="name-style-section">
+                            <div class="name-style-section-label">
+                                원하는 이름 스타일
+                                <span class="required-badge">필수</span>
+                            </div>
+                            <div class="name-style-grid">
+                                <label class="name-style-card">
+                                    <input type="radio" name="prem_name_style" value="global">
+                                    <div class="nsc-inner">
+                                        <div class="nsc-check">✓</div>
+                                        <div class="nsc-top"><span class="nsc-icon">🌏</span><span class="nsc-name">글로벌 감각</span></div>
+                                        <div class="nsc-desc">영어 이름으로도 자연스럽게<br>쓸 수 있는 세련된 이름</div>
+                                        <div class="nsc-examples">예: 서아 · 지아 · 하나</div>
+                                    </div>
+                                </label>
+                                <label class="name-style-card">
+                                    <input type="radio" name="prem_name_style" value="trendy">
+                                    <div class="nsc-inner">
+                                        <div class="nsc-check">✓</div>
+                                        <div class="nsc-top"><span class="nsc-icon">✨</span><span class="nsc-name">요즘 트렌드</span></div>
+                                        <div class="nsc-desc">2020년대 신생아 사이에서<br>인기 있는 개성 있는 이름</div>
+                                        <div class="nsc-examples">예: 하율 · 이든 · 시우</div>
+                                    </div>
+                                </label>
+                                <label class="name-style-card">
+                                    <input type="radio" name="prem_name_style" value="classic">
+                                    <div class="nsc-inner">
+                                        <div class="nsc-check">✓</div>
+                                        <div class="nsc-top"><span class="nsc-icon">🍃</span><span class="nsc-name">친숙한 클래식</span></div>
+                                        <div class="nsc-desc">우리 세대에게 익숙하고<br>평범하게 사랑받는 이름</div>
+                                        <div class="nsc-examples">예: 지윤 · 서윤 · 민준</div>
+                                    </div>
+                                </label>
+                                <label class="name-style-card">
+                                    <input type="radio" name="prem_name_style" value="traditional">
+                                    <div class="nsc-inner">
+                                        <div class="nsc-check">✓</div>
+                                        <div class="nsc-top"><span class="nsc-icon">📜</span><span class="nsc-name">한자 정통</span></div>
+                                        <div class="nsc-desc">깊은 뜻을 담은 격조 있는<br>전통 한자 이름</div>
+                                        <div class="nsc-examples">예: 영근 · 정호 · 현숙</div>
+                                    </div>
+                                </label>
                             </div>
                         </div>
                         <div class="wizard-nav" style="margin-top:30px;">
@@ -3271,6 +3333,8 @@
         if (step === 1) {
             const bd = document.getElementById('prem-birth-date')?.value;
             if (!bd) { alert('생년월일을 입력해주세요.'); return; }
+            const ns = document.querySelector('input[name="prem_name_style"]:checked');
+            if (!ns) { alert('원하는 이름 스타일을 선택해주세요.'); return; }
         }
         const cur  = document.getElementById(`wstep-${step}`);
         const next = document.getElementById(`wstep-${step + 1}`);
