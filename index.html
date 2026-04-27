@@ -1443,6 +1443,9 @@
         .wizard-step-hint { font-size:0.78rem; color:var(--text-secondary); margin-top:10px; text-align:center; }
         .wizard-step-title { color:var(--bg-dark); font-size:1.25rem; font-weight:800; margin:0 0 6px; }
         .wizard-step-sub { color:var(--text-secondary); font-size:0.9rem; margin:0 0 30px; }
+        /* 필수·선택 뱃지 */
+        .badge-req { display:inline-flex; align-items:center; font-size:0.66rem; font-weight:800; padding:1px 7px; border-radius:20px; background:#fee2e2; color:#dc2626; margin-left:6px; vertical-align:middle; letter-spacing:0; }
+        .badge-opt { display:inline-flex; align-items:center; font-size:0.66rem; font-weight:700; padding:1px 7px; border-radius:20px; background:#f1f5f9; color:#94a3b8; margin-left:6px; vertical-align:middle; letter-spacing:0; }
         /* 이름 스타일 선택 */
         .prem-style-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
         .prem-style-pill { position:relative; cursor:pointer; }
@@ -1806,31 +1809,31 @@
                         <p class="wizard-step-sub">성별과 생년월일, 태어난 시간이 정확할수록 더 잘 맞는 이름을 찾을 수 있어요.</p>
                         <div class="form-grid">
                             <div>
-                                <label class="input-label">이름 형식</label>
+                                <label class="input-label">이름 형식<span class="badge-req">필수</span></label>
                                 <div class="cal-pill-group">
                                     <label class="cal-pill"><input type="radio" name="prem_name_type" value="2" checked><span class="cal-label">두 글자</span></label>
                                     <label class="cal-pill"><input type="radio" name="prem_name_type" value="1"><span class="cal-label">외자</span></label>
                                 </div>
                             </div>
                             <div>
-                                <label class="input-label">성별</label>
+                                <label class="input-label">성별<span class="badge-req">필수</span></label>
                                 <div class="cal-pill-group">
                                     <label class="cal-pill"><input type="radio" name="premium_gender" value="M" checked><span class="cal-label">남자</span></label>
                                     <label class="cal-pill"><input type="radio" name="premium_gender" value="F"><span class="cal-label">여자</span></label>
                                 </div>
                             </div>
                             <div>
-                                <label class="input-label">성(姓) <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">— 한글</span></label>
+                                <label class="input-label">성(姓) 한글<span class="badge-req">필수</span></label>
                                 <input type="text" id="prem-last-name" placeholder="예: 김" maxlength="1" onkeyup="updateHanjaSelect('prem-last-name','prem-last-name-hanja')">
                             </div>
                             <div>
-                                <label class="input-label">성(姓) <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">— 한자</span></label>
+                                <label class="input-label">성(姓) 한자<span class="badge-opt">선택</span></label>
                                 <select id="prem-last-name-hanja">
                                     <option value="">한자 선택</option>
                                 </select>
                             </div>
                             <div class="full-width-form">
-                                <label class="input-label">출생 일시 및 지역</label>
+                                <label class="input-label">출생 일시<span class="badge-req">필수</span> · 지역<span class="badge-opt">선택</span></label>
                                 <input type="hidden" id="prem-birth-date">
                                 <input type="hidden" id="prem-birth-time">
                                 <div class="birth-form-area">
@@ -1942,7 +1945,7 @@
                         </div>
                         <!-- 이름 스타일 선택 -->
                         <div class="full-width-form" style="margin-top:20px;">
-                            <label class="input-label">이름 스타일 <span style="color:#ef4444;font-size:0.78rem;font-weight:700;margin-left:4px;">필수</span></label>
+                            <label class="input-label">이름 스타일<span class="badge-req">필수</span></label>
                             <div class="prem-style-row">
                                 <label class="prem-style-pill">
                                     <input type="radio" name="prem_name_style" value="global">
@@ -1973,7 +1976,7 @@
                         <p class="wizard-step-sub">이름에 담고 싶은 기운을 골라주세요. 여러 개 선택 가능해요.</p>
                         <div class="form-grid">
                             <div class="full-width-form">
-                                <label class="input-label">이름에 담고 싶은 이미지 및 성향 (다중 선택)</label>
+                                <label class="input-label">이름에 담고 싶은 이미지 및 성향<span class="badge-opt">선택</span></label>
                                 <div class="cal-pill-group" style="margin-bottom:15px;flex-wrap:wrap;">
                                     <label class="cal-pill"><input type="checkbox" name="traits" value="1"><span class="cal-label">리더십·카리스마</span></label>
                                     <label class="cal-pill"><input type="checkbox" name="traits" value="2"><span class="cal-label">지혜·총명함</span></label>
@@ -1987,7 +1990,7 @@
                             <div class="full-width-form" style="background:var(--bg-light);padding:25px;border-radius:20px;border:1px solid var(--border-light);">
                                 <div class="split-grid">
                                     <div>
-                                        <label class="input-label" style="color:var(--gold-dark);">돌림자 (선택)</label>
+                                        <label class="input-label">돌림자<span class="badge-opt">선택</span></label>
                                         <div style="display:flex;gap:10px;flex-direction:column;">
                                             <div style="display:flex;gap:10px;">
                                                 <input type="text" id="prem-dolrim" placeholder="한글 (예: 수)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-dolrim','prem-dolrim-hanja')">
@@ -2000,7 +2003,7 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <label class="input-label" style="color:var(--gold-dark);">항렬자 (선택)</label>
+                                        <label class="input-label">항렬자<span class="badge-opt">선택</span></label>
                                         <div style="display:flex;gap:10px;flex-direction:column;">
                                             <div style="display:flex;gap:10px;">
                                                 <input type="text" id="prem-hangryul" placeholder="한글 (예: 영)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-hangryul','prem-hangryul-hanja')">
@@ -2015,16 +2018,14 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="input-label">선호하는 한자 (선택)</label>
+                                <label class="input-label">선호하는 한자<span class="badge-opt">선택</span></label>
                                 <div style="display:flex;gap:10px;">
                                     <input type="text" id="prem-fav" placeholder="한글 (예: 명)" style="flex:1;margin-bottom:0;" onkeyup="updateHanjaSelect('prem-fav','prem-fav-hanja')">
                                     <select id="prem-fav-hanja" style="flex:1.5;margin-bottom:0;"><option value="">한자 선택</option></select>
                                 </div>
                             </div>
                             <div class="full-width-form">
-                                <label class="input-label">운 중심 설정
-                                    <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);margin-left:6px;">선택 — 특정 운이 강한 수리(획수 조합)를 우선합니다</span>
-                                </label>
+                                <label class="input-label">운 중심 설정<span class="badge-opt">선택</span></label>
                                 <div class="cal-pill-group" style="flex-wrap:wrap;gap:8px;">
                                     <label class="cal-pill"><input type="radio" name="luck_focus" value="balanced" checked><span class="cal-label">기본 (균형)</span></label>
                                     <label class="cal-pill"><input type="radio" name="luck_focus" value="wealth"><span class="cal-label">💰 재물·풍요운</span></label>
@@ -2034,9 +2035,7 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="input-label">친인척 이름 — 동일 음절 제외
-                                    <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);margin-left:4px;">선택</span>
-                                </label>
+                                <label class="input-label">친인척 이름 — 동일 음절 제외<span class="badge-opt">선택</span></label>
                                 <input type="text" id="prem-avoid" placeholder="예: 지우, 서연, 민준 (형제·친척 이름)">
                                 <p style="font-size:0.78rem;color:var(--text-secondary);margin:6px 0 0;">입력한 이름과 같은 음절의 한자를 후보에서 자동 제외합니다.</p>
                             </div>
@@ -2053,10 +2052,7 @@
                         <p class="wizard-step-sub">없어도 괜찮아요. 있으면 더 세밀하게 맞춰드립니다.</p>
                         <div class="form-grid">
                             <div class="full-width-form">
-                                <label class="input-label">
-                                    부모님 생년월일
-                                    <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);margin-left:8px;">선택 — 부모 오행과의 조화를 분석합니다</span>
-                                </label>
+                                <label class="input-label">부모님 생년월일<span class="badge-opt">선택</span></label>
                                 <div style="display:flex;flex-direction:column;gap:16px;">
                                     <!-- 아버지 -->
                                     <div>
@@ -2125,7 +2121,7 @@
                                 </div>
                             </div>
                             <div class="full-width-form">
-                                <label class="input-label">기타 특별 요청사항 <span style="font-weight:500;font-size:0.85rem;color:var(--text-secondary);">선택 사항</span></label>
+                                <label class="input-label">기타 특별 요청사항<span class="badge-opt">선택</span></label>
                                 <textarea rows="4" id="prem-request" style="resize:vertical;" placeholder="특별히 원하시는 사항이 있으면 자유롭게 적어주세요."></textarea>
                             </div>
                         </div>
