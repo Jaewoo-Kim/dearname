@@ -3759,10 +3759,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const s3_data = getSuriData(g3_num);
         const s4_data = getSuriData(g4_num);
         
-        const goodCount = [s1_data, s2_data, s3_data, s4_data].filter(d => ['대길','길'].includes(d.grade)).length;
+        // '평'도 좋음으로 카운트 — 시즌 카드 배지(_badgeHtml '평'→'좋음')와 일치
+        const goodCount = [s1_data, s2_data, s3_data, s4_data].filter(d => ['대길','길','평'].includes(d.grade)).length;
         let math4Grade, math4Desc;
-        if(goodCount === 4)      { math4Grade = '매우 좋음'; math4Desc = '4격의 획수 합이 모두 길수에 해당합니다.'; }
-        else if(goodCount === 3) { math4Grade = '좋음';     math4Desc = '대부분의 시기에서 길한 수리가 배치되어 있습니다.'; }
+        if(goodCount === 4)      { math4Grade = '매우 좋음'; math4Desc = '4격의 획수 합이 모두 길수(대길·길·평)에 해당합니다.'; }
+        else if(goodCount === 3) { math4Grade = '좋음';     math4Desc = '대부분의 시기에서 무난하거나 길한 수리가 배치되어 있습니다.'; }
         else if(goodCount === 2) { math4Grade = '좋음';     math4Desc = '길수와 흉수가 균형을 이루고 있습니다. 자원오행과 발음으로 보완하면 좋습니다.'; }
         else if(goodCount === 1) { math4Grade = '나쁨';     math4Desc = '흉수가 많아 삶의 굴곡이 예상되므로 보완이 필요합니다.'; }
         else                     { math4Grade = '매우 나쁨'; math4Desc = '4격이 모두 흉수입니다. 작명을 새로 하시는 것을 강력히 권장합니다.'; }
@@ -5790,9 +5791,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const pronGrade = analysisData?.pronounceOheng?.grade || '평';
         const yinGrade  = analysisData?.pronounceYin?.grade  || '평';
 
-        const _normG  = g => g==='대길'?'길':g==='대흉'?'흉':g;
-        const _gColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'})[_normG(g)]||'#64748b';
-        const _gBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        // 구 등급(길/평/흉) + 신 4단계 등급(매우 좋음/좋음/나쁨/매우 나쁨) 모두 지원
+        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g] || g);
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
 
         // ── 글자별 오행 흐름 시각화 ──────────────────────────────────
