@@ -1963,7 +1963,7 @@
                             </div>
                         </div>
                         <div class="wizard-nav" style="margin-top:30px;">
-                            <button type="button" class="wizard-btn-next" onclick="wizardNext(1)">다음 단계로</button>
+                            <button type="button" id="wizard-next-1" class="wizard-btn-next" onclick="wizardNext(1)" disabled style="opacity:0.4;cursor:not-allowed;">다음 단계로</button>
                         </div>
                     </div>
 
@@ -3307,12 +3307,29 @@
     function closeLoginModal() { document.getElementById('login-modal').style.display = 'none'; }
   // 팝업을 열 때 항상 '1개(3만 원)' 옵션이 기본으로 선택되도록 세팅
     // ── 프리미엄 폼 위저드 ─────────────────────────────────────────────
+    function checkStep1Ready() {
+        const btn = document.getElementById('wizard-next-1');
+        if (!btn) return;
+        const bd       = document.getElementById('prem-birth-date')?.value;
+        const lastName = document.getElementById('prem-last-name')?.value?.trim();
+        const hour     = document.getElementById('prem-time-hour')?.value;
+        const ns       = document.querySelector('input[name="prem_name_style"]:checked');
+        const ready    = !!(bd && lastName && hour && ns);
+        btn.disabled      = !ready;
+        btn.style.opacity = ready ? '1' : '0.4';
+        btn.style.cursor  = ready ? 'pointer' : 'not-allowed';
+    }
+
     function wizardNext(step) {
         if (step === 1) {
-            const bd = document.getElementById('prem-birth-date')?.value;
-            if (!bd) { alert('생년월일을 입력해주세요.'); return; }
-            const ns = document.querySelector('input[name="prem_name_style"]:checked');
-            if (!ns) { alert('원하는 이름 스타일을 선택해주세요.'); return; }
+            const bd       = document.getElementById('prem-birth-date')?.value;
+            const lastName = document.getElementById('prem-last-name')?.value?.trim();
+            const hour     = document.getElementById('prem-time-hour')?.value;
+            const ns       = document.querySelector('input[name="prem_name_style"]:checked');
+            if (!bd)       { alert('생년월일을 입력해주세요.'); return; }
+            if (!lastName) { alert('성씨를 입력해주세요.'); return; }
+            if (!hour)     { alert('태어난 시간을 입력해주세요.'); return; }
+            if (!ns)       { alert('이름 스타일을 선택해주세요.'); return; }
         }
         const cur  = document.getElementById(`wstep-${step}`);
         const next = document.getElementById(`wstep-${step + 1}`);
@@ -8079,6 +8096,24 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 if (el) { el.addEventListener('input', () => _syncTimeVal(prefix)); el.addEventListener('change', () => _syncTimeVal(prefix)); }
             });
         });
+
+        // ── Step 1 완성도 체크 (버튼 활성화) ──
+        const _s1Fields = [
+            document.getElementById('prem-birth-date-year'),
+            document.getElementById('prem-birth-date-month'),
+            document.getElementById('prem-birth-date-day'),
+            document.getElementById('prem-time-hour'),
+            document.getElementById('prem-last-name'),
+        ];
+        _s1Fields.forEach(el => {
+            if (!el) return;
+            el.addEventListener('change', checkStep1Ready);
+            el.addEventListener('input',  checkStep1Ready);
+        });
+        document.querySelectorAll('input[name="prem_name_style"]').forEach(el => {
+            el.addEventListener('change', checkStep1Ready);
+        });
+        checkStep1Ready(); // 초기 상태 반영
 
         // 윤달 서브 옵션: 음력 선택 시 표시, 타 선택 시 숨김
         [{ name: 'self_cal_type', leapLabel: 'self-leap-label', leapCheck: 'self-leap-check' },
