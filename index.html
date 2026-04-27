@@ -2168,10 +2168,11 @@
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 1. 이 아이가 태어난 우주</div>
-                        <h2 class="section-title"><span class="term-tip" data-tip="태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.">사주</span> 원국 (四柱八字)</h2>
+                        <h2 class="section-title">사주 원국 (四柱八字)</h2>
                     </div>
                     <button id="toggle-btn-self-ch1" class="chapter-toggle-btn" style="flex-shrink:0;">접기 ↑</button>
                 </div>
+                <div id="verdict-self-ch1" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-self-ch1">
             <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:20px;margin-top:12px;" id="self-saju-meta-label"></p>
@@ -2201,10 +2202,11 @@
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 2. 소리의 기운</div>
-                        <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> &amp; <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
+                        <h2 class="section-title">발음 오행 &amp; 음양 분석</h2>
                     </div>
                     <button id="toggle-btn-self-ch2" class="chapter-toggle-btn" style="flex-shrink:0;">접기 ↑</button>
                 </div>
+                <div id="verdict-self-ch2" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-self-ch2">
             <div id="self-sound-body"></div>
@@ -2224,10 +2226,11 @@
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 3. 획수가 그리는 운명</div>
-                        <h2 class="section-title"><span class="term-tip" data-tip="원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.">사격수리</span> (四格數理) — 인생의 사계절</h2>
+                        <h2 class="section-title">사격수리 (四格數理) — 인생의 사계절</h2>
                     </div>
                     <button id="toggle-btn-self-ch3" class="chapter-toggle-btn" style="flex-shrink:0;">접기 ↑</button>
                 </div>
+                <div id="verdict-self-ch3" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-self-ch3">
             <div id="self-suri-body"></div>
@@ -2247,10 +2250,11 @@
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 4. 수리 보조 지표</div>
-                        <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> &amp; <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
+                        <h2 class="section-title">수리 오행 &amp; 음양 분석</h2>
                     </div>
                     <button id="toggle-btn-self-ch4" class="chapter-toggle-btn" style="flex-shrink:0;">접기 ↑</button>
                 </div>
+                <div id="verdict-self-ch4" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-self-ch4">
             <div id="self-suri-oheng-yin"></div>
@@ -4206,6 +4210,27 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             </div>
             <div class="conclusion-msg" style="border-color:${scoreMsg.border};background:${scoreMsg.bg};color:${scoreMsg.color};font-size:0.95rem;line-height:1.9;">${scoreMsg.text}</div>
             <div class="conclusion-points">${pointsHtml}</div>`;
+
+        // ── 챕터 verdict strip 렌더링 ────────────────────────────────
+        if (typeof _renderVerdict === 'function') {
+            const _wg = (...gs) => {
+                const order = ['매우 나쁨','나쁨','좋음','매우 좋음'];
+                return gs.reduce((w, g) => order.indexOf(_normG(g)) < order.indexOf(w) ? _normG(g) : w, '매우 좋음');
+            };
+            const _ng2 = g => _normG(g); // 4단계 정규화
+            _renderVerdict('verdict-self-ch1',
+                _ng2(data.sajuOheng.grade),
+                `자원오행 <b>${_ng2(data.sajuOheng.grade)}</b>`);
+            _renderVerdict('verdict-self-ch2',
+                _wg(data.pronounceOheng.grade, data.pronounceYin.grade),
+                `발음 오행 <b>${_ng2(data.pronounceOheng.grade)}</b> · 발음 음양 <b>${_ng2(data.pronounceYin.grade)}</b>`);
+            _renderVerdict('verdict-self-ch3',
+                _ng2(data.math4.grade),
+                `사격수리 <b>${_ng2(data.math4.grade)}</b>`);
+            _renderVerdict('verdict-self-ch4',
+                _wg(data.mathOheng.grade, data.mathYin.grade),
+                `수리 오행 <b>${_ng2(data.mathOheng.grade)}</b> · 수리 음양 <b>${_ng2(data.mathYin.grade)}</b>`);
+        }
 
         // ── 실천 가이드 ───────────────────────────────────────────────
         _renderPracticeGuide(null, _currentState, 'self-practice-guide');
