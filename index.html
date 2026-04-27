@@ -3820,15 +3820,36 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // 진단하기 버튼 클릭 시 이벤트
     function runAnalysis() {
-        const lastName = document.getElementById('kr-last-name').value.trim();
+        const lastName  = document.getElementById('kr-last-name').value.trim();
         const firstName = document.getElementById('kr-first-name').value.trim();
-        
-        // 출생일시 검사를 제외하고 이름만 입력해도 넘어가도록 수정
-        if(!lastName || !firstName) { 
-            alert('한글 성과 이름을 정확히 입력해주세요.'); 
-            return; 
+
+        // ① 이름 체크
+        if (!lastName || !firstName) {
+            alert('한글 성과 이름을 정확히 입력해주세요.');
+            return;
         }
-        
+
+        // ② 한자 선택 체크
+        const hanjaSelects = document.querySelectorAll('#hanja-dropdowns select');
+        if (hanjaSelects.length === 0) {
+            alert('이름을 입력하면 자동으로 한자 선택란이 나타납니다.\n한자를 선택해주세요.');
+            return;
+        }
+        for (const sel of hanjaSelects) {
+            if (!sel.value) {
+                alert('모든 글자의 한자를 선택해주세요.');
+                return;
+            }
+        }
+
+        // ③ 생년월일 체크 (연도·월·일 모두 선택해야 hidden 필드 채워짐)
+        const birthYear  = document.getElementById('birth-date-year')?.value;
+        const birthMonth = document.getElementById('birth-date-month')?.value;
+        const birthDay   = document.getElementById('birth-date-day')?.value;
+        if (!birthYear)  { alert('출생 연도를 선택해주세요.'); return; }
+        if (!birthMonth) { alert('출생 월을 선택해주세요.');   return; }
+        if (!birthDay)   { alert('출생 일을 선택해주세요.');   return; }
+
         const data = getAnalysisData(lastName, firstName);
         
         // 입력 폼 내의 "진단 결과 요약" 업데이트
