@@ -1448,14 +1448,18 @@
         .prem-style-pill { position:relative; cursor:pointer; }
         .prem-style-pill input { position:absolute; opacity:0; width:0; height:0; }
         .prem-style-pill .psb {
-            display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+            display:inline-flex; align-items:center; gap:4px; white-space:nowrap;
             padding:7px 14px; background:#f1f5f9; border:1.5px solid #e2e8f0;
             border-radius:20px; cursor:pointer; transition:all 0.2s;
             font-size:0.82rem; font-weight:700; color:#334155; line-height:1;
         }
+        .prem-style-pill .psb .psb-sep { color:#cbd5e1; margin:0 5px; }
+        .prem-style-pill .psb .psb-ex-label { font-size:0.7rem; font-weight:600; color:#94a3b8; }
         .prem-style-pill .psb .psb-ex { font-weight:500; color:#94a3b8; font-size:0.78rem; }
         .prem-style-pill:hover .psb { background:#e2e8f0; }
         .prem-style-pill input:checked ~ .psb { background:#fff8e6; border-color:#b45309; color:#b45309; }
+        .prem-style-pill input:checked ~ .psb .psb-sep,
+        .prem-style-pill input:checked ~ .psb .psb-ex-label,
         .prem-style-pill input:checked ~ .psb .psb-ex { color:#b45309; opacity:0.7; }
         .tooltip-icon { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; background:rgba(255,255,255,0.15); border-radius:50%; font-size:0.68rem; font-weight:800; color:rgba(255,255,255,0.5); cursor:help; margin-left:5px; vertical-align:middle; }
 </style>
@@ -1942,19 +1946,19 @@
                             <div class="prem-style-row">
                                 <label class="prem-style-pill">
                                     <input type="radio" name="prem_name_style" value="global">
-                                    <span class="psb">🌏 글로벌 <span class="psb-ex">서아·지아</span></span>
+                                    <span class="psb">🌏 글로벌<span class="psb-sep">|</span><span class="psb-ex-label">예</span> <span class="psb-ex">서아·지아</span></span>
                                 </label>
                                 <label class="prem-style-pill">
                                     <input type="radio" name="prem_name_style" value="trendy">
-                                    <span class="psb">✨ 트렌디 <span class="psb-ex">하율·이든</span></span>
+                                    <span class="psb">✨ 트렌디<span class="psb-sep">|</span><span class="psb-ex-label">예</span> <span class="psb-ex">하율·이든</span></span>
                                 </label>
                                 <label class="prem-style-pill">
                                     <input type="radio" name="prem_name_style" value="neutral">
-                                    <span class="psb">🍀 무난한 <span class="psb-ex">지윤·서윤</span></span>
+                                    <span class="psb">🍀 무난한<span class="psb-sep">|</span><span class="psb-ex-label">예</span> <span class="psb-ex">지윤·서윤</span></span>
                                 </label>
                                 <label class="prem-style-pill">
                                     <input type="radio" name="prem_name_style" value="traditional">
-                                    <span class="psb">📜 전통 <span class="psb-ex">영근·정호</span></span>
+                                    <span class="psb">📜 전통<span class="psb-sep">|</span><span class="psb-ex-label">예</span> <span class="psb-ex">영근·정호</span></span>
                                 </label>
                             </div>
                         </div>
