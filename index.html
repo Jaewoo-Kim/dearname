@@ -719,8 +719,13 @@
             font-size: 1rem; color: white; font-weight: 800;
         }
         .sci-label {
-            font-size: 0.72rem; font-weight: 700;
-            color: var(--text-secondary); line-height: 1.3;
+            font-size: 0.75rem; font-weight: 700;
+            color: var(--text-primary); line-height: 1.3;
+        }
+        .sci-sub {
+            font-size: 0.64rem; font-weight: 500;
+            color: var(--text-muted); line-height: 1.3;
+            margin-top: 1px;
         }
         .sci-grade-pill {
             font-size: 0.68rem; font-weight: 800;
@@ -6000,12 +6005,20 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 4단계: Section 1 전문 용어 맵
         const CONSUMER_LABEL = {
-            '사주 보완': '자원오행(字源五行)',
-            '발음 오행': '발음오행(發音五行)',
-            '발음 음양': '음양배합(陰陽配合)',
-            '사격수리':  '사격수리(四格數理)',
-            '수리 오행': '수리오행(數理五行)',
-            '수리 음양': '수리음양(數理陰陽)',
+            '사주 보완': '자원오행',
+            '발음 오행': '발음 오행',
+            '발음 음양': '발음 음양',
+            '사격수리':  '사격수리',
+            '수리 오행': '수리 오행',
+            '수리 음양': '수리 음양',
+        };
+        const CONSUMER_SUB = {
+            '사주 보완': '한자 오행으로 사주 보완',
+            '발음 오행': '이름 소리의 오행 상생',
+            '발음 음양': '이름 소리의 음양 균형',
+            '사격수리':  '4격 획수의 길흉 판단',
+            '수리 오행': '4격 오행의 상생 흐름',
+            '수리 음양': '획수 홀짝의 음양 균형',
         };
 
         // 색상 매핑
@@ -6035,9 +6048,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 const bg = G4_BG[x.grade] || '#f8fafc';
                 const ic = G4_ICON[x.grade] || '–';
                 const dispLabel = CONSUMER_LABEL[x.label] || x.label;
+                const dispSub   = CONSUMER_SUB[x.label]   || '';
                 return `<div class="score-criteria-item" style="border-color:${c}40;background:${bg};">
                     <div class="sci-dot" style="background:${c};">${ic}</div>
                     <div class="sci-label">${dispLabel}</div>
+                    ${dispSub ? `<div class="sci-sub">${dispSub}</div>` : ''}
                     <div class="sci-grade-pill" style="background:${c}20;color:${c};">${x.grade}</div>
                 </div>`;
             }).join('') + `</div>`;
