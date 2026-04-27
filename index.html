@@ -1756,9 +1756,9 @@
                         진단 결과 요약 <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-light); padding: 5px 15px; border-radius: 20px;">총 6개 지표 평가 완료</span>
                     </h3>
                     <div class="result-grid">
-                        <!-- 핵심 지표: 사주 보완 + 사격 수리 -->
+                        <!-- 핵심 지표: 자원오행 + 사격 수리 -->
                         <div class="result-row result-row-2">
-                            <div class="result-box"><div class="result-header"><h4>사주 보완</h4><span class="grade-badge" id="res-saju-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-saju-oheng">생년월일을 입력하면 사주 보완 분석이 표시됩니다.</p></div>
+                            <div class="result-box"><div class="result-header"><h4>자원오행</h4><span class="grade-badge" id="res-saju-oheng"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-saju-oheng">생년월일을 입력하면 자원오행 분석이 표시됩니다.</p></div>
                             <div class="result-box"><div class="result-header"><h4>사격 수리</h4><span class="grade-badge" id="res-math-4"></span></div><p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;" id="res-desc-math-4"></p></div>
                         </div>
                         <!-- 보조 지표: 발음 오행·음양 + 수리 오행·음양 -->
@@ -5658,7 +5658,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const _sg4Good = _sg4.filter(g=>g==='매우 좋음'||g==='좋음').length;
             const _sg4Grade = _sg4Good===4?'매우 좋음':_sg4Good>=2?'좋음':_sg4Good===1?'나쁨':'매우 나쁨';
             return [
-                { label:'사주 보완',  sub:'자원오행 매칭',  grade: sajuGrade },
+                { label:'자원오행',   sub:'자원오행 매칭',  grade: sajuGrade },
                 { label:'발음 오행',  sub:'초성 상생 흐름', grade: _pronGrade(fullKr) },
                 { label:'발음 음양',  sub:'모음 음양 균형', grade: _yinGrade(fullKr) },
                 { label:'사격수리',   sub:'원·형·이·정격',  grade: _sg4Grade },
@@ -5672,7 +5672,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const ad = getAnalysisData(familyKr, firstName);
         if (!ad) return [];
         return [
-            { label:'사주 보완',  sub:'사주 오행 보완',  grade: _ng(ad.sajuOheng?.grade)     },
+            { label:'자원오행',   sub:'한자 오행 보완',  grade: _ng(ad.sajuOheng?.grade)     },
             { label:'발음 오행',  sub:'초성 상생 흐름',  grade: _ng(ad.pronounceOheng?.grade) },
             { label:'발음 음양',  sub:'모음 음양 균형',  grade: _ng(ad.pronounceYin?.grade)   },
             { label:'사격수리',   sub:'원·형·이·정격',   grade: _ng(ad.math4?.grade)          },
@@ -5697,13 +5697,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const filled = ((score/100)*C).toFixed(1);
 
         const goodItems = labeledItems.filter(it=>{ const ng=_ng(it.g); return ng==='매우 좋음'||ng==='좋음'; });
-        const badItems  = labeledItems.filter(it=>_ng(it.g)==='매우 나쁨');
-        const midItems  = labeledItems.filter(it=>_ng(it.g)==='나쁨');
+        const badItems  = labeledItems.filter(it=>{ const ng=_ng(it.g); return ng==='나쁨'||ng==='매우 나쁨'; });
 
         const itemsHtml = [
             ...goodItems.map(it=>`<span class="exec-item good">✓ ${it.label}</span>`),
             ...badItems.map(it =>`<span class="exec-item bad">⚠ ${it.label}</span>`),
-            ...midItems.slice(0,2).map(it=>`<span class="exec-item mid">· ${it.label}</span>`),
         ].join('');
 
         return `<div class="exec-summary">
@@ -6123,7 +6121,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 4단계: Section 1 전문 용어 맵
         const CONSUMER_LABEL = {
-            '사주 보완': '자원오행',
+            '자원오행':  '자원오행',
             '발음 오행': '발음 오행',
             '발음 음양': '발음 음양',
             '사격수리':  '사격수리',
@@ -6131,7 +6129,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             '수리 음양': '수리 음양',
         };
         const CONSUMER_SUB = {
-            '사주 보완': '한자 오행으로 사주 보완',
+            '자원오행':  '한자 오행으로 사주 보완',
             '발음 오행': '이름 소리의 오행 상생',
             '발음 음양': '이름 소리의 음양 균형',
             '사격수리':  '4격 획수의 길흉 판단',
