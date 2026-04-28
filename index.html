@@ -4235,8 +4235,21 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // ── 실천 가이드 ───────────────────────────────────────────────
         _renderPracticeGuide(null, _currentState, 'self-practice-guide');
 
-        // ── 저장 ──────────────────────────────────────────────────────
-        _saveSelfReport({ nameKr:`${lastName}${firstName}`, nameHanja:hanjaStr, gender, birthDate:bDate, birthTime:bTime });
+        // ── 저장 (복원에 필요한 전체 상태 포함) ─────────────────────────
+        const _hanjaVals  = Array.from(document.querySelectorAll('#hanja-dropdowns select')).map(s => s.value);
+        const _genderVal  = document.querySelector('[name="self_gender"]:checked')?.value || 'M';
+        const _calTypeVal = _getCalType('self');
+        _saveSelfReport({
+            lastName, firstName,
+            nameKr:    `${lastName}${firstName}`,
+            nameHanja: hanjaStr,
+            gender,                 // 표시용 '남자'/'여자'
+            genderVal: _genderVal,  // 복원용 'M'/'F'
+            birthDate: bDate,
+            birthTime: bTime,
+            hanjaVals: _hanjaVals,  // 한자 드롭다운 선택값 배열
+            calType:   _calTypeVal, // 'solar'|'lunar'|'leap'
+        });
     }
 
     // ── Chart.js 커스텀 플러그인: 대운 배경 음영 ─────────────────
@@ -7266,18 +7279,23 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const el = document.getElementById('mypage-subscription');
         if (!el) return;
         const sub = _getSubscription();
-        if (_isSubscribed() && sub) {
-            const exp = new Date(sub.expiresAt).toLocaleDateString('ko-KR');
+        const isDev = !window.TOSS_CLIENT_KEY; // config.js에서 키 없으면 개발 모드
+        if (_isSubscribed() && (sub || isDev)) {
+            const exp  = sub ? new Date(sub.expiresAt).toLocaleDateString('ko-KR') : null;
+            const label = sub?.label || (isDev ? '개발 모드 (결제 우회)' : '이용권');
+            const expHtml = exp
+                ? `<div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">만료: ${exp}</div>`
+                : `<div style="font-size:0.82rem;color:#16a34a;margin-top:4px;">✓ 모든 기능 이용 가능</div>`;
             el.innerHTML = `
                 <div class="mp-sub-card">
                     <div>
                         <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">현재 이용권</div>
-                        <div style="font-size:1.1rem;font-weight:800;color:var(--bg-dark);">${sub.label || '이용권'} <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:6px;vertical-align:middle;"></span></div>
-                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">만료: ${exp}</div>
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--bg-dark);">${label} <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:6px;vertical-align:middle;"></span></div>
+                        ${expHtml}
                     </div>
                     <div style="display:flex;flex-direction:column;gap:8px;">
-                        <button class="mp-btn mp-btn-gold" onclick="openSubscribeModal()">연장하기</button>
-                        <button class="mp-btn mp-btn-outline" onclick="_cancelSubscription()">구독 취소</button>
+                        ${sub ? `<button class="mp-btn mp-btn-gold" onclick="openSubscribeModal()">연장하기</button>
+                        <button class="mp-btn mp-btn-outline" onclick="_cancelSubscription()">구독 취소</button>` : ''}
                     </div>
                 </div>`;
         } else {
@@ -7306,14 +7324,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             return;
         }
         el.innerHTML = list.map(r => {
-            const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : '';
-            const gender = r.gender || '';
+            const date      = r.createdAt  ? new Date(r.createdAt).toLocaleDateString('ko-KR') : '';
+            const birthInfo = r.birthDate  ? r.birthDate.replace(/-/g, '.') + (r.birthTime ? ' ' + r.birthTime : '') : '';
+            const gender    = r.gender     || '';
+            // 아이콘: nameHanja 첫 글자 (한자), 없으면 nameKr 첫 글자
+            const iconChar  = r.nameHanja  ? r.nameHanja[0] : (r.nameKr ? r.nameKr[0] : '?');
             return `
             <div class="mp-report-row">
-                <div class="mp-report-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">${(r.nameHanja||'?')[0]}</div>
+                <div class="mp-report-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">${iconChar}</div>
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:1.05rem;font-weight:800;color:var(--bg-dark);">${r.nameKr||''} <span style="font-weight:500;color:var(--text-secondary);font-size:0.9rem;">${r.nameHanja||''}</span></div>
-                    <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${date}${gender ? ' · ' + gender : ''}</div>
+                    <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${date}${gender ? ' · ' + gender : ''}${birthInfo ? ' · ' + birthInfo + ' 출생' : ''}</div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
                     <button class="mp-btn mp-btn-gold" onclick="_openSavedSelfReport('${r.id}')">보고서 보기</button>
@@ -7328,12 +7349,47 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const entry = _getSelfReports().find(r => r.id === id);
         if (!entry) { _showToast('보고서를 찾을 수 없습니다.'); return; }
         if (!_isSubscribed()) { openSubscribeModal(); return; }
-        // 저장된 데이터로 셀프 보고서 복원
         _showToast('보고서를 불러오는 중...');
-        // 폼 값 복원 후 뷰 전환
+
+        // ① 이름 복원 (구버전 호환: lastName/firstName 없으면 nameKr 분리)
+        const lastN  = entry.lastName  || (entry.nameKr ? entry.nameKr[0]      : '');
+        const firstN = entry.firstName || (entry.nameKr ? entry.nameKr.slice(1) : '');
+        const lastEl  = document.getElementById('kr-last-name');
+        const firstEl = document.getElementById('kr-first-name');
+        if (lastEl)  lastEl.value  = lastN;
+        if (firstEl) firstEl.value = firstN;
+
+        // ② 성별 라디오 복원 (구버전 호환: genderVal 없으면 gender 문자열로 유추)
+        const gv = entry.genderVal || (entry.gender === '여자' ? 'F' : 'M');
+        const genderEl = document.querySelector(`[name="self_gender"][value="${gv}"]`);
+        if (genderEl) genderEl.checked = true;
+
+        // ③ 날짜·시간 복원
         if (entry.birthDate) _setDateFields('birth-date', entry.birthDate);
         if (entry.birthTime) _setTimeFields('birth', entry.birthTime);
-        setTimeout(showSelfReportViewDirect, 100);
+
+        // ④ 음력 유형 복원 (구버전 호환: calType 없으면 solar)
+        const ct = entry.calType || 'solar';
+        const ctBase = ct === 'leap' ? 'lunar' : ct;
+        const ctEl   = document.querySelector(`[name="self_cal_type"][value="${ctBase}"]`);
+        if (ctEl) ctEl.checked = true;
+        const leapEl = document.getElementById('self-leap-check');
+        if (leapEl) leapEl.checked = (ct === 'leap');
+
+        // ⑤ 한자 드롭다운 재생성 후 선택값 복원
+        generateHanjaSelectors();
+        if (entry.hanjaVals && Array.isArray(entry.hanjaVals)) {
+            document.querySelectorAll('#hanja-dropdowns select').forEach((sel, i) => {
+                const saved = entry.hanjaVals[i];
+                if (!saved) return;
+                // 해당 option 존재 시 선택, 없으면 첫 번째 유지
+                const opt = Array.from(sel.options).find(o => o.value === saved);
+                if (opt) sel.value = saved;
+            });
+        }
+
+        // ⑥ 보고서 뷰 전환 (DOM 반영 후 실행)
+        setTimeout(showSelfReportViewDirect, 80);
     }
 
     function showSelfReportViewDirect() {
