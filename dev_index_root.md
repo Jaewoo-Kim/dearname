@@ -501,6 +501,54 @@ openLoginModal()
 
 ---
 
+### 셀프작명 보고서 버그 수정 및 디자인 정합성 (2026-04-28 세션)
+
+#### ① '좋음' 배지 색상 통일 (프리미엄과 동일)
+
+4개 JS 색상 맵 일괄 수정:
+
+| 위치 | 함수 |
+|---|---|
+| `showSelfReportView()` 결론부 | `_gradeColor`, `_gradeBg` |
+| `_buildSuriSubHtml()` | `_gColor`, `_gBg` |
+| `_renderSoundSection()` | `_gColor`, `_gBg` |
+| `_renderMathSection()` | `_gColor`, `_gBg` |
+
+```
+'좋음' text:  #15803d (초록) → #1d4ed8 (파랑)
+'좋음' bg:    #dcfce7 (연초록) → #eff6ff (연파랑)
+```
+
+#### ② '평' 점수값 보정
+
+`_g2s` 테이블에서 `'평': 35 → 55` (중간값)  
+배지 표시에서 '평'은 '좋음'으로 표시되므로 점수도 중간값에 맞게 조정.
+
+#### ③ `_renderSoundSection` DOM 독립화 (버그 수정)
+
+**버그:** 프리미엄 보고서에서 `_renderSoundSection` 호출 시 `getAnalysisData()`를 통해  
+`birth-date`, `hanja-sel-N` 등 셀프진단 DOM을 읽어 `pronGrade`/`yinGrade`가 잘못 계산됨.  
+`calcSajuOhengGrade()` 예외 발생 시 두 등급이 `'평'`으로 fallback되는 문제.
+
+**수정:** `getAnalysisData()` 호출 제거 → 이미 candidate 기반으로 계산된  
+`ohengs`, `yinYangs` 배열에서 직접 등급 산출 (DOM 독립적).
+
+```js
+// Before (DOM 의존)
+const analysisData = getAnalysisData(familyKr, firstName);
+const pronGrade = analysisData?.pronounceOheng?.grade || '평';
+
+// After (candidate 직접 계산)
+const _tp = Math.max(ohengs.length - 1, 1);
+const _bp = ohengs.reduce((cnt, o, i) =>
+    i < ohengs.length - 1 ? cnt + (isSangsaeng(o, ohengs[i+1]) ? 0 : 1) : cnt, 0);
+const pronGrade = _bp === 0 ? '매우 좋음' : _bp === _tp ? '매우 나쁨'
+                : _bp * 2 <= _tp ? '좋음' : '나쁨';
+const yinGrade  = yinYangs.every(y => y === yinYangs[0]) ? '매우 나쁨' : '매우 좋음';
+```
+
+---
+
 ## 6. 배포 설정
 
 ### 파일 목록
