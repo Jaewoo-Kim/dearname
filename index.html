@@ -5808,11 +5808,18 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 : getYYByChr(c)
         );
 
-        // ── 등급 계산 ────────────────────────────────────────────────
-        const analysisData = (typeof getAnalysisData === 'function')
-            ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
-        const pronGrade = analysisData?.pronounceOheng?.grade || '평';
-        const yinGrade  = analysisData?.pronounceYin?.grade  || '평';
+        // ── 등급 계산 (candidate 직접 계산 — DOM 독립적) ─────────────
+        // getAnalysisData()는 셀프진단 DOM(birth-date, hanja-sel-N 등)을 읽기 때문에
+        // 프리미엄 보고서에서 호출하면 잘못된 값이 나오거나 예외가 발생할 수 있음.
+        // ohengs / yinYangs 는 이미 위에서 candidate 기반으로 올바르게 계산됨.
+        const _tp = Math.max(ohengs.length - 1, 1);
+        const _bp = ohengs.reduce((cnt, o, i) =>
+            i < ohengs.length - 1 ? cnt + (isSangsaeng(o, ohengs[i+1]) ? 0 : 1) : cnt, 0);
+        const pronGrade = _bp === 0           ? '매우 좋음'
+                        : _bp === _tp         ? '매우 나쁨'
+                        : _bp * 2 <= _tp      ? '좋음' : '나쁨';
+        const yinGrade  = yinYangs.length > 0 && yinYangs.every(y => y === yinYangs[0])
+                        ? '매우 나쁨' : '매우 좋음';
 
         // 구 등급(길/평/흉) + 신 4단계 등급(매우 좋음/좋음/나쁨/매우 나쁨) 모두 지원
         const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g] || g);
