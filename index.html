@@ -151,10 +151,10 @@
 
         /* 영역별 평가 뱃지 (매우 좋음, 좋음, 나쁨, 매우 나쁨) */
         .grade-badge { padding: 6px 16px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.5px; display: inline-block;}
-        .grade-very-good { background: rgba(34, 197, 94, 0.15); color: #14532d; border: 1px solid rgba(34, 197, 94, 0.4); }
-        .grade-high      { background: rgba(34, 197, 94, 0.08); color: #166534; border: 1px solid rgba(34, 197, 94, 0.25); }
-        .grade-mid       { background: rgba(234, 179, 8,  0.1);  color: #854d0e; border: 1px solid rgba(234, 179, 8,  0.3); }
-        .grade-low       { background: rgba(239, 68,  68, 0.1);  color: #991b1b; border: 1px solid rgba(239, 68,  68, 0.3); }
+        .grade-very-good { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .grade-high      { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .grade-mid       { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .grade-low       { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 
         .tech-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden;}
         .tech-table th, .tech-table td { padding: 20px; border-bottom: 1px solid var(--border-light); text-align: left; font-size: 1.05rem; line-height: 1.6; }
@@ -3959,7 +3959,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // ── 총점 계산 ─────────────────────────────────────────────────
         const _g2s = { '매우 좋음':100,'좋음':75,'나쁨':35,'매우 나쁨':10,
-                       '대길':100,'길':75,'평':35,'흉':10,'대흉':10 }; // SURI_DATA 내부값 호환
+                       '대길':100,'길':75,'평':55,'흉':35,'대흉':10 }; // SURI_DATA 내부값 호환 (평=중간)
         const _scored = [
             { g: sGrades[0].grade, w:2 }, { g: sGrades[1].grade, w:2 },
             { g: sGrades[2].grade, w:2 }, { g: sGrades[3].grade, w:2 },
@@ -3988,8 +3988,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _OHENG_COLOR_R = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
         const _OHENG_KR_R    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const _normG      = g => _GRADE4[g] || g; // 구 등급 → 4단계 (applyBadge와 동일 맵 사용)
-        const _gradeColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'}[_normG(g)]||'#64748b');
-        const _gradeBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'}[_normG(g)]||'#f1f5f9');
+        const _gradeColor = g => ({'매우 좋음':'#14532d','좋음':'#1d4ed8','나쁨':'#92400e','매우 나쁨':'#dc2626'}[_normG(g)]||'#64748b');
+        const _gradeBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'}[_normG(g)]||'#f1f5f9');
         const _badgeHtml  = (g,label) => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gradeBg(ng)};color:${_gradeColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${label||ng}</span>`; };
         const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
         const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
@@ -5464,8 +5464,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // ── 수리음양/수리오행 서브 섹션 HTML 빌더 (셀프/프리미엄 공통) ──
     function _buildSuriSubHtml(mathYin, mathOheng) {
         const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
-        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
-        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#1d4ed8','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const badge   = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
 
         // 수리오행 — 오행 흐름 시각화용
@@ -5553,8 +5553,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const rawNums = [g1, g2, g3, g4];
 
         const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
-        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
-        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#1d4ed8','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
         const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
         const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
@@ -5816,8 +5816,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 구 등급(길/평/흉) + 신 4단계 등급(매우 좋음/좋음/나쁨/매우 나쁨) 모두 지원
         const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g] || g);
-        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
-        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#1d4ed8','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
         const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
 
         // ── 글자별 오행 흐름 시각화 ──────────────────────────────────
