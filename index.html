@@ -478,12 +478,93 @@
         .payment-content p { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 30px; line-height: 1.6;}
         .price-tag { font-size: 2.5rem; font-weight: 900; color: var(--gold-premium); margin-bottom: 40px; }
 
-        /* 반응형 */
+        /* ── 햄버거 메뉴 버튼 ─────────────────────────────────── */
+        .nav-hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            margin-left: auto;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .nav-hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--bg-dark);
+            border-radius: 2px;
+            transition: transform 0.28s ease, opacity 0.2s ease;
+            transform-origin: center;
+        }
+        .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ── 전역 터치 최적화 ──────────────────────────────────── */
+        button, a, [onclick] { touch-action: manipulation; }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* ── 반응형 ────────────────────────────────────────────── */
         @media (max-width: 992px) {
             .theory-split { flex-direction: column; align-items: stretch; }
             .theory-split .diagram-area { margin-top: 30px; padding: 40px 20px; }
         }
         @media (max-width: 768px) {
+            /* ─ 햄버거 버튼 노출 ─ */
+            .nav-hamburger { display: flex; }
+
+            /* ─ 모바일 메뉴 드로어 ─ */
+            .main-nav-links.mobile-open {
+                display: flex !important;
+                flex-direction: column;
+                align-items: stretch;
+                position: fixed;
+                top: 61px; left: 0; right: 0;
+                background: #fff;
+                padding: 10px 16px 24px;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.13);
+                border-top: 1px solid #f1f5f9;
+                z-index: 150;
+                max-height: calc(100vh - 61px);
+                overflow-y: auto;
+                animation: mobileMenuSlide 0.22s ease;
+            }
+            @keyframes mobileMenuSlide {
+                from { opacity: 0; transform: translateY(-8px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+            .main-nav-links.mobile-open a {
+                margin-left: 0;
+                padding: 15px 16px;
+                border-radius: 12px;
+                border-bottom: 1px solid #f8fafc;
+                font-size: 1rem;
+                text-align: left;
+            }
+            .main-nav-links.mobile-open a.premium-link {
+                margin-top: 6px;
+                text-align: center;
+                border: 1px solid var(--border-gold);
+            }
+            .main-nav-links.mobile-open a.login-link {
+                margin-left: 0;
+                margin-top: 6px;
+                text-align: center;
+                display: block;
+            }
+            .main-nav-links.mobile-open #user-badge {
+                margin-left: 0 !important;
+                margin-top: 6px;
+                justify-content: center;
+                width: 100%;
+            }
+
+            /* ─ 그리드 1열 ─ */
             .core-report-box, .intro-grid, .advice-grid, .theory-example-grid, .form-grid, .suri-grid { grid-template-columns: 1fr; }
             .theory-row-2, .theory-row-3 { grid-template-columns: 1fr; }
             .theory-grid-uniform { grid-template-columns: 1fr; }
@@ -497,10 +578,12 @@
             .report-selector-area { gap: 12px; }
             .name-card-tab { width: calc(50% - 6px); min-width: 0; padding: 14px 12px; }
             .card-kr { font-size: 1.25rem; }
-            section { padding: 80px 20px; }
-            .hero { padding: 180px 20px 120px; }
+            section { padding: 60px 20px; }
+            .hero { padding: 140px 20px 90px; }
             .hero h1 { font-size: 3rem; letter-spacing: -1.5px; }
             .hero-badge-sep { display: none; }
+            .hero-sub { font-size: 1.15rem; }
+            .hero-cta .btn { padding: 16px 32px; }
             .report-header h1 { font-size: 3rem; }
             .report-header h1 span { display: block; margin: 10px 0 0; }
             .report-card, #theory-detail-view .report-card { padding: 30px 20px; }
@@ -509,16 +592,40 @@
             .meaning-text h4 { justify-content: center; }
             .premium-box { padding: 50px 20px; }
             .tech-table th, .tech-table td { display: block; width: 100%; }
-            .main-nav-links a.login-link { margin-left: 15px; padding: 8px 16px; }
             .split-grid { grid-template-columns: 1fr; gap: 20px; }
             .title-flex-container { flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 40px; }
             .theory-intro-box { padding: 20px; }
         }
         @media (max-width: 480px) {
-            /* 소형 폰: 이름 탭 1열 */
+            /* ─ 소형 폰 전반 ─ */
+            section { padding: 44px 16px; }
+            .hero { padding: 110px 16px 64px; }
+            .hero h1 { font-size: 2.3rem; letter-spacing: -1px; }
+            .hero-eyebrow { font-size: 0.85rem; letter-spacing: 2px; }
+            .hero-sub { font-size: 1.05rem; margin-bottom: 36px; }
+            .hero-sub br { display: none; }
+            .hero-cta { gap: 10px; }
+            .hero-cta .btn { padding: 14px 24px; font-size: 0.95rem; width: 100%; max-width: 320px; }
+            .hero-badges { gap: 20px; }
+            .hero-badge-num { font-size: 1.25rem; }
+            /* ─ 카드 패딩 ─ */
+            .report-card, #theory-detail-view .report-card { padding: 22px 14px; }
+            .premium-box { padding: 32px 16px; }
+            .modal-content { padding: 32px 20px; border-radius: 20px; }
+            /* ─ 이름 탭 1열 ─ */
             .name-card-tab { width: 100%; }
+            /* ─ 사주 ─ */
             .saju-hanja { font-size: 1.8rem; }
             .saju-story { display: none; }
+            /* ─ 보고서 헤더 ─ */
+            .report-header h1 { font-size: 2.2rem; }
+            /* ─ 섹션 제목 ─ */
+            .section-title { font-size: 1.5rem; }
+            h2.section-title { font-size: 1.55rem; }
+            /* ─ 어드바이스 카드 패딩 ─ */
+            .advice-card { padding: 28px 18px; }
+            /* ─ 결론 그리드 ─ */
+            .ai-conclusion-grid, .conclusion-points { grid-template-columns: 1fr; }
         }
 /* =========================================
            [수정완료] 결제 모달 전용 스타일
@@ -1476,13 +1583,16 @@
 <nav>
     <div class="nav-inner">
         <a onclick="showMainView()" class="logo">디어네임</a>
+        <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="메뉴 열기/닫기" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
         <div class="main-nav-links" id="main-nav">
-            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('report').scrollIntoView();}, 100);">보고서 미리보기</a>
-            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('theory').scrollIntoView();}, 100);">작명 기준</a>
-            <a onclick="showMainView(); setTimeout(()=>{document.getElementById('self-naming').scrollIntoView();}, 100);">셀프 작명</a>
-            <a class="premium-link" onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 작명 의뢰</a>
-            <a class="login-link" onclick="openLoginModal()">로그인</a>
-            <div id="user-badge" style="display:none;align-items:center;gap:8px;cursor:pointer;margin-left:20px;" onclick="showMypageView()" title="마이페이지">
+            <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('report').scrollIntoView();}, 100);">보고서 미리보기</a>
+            <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('theory').scrollIntoView();}, 100);">작명 기준</a>
+            <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('self-naming').scrollIntoView();}, 100);">셀프 작명</a>
+            <a class="premium-link" onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 작명 의뢰</a>
+            <a class="login-link" onclick="closeMobileMenu(); openLoginModal()">로그인</a>
+            <div id="user-badge" style="display:none;align-items:center;gap:8px;cursor:pointer;margin-left:20px;" onclick="closeMobileMenu(); showMypageView()" title="마이페이지">
                 <img class="user-avatar" src="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:none;">
                 <a class="login-link" style="margin-left:0;cursor:pointer;">마이페이지</a>
             </div>
@@ -3185,6 +3295,30 @@
         }
     });
 
+    // ── 모바일 햄버거 메뉴 ───────────────────────────────────────
+    function toggleMobileMenu() {
+        const mn  = document.getElementById('main-nav');
+        const btn = document.getElementById('nav-hamburger');
+        const isOpen = mn.classList.contains('mobile-open');
+        if (isOpen) {
+            closeMobileMenu();
+        } else {
+            mn.classList.add('mobile-open');
+            mn.style.display = 'flex';
+            btn.classList.add('open');
+            btn.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    function closeMobileMenu() {
+        const mn  = document.getElementById('main-nav');
+        const btn = document.getElementById('nav-hamburger');
+        mn.classList.remove('mobile-open');
+        mn.style.display = '';          // CSS 기본값으로 복귀 (모바일: none, 데스크탑: flex)
+        if (btn) { btn.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+        document.body.style.overflow = '';
+    }
+
     // 뷰 전환 로직
     function showMainView() {
         document.getElementById('report-view').style.display        = 'none';
@@ -3193,7 +3327,8 @@
         document.getElementById('mypage-view').style.display        = 'none';
         document.getElementById('main-view').style.display          = 'block';
         document.getElementById('report-nav').style.display         = 'none';
-        document.getElementById('main-nav').style.display           = 'flex';
+        closeMobileMenu();
+        document.getElementById('nav-hamburger').style.display      = '';
     }
 
     function showReportViewWithoutLock() {
@@ -3324,7 +3459,9 @@
         document.getElementById('self-report-view').style.display = 'none';
         document.getElementById('theory-detail-view').style.display = 'none';
         document.getElementById('report-view').style.display = 'block';
+        closeMobileMenu();
         document.getElementById('main-nav').style.display = 'none';
+        document.getElementById('nav-hamburger').style.display = 'none';
         document.getElementById('report-nav').style.display = 'block';
         document.getElementById('load-more-btn').style.display = 'none';
         window.scrollTo(0, 0);
@@ -3340,7 +3477,9 @@
         document.getElementById('report-view').style.display = 'none';
         document.getElementById('self-report-view').style.display = 'none';
         document.getElementById('theory-detail-view').style.display = 'block';
+        closeMobileMenu();
         document.getElementById('main-nav').style.display = 'none';
+        document.getElementById('nav-hamburger').style.display = 'none';
         document.getElementById('report-nav').style.display = 'block';
         window.scrollTo(0, 0);
     }
@@ -3942,7 +4081,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         ['main-view','report-view','theory-detail-view'].forEach(id => document.getElementById(id).style.display = 'none');
         document.getElementById('self-report-view').style.display = 'block';
+        closeMobileMenu();
         document.getElementById('main-nav').style.display   = 'none';
+        document.getElementById('nav-hamburger').style.display = 'none';
         document.getElementById('report-nav').style.display = 'block';
         window.scrollTo(0, 0);
 
@@ -7258,7 +7399,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         document.getElementById('self-report-view').style.display  = 'none';
         document.getElementById('theory-detail-view').style.display= 'none';
         document.getElementById('mypage-view').style.display       = 'block';
+        closeMobileMenu();
         document.getElementById('main-nav').style.display          = 'none';
+        document.getElementById('nav-hamburger').style.display     = 'none';
         document.getElementById('report-nav').style.display        = 'block';
         window.scrollTo(0, 0);
 
@@ -7421,7 +7564,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // 구독 체크 없이 직접 보고서 뷰로 이동 (마이페이지 복원용)
         ['main-view','report-view','theory-detail-view','mypage-view'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
         document.getElementById('self-report-view').style.display = 'block';
+        closeMobileMenu();
         document.getElementById('main-nav').style.display   = 'none';
+        document.getElementById('nav-hamburger').style.display = 'none';
         document.getElementById('report-nav').style.display = 'block';
         window.scrollTo(0,0);
         showSelfReportView();
