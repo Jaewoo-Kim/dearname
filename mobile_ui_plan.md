@@ -196,3 +196,321 @@ Phase 2 변경량: +12줄 CSS
 Phase 3 변경량: +8줄 CSS
 총 예상 변경: ~26줄
 ```
+
+---
+---
+
+# 2차 모바일 UI 개선 기획서
+
+> 기준일: 2026-05-02  
+> 배경: 사용자 실기기 스크린샷 2차 분석 — 탭·폼·결과 그리드 영역
+
+---
+
+## A. 현황 요약 — 신규 문제 영역
+
+1차 기획(Phase 1~3)에서 처리한 패딩·폰트 이슈와 별개로,  
+**입력 폼 구조 / 탭 UI / 결과 그리드** 세 영역에 구조적 레이아웃 파괴가 존재.
+
+---
+
+## B. 문제점 분석
+
+### 🔴 Critical — 레이아웃 파괴 수준
+
+#### F1. `.birth-form-area` — 출생 입력 행 모바일 전면 붕괴
+
+**현재 구조:**
+```
+[연도▼] [월▼] [일▼] [양력|음력] | [오전|오후] [시▼] [분▼] [출생지▼▼▼▼▼▼▼▼]
+```
+- 총 8개 요소가 `display:flex; flex-wrap:wrap` 한 행에 나열
+- 최소 필요 너비: ~650px (연도 106 + 월+일 각 ~80 + pill ~100 + sep + ampm ~90 + 시 70 + 분 74 + 출생지 90)
+- 390px 화면에서 `flex-wrap:wrap`이 발동되나 **줄바꿈 경계가 예측 불가**
+  → 출생지 select가 시간 select 사이에 끼거나, 양력/음력 pill이 고립되는 등 랜덤 배치
+
+**수정 방향 — HTML 구조 수정 + CSS:**
+```
+[행 1 — 날짜] [연도▼] [월▼] [일▼] [양력|음력]
+[행 2 — 시간] [오전|오후] [시▼] [분▼]
+[행 3 — 지역] [출생지▼▼▼▼▼▼▼▼▼▼▼▼▼▼]
+```
+
+**구체적 수정:**
+1. HTML: `birth-form-area` 내부를 3개 `<div class="bf-row">` 로 그루핑
+   - `.bf-row--date`: 연도·월·일·양력음력 pill
+   - `.bf-row--time`: 오전오후·시·분
+   - `.bf-row--city`: 출생지 select
+2. CSS(768px):
+   ```css
+   .birth-form-area { flex-direction: column; gap: 10px; align-items: stretch; }
+   .bf-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+   .bf-row--date .bf-select { flex: 1; min-width: 0; }
+   .bf-row--city .bf-city-select { width: 100%; }
+   .bf-sep { display: none; }
+   ```
+3. 대상 섹션: `#self-naming` + `#premium` wizard step 1 + step 3 부모 사주 행 (동일 구조 3곳)
+
+---
+
+#### F2. `#hanja-dropdowns` — 한자 드롭다운 인라인 flex 고정
+
+**현재:**
+```html
+<div id="hanja-dropdowns" style="display: flex; gap: 20px;"></div>
+```
+- 2개 `.hanja-block` (성·이름)이 `flex:1`로 나란히 배치
+- 390px 기준 각 block: (390 - 28pad*2 - 20gap) / 2 ≈ **157px** → 내부 select 극도로 압축
+
+**수정:**
+- HTML: inline style `style="display: flex; gap: 20px;"` → class="hanja-dropdowns-flex" 로 전환 (inline 제거)
+- CSS:
+  ```css
+  .hanja-dropdowns-flex { display: flex; gap: 20px; }
+  /* 768px */
+  .hanja-dropdowns-flex { flex-direction: column; gap: 14px; }
+  ```
+- `#hanja-dropdowns` 를 id selector로 직접 오버라이드해도 가능 (inline style 제거 후):
+  ```css
+  /* 768px */
+  #hanja-dropdowns { flex-direction: column; gap: 14px; }
+  ```
+
+---
+
+### 🟠 Major — 가독성·사용성 저하
+
+#### F3. 폼 섹션 h3 타이틀 인라인 폰트 미적용
+
+**현재:**
+```html
+<h3 style="font-size: 2rem; ...">우리 아이 이름을 직접 지어보아요.</h3>
+```
+- inline style → CSS media query가 덮을 수 없음
+- 390px에서 2rem(32px) 제목 2줄 → 과도한 공간 차지
+
+**수정:**
+- HTML: `style="font-size:2rem"` 제거 → `.form-card-title` class 추가
+- CSS:
+  ```css
+  .form-card-title { font-size: 2rem; margin-bottom: 12px; font-weight: 800; }
+  /* 768px */
+  .form-card-title { font-size: 1.55rem; }
+  /* 480px */
+  .form-card-title { font-size: 1.35rem; }
+  ```
+
+---
+
+#### F4. `.result-row-4` — 진단결과 4열 그리드 모바일 미해제
+
+**현재:**
+```css
+.result-row-4 { grid-template-columns: repeat(4, 1fr); }
+```
+- 390px에서 4열 = 각 셀 약 **80px** → 내용이 모두 overflow·압축
+
+**수정:**
+```css
+/* 768px */
+.result-row-4 { grid-template-columns: repeat(2, 1fr); }
+/* 480px */
+.result-row-4 { grid-template-columns: 1fr; }
+```
+
+---
+
+#### F5. `#analysis-result-area` h3 — 진단결과 헤더 flex overflow
+
+**현재:**
+```html
+<h3 style="display: flex; align-items: center; justify-content: space-between;">
+    진단 결과 요약
+    <span style="...">총 6개 지표 평가 완료</span>
+</h3>
+```
+- 좁은 화면에서 뱃지 텍스트가 h3와 같은 줄에 들어가지 않아 overflow·압축
+
+**수정:**
+- HTML: inline style → `.result-summary-header` class
+- CSS:
+  ```css
+  .result-summary-header { font-size:1.6rem; font-weight:800; display:flex; align-items:center; justify-content:space-between; margin-bottom:25px; }
+  /* 768px */
+  .result-summary-header { flex-direction: column; align-items: flex-start; gap: 8px; font-size: 1.3rem; }
+  ```
+
+---
+
+#### F6. `.result-box` padding 모바일 미축소
+
+**현재:**
+```css
+.result-box { padding: 30px; }
+```
+- 768px 이하 오버라이드 없음
+
+**수정:**
+```css
+/* 768px */
+.result-box { padding: 20px 16px; border-radius: 18px; }
+/* 480px */
+.result-box { padding: 16px 12px; }
+```
+
+---
+
+#### F7. Wizard 탭 텍스트 overflow
+
+**현재:**
+```css
+.wizard-progress { display: flex; gap: 16px; }
+.tab-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+```
+- 3개 탭 (`① 기본 정보` / `② 작명 방향` / `③ 심층 분석`) 이 가로 배치
+- 390px 화면에서 각 탭 ~113px → 한국어 텍스트 넘침
+
+**수정:**
+```css
+/* 768px */
+.wizard-progress { gap: 8px; margin-bottom: 32px; }
+.tab-label { font-size: 0.72rem; letter-spacing: 0; }
+/* 480px */
+.tab-label { font-size: 0.68rem; }
+```
+
+---
+
+#### F8. 프리미엄 섹션 헤드 h2 폰트·줄바꿈
+
+**현재:**
+```html
+<h2 class="section-title" style="color:white; font-size:2.8rem; margin-bottom:20px;">
+    우리 아이에게 꼭 맞는 이름,<br>직접 지어드립니다.
+</h2>
+```
+- inline `font-size:2.8rem` → CSS 오버라이드 불가
+- `<br>` 태그: 모바일에서 원치 않는 위치에서 줄바꿈
+
+**수정:**
+- HTML: inline `font-size` 제거 → `.section-title` CSS로 관리
+- CSS `.section-title`:
+  ```css
+  /* 기존 전역 */
+  .section-title { font-size: 2.8rem; }  /* 이미 존재하면 통합 */
+  /* 768px */
+  .section-title { font-size: 2rem; }
+  /* 480px */
+  .section-title { font-size: 1.7rem; }
+  ```
+- `<br>` → CSS `br.mobile-hide { display: none }` 또는 HTML에서 제거하고 CSS word-break 위임
+
+---
+
+### 🟡 Minor — 세부 폴리싱
+
+#### F9. 섹션 상하 패딩 압축 (스크롤 길이)
+
+**현재:**
+```html
+<section id="premium" style="padding-top:100px; padding-bottom:120px;">
+```
+- inline style로 고정 → 모바일에서도 동일 패딩 유지
+
+**수정 방향:**
+- HTML inline `padding-top/bottom` → CSS class 관리로 전환하거나
+- 전역 `section { ... }` 모바일 오버라이드:
+  ```css
+  /* 768px */
+  .section-inner { padding-top: 60px; padding-bottom: 70px; }
+  ```
+- 분석 결과: 스크롤 단축 **최대 40%** 기대 (각 섹션 160~220px → 120~130px)
+
+---
+
+#### F10. `#analysis-result-area` 상단 margin/padding
+
+**현재:**
+```css
+#analysis-result-area { margin-top: 50px; padding-top: 50px; }
+```
+**수정:**
+```css
+/* 768px */
+#analysis-result-area { margin-top: 32px; padding-top: 32px; }
+```
+
+---
+
+#### F11. `.form-card p` (소개 문구) 모바일 폰트
+
+**현재:**
+```html
+<p style="font-size:1.05rem; margin-bottom:40px;">마음에 두고 있는 이름이...</p>
+```
+**수정:**
+- CSS:
+  ```css
+  /* 768px */
+  .form-card > p { font-size: 0.97rem; margin-bottom: 28px; }
+  ```
+
+---
+
+## C. 개선 계획 (우선순위별)
+
+### Phase 4 — Critical 폼 구조 (F1~F2)
+> HTML 수정 포함. 입력 폼 전체 사용 불가 수준.
+
+| 항목 | 변경 내용 | 난이도 |
+|---|---|---|
+| `.birth-form-area` | HTML: 3개 `.bf-row` div로 그루핑 + CSS flex-direction:column | HTML+CSS |
+| `#hanja-dropdowns` | HTML: inline style 제거 + CSS `flex-direction:column` | HTML+CSS |
+
+### Phase 5 — Major 가독성 (F3~F8)
+> CSS 위주, 일부 HTML inline style 클래스로 전환.
+
+| 항목 | 변경 내용 |
+|---|---|
+| 폼 h3 타이틀 | HTML class 전환 + `768px: 1.55rem` / `480px: 1.35rem` |
+| `.result-row-4` | `768px: 2열` / `480px: 1열` |
+| 진단결과 헤더 h3 | HTML class 전환 + `768px: flex-direction:column` |
+| `.result-box` | `768px: padding 20px 16px` / `480px: 16px 12px` |
+| `.wizard-progress` | `768px: gap:8px` / `.tab-label: 0.72rem` |
+| 프리미엄 h2 | HTML inline 제거 + CSS `.section-title 768px: 2rem` |
+
+### Phase 6 — Minor 폴리싱 (F9~F11)
+
+| 항목 | 변경 내용 |
+|---|---|
+| 섹션 패딩 (스크롤 압축) | `section-inner` 또는 각 section inline padding → CSS 이관 |
+| `#analysis-result-area` | `768px: margin-top/padding-top: 32px` |
+| `.form-card > p` | `768px: 0.97rem; margin-bottom:28px` |
+
+---
+
+## D. 구현 위치
+
+| Phase | 변경 파일 | 변경 유형 | 예상 줄수 |
+|---|---|---|---|
+| Phase 4 | `index.html` HTML 구조 | HTML div 그루핑 2곳×3 = 6블록 | +18줄 HTML |
+| Phase 4 | `index.html` CSS 768px | `.birth-form-area`, `.bf-row`, `#hanja-dropdowns` | +8줄 CSS |
+| Phase 5 | `index.html` HTML inline 제거 | h3, h2, result h3 (class 전환) | HTML 수정 5곳 |
+| Phase 5 | `index.html` CSS 768px+480px | F3~F8 | +14줄 CSS |
+| Phase 6 | `index.html` CSS | F9~F11 | +6줄 CSS |
+
+```
+총 예상 변경: HTML 수정 ~24곳 + CSS ~28줄 추가
+```
+
+---
+
+## E. 적용 우선순위 판단
+
+```
+Phase 4 (F1 birth-form-area) → 즉시 적용 필수
+Phase 4 (F2 hanja-dropdowns) → 즉시 적용 필수
+Phase 5 (F4 result-row-4) → CSS만, 즉시 가능
+Phase 5 (F3, F5~F8) → 1~2일 내
+Phase 6 → 여유 시
+```
