@@ -588,13 +588,39 @@
             .report-header h1 span { display: block; margin: 10px 0 0; }
             .report-card, #theory-detail-view .report-card { padding: 30px 20px; }
             .chart-container-large { padding: 20px; height: 250px;}
-            .meaning-item { flex-direction: column; align-items: center; text-align: center; }
+            .meaning-item { flex-direction: column; align-items: center; text-align: center; margin-bottom: 28px; padding-bottom: 28px; gap: 20px; }
             .meaning-text h4 { justify-content: center; }
             .premium-box { padding: 50px 20px; }
             .tech-table th, .tech-table td { display: block; width: 100%; }
             .split-grid { grid-template-columns: 1fr; gap: 20px; }
             .title-flex-container { flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 40px; }
             .theory-intro-box { padding: 20px; }
+
+            /* ─ Phase 1: Critical ─ */
+            /* report-visual 패딩 (AI 소견서 미리보기 카드) */
+            .report-visual { padding: 28px 20px; }
+            .report-visual h4 { font-size: 1.2rem; }
+            .report-narrative { padding: 16px; margin: 20px 0; font-size: 0.95rem; }
+            /* form-card 패딩 (셀프 작명 폼) */
+            .form-card { padding: 28px 16px; border-radius: 20px; }
+            /* full-width-form: 1열 그리드에서 span 해제 */
+            .full-width-form { grid-column: span 1; }
+
+            /* ─ Phase 2: Major ─ */
+            /* intro-grid gap 축소 (1열 전환 후) */
+            .intro-grid { gap: 32px; }
+            /* highlight-quote 폰트 축소 */
+            .highlight-quote { font-size: 1.35rem; }
+            /* 소개 섹션 한자 원 축소 */
+            .hanja-circle { width: 72px; height: 72px; font-size: 2rem; border-width: 3px; }
+            /* 타임라인 좌측 오프셋 축소 */
+            .timeline { padding-left: 28px; margin-left: 8px; }
+            .time-step { margin-bottom: 36px; }
+            .time-step::before { left: -37px; }
+            .time-step h4 { font-size: 1.15rem; }
+
+            /* ─ Phase 3: Minor ─ */
+            .advice-card { padding: 28px 20px; }
         }
         @media (max-width: 480px) {
             /* ─ 소형 폰 전반 ─ */
@@ -608,8 +634,10 @@
             .hero-cta .btn { padding: 14px 24px; font-size: 0.95rem; width: 100%; max-width: 320px; }
             .hero-badges { gap: 20px; }
             .hero-badge-num { font-size: 1.25rem; }
-            /* ─ 카드 패딩 ─ */
+            /* ─ 카드 패딩 (추가 축소) ─ */
             .report-card, #theory-detail-view .report-card { padding: 22px 14px; }
+            .report-visual { padding: 20px 14px; }
+            .form-card { padding: 20px 12px; }
             .premium-box { padding: 32px 16px; }
             .modal-content { padding: 32px 20px; border-radius: 20px; }
             /* ─ 이름 탭 1열 ─ */
@@ -626,6 +654,12 @@
             .advice-card { padding: 28px 18px; }
             /* ─ 결론 그리드 ─ */
             .ai-conclusion-grid, .conclusion-points { grid-template-columns: 1fr; }
+            /* ─ 타임라인 추가 축소 ─ */
+            .timeline { padding-left: 22px; margin-left: 4px; }
+            .time-step { margin-bottom: 28px; }
+            .time-step::before { left: -30px; width: 14px; height: 14px; }
+            /* ─ 한자 원 추가 축소 ─ */
+            .hanja-circle { width: 60px; height: 60px; font-size: 1.7rem; }
         }
 /* =========================================
            [수정완료] 결제 모달 전용 스타일
