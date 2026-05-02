@@ -70,7 +70,7 @@ index.html 인라인 <script> ← 위 전역 변수 모두 참조
 | `saju-engine.js` | `MANJURYEOK` |
 | `name-spec.js` | `getSeoryeokStatus()` (saju-engine) |
 | `name-search.js` (Worker) | `HANJA_DB_FULL`, `BULYONG_HANJA`, `SURI_DATA` |
-| `claude-report.js` | `SURI_DATA`, `getSeoryeokStatus()` |
+| `claude-report.js` | `SURI_DATA`, `getSeoryeokStatus()`, `window.getCho`, `window.getOhengFromCho`, `window.getYinYangFromJung` |
 | `index.html inline` | 위 전부 + `window.getCho`, `window.getOhengFromCho`, `window.getYinYangFromJung` |
 
 > `window.getCho` 등 3개 함수는 `index.html` 인라인 스크립트 내에서 선언되어  
