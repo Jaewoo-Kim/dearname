@@ -575,11 +575,16 @@
         .exec-stars { font-size:1rem;color:var(--gold-premium);letter-spacing:3px;margin-bottom:8px; }
         .exec-msg { font-size:0.92rem;color:var(--text-secondary);font-style:italic;border-left:3px solid var(--gold-premium);padding-left:12px;margin:8px 0 14px;line-height:1.65; }
         .exec-items { display:flex;flex-wrap:wrap;gap:7px; }
-        .exec-item { display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:0.76rem;font-weight:700; }
-        .exec-item.good { background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0; }
-        .exec-item.warn { background:#fffbeb;color:#92400e;border:1px solid #fde68a; }
-        .exec-item.bad  { background:#fee2e2;color:#991b1b;border:1px solid #fecaca; }
-        .exec-item.mid  { background:#f8fafc;color:#64748b;border:1px solid #e2e8f0; }
+        .exec-item { display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:0.76rem;font-weight:700;border:1px solid transparent; }
+        .exec-item-grade { padding:2px 7px;border-radius:10px;font-size:0.7rem;font-weight:800;flex-shrink:0; }
+        .exec-grade-great { background:#f0fdf4;color:#15803d;border-color:#bbf7d0; }
+        .exec-grade-great .exec-item-grade { background:#15803d;color:#fff; }
+        .exec-grade-good  { background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe; }
+        .exec-grade-good  .exec-item-grade { background:#1d4ed8;color:#fff; }
+        .exec-grade-bad   { background:#fffbeb;color:#b45309;border-color:#fde68a; }
+        .exec-grade-bad   .exec-item-grade { background:#d97706;color:#fff; }
+        .exec-grade-worst { background:#fee2e2;color:#991b1b;border-color:#fecaca; }
+        .exec-grade-worst .exec-item-grade { background:#dc2626;color:#fff; }
         @media(max-width:640px){ .exec-summary{ flex-direction:column;align-items:flex-start;gap:16px;padding:24px 22px; } }
 
         /* ── 용어 툴팁 ── */
@@ -3975,7 +3980,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const _execItems = _buildReportItems(lastName, firstName);
             _selfExecEl.innerHTML = _buildExecSummaryHtml(
                 `${lastName}${firstName}`, hanjaStr, finalScore,
-                _execItems.map(x => ({ label: x.label, g: x.grade }))
+                _execItems.map(x => ({ label: x.label, sub: x.sub, g: x.grade }))
             );
         }
 
@@ -5729,13 +5734,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const C = 2*Math.PI*42; // circumference r=42
         const filled = ((score/100)*C).toFixed(1);
 
-        const goodItems = labeledItems.filter(it=>{ const ng=_ng(it.g); return ng==='매우 좋음'||ng==='좋음'; });
-        const badItems  = labeledItems.filter(it=>{ const ng=_ng(it.g); return ng==='나쁨'||ng==='매우 나쁨'; });
-
-        const itemsHtml = [
-            ...goodItems.map(it=>`<span class="exec-item good">✓ ${it.label}</span>`),
-            ...badItems.map(it =>`<span class="exec-item bad">⚠ ${it.label}</span>`),
-        ].join('');
+        const G_CLASS = {
+            '매우 좋음': 'exec-grade-great',
+            '좋음':     'exec-grade-good',
+            '나쁨':     'exec-grade-bad',
+            '매우 나쁨': 'exec-grade-worst'
+        };
+        const itemsHtml = labeledItems.map(it => {
+            const ng  = _ng(it.g);
+            const cls = G_CLASS[ng] || 'exec-grade-good';
+            return `<span class="exec-item ${cls}">✦ ${it.label}<span class="exec-item-grade">${ng}</span></span>`;
+        }).join('');
 
         return `<div class="exec-summary">
             <div class="exec-score-ring">
