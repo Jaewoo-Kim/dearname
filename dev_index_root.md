@@ -235,22 +235,26 @@ requestPremiumReport()
         → _renderReportContent()  보고서 본문 렌더링
 ```
 
-### 데모 리포트 플로우 (나윤이 예시 버튼)
+### 데모 리포트 플로우 (예시 보고서 버튼)
 
 ```
 showReportViewWithoutLock()
   → _currentState 에 하드코딩 데모 데이터 주입
-      - 사주: 2025-03-25 16:29 → 乙巳년 己卯월 癸巳일 庚申시
-      - 성씨: 김(金) s0=8 / 이름: 娜(나·土·10획) 奫(윤·水·15획)
-      - 오행 점수: 木25.0 火18.0 土16.75 金26.5 水13.75
-      - 수리: 원격25(안강격吉) 형격18(발전격吉) 이격23(혁신격吉) 정격33(등룡격吉)
-  → _renderReportTabs([demoCandidate])
-  → _renderReportContent(demoCandidate, demoReport, 0)
+      - 사주: 2026-04-20 09:20 서울 여아 → 丙午년 壬辰월 甲子일 戊辰시
+      - 오행 점수: 木14.5 火21.25 土31.75 金0 水32.5
+      - 성씨: 박(朴) s0=6
+      - 이름 3개:
+          ① 박서연 朴棲硏 (棲木12·硏金11) 원격23혁신·형격18발전·이격17용진·정격29성공 전격吉
+          ② 박서현 朴敘絢 (敘金11·絢木12) 원격23혁신·형격17용진·이격18발전·정격29성공 전격吉
+          ③ 박지윤 朴祉玧 (祉木9·玧金9)   원격18발전·형격15통솔·이격15통솔·정격24출세 전격吉
+  → _renderReportTabs([_demo1, _demo2, _demo3])
+  → _renderReportContent(_demo1, _report1, 0)
+  → _updateRadarChart(_demoScores, _demo1)
   → report-view 표시 + 차트 렌더
 ```
 
 > **주의:** 데모 데이터는 하드코딩. 실제 Claude API 호출 없음.
-> 데모 수정 시 `showReportViewWithoutLock()` 내 `_demoReport` 객체 직접 편집.
+> 데모 수정 시 `showReportViewWithoutLock()` 내 `_demo1`/`_demo2`/`_demo3` 및 `_report1`/`_report2`/`_report3` 객체 직접 편집.
 
 ---
 
