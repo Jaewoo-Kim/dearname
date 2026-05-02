@@ -3764,15 +3764,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const s4_data = getSuriData(g4_num);
         
         // 흉 개수 기준으로 등급 판정 (평은 중립, good/bad 분리)
-        const _s4data   = [s1_data, s2_data, s3_data, s4_data];
-        const goodCount = _s4data.filter(d => d.grade==='대길'||d.grade==='길').length;
-        const badCount  = _s4data.filter(d => d.grade==='흉'||d.grade==='대흉').length;
+        const _s4data      = [s1_data, s2_data, s3_data, s4_data];
+        const _s4GoodCount = _s4data.filter(d => d.grade==='대길'||d.grade==='길').length;
+        const _s4BadCount  = _s4data.filter(d => d.grade==='흉'||d.grade==='대흉').length;
         let math4Grade, math4Desc;
-        if (badCount === 0 && goodCount >= 3)      { math4Grade = '매우 좋음'; math4Desc = '흉수 없이 3~4격이 모두 길수에 해당해 인생 전반에 걸쳐 좋은 기운이 흐릅니다.'; }
-        else if (badCount === 0)                   { math4Grade = '좋음';     math4Desc = '흉수가 없어 인생 흐름이 안정적입니다. 자원오행·발음오행이 뒷받침해준다면 더욱 좋습니다.'; }
-        else if (badCount === 1 && goodCount >= 3) { math4Grade = '좋음';     math4Desc = '3격이 길수로 대부분의 시기가 순탄하며, 한 시기의 어려움은 자원오행·발음오행으로 보완할 수 있습니다.'; }
-        else if (badCount >= 3)                    { math4Grade = '매우 나쁨'; math4Desc = '흉수가 3격 이상에 걸쳐 있어 삶의 굴곡이 크게 예상됩니다. 작명을 재검토하시는 것을 권장합니다.'; }
-        else                                       { math4Grade = '나쁨';     math4Desc = `${badCount}격에 흉수가 포함되어 해당 시기에 어려움이 예상됩니다. 자원오행·발음오행에서 보완 기운을 강화하세요.`; }
+        if (_s4BadCount === 0 && _s4GoodCount >= 3)      { math4Grade = '매우 좋음'; math4Desc = '흉수 없이 3~4격이 모두 길수에 해당해 인생 전반에 걸쳐 좋은 기운이 흐릅니다.'; }
+        else if (_s4BadCount === 0)                       { math4Grade = '좋음';     math4Desc = '흉수가 없어 인생 흐름이 안정적입니다. 자원오행·발음오행이 뒷받침해준다면 더욱 좋습니다.'; }
+        else if (_s4BadCount === 1 && _s4GoodCount >= 3) { math4Grade = '좋음';     math4Desc = '3격이 길수로 대부분의 시기가 순탄하며, 한 시기의 어려움은 자원오행·발음오행으로 보완할 수 있습니다.'; }
+        else if (_s4BadCount >= 3)                        { math4Grade = '매우 나쁨'; math4Desc = '흉수가 3격 이상에 걸쳐 있어 삶의 굴곡이 크게 예상됩니다. 작명을 재검토하시는 것을 권장합니다.'; }
+        else                                              { math4Grade = '나쁨';     math4Desc = `${_s4BadCount}격에 흉수가 포함되어 해당 시기에 어려움이 예상됩니다. 자원오행·발음오행에서 보완 기운을 강화하세요.`; }
 
         /* ----------------------------------------------------
            ④ 수리오행 (형격과 정격의 끝자리 오행 상생)
