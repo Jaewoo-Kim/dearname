@@ -23,6 +23,8 @@ dearname/
 ├── index.html               ← 메인 SPA (합본28_v2.html → rename)
 ├── config.js                ← 운영자 키 설정 (TOSS, Google, Apple)
 ├── server.py                ← Flask 서버 (정적 서빙 + Claude API 프록시)
+├── mobile_ui_plan.md        ← 모바일 UI 개선 기획 (문제점·우선순위·구현 위치)
+├── feature_chat_plan.md     ← AI 작명 상담 채팅 기능 기획
 ├── data/
 │   ├── hanja-db.js          ← 인명용 한자 7,065자 DB
 │   ├── manjuryeok.js        ← 동추원 만세력 1921~2040년
