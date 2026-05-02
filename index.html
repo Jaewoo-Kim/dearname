@@ -245,6 +245,7 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold-premium); background: white; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
         /* ── 출생 정보 입력 (1줄 인라인) ── */
         .birth-form-area { display:flex; align-items:center; gap:10px; flex-wrap:wrap; width:100%; }
+        .bf-row { display:flex; align-items:center; gap:8px; width:100%; }
         .bf-sep { width:1px; height:26px; background:var(--border-light); flex-shrink:0; margin:0 4px; }
         /* 년도·시·분 입력 칩 */
         .bf-chip { display:inline-flex; align-items:center; gap:5px; background:var(--bg-light); border:1.5px solid var(--border-light); border-radius:13px; padding:10px 14px; transition:border-color 0.2s,box-shadow 0.2s,background 0.2s; }
@@ -278,11 +279,14 @@
         .cal-sub-pill input:checked ~ .cal-sub-label { background:#fff8e6; border-color:var(--gold-dark); color:var(--gold-dark); }
 
         #hanja-selection-area { background: #fffcf5; border: 1px dashed var(--gold-premium); padding: 30px; border-radius: 20px; display: none; margin-bottom: 25px; margin-top: 10px; }
+        #hanja-dropdowns { display: flex; gap: 20px; }
         .hanja-block { background: white; border: 1px solid var(--border-gold); padding: 20px; border-radius: 16px; flex: 1; text-align: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.05);}
         .hanja-block span { display: block; font-size: 1.4rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 15px; }
         .hanja-block select { margin-bottom: 0; padding: 12px; font-size: 1.1rem; text-align: center; background: #fffcf5; font-weight: 600;}
 
         #analysis-result-area { display: none; margin-top: 50px; border-top: 1px solid var(--border-light); padding-top: 50px; animation: fadeIn 0.6s ease-in-out; }
+        .form-card-title { font-size: 2rem; margin-bottom: 12px; font-weight: 800; }
+        .result-summary-header { font-size: 1.6rem; color: var(--bg-dark); font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .result-grid { display: flex; flex-direction: column; gap: 16px; }
         .result-row { display: grid; gap: 16px; }
@@ -515,8 +519,9 @@
             .theory-split .diagram-area { margin-top: 30px; padding: 40px 20px; }
         }
         @media (max-width: 768px) {
-            /* ─ 햄버거 버튼 노출 ─ */
+            /* ─ 햄버거 버튼 노출 / 기본 메뉴 숨김 ─ */
             .nav-hamburger { display: flex; }
+            .main-nav-links { display: none; }
 
             /* ─ 모바일 메뉴 드로어 ─ */
             .main-nav-links.mobile-open {
@@ -621,6 +626,27 @@
 
             /* ─ Phase 3: Minor ─ */
             .advice-card { padding: 28px 20px; }
+
+            /* ─ Phase 4: birth-form-area 3행 레이아웃 ─ */
+            .birth-form-area { flex-direction: column; gap: 10px; align-items: stretch; }
+            .bf-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+            .bf-row .bf-select { flex: 1; min-width: 0; }
+            .bf-row--city .bf-city-select { width: 100%; flex: 1; }
+            .bf-sep { display: none; }
+            /* ─ Phase 4: hanja-dropdowns 세로 스택 ─ */
+            #hanja-dropdowns { flex-direction: column; gap: 14px; }
+
+            /* ─ Phase 5: 폼·결과 영역 ─ */
+            .form-card-title { font-size: 1.55rem; }
+            .result-summary-header { flex-direction: column; align-items: flex-start; gap: 8px; font-size: 1.3rem; }
+            .result-box { padding: 20px 16px; border-radius: 18px; }
+            /* ─ Phase 5: wizard 탭 ─ */
+            .wizard-progress { gap: 8px; margin-bottom: 32px; }
+            .tab-label { font-size: 0.7rem; letter-spacing: 0; }
+
+            /* ─ Phase 6: 여백 압축 ─ */
+            #analysis-result-area { margin-top: 32px; padding-top: 32px; }
+            .form-card > p { font-size: 0.97rem; margin-bottom: 28px; }
         }
         @media (max-width: 480px) {
             /* ─ 소형 폰 전반 ─ */
@@ -660,6 +686,10 @@
             .time-step::before { left: -30px; width: 14px; height: 14px; }
             /* ─ 한자 원 추가 축소 ─ */
             .hanja-circle { width: 60px; height: 60px; font-size: 1.7rem; }
+            /* ─ Phase 4~5 추가 축소 ─ */
+            .form-card-title { font-size: 1.35rem; }
+            .result-box { padding: 16px 12px; }
+            .tab-label { font-size: 0.65rem; }
         }
 /* =========================================
            [수정완료] 결제 모달 전용 스타일
@@ -1754,7 +1784,7 @@
         <div class="section-inner">
             <div class="form-card">
                 <span class="section-tag">셀프 작명</span>
-                <h3 style="font-size: 2rem; margin-bottom: 12px; font-weight: 800;">우리 아이 이름을 직접 지어보아요.</h3>
+                <h3 class="form-card-title">우리 아이 이름을 직접 지어보아요.</h3>
                 <p style="font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.7;">마음에 두고 있는 이름이 있으신가요?<br>한글 이름을 입력하면, 성명학 6가지 주요 기준으로 즉시 분석해드립니다.</p>
                 
                 <form id="naming-form" class="form-grid">
@@ -1782,13 +1812,14 @@
                     </div>
                     <div id="hanja-selection-area" class="full-width-form">
                         <label class="input-label" style="color: var(--gold-dark);">한자 매칭 <span style="font-weight: 500; font-size: 0.9rem; color: var(--text-secondary);">(한글 음에 맞는 한자를 선택해주세요)</span></label>
-                        <div id="hanja-dropdowns" style="display: flex; gap: 20px;"></div>
+                        <div id="hanja-dropdowns"></div>
                     </div>
                     <div class="full-width-form">
                         <label class="input-label">출생 일시 및 지역</label>
                         <input type="hidden" id="birth-date">
                         <input type="hidden" id="birth-time">
                         <div class="birth-form-area">
+                            <div class="bf-row bf-row--date">
                             <!-- 날짜 -->
                             <select class="bf-select" id="birth-date-year" style="min-width:106px;">
                                 <option value="">연도</option>
@@ -1811,8 +1842,8 @@
                                 </label>
                             </div>
                             <span id="self-lunar-label" style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;display:none;align-self:center;"></span>
-                            <!-- 구분선 -->
-                            <span class="bf-sep"></span>
+                            </div><!-- /bf-row--date -->
+                            <div class="bf-row bf-row--time">
                             <!-- 시간 -->
                             <div class="bf-ampm-chip">
                                 <label class="ampm-pill"><input type="radio" name="birth-ampm" value="am" checked><span>오전</span></label>
@@ -1826,6 +1857,8 @@
                                 <option value="">분</option>
                                 <option value="00">0분</option><option value="01">1분</option><option value="02">2분</option><option value="03">3분</option><option value="04">4분</option><option value="05">5분</option><option value="06">6분</option><option value="07">7분</option><option value="08">8분</option><option value="09">9분</option><option value="10">10분</option><option value="11">11분</option><option value="12">12분</option><option value="13">13분</option><option value="14">14분</option><option value="15">15분</option><option value="16">16분</option><option value="17">17분</option><option value="18">18분</option><option value="19">19분</option><option value="20">20분</option><option value="21">21분</option><option value="22">22분</option><option value="23">23분</option><option value="24">24분</option><option value="25">25분</option><option value="26">26분</option><option value="27">27분</option><option value="28">28분</option><option value="29">29분</option><option value="30">30분</option><option value="31">31분</option><option value="32">32분</option><option value="33">33분</option><option value="34">34분</option><option value="35">35분</option><option value="36">36분</option><option value="37">37분</option><option value="38">38분</option><option value="39">39분</option><option value="40">40분</option><option value="41">41분</option><option value="42">42분</option><option value="43">43분</option><option value="44">44분</option><option value="45">45분</option><option value="46">46분</option><option value="47">47분</option><option value="48">48분</option><option value="49">49분</option><option value="50">50분</option><option value="51">51분</option><option value="52">52분</option><option value="53">53분</option><option value="54">54분</option><option value="55">55분</option><option value="56">56분</option><option value="57">57분</option><option value="58">58분</option><option value="59">59분</option>
                             </select>
+                            </div><!-- /bf-row--time -->
+                            <div class="bf-row bf-row--city">
                             <!-- 지역 -->
                             <select class="bf-city-select" id="birth-location">
                                 <option value="">출생지 선택 (미선택 시 서울 기준)</option>
@@ -1892,6 +1925,7 @@
                                     <option value="독도">독도</option>
                                 </optgroup>
                             </select>
+                            </div><!-- /bf-row--city -->
                         </div>
                     </div>
                     <div class="full-width-form" style="margin-top: 20px;">
@@ -1900,7 +1934,7 @@
                 </form>
 
                 <div id="analysis-result-area">
-                    <h3 style="font-size: 1.6rem; color: var(--bg-dark); font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between;">
+                    <h3 class="result-summary-header">
                         진단 결과 요약 <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-light); padding: 5px 15px; border-radius: 20px;">총 6개 지표 평가 완료</span>
                     </h3>
                     <div class="result-grid">
@@ -1928,7 +1962,7 @@
         <div class="section-inner">
             <div style="text-align: center; margin-bottom: 60px;">
                 <span class="section-tag" style="color: var(--gold-premium); display: inline-block;">프리미엄 작명 의뢰</span>
-                <h2 class="section-title" style="color: white; font-size: 2.8rem; margin-bottom: 20px;">우리 아이에게 꼭 맞는 이름,<br>직접 지어드립니다.</h2>
+                <h2 class="section-title" style="color: white; margin-bottom: 20px;">우리 아이에게 꼭 맞는 이름,<br>직접 지어드립니다.</h2>
                 <p style="color: rgba(255,255,255,0.65); max-width: 600px; margin: 0 auto; font-size: 1.15rem;">전통 성명학의 다양한 기준들을 복합적으로 분석하여,<br>왜 이 이름이 아이에게 최고인지 알기 쉽게 설명해드립니다.</p>
             </div>
 
@@ -1985,6 +2019,7 @@
                                 <input type="hidden" id="prem-birth-date">
                                 <input type="hidden" id="prem-birth-time">
                                 <div class="birth-form-area">
+                                    <div class="bf-row bf-row--date">
                                     <!-- 날짜 -->
                                     <select class="bf-select" id="prem-birth-date-year" style="min-width:106px;">
                                         <option value="">연도</option>
@@ -2007,8 +2042,8 @@
                                         </label>
                                         <span id="lunar-label" style="font-size:0.82rem;color:var(--gold-dark);font-weight:700;align-self:center;display:none;">→ 양력 변환 중...</span>
                                     </div>
-                                    <!-- 구분선 -->
-                                    <span class="bf-sep"></span>
+                                    </div><!-- /bf-row--date -->
+                                    <div class="bf-row bf-row--time">
                                     <!-- 시간 -->
                                     <div class="bf-ampm-chip">
                                         <label class="ampm-pill"><input type="radio" name="prem-ampm" value="am" checked><span>오전</span></label>
@@ -2022,6 +2057,8 @@
                                         <option value="">분</option>
                                         <option value="00">0분</option><option value="01">1분</option><option value="02">2분</option><option value="03">3분</option><option value="04">4분</option><option value="05">5분</option><option value="06">6분</option><option value="07">7분</option><option value="08">8분</option><option value="09">9분</option><option value="10">10분</option><option value="11">11분</option><option value="12">12분</option><option value="13">13분</option><option value="14">14분</option><option value="15">15분</option><option value="16">16분</option><option value="17">17분</option><option value="18">18분</option><option value="19">19분</option><option value="20">20분</option><option value="21">21분</option><option value="22">22분</option><option value="23">23분</option><option value="24">24분</option><option value="25">25분</option><option value="26">26분</option><option value="27">27분</option><option value="28">28분</option><option value="29">29분</option><option value="30">30분</option><option value="31">31분</option><option value="32">32분</option><option value="33">33분</option><option value="34">34분</option><option value="35">35분</option><option value="36">36분</option><option value="37">37분</option><option value="38">38분</option><option value="39">39분</option><option value="40">40분</option><option value="41">41분</option><option value="42">42분</option><option value="43">43분</option><option value="44">44분</option><option value="45">45분</option><option value="46">46분</option><option value="47">47분</option><option value="48">48분</option><option value="49">49분</option><option value="50">50분</option><option value="51">51분</option><option value="52">52분</option><option value="53">53분</option><option value="54">54분</option><option value="55">55분</option><option value="56">56분</option><option value="57">57분</option><option value="58">58분</option><option value="59">59분</option>
                                     </select>
+                                    </div><!-- /bf-row--time -->
+                                    <div class="bf-row bf-row--city">
                                     <!-- 지역 -->
                                     <select class="bf-city-select" id="prem-city">
                                         <option value="">출생지 선택 (미선택 시 서울 기준)</option>
@@ -2088,6 +2125,7 @@
                                             <option value="독도">독도</option>
                                         </optgroup>
                                     </select>
+                                    </div><!-- /bf-row--city -->
                                 </div>
                             </div>
                         </div>
@@ -2206,6 +2244,7 @@
                                     <div>
                                         <p style="font-size:0.82rem;font-weight:800;color:var(--gold-dark);margin:0 0 8px;">아버지</p>
                                         <div class="birth-form-area">
+                                            <div class="bf-row bf-row--date">
                                             <select class="bf-select" id="parent-father-year" style="min-width:100px;"><option value="">연도</option></select>
                                             <select class="bf-select" id="parent-father-month">
                                                 <option value="">월</option>
@@ -2219,7 +2258,8 @@
                                                 <label class="cal-pill"><input type="radio" name="parent_father_cal" value="solar" checked><span class="cal-label">양력</span></label>
                                                 <label class="cal-pill"><input type="radio" name="parent_father_cal" value="lunar"><span class="cal-label">음력</span></label>
                                             </div>
-                                            <span class="bf-sep"></span>
+                                            </div><!-- /bf-row--date -->
+                                            <div class="bf-row bf-row--time">
                                             <div class="bf-ampm-chip">
                                                 <label class="ampm-pill"><input type="radio" name="parent_father_ampm" value="am" checked><span>오전</span></label>
                                                 <label class="ampm-pill"><input type="radio" name="parent_father_ampm" value="pm"><span>오후</span></label>
@@ -2232,12 +2272,14 @@
                                                 <option value="">분</option>
                                                 <option value="00">0분</option><option value="05">5분</option><option value="10">10분</option><option value="15">15분</option><option value="20">20분</option><option value="25">25분</option><option value="30">30분</option><option value="35">35분</option><option value="40">40분</option><option value="45">45분</option><option value="50">50분</option><option value="55">55분</option>
                                             </select>
+                                            </div><!-- /bf-row--time -->
                                         </div>
                                     </div>
                                     <!-- 어머니 -->
                                     <div>
                                         <p style="font-size:0.82rem;font-weight:800;color:var(--gold-dark);margin:0 0 8px;">어머니</p>
                                         <div class="birth-form-area">
+                                            <div class="bf-row bf-row--date">
                                             <select class="bf-select" id="parent-mother-year" style="min-width:100px;"><option value="">연도</option></select>
                                             <select class="bf-select" id="parent-mother-month">
                                                 <option value="">월</option>
@@ -2251,7 +2293,8 @@
                                                 <label class="cal-pill"><input type="radio" name="parent_mother_cal" value="solar" checked><span class="cal-label">양력</span></label>
                                                 <label class="cal-pill"><input type="radio" name="parent_mother_cal" value="lunar"><span class="cal-label">음력</span></label>
                                             </div>
-                                            <span class="bf-sep"></span>
+                                            </div><!-- /bf-row--date -->
+                                            <div class="bf-row bf-row--time">
                                             <div class="bf-ampm-chip">
                                                 <label class="ampm-pill"><input type="radio" name="parent_mother_ampm" value="am" checked><span>오전</span></label>
                                                 <label class="ampm-pill"><input type="radio" name="parent_mother_ampm" value="pm"><span>오후</span></label>
@@ -2264,6 +2307,7 @@
                                                 <option value="">분</option>
                                                 <option value="00">0분</option><option value="05">5분</option><option value="10">10분</option><option value="15">15분</option><option value="20">20분</option><option value="25">25분</option><option value="30">30분</option><option value="35">35분</option><option value="40">40분</option><option value="45">45분</option><option value="50">50분</option><option value="55">55분</option>
                                             </select>
+                                            </div><!-- /bf-row--time -->
                                         </div>
                                     </div>
                                 </div>
