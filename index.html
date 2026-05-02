@@ -1372,8 +1372,7 @@
         .oheng-dist-wrap { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
         .oheng-dist-item { display: flex; align-items: center; gap: 10px; background: var(--bg-light); border-radius: 14px; padding: 10px 18px; border: 1px solid var(--border-light); }
         .oheng-dist-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .oheng-dist-hanja { font-size: 1.15rem; font-weight: 900; }
-        .oheng-dist-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; }
+        .oheng-dist-hanja { font-size: 0.88rem; font-weight: 800; }
         .oheng-dist-count { font-size: 0.85rem; font-weight: 800; color: var(--bg-dark); margin-left: 2px; }
         .oheng-dist-item.weak .oheng-dist-count { color: #ef4444; }
         .oheng-dist-plus { font-size: 0.85rem; font-weight: 900; margin-left: 1px; opacity: 0.85; }
@@ -3605,7 +3604,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     function _buildHanjaOptions(hanjaList, isSurname, surnameChar) {
         const sorted = _sortHanjaList(hanjaList, isSurname, surnameChar);
-        const toOpt = h => `<option value="${h.s}|${h.o}|${h.h}">${h.h} (${h.m}) - ${h.s}획 / ${h.o}</option>`;
+        const _OKR = {'木':'목','火':'화','土':'토','金':'금','水':'수'};
+        const toOpt = h => `<option value="${h.s}|${h.o}|${h.h}">${h.h} (${h.m}) - ${h.s}획 / ${_OKR[h.o]||h.o}(${h.o})</option>`;
 
         if (isSurname) {
             const priority = SURNAME_PRIORITY[surnameChar] || [];
@@ -5278,7 +5278,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 오행 한글+한자 통일 표기 헬퍼
         const _OHKR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
-        const _ohengFull = o => { const k = _ohengToKr(o); const h = {'나무':'木','불':'火','흙':'土','쇠':'金','물':'水'}[k]||o; return `${h}(${k})`; };
+        const _ohengFull = o => { const k = _ohengToKr(o); const h = {'나무':'木','불':'火','흙':'土','쇠':'金','물':'水'}[k]||o; return `${k}(${h})`; };
 
         // 이름 기여 카드 (개선된 시각화)
         const badgeHtml = nameOhengs.length
@@ -5470,7 +5470,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         el.innerHTML = src.map(d => {
             const oc  = OHENG_COLOR_MAP[d.oheng] || '#888';
             const okr = OHENG_KR_MAP2[d.oheng]  || d.oheng || '';
-            const ohengLabel = d.oheng ? `${d.oheng}(${okr})` : '';
+            const ohengLabel = d.oheng ? `${okr}(${d.oheng})` : '';
             return `
             <div class="ai-hanja-card">
                 <div class="ai-hanja-char" style="color:${oc};background:${oc}14;border:2.5px solid ${oc}55;">${d.hanja}</div>
@@ -7090,8 +7090,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     : `<span class="oheng-dist-count">${cnt}</span>`;
                 return `<div class="oheng-dist-item${isWeak?' weak':''}">
                     <div class="oheng-dist-dot" style="background:${_OHENG_COLOR[o]};"></div>
-                    <span class="oheng-dist-hanja" style="color:${_OHENG_COLOR[o]};">${o}</span>
-                    <span class="oheng-dist-label">${_OHENG_NAME[o]}</span>
+                    <span class="oheng-dist-hanja" style="color:${_OHENG_COLOR[o]};">${_OHENG_NAME[o]||o}</span>
                     ${countHtml}
                 </div>`;
             }).join('');
