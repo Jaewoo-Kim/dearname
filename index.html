@@ -1195,8 +1195,8 @@
         /* ── 아코디언 챕터 ──────────────────────────────────── */
         .report-card-acc { overflow: hidden; }
         .chapter-acc-header { cursor: pointer; }
-        /* 전문 분석 섹션 내부 챕터는 항상 오픈 — 클릭 불필요 */
-        #expert-master-body .chapter-acc-header { cursor: default; }
+        /* 전문 분석 섹션 내부 챕터: 클릭으로 접기/펼치기 가능 */
+        #expert-master-body .chapter-acc-header { cursor: pointer; }
         .chapter-acc-title-row {
             display: flex;
             justify-content: space-between;
@@ -1387,6 +1387,91 @@
             color: var(--text-primary);
         }
         .chapter-theory-box b { color: #1e40af; }
+        /* report-view 에서는 이론박스 숨김 — ⓘ 버튼 팝오버로 대체 */
+        #report-view .chapter-theory-box { display: none; }
+        /* story-intro-card report-view 에서는 숨김 */
+        #report-view #report-story-intro { display: none; }
+        /* 챕터 제목 + ⓘ 버튼 row */
+        .ch-title-row { display: flex; align-items: center; gap: 6px; }
+        .ch-title-row .section-title { margin-bottom: 0; }
+        /* ⓘ 이론 설명 버튼 */
+        .theory-info-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #e0e7ff; border: none; color: #4f46e5;
+            font-size: 0.72rem; font-weight: 900; cursor: pointer;
+            flex-shrink: 0; transition: background 0.18s; line-height: 1;
+        }
+        .theory-info-btn:hover { background: #c7d2fe; }
+        /* 이론 팝오버 — 바텀 시트 */
+        #theory-popover-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.42); z-index: 500;
+        }
+        #theory-popover {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #fff; border-radius: 22px 22px 0 0;
+            z-index: 501; max-height: 75vh; overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.14);
+        }
+        #theory-popover.open { transform: translateY(0); }
+        #theory-popover-handle {
+            width: 38px; height: 4px; background: #e2e8f0; border-radius: 2px;
+            margin: 12px auto 0; cursor: grab;
+        }
+        #theory-popover-inner { padding: 16px 22px 36px; }
+        .theory-pop-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .theory-pop-title { font-size: 0.85rem; font-weight: 900; color: #1e40af; }
+        .theory-pop-close {
+            width: 28px; height: 28px; border-radius: 50%; border: none;
+            background: #f1f5f9; color: #64748b; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0;
+        }
+        .theory-pop-close:hover { background: #e2e8f0; }
+        #theory-popover-body { font-size: 0.88rem; color: var(--text-primary); line-height: 1.78; }
+        #theory-popover-body b { color: #1e40af; }
+        #theory-popover-body .chapter-theory-title { display: none; }
+        #theory-popover-body .chapter-theory-pillars { margin-top: 14px; }
+        #theory-popover-body .pillar-explain { margin-bottom: 5px; font-size: 0.82rem; }
+        /* 플로팅 챕터 네비게이터 */
+        #chapter-float-nav {
+            position: fixed; right: 14px; top: 50%; transform: translateY(-50%);
+            z-index: 200; display: none; flex-direction: column; gap: 5px;
+            background: white; border-radius: 18px; padding: 8px 6px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            border: 1px solid var(--border-light);
+        }
+        #chapter-float-nav.visible { display: flex; }
+        .cfn-item {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.68rem; font-weight: 900; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.18s; border: none; background: none;
+        }
+        .cfn-item:hover { background: #f1f5f9; color: var(--bg-dark); }
+        .cfn-item.cfn-active { background: var(--gold-premium); color: white; }
+        @media (max-width: 768px) {
+            #chapter-float-nav { right: 6px; padding: 6px 4px; }
+            .cfn-item { width: 26px; height: 26px; font-size: 0.6rem; }
+        }
+        /* AI 해석 블록 접기 */
+        .ai-story-block.ai-clamped {
+            max-height: 5.6em; overflow: hidden; position: relative;
+            -webkit-mask-image: linear-gradient(180deg,#000 55%,transparent 100%);
+            mask-image: linear-gradient(180deg,#000 55%,transparent 100%);
+        }
+        .ai-expand-btn {
+            display: block; font-size: 0.78rem; font-weight: 700;
+            color: var(--gold-dark); background: none; border: none;
+            cursor: pointer; padding: 4px 0 0; text-align: left;
+        }
+        .ai-expand-btn:hover { color: var(--gold-premium); }
         .chapter-theory-title {
             font-size: 0.78rem;
             font-weight: 900;
@@ -2841,15 +2926,19 @@
 
         <!-- Chapter 1: 사주 원국 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch1')">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 1. 이 아이가 태어난 우주</div>
-                        <h2 class="section-title"><span class="term-tip" data-tip="태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.">사주</span> 원국 (四柱八字)</h2>
+                        <div class="ch-title-row">
+                            <h2 class="section-title"><span class="term-tip" data-tip="태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.">사주</span> 원국 (四柱八字)</h2>
+                            <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch1')" title="이론 설명 보기">ⓘ</button>
+                        </div>
                     </div>
+                    <button id="toggle-btn-ch1" class="chapter-toggle-btn">자세히 보기 ↓</button>
                 </div>
             </div>
-            <div class="chapter-acc-body open" id="acc-body-ch1">
+            <div class="chapter-acc-body" id="acc-body-ch1">
 
             <!-- 사주 이론 설명 박스 (동적) -->
             <div class="chapter-theory-box" id="ch1-theory-box">
@@ -2936,16 +3025,20 @@
 
         <!-- Chapter 2: 자원오행 & 레이더 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch2')">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 2. 이름이 사주를 만날 때</div>
-                        <h2 class="section-title"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
+                        <div class="ch-title-row">
+                            <h2 class="section-title"><span class="term-tip" data-tip="한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.">자원오행</span> & <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> 균형</h2>
+                            <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch2')" title="이론 설명 보기">ⓘ</button>
+                        </div>
                     </div>
+                    <button id="toggle-btn-ch2" class="chapter-toggle-btn">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch2" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body open" id="acc-body-ch2">
+            <div class="chapter-acc-body" id="acc-body-ch2">
             <div class="chapter-theory-box" id="ch2-theory-box">
                 <div class="chapter-theory-title" id="ch2-theory-title">📖 이름이 사주를 채우는 방법</div>
                 <span id="ch2-theory-body">한자 한 글자마다 <b>목(木)·화(火)·토(土)·금(金)·수(水)</b> 다섯 기운 중 하나가 담겨 있습니다. 이름을 매일 수십 번 부를 때마다 그 기운이 아이에게 자연스럽게 스며들어, 사주에서 부족한 자리를 채워줍니다. 오른쪽 레이더 차트의 <b>금색 면적</b>이 넓을수록 이름의 보완 효과가 큽니다.</span>
@@ -2981,16 +3074,20 @@
 
         <!-- Chapter 3: 한자 의미 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch3')">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 3. 한자가 품은 이야기</div>
-                        <h2 class="section-title">자원(字源) 심층 분석</h2>
+                        <div class="ch-title-row">
+                            <h2 class="section-title">자원(字源) 심층 분석</h2>
+                            <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch3')" title="이론 설명 보기">ⓘ</button>
+                        </div>
                     </div>
+                    <button id="toggle-btn-ch3" class="chapter-toggle-btn">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch3" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body open" id="acc-body-ch3">
+            <div class="chapter-acc-body" id="acc-body-ch3">
             <div class="chapter-theory-box" id="ch3-theory-box">
                 <div class="chapter-theory-title">📖 오행을 담은 한자, 의미까지 담다</div>
                 <span id="ch3-theory-body">앞서 필요한 기운을 파악했다면, 이제 <b>그 기운을 품으면서도 뜻이 아름다운 한자</b>를 고를 차례입니다. 오행 보완이 목적이더라도, 매일 불릴 이름의 한자가 좋은 뜻을 가져야 아이의 인생에 긍정적 에너지가 쌓입니다. 아래에서 각 한자가 어떤 오행을 담고 있으며, 어떤 뜻과 어원을 가지는지 확인하세요.</span>
@@ -3009,16 +3106,20 @@
 
         <!-- Chapter 4: 발음 오행 & 음양 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch4')">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
-                        <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> & <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
+                        <div class="ch-title-row">
+                            <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> & <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
+                            <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch4')" title="이론 설명 보기">ⓘ</button>
+                        </div>
                     </div>
+                    <button id="toggle-btn-ch4" class="chapter-toggle-btn">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch4" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body open" id="acc-body-ch4">
+            <div class="chapter-acc-body" id="acc-body-ch4">
             <div class="chapter-theory-box" id="ch4-theory-box">
                 <div class="chapter-theory-title">📖 이름이 귀에 닿을 때 — 소리로 검증하다</div>
                 한자의 오행과 뜻을 골랐다면, 마지막으로 <b>소리가 편하고 긍정적인지</b>를 과학적 이론으로 검증합니다. 이름을 소리 낼 때 <b>초성의 발음 위치</b>에 따라 오행이 결정되며(예: ㄱ·ㅋ=木, ㄴ·ㄷ·ㄹ=火, ㅅ·ㅈ·ㅊ=金, ㅁ·ㅂ=水, ㅇ·ㅎ=土), 성씨→이름 순서로 이 오행이 <b>상생(相生) 흐름</b>을 이루어야 기운이 막힘없이 전달됩니다. 모음의 음양 균형까지 맞으면 소리 자체에서 조화로운 에너지가 흘러나옵니다.
@@ -3037,16 +3138,20 @@
 
         <!-- Chapter 5-A: 사격수리 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch5a')">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 5. 획수가 그리는 운명</div>
-                        <h2 class="section-title"><span class="term-tip" data-tip="원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.">사격수리</span> (四格數理)</h2>
+                        <div class="ch-title-row">
+                            <h2 class="section-title"><span class="term-tip" data-tip="원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.">사격수리</span> (四格數理)</h2>
+                            <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch5a')" title="이론 설명 보기">ⓘ</button>
+                        </div>
                     </div>
+                    <button id="toggle-btn-ch5a" class="chapter-toggle-btn">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch5a" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body open" id="acc-body-ch5a">
+            <div class="chapter-acc-body" id="acc-body-ch5a">
             <div class="chapter-theory-box" id="ch5a-theory-box">
                 <div class="chapter-theory-title">📖 사격수리 — 이름이 그리는 인생의 지도</div>
                 사격수리(四格數理)는 이름 한자의 <b>획수 합</b>으로 인생 초년부터 말년까지의 운세 지도를 그립니다. 동양에서는 1~81 각 수마다 고유한 기운과 길흉이 있다고 봅니다. <b>원격(源格)</b>은 초년의 기질, <b>형격(亨格)</b>은 청장년기 사회운, <b>이격(利格)</b>은 가정·이성운, <b>정격(正格)</b>은 총운을 나타냅니다. 앞서 자원오행·발음오행으로 기운의 질(質)을 맞췄다면, 수리는 <b>기운의 양(量)과 인생 타이밍</b>을 조율합니다.
@@ -3065,16 +3170,20 @@
 
         <!-- Chapter 5. 수리 오행 & 음양 -->
         <div class="report-card report-card-acc">
-            <div class="chapter-acc-header">
+            <div class="chapter-acc-header" onclick="_toggleChapter('ch5b')">
                 <div class="chapter-acc-title-row">
                     <div>
                         <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
-                        <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
+                        <div class="ch-title-row">
+                            <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
+                            <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch5b')" title="이론 설명 보기">ⓘ</button>
+                        </div>
                     </div>
+                    <button id="toggle-btn-ch5b" class="chapter-toggle-btn">자세히 보기 ↓</button>
                 </div>
                 <div id="verdict-ch5b" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body open" id="acc-body-ch5b">
+            <div class="chapter-acc-body" id="acc-body-ch5b">
             <div class="chapter-theory-box" id="ch5b-theory-box">
                 <div class="chapter-theory-title">📖 사격수리를 보완하는 두 가지 지표</div>
                 사격수리가 <b>인생의 큰 그림</b>을 보여준다면, 수리 오행·음양은 <b>그 그림의 균형을 미세 조정</b>합니다. 획수의 합이 짝수(음)와 홀수(양)로 균형 있게 섞여야 기운이 막히지 않고 흐르며, 각 격의 끝자리 오행이 서로 상생하면 수리가 사주 오행 흐름과도 조화를 이룹니다.
@@ -3191,6 +3300,28 @@
             </button>
         </div>
     </main>
+
+    <!-- ── 이론 설명 팝오버 (바텀 시트) ── -->
+    <div id="theory-popover-overlay" onclick="_closeTheoryPopover()"></div>
+    <div id="theory-popover">
+        <div id="theory-popover-handle"></div>
+        <div id="theory-popover-inner">
+            <div class="theory-pop-header">
+                <div class="theory-pop-title" id="theory-popover-title"></div>
+                <button class="theory-pop-close" onclick="_closeTheoryPopover()">✕</button>
+            </div>
+            <div id="theory-popover-body"></div>
+        </div>
+    </div>
+
+    <!-- ── 플로팅 챕터 네비게이터 ── -->
+    <div id="chapter-float-nav">
+        <button class="cfn-item" onclick="_jumpToChapter('ch1')" data-ch="ch1" title="사주 원국">①</button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch2')" data-ch="ch2" title="자원오행">②</button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch3')" data-ch="ch3" title="한자 의미">③</button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch4')" data-ch="ch4" title="발음 오행">④</button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch5a')" data-ch="ch5a" title="사격수리">⑤</button>
+    </div>
 </div>
 
 <div id="theory-detail-view">
@@ -3330,6 +3461,7 @@
             </button>
         </div>
     </main>
+
 </div>
 
 <div id="login-modal" class="modal-overlay">
@@ -3696,6 +3828,8 @@
             renderCharts();
             _updateRadarChart(_demoScores, _demo1);
             if (window._daeunData) _updateLifeFlowChart(window._daeunData);
+            _initAiClamp();
+            _updateChapterNav();
         }, 100);
     }
 
@@ -5597,11 +5731,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         setTimeout(() => {
             renderCharts();
             _updateRadarChart(_scores, candidate);
-            // 대운 데이터로 lifeFlow 차트 업데이트
             if (window._daeunData) _updateLifeFlowChart(window._daeunData);
             if (window._showDaeunDetail && !document.getElementById('daeun-detail-panel')?.dataset.openIdx) {
                 window._showDaeunDetail(0);
             }
+            _initAiClamp();
+            _updateChapterNav();
         }, 100);
 
         // 채팅 컨텍스트 초기화
@@ -6508,6 +6643,91 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
     // 전역 노출 (onclick에서 호출)
     window._toggleChapter = _toggleChapter;
+
+    // ── 이론 설명 팝오버 ──────────────────────────────────────
+    function _showTheoryPopover(chId) {
+        const theoryBox = document.getElementById(chId + '-theory-box');
+        if (!theoryBox) return;
+        const titleEl = theoryBox.querySelector('.chapter-theory-title');
+        const title = titleEl ? titleEl.textContent.replace(/^📖\s*/, '') : '이론 설명';
+        document.getElementById('theory-popover-title').textContent = title;
+        const bodyEl = document.getElementById('theory-popover-body');
+        const clone = theoryBox.cloneNode(true);
+        const clonedTitle = clone.querySelector('.chapter-theory-title');
+        if (clonedTitle) clonedTitle.remove();
+        bodyEl.innerHTML = clone.innerHTML;
+        document.getElementById('theory-popover-overlay').style.display = 'block';
+        const popover = document.getElementById('theory-popover');
+        popover.style.display = 'block';
+        requestAnimationFrame(() => popover.classList.add('open'));
+    }
+    function _closeTheoryPopover() {
+        const popover = document.getElementById('theory-popover');
+        popover.classList.remove('open');
+        setTimeout(() => {
+            document.getElementById('theory-popover-overlay').style.display = 'none';
+            popover.style.display = 'none';
+        }, 300);
+    }
+    window._showTheoryPopover = _showTheoryPopover;
+    window._closeTheoryPopover = _closeTheoryPopover;
+
+    // ── 챕터 점프 & 플로팅 네비 ────────────────────────────────
+    function _jumpToChapter(chId) {
+        const acc = document.getElementById(chId);
+        if (!acc) return;
+        const body = acc.querySelector('.chapter-acc-body');
+        if (body && !body.classList.contains('open')) {
+            _toggleChapter(chId);
+        }
+        setTimeout(() => {
+            acc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+    }
+    function _updateChapterNav() {
+        const nav = document.getElementById('chapter-float-nav');
+        if (!nav) return;
+        const reportView = document.getElementById('report-view');
+        const isVisible = reportView && reportView.style.display !== 'none' && !reportView.classList.contains('hidden');
+        if (!isVisible) { nav.classList.remove('visible'); return; }
+        nav.classList.add('visible');
+        const items = nav.querySelectorAll('.cfn-item[data-ch]');
+        let activeId = null;
+        let minDist = Infinity;
+        items.forEach(item => {
+            const chId = item.dataset.ch;
+            const el = document.getElementById(chId);
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const dist = Math.abs(rect.top - 120);
+            if (dist < minDist) { minDist = dist; activeId = chId; }
+        });
+        items.forEach(item => {
+            item.classList.toggle('cfn-active', item.dataset.ch === activeId);
+        });
+    }
+    window._jumpToChapter = _jumpToChapter;
+    window._updateChapterNav = _updateChapterNav;
+    window.addEventListener('scroll', _updateChapterNav, { passive: true });
+
+    // ── AI 스토리 블록 클램핑 ──────────────────────────────────
+    function _initAiClamp() {
+        document.querySelectorAll('.ai-story-block').forEach(block => {
+            if (block.dataset.clampInit) return;
+            block.dataset.clampInit = '1';
+            if (block.scrollHeight <= block.offsetHeight + 30) return;
+            block.classList.add('ai-clamped');
+            const btn = document.createElement('button');
+            btn.className = 'ai-expand-btn';
+            btn.textContent = '더 읽기 ▾';
+            btn.onclick = () => {
+                block.classList.remove('ai-clamped');
+                btn.remove();
+            };
+            block.insertAdjacentElement('afterend', btn);
+        });
+    }
+    window._initAiClamp = _initAiClamp;
 
     function _toggleExpertSection() {
         const body = document.getElementById('expert-master-body');
