@@ -602,8 +602,11 @@
             .hero-badge-sep { display: none; }
             .hero-sub { font-size: 1.15rem; }
             .hero-cta .btn { padding: 16px 32px; }
-            .report-header h1 { font-size: 3rem; }
-            .report-header h1 span { display: block; margin: 10px 0 0; }
+            .report-header { padding: 80px 18px 50px !important; }
+            .report-header h1 { font-size: 2.4rem; margin: 0 0 10px; }
+            .report-header h1 span { display: block; margin: 6px 0 0; font-size: 1.5rem; }
+            #report-header-tagline { font-size: 0.92rem !important; margin-top: 6px !important; }
+            .meta-info { font-size: 0.85rem; margin-top: 14px; }
             .report-card, #theory-detail-view .report-card { padding: 30px 20px; }
             .chart-container-large { padding: 20px; height: 250px;}
             .meaning-item { flex-direction: column; align-items: center; text-align: center; margin-bottom: 28px; padding-bottom: 28px; gap: 20px; }
@@ -665,7 +668,10 @@
             .form-card > p { font-size: 0.97rem; margin-bottom: 28px; }
 
             /* ─ 섹션 제목 폰트 ─ */
-            .section-title { font-size: 1.6rem; word-break: keep-all; }
+            .section-title { font-size: 1.4rem; word-break: keep-all; line-height: 1.35; margin-bottom: 24px; }
+            /* term-tip 모바일: inline + dashed underline 유지 (호버 툴팁은 모바일 비활성화) */
+            .section-title .term-tip { display: inline; border-bottom: 1.5px dashed var(--gold-dark); cursor: default; }
+            .section-title .term-tip::after, .section-title .term-tip::before { display: none; }
 
             /* ─ 버튼 위치 개선 ─ */
             /* 이름 기준 알아보기 버튼: 전체 너비, 텍스트 중앙 */
@@ -910,6 +916,13 @@
             font-style: italic;
             font-weight: 600;
         }
+        @media (max-width: 768px) {
+            .conclusion-letter-wrap { padding: 24px 18px 22px; border-radius: 14px; }
+            .conclusion-letter-wrap::before { font-size: 4.5rem; left: 10px; top: 2px; }
+            .conclusion-letter-greeting { font-size: 0.78rem; margin-bottom: 14px; padding-bottom: 10px; }
+            .conclusion-letter-body { font-size: 0.92rem; line-height: 1.95; margin: 0 0 16px; }
+            .conclusion-letter-sig { font-size: 0.75rem; }
+        }
 
         /* ── 기준별 시각 스코어카드 ─────────────────────────── */
         .score-criteria-grid {
@@ -950,14 +963,14 @@
             font-size: 0.68rem; font-weight: 800;
             padding: 2px 9px; border-radius: 20px;
         }
-        /* ── 모바일: 스코어카드 폰트/패딩 압축 ── */
+        /* ── 모바일: 스코어카드 2열 (3열 시 sci-sub 깨짐 방지) ── */
         @media (max-width: 768px) {
-            .score-criteria-grid { gap: 8px; }
-            .score-criteria-item { padding: 12px 6px 10px; gap: 5px; }
-            .sci-dot { width: 32px; height: 32px; font-size: 0.85rem; }
-            .sci-label { font-size: 0.72rem; word-break: keep-all; }
-            .sci-sub { font-size: 0.6rem; }
-            .sci-grade-pill { font-size: 0.62rem; padding: 1px 7px; }
+            .score-criteria-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .score-criteria-item { padding: 14px 10px 12px; gap: 6px; }
+            .sci-dot { width: 36px; height: 36px; font-size: 0.95rem; }
+            .sci-label { font-size: 0.85rem; word-break: keep-all; }
+            .sci-sub { font-size: 0.72rem; word-break: keep-all; line-height: 1.4; }
+            .sci-grade-pill { font-size: 0.7rem; padding: 2px 9px; }
         }
 
         /* ── 2-Section 구조 ────────────────────────────────── */
@@ -1234,7 +1247,10 @@
         .story-score-sub { font-size:0.82rem;color:var(--text-muted);margin-top:6px; }
 
         /* AI 보고서 스토리 요소 */
-        .ai-story-block { background:#f8fafc; border:1px solid var(--border-light); border-radius:14px; padding:20px 24px; margin-top:20px; font-size:0.95rem; line-height:1.75; color:var(--text-primary); }
+        .ai-story-block { background:#f8fafc; border:1px solid var(--border-light); border-radius:14px; padding:20px 24px; margin-top:20px; font-size:0.95rem; line-height:1.75; color:var(--text-primary); word-break:keep-all; overflow-wrap:break-word; }
+        @media (max-width: 768px) {
+            .ai-story-block { padding: 16px 16px; font-size: 0.88rem; line-height: 1.7; }
+        }
         .ai-tagline { font-size:1.35rem; font-weight:800; color:var(--bg-dark); line-height:1.5; margin-bottom:20px; font-style:italic; border-left:4px solid var(--gold-dark); padding-left:18px; }
         .ai-hanja-card { display:flex; gap:20px; align-items:flex-start; padding:22px 0; border-bottom:1px solid var(--border-light); }
         .ai-hanja-card:last-child { border-bottom:none; padding-bottom:0; }
@@ -1544,7 +1560,11 @@
             .chat-bubble { max-width:92%; font-size:0.88rem; }
             #chat-send-btn { padding:11px 16px; font-size:0.85rem; }
         }
-        .sound-unified { font-size:0.95rem;line-height:1.85;color:var(--text-primary);padding:20px 22px;background:#f8fafc;border-radius:14px;border:1px solid var(--border-light); }
+        .sound-unified { font-size:0.95rem;line-height:1.85;color:var(--text-primary);padding:20px 22px;background:#f8fafc;border-radius:14px;border:1px solid var(--border-light); word-break:keep-all; overflow-wrap:break-word; }
+        @media (max-width: 768px) {
+            .sound-unified { padding: 16px 14px; font-size: 0.88rem; line-height: 1.7; }
+            .sound-grade-row { flex-wrap: wrap; gap: 6px; }
+        }
         /* ── 대운 칩 바 ── */
         .daeun-chips-bar { display:flex;gap:6px;padding:14px 0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch; }
         .daeun-chip { flex:1;min-width:54px;text-align:center;padding:10px 4px 8px;border-radius:12px;cursor:pointer;border:2px solid transparent;transition:all 0.2s;background:#f8fafc;position:relative; }
