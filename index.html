@@ -186,7 +186,7 @@
         .hero-badge-sep { width: 1px; height: 40px; background: rgba(255,255,255,0.12); align-self: center; }
 
         .live-ticker { background: rgba(0,0,0,0.5); padding: 22px 0; overflow: hidden; border-top: 1px solid rgba(212,175,55,0.12); border-bottom: 1px solid rgba(212,175,55,0.12); backdrop-filter: blur(10px); }
-        .ticker-wrap { display: flex; white-space: nowrap; animation: ticker 50s linear infinite; }
+        .ticker-wrap { display: flex; white-space: nowrap; animation: ticker 15s linear infinite; }
         .ticker-wrap span { color: rgba(255,255,255,0.65); font-size: 1.1rem; margin-right: 100px; font-weight: 300; letter-spacing: -0.3px; }
         .ticker-wrap b { color: var(--gold-premium); font-weight: 800; margin-right: 6px; font-size: 1.15rem; }
         @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
@@ -534,8 +534,8 @@
                 position: fixed;
                 top: 61px; left: 0; right: 0;
                 background: #fff;
-                padding: 10px 16px 24px;
-                box-shadow: 0 12px 40px rgba(0,0,0,0.13);
+                padding: 8px 14px 20px;
+                box-shadow: 0 16px 48px rgba(0,0,0,0.14);
                 border-top: 1px solid #f1f5f9;
                 z-index: 150;
                 max-height: calc(100vh - 61px);
@@ -543,31 +543,46 @@
                 animation: mobileMenuSlide 0.22s ease;
             }
             @keyframes mobileMenuSlide {
-                from { opacity: 0; transform: translateY(-8px); }
+                from { opacity: 0; transform: translateY(-6px); }
                 to   { opacity: 1; transform: translateY(0); }
             }
             .main-nav-links.mobile-open a {
                 margin-left: 0;
-                padding: 15px 16px;
+                padding: 13px 16px;
                 border-radius: 12px;
-                border-bottom: 1px solid #f8fafc;
-                font-size: 1rem;
+                border-bottom: none;
+                font-size: 0.97rem;
+                font-weight: 600;
                 text-align: left;
+                color: #334155;
+                transition: background 0.15s;
             }
+            .main-nav-links.mobile-open a:hover,
+            .main-nav-links.mobile-open a:active { background: #f8fafc; }
+            .main-nav-links.mobile-open a + a { border-top: 1px solid #f1f5f9; }
             .main-nav-links.mobile-open a.premium-link {
-                margin-top: 6px;
+                margin-top: 10px;
                 text-align: center;
-                border: 1px solid var(--border-gold);
+                background: linear-gradient(135deg, #fffbeb, #fef3c7);
+                border: 1.5px solid var(--border-gold);
+                color: var(--gold-dark);
+                font-weight: 800;
+                border-radius: 14px;
             }
+            .main-nav-links.mobile-open a.premium-link + * { border-top: none; }
             .main-nav-links.mobile-open a.login-link {
                 margin-left: 0;
-                margin-top: 6px;
+                margin-top: 8px;
                 text-align: center;
                 display: block;
+                background: #f8fafc;
+                border-radius: 14px;
+                color: #334155;
+                font-weight: 700;
             }
             .main-nav-links.mobile-open #user-badge {
                 margin-left: 0 !important;
-                margin-top: 6px;
+                margin-top: 8px;
                 justify-content: center;
                 width: 100%;
             }
@@ -581,7 +596,8 @@
             .theory-card-clean h3 { font-size: 0.92rem; }
             .theory-card-clean p { font-size: 0.8rem; line-height: 1.55; }
             .theory-card-clean .tc-sub { font-size: 0.72rem; }
-            .result-row-4, .result-row-3 { grid-template-columns: 1fr; }
+            .result-row-4, .result-row-3 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .result-row-2 { gap: 10px; }
             /* 사주 그리드: 2×2 유지 */
             .saju-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 44px; }
             .saju-box-inner { padding: 16px 12px 14px; }
@@ -657,8 +673,22 @@
 
             /* ─ Phase 5: 폼·결과 영역 ─ */
             .form-card-title { font-size: 1.55rem; }
-            .result-summary-header { flex-direction: column; align-items: flex-start; gap: 8px; font-size: 1.3rem; }
-            .result-box { padding: 20px 16px; border-radius: 18px; }
+            .result-summary-header { flex-direction: column; align-items: flex-start; gap: 8px; font-size: 1.2rem; }
+            .result-box { padding: 14px 12px; border-radius: 14px; }
+            .result-header { margin-bottom: 8px; }
+            .result-header h4 { font-size: 0.88rem; }
+            .result-box > p { font-size: 0.75rem !important; line-height: 1.45; margin-top: 4px; }
+            .grade-badge { font-size: 0.68rem !important; padding: 3px 8px !important; }
+            /* 이름형식 + 성별: 모바일에서 2열 유지 */
+            #naming-form { grid-template-columns: 1fr 1fr !important; }
+            #naming-form .full-width-form { grid-column: span 2; }
+            #wstep-1 .form-grid { grid-template-columns: 1fr 1fr !important; }
+            #wstep-1 .full-width-form { grid-column: span 2; }
+            /* 이름스타일 버튼 예시 모바일 표시 */
+            .prem-style-pill .psb { display: flex !important; flex-direction: column; align-items: flex-start; gap: 2px; padding: 9px 10px; }
+            .prem-style-pill .psb-ex { display: block !important; font-size: 0.68rem; color: #94a3b8; font-weight: 500; }
+            .prem-style-pill .psb-ex-label { display: none; }
+            .prem-style-pill .psb-sep { display: none !important; }
             /* ─ Phase 5: wizard 탭 ─ */
             .wizard-progress { gap: 8px; margin-bottom: 32px; }
             .tab-label { font-size: 0.7rem; letter-spacing: 0; }
@@ -728,8 +758,23 @@
             .hanja-circle { width: 60px; height: 60px; font-size: 1.7rem; }
             /* ─ Phase 4~5 추가 축소 ─ */
             .form-card-title { font-size: 1.35rem; }
-            .result-box { padding: 16px 12px; }
+            .result-box { padding: 12px 10px; }
+            .result-header h4 { font-size: 0.82rem; }
             .tab-label { font-size: 0.65rem; }
+            /* 마이페이지 결제내역 모바일 */
+            .mp-payment-row { flex-wrap: wrap; gap: 10px; }
+            .mp-payment-info { min-width: 0; }
+            .mp-payment-right { flex-direction: row; align-items: center; gap: 8px; }
+            .mp-payment-title { font-size: 0.82rem; }
+            .mp-payment-meta { font-size: 0.7rem; }
+            .mp-payment-amount { font-size: 0.88rem; }
+            /* 마이페이지 전체 폰트 */
+            .mp-section-title { font-size: 1.15rem; }
+            .mp-section-tag { font-size: 0.68rem; }
+            .mp-card-title { font-size: 0.9rem; }
+            .mp-card-meta { font-size: 0.72rem; }
+            .mp-sub-card { padding: 14px 16px; font-size: 0.88rem; }
+            .mp-badge-ai, .mp-badge-sub { font-size: 0.62rem; }
             /* ─ 보고서 점수 배지: 모바일 축소 (한 줄 유지) ─ */
             .score-badge { font-size: 0.78rem; letter-spacing: 0.5px; padding: 8px 18px; max-width: 92vw; }
             /* 소형 화면: 기준 카드 2열 유지, 패딩/폰트 추가 축소 */
@@ -1907,7 +1952,7 @@
                     </div>
                     <div>
                         <label class="input-label">한글 성(姓)</label>
-                        <input type="text" id="kr-last-name" placeholder="예: 김" maxlength="1" onkeyup="generateHanjaSelectors()">
+                        <input type="text" id="kr-last-name" placeholder="예: 김, 남궁" maxlength="2" onkeyup="generateHanjaSelectors()">
                     </div>
                     <div>
                         <label class="input-label">한글 이름</label>
@@ -2109,7 +2154,7 @@
                             </div>
                             <div>
                                 <label class="input-label">성(姓) 한글<span class="badge-req">필수</span></label>
-                                <input type="text" id="prem-last-name" placeholder="예: 김" maxlength="1" onkeyup="updateHanjaSelect('prem-last-name','prem-last-name-hanja')">
+                                <input type="text" id="prem-last-name" placeholder="예: 김, 남궁" maxlength="2" onkeyup="updateHanjaSelect('prem-last-name','prem-last-name-hanja')">
                             </div>
                             <div>
                                 <label class="input-label">성(姓) 한자<span class="badge-opt">선택</span></label>
@@ -2578,31 +2623,32 @@
 
             <!-- 헤더 -->
             <div style="text-align:center;margin-bottom:28px;">
-                <div style="display:inline-block;font-size:0.7rem;font-weight:800;letter-spacing:2px;color:var(--gold-premium);text-transform:uppercase;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:5px 16px;margin-bottom:14px;">셀프 진단의 한계를 넘어</div>
-                <h3 style="font-size:1.45rem;font-weight:900;color:white;margin:0 0 10px;line-height:1.4;">이 이름, 진짜 맞는지 <br>AI 프리미엄으로 완성하세요</h3>
-                <p style="font-size:0.88rem;color:rgba(255,255,255,0.55);margin:0;line-height:1.7;">셀프 진단은 획수·발음 기반 1차 스크리닝입니다.<br>사주 전문가 수준의 정밀 분석은 아래에서 확인하세요.</p>
+                <div style="display:inline-block;font-size:0.7rem;font-weight:800;letter-spacing:2px;color:var(--gold-premium);text-transform:uppercase;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);border-radius:20px;padding:5px 16px;margin-bottom:14px;">셀프 진단, 그 다음 단계</div>
+                <h3 style="font-size:1.45rem;font-weight:900;color:white;margin:0 0 10px;line-height:1.4;">이 이름, 더 완벽하게 <br>AI 프리미엄으로 완성하세요</h3>
+                <p style="font-size:0.88rem;color:rgba(255,255,255,0.55);margin:0;line-height:1.7;">이 보고서로 6가지 지표를 확인했습니다.<br>이름을 직접 의뢰하면 전문가 수준의 완성도로 완성됩니다.</p>
             </div>
 
             <!-- 셀프 vs 프리미엄 비교 -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;">
                 <div style="background:rgba(255,255,255,0.05);border-radius:14px;padding:16px;">
-                    <div style="font-size:0.7rem;font-weight:800;color:#94a3b8;letter-spacing:1px;margin-bottom:10px;">셀프 진단 (현재)</div>
+                    <div style="font-size:0.7rem;font-weight:800;color:#94a3b8;letter-spacing:1px;margin-bottom:10px;">이 보고서 (셀프 진단)</div>
                     <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px;">
-                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:center;"><span style="color:#ef4444;">✕</span> 조후 용신 분석 없음</li>
-                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:center;"><span style="color:#ef4444;">✕</span> AI 한자 의미 분석 없음</li>
-                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:center;"><span style="color:#ef4444;">✕</span> 대운 10년 흐름 없음</li>
-                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:center;"><span style="color:#ef4444;">✕</span> 후보 이름 비교 없음</li>
-                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:center;"><span style="color:#ef4444;">✕</span> 1개 이름만 분석</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.5);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✓</span> 사주 원국·오행 분포 확인</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.5);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✓</span> 6대 성명학 지표 즉시 분석</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.5);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✓</span> 자원오행 보완 점검</li>
+                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> 대운 10년 흐름 없음</li>
+                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> AI 작명 소견서 없음</li>
+                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> 후보 이름 추천 없음</li>
                     </ul>
                 </div>
                 <div style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.25);border-radius:14px;padding:16px;">
                     <div style="font-size:0.7rem;font-weight:800;color:var(--gold-premium);letter-spacing:1px;margin-bottom:10px;">AI 프리미엄 작명</div>
                     <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px;">
-                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:center;"><span style="color:#22c55e;">✦</span> 조후·용신 정밀 분석</li>
-                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:center;"><span style="color:#22c55e;">✦</span> AI 한자 심층 해석</li>
-                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:center;"><span style="color:#22c55e;">✦</span> 인생 흐름을 알려주는 대운 그래프</li>
-                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:center;"><span style="color:#22c55e;">✦</span> 오행 생활 팁 &amp; 시기별 부모 가이드</li>
-                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:center;"><span style="color:#22c55e;">✦</span> AI 작명 상담</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✦</span> 조후·용신 정밀 분석</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✦</span> 대운 10년 운세 그래프</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✦</span> 5가지 후보 이름 추천·비교</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✦</span> AI 개인화 작명 소견서</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✦</span> 오행 생활 팁 &amp; 부모 가이드</li>
                     </ul>
                 </div>
             </div>
@@ -7279,16 +7325,28 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         `;
 
         // ── 오행 분포 계산 (사주 기반) ──────────────────────────────
+        // calcOhengScores(지장간 가중치)와 동일한 기준으로 균형 판정
+        let ohengScores8 = null;
+        if (typeof calcOhengScores === 'function') {
+            ohengScores8 = calcOhengScores(saju);
+        }
+        // fallback: 단순 8자 카운트
         const ohengCount = {'木':0,'火':0,'土':0,'金':0,'水':0};
         for (const p of pillars) {
             const go = _CG_OHENG[p.gan]; if (go) ohengCount[go]++;
             const jo = _JJ_OHENG[p.ji];  if (jo) ohengCount[jo]++;
         }
 
-        // ── 오행 균형/불균형 뱃지 (8자 기준) ────────────────────────
-        const weakList8   = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
-        const strongList8 = Object.entries(ohengCount).filter(([,c]) => c >= 4).map(([o]) => o);
-        const isBalanced8 = weakList8.length === 0 && strongList8.length === 0;
+        // ── 오행 균형/불균형 뱃지 — calcOhengScores 점수 기준(score<10 = 부족) ──
+        let weakList8, isBalanced8;
+        if (ohengScores8) {
+            weakList8   = Object.entries(ohengScores8).filter(([,s]) => s < 10).map(([o]) => o);
+            const strongList8 = Object.entries(ohengScores8).filter(([,s]) => s >= 40).map(([o]) => o);
+            isBalanced8 = weakList8.length === 0 && strongList8.length === 0;
+        } else {
+            weakList8   = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
+            isBalanced8 = weakList8.length === 0;
+        }
         const balanceBadge = document.getElementById('self-oheng-balance-badge');
         if (balanceBadge) {
             balanceBadge.innerHTML = isBalanced8
