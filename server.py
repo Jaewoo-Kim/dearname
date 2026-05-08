@@ -86,6 +86,10 @@ def api_files(filename):
     # api/claude-report.js 같은 정적 파일
     return _no_cache(send_from_directory(BASE_DIR / 'api', filename))
 
+@app.route('/tests/<path:filename>')
+def tests_files(filename):
+    return _no_cache(send_from_directory(BASE_DIR / 'tests', filename))
+
 # ── Claude API 프록시 ─────────────────────────────────────
 @app.route('/proxy/claude', methods=['POST'])
 def claude_proxy():

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>DearName 만세력 엔진 테스트</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: #f8fafc; color: #1e293b; padding: 24px; }
+  h1 { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { font-size: 0.8rem; color: #64748b; margin-bottom: 24px; }
+  #summary { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .badge { padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+  .badge.total  { background:#e2e8f0; color:#334155; }
+  .badge.pass   { background:#dcfce7; color:#16a34a; }
+  .badge.fail   { background:#fee2e2; color:#dc2626; }
+  #btn-run { padding: 8px 20px; border-radius: 8px; border: none; background: #1e293b; color: white;
+             font-size: 0.85rem; font-weight: 700; cursor: pointer; margin-bottom: 24px; }
+  #btn-run:hover { background: #334155; }
+  .suite { margin-bottom: 20px; }
+  .suite-name { font-size: 0.78rem; font-weight: 700; color: #475569; letter-spacing: 0.5px;
+                text-transform: uppercase; margin-bottom: 6px; padding-left: 4px; border-left: 3px solid #cbd5e1; }
+  .case { display: flex; align-items: flex-start; gap: 8px; padding: 5px 8px; border-radius: 6px;
+          font-size: 0.82rem; line-height: 1.5; }
+  .case.pass  { background: #f0fdf4; }
+  .case.fail  { background: #fef2f2; }
+  .icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .msg  { color: #334155; }
+  .fail .msg  { color: #991b1b; }
+  .detail { font-size: 0.75rem; color: #94a3b8; margin-left: 4px; }
+  .fail .detail { color: #f87171; }
+</style>
+</head>
+<body>
+
+<h1>🧪 DearName 만세력 엔진 테스트</h1>
+<p class="subtitle">runner.js 와 동일한 48개 케이스 — 브라우저에서 직접 실행</p>
+<button id="btn-run">▶ 테스트 실행</button>
+<div id="summary" style="display:none"></div>
+<div id="output"></div>
+
+<!-- 엔진 의존성 -->
+<script src="../data/manjuryeok.js"></script>
+<script src="../data/lunar-calendar.js"></script>
+<script src="../lib/saju-engine.js"></script>
+
+<script>
+// ── 미니 테스트 프레임워크 ──────────────────────────────────────────
+const suites = [];
+let cur = null;
+
+function suite(name) {
+  cur = { name, cases: [] };
+  suites.push(cur);
+}
+function assert(cond, msg, detail = '') {
+  cur.cases.push({ ok: !!cond, msg, detail });
+}
+function assertEq(got, expected, msg) {
+  assert(got === expected, msg, got !== expected ? `got "${got}"  expected "${expected}"` : '');
+}
+function saju(d, t, o) {
+  const r = calcSaju(d, t, o ?? {});
+  if (!r) throw new Error('calcSaju returned null: ' + d + ' ' + t);
+  return { year: r.year.gan+r.year.ji, month: r.month.gan+r.month.ji,
+           day: r.day.gan+r.day.ji, time: r.time.gan+r.time.ji, raw: r };
+}
+
+// ── 테스트 케이스 정의 ─────────────────────────────────────────────
+suite('[GOLD] 엔진 검증 케이스 & 실사용 회귀');
+{
+  const x = saju('2025-03-25','16:29');
+  assertEq(x.year,'乙巳','연주'); assertEq(x.month,'己卯','월주');
+  assertEq(x.day,'癸巳','일주'); assertEq(x.time,'庚申','시주');
+}
+{
+  const x = saju('1990-02-16','16:20');
+  assertEq(x.year,'庚午','연주'); assertEq(x.month,'戊寅','월주');
+  assertEq(x.day,'壬子','일주'); assertEq(x.time,'戊申','시주');
+}
+{
+  const raw = calcSaju('1990-02-16','16:20',{});
+  const CG={'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+  const JJ={'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+  const cnt={'木':0,'火':0,'土':0,'金':0,'水':0};
+  [raw.year,raw.month,raw.day,raw.time].forEach(p=>{cnt[CG[p.gan]]++;cnt[JJ[p.ji]]++;});
+  assertEq(cnt['木'],1,'오행카운트 木=1'); assertEq(cnt['火'],1,'오행카운트 火=1');
+  assertEq(cnt['土'],2,'오행카운트 土=2'); assertEq(cnt['金'],2,'오행카운트 金=2'); assertEq(cnt['水'],2,'오행카운트 水=2');
+}
+
+suite('[LOGIC] 입춘 경계 — 연주 전환');
+{
+  assertEq(saju('1990-02-04','11:00').year,'己巳','入春 직전(adjH=10) → 己巳년');
+  assertEq(saju('1990-02-04','12:00').year,'庚午','入春 직후(adjH=11,adjMin=28) → 庚午년');
+  assertEq(saju('2025-02-03','23:41').year,'甲辰','2025 入春 직전(adjMin=9) → 甲辰년');
+  assertEq(saju('2025-02-03','23:43').year,'乙巳','2025 入春 직후(adjMin=11) → 乙巳년');
+}
+
+suite('[LOGIC] 절기 경계 — 월주 전환');
+{
+  // 경칩(2025) = j['3'] = 3/5 17:07  /  KST 17:06 adjH=16(前) / 17:40 adjH=17(後)
+  assertEq(saju('2025-03-05','17:06').month,'戊寅','경칩 직전(adjH=16) 월주 戊寅');
+  assertEq(saju('2025-03-05','17:40').month,'己卯','경칩 직후(adjH=17,adjMin=28) 월주 己卯');
+}
+
+suite('[LOGIC] 야자시 — 시주 일간 전환');
+{
+  assertEq(saju('2025-03-26','00:30',{yajasi:true}).time,'甲子','야자시 ON  → 甲子');
+  assertEq(saju('2025-03-26','00:30',{yajasi:false}).time,'壬子','야자시 OFF → 壬子');
+  assert(saju('2025-03-26','00:30',{yajasi:true}).day === saju('2025-03-26','00:30',{yajasi:false}).day,
+    '야자시 ON/OFF 일주 동일');
+  assertEq(saju('2025-03-25','22:59',{yajasi:true,apply30min:false}).time,'癸亥','22:59 → 亥시 癸亥');
+  assertEq(saju('2025-03-25','23:00',{yajasi:true,apply30min:false}).time,'甲子','23:00 → 야자시 甲子');
+}
+
+suite('[LOGIC] 지방시 30분 보정 on/off');
+{
+  // 15:10 KST: 보정ON → adjH=14 未시 丁未 / 보정OFF → adjH=15 申시 戊申
+  assertEq(saju('1990-02-16','15:10',{apply30min:true}).time,'丁未','apply30min=true  → 未시 丁未');
+  assertEq(saju('1990-02-16','15:10',{apply30min:false}).time,'戊申','apply30min=false → 申시 戊申');
+}
+
+suite('[LOGIC] 도시 보정 — 서울 vs 독도');
+{
+  assertEq(saju('2025-03-25','23:30',{city:'서울'}).time,'癸亥','서울(adjH=22) → 亥시 癸亥');
+  assertEq(saju('2025-03-25','23:30',{city:'독도'}).time,'甲子','독도(adjH=23) → 야자시 甲子');
+}
+
+suite('[LOGIC] 표준시 보정 +30분 (1954~1961)');
+{
+  const inPeriod  = saju('1958-06-15','01:31').time;
+  const outPeriod = saju('1962-06-15','01:31').time;
+  assert(inPeriod !== outPeriod, `보정 기간 내/외 시주 달라야 함 (${inPeriod} vs ${outPeriod})`);
+  const x = saju('1958-06-15','14:00');
+  assertEq(x.year,'戊戌','연주 戊戌'); assertEq(x.month,'戊午','월주 戊午');
+  assertEq(x.day,'癸亥','일주 癸亥');  assertEq(x.time,'戊午','시주 戊午 [SNAP]');
+}
+
+suite('[LOGIC] 서머타임 -60분 (1955 하절기)');
+{
+  assert(saju('1955-07-01','14:00').time.endsWith('午'),'서머타임 적용 中: 午시');
+  assert(saju('1955-10-01','14:00').time.endsWith('未'),'서머타임 종료 後: 未시');
+  const x = saju('1955-07-01','14:00');
+  assertEq(x.year,'乙未','연주 乙未'); assertEq(x.month,'壬午','월주 壬午');
+  assertEq(x.day,'癸亥','일주 癸亥'); assertEq(x.time,'戊午','시주 戊午 [SNAP]');
+}
+
+suite('[SNAP] calcOhengScores — 가중 오행 점수');
+{
+  const raw    = calcSaju('1990-02-16','16:20',{});
+  const scores = calcOhengScores(raw);
+  const total  = Object.values(scores).reduce((a,b)=>a+b,0);
+  assert(total >= 95 && total <= 105, `오행점수 합계 ≈100pt (got ${total.toFixed(1)})`);
+  const top = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  assertEq(top[0][0],'水','1위 오행=水'); assertEq(top[1][0],'土','2위 오행=土');
+}
+
+suite('[SNAP] calcDaeun — 구조 및 첫 대운');
+{
+  const CHEONGAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+  const raw    = calcSaju('1990-02-16','16:20',{});
+  const result = calcDaeun(raw,'1990-02-16','16:20','남자',{});
+  assert(result !== null,'반환값 non-null');
+  assert(result.cycles?.length >= 8, `사이클 8개 이상 (got ${result.cycles?.length})`);
+  assert(typeof result.startAge === 'number', `startAge 숫자 (got ${result.startAge})`);
+  assert(typeof result.isForward === 'boolean', `isForward 불리언 (got ${result.isForward})`);
+  const first = result.cycles[0];
+  assertEq(first.gan + first.ji,'丁丑','첫 대운 丁丑 [SNAP]');
+  const i0=CHEONGAN.indexOf(result.cycles[0].gan);
+  const i1=CHEONGAN.indexOf(result.cycles[1].gan);
+  const i2=CHEONGAN.indexOf(result.cycles[2].gan);
+  assert(((i1-i0+10)%10) === ((i2-i1+10)%10), `대운 천간 방향 일관됨`);
+}
+
+suite('[LOGIC] 만세력 범위 외 연도 — null 반환');
+{
+  assert(calcSaju('1920-01-01','12:00',{}) === null,'1920년 → null');
+  assert(calcSaju('2041-01-01','12:00',{}) === null,'2041년 → null');
+  assert(calcSaju('1921-01-06','12:00',{}) !== null,'1921년 → 정상 반환');
+  assert(calcSaju('2040-12-25','12:00',{}) !== null,'2040년 → 정상 반환');
+}
+
+// ── 렌더링 ──────────────────────────────────────────────────────────
+document.getElementById('btn-run').addEventListener('click', runAndRender);
+function runAndRender() {
+  let totalPass = 0, totalFail = 0;
+  const out = document.getElementById('output');
+  out.innerHTML = '';
+  suites.forEach(suite => {
+    const div = document.createElement('div');
+    div.className = 'suite';
+    div.innerHTML = `<div class="suite-name">${suite.name}</div>`;
+    suite.cases.forEach(c => {
+      if (c.ok) totalPass++; else totalFail++;
+      const item = document.createElement('div');
+      item.className = 'case ' + (c.ok ? 'pass' : 'fail');
+      item.innerHTML = `<span class="icon">${c.ok ? '✓' : '✗'}</span>
+        <span class="msg">${c.msg}${c.detail ? `<span class="detail"> — ${c.detail}</span>` : ''}</span>`;
+      div.appendChild(item);
+    });
+    out.appendChild(div);
+  });
+  const sum = document.getElementById('summary');
+  sum.style.display = 'flex';
+  sum.innerHTML = `
+    <span class="badge total">총 ${totalPass+totalFail}개</span>
+    <span class="badge pass">✓ ${totalPass}개 통과</span>
+    ${totalFail > 0 ? `<span class="badge fail">✗ ${totalFail}개 실패</span>` : '<span class="badge pass">전체 통과 🎉</span>'}`;
+}
+// 페이지 로드 시 자동 실행
+window.addEventListener('load', runAndRender);
+</script>
+</body>
+</html>

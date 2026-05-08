@@ -1,0 +1,11 @@
+{
+  "name": "dearname",
+  "version": "2.0.0",
+  "description": "DearName v2 — 프리미엄 AI 작명 소견서",
+  "scripts": {
+    "test": "node tests/runner.js"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
