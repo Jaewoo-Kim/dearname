@@ -2927,7 +2927,7 @@
         </div>
 
         <!-- Chapter 1: 사주 원국 -->
-        <div class="report-card report-card-acc">
+        <div class="report-card report-card-acc" id="ch1">
             <div class="chapter-acc-header" onclick="_toggleChapter('ch1')">
                 <div class="chapter-acc-title-row">
                     <div>
@@ -2937,10 +2937,10 @@
                             <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch1')" title="이론 설명 보기">ⓘ</button>
                         </div>
                     </div>
-                    <button id="toggle-btn-ch1" class="chapter-toggle-btn">자세히 보기 ↓</button>
+                    <button id="toggle-btn-ch1" class="chapter-toggle-btn">접기 ↑</button>
                 </div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch1">
+            <div class="chapter-acc-body open" id="acc-body-ch1">
 
             <!-- 사주 이론 설명 박스 (동적) -->
             <div class="chapter-theory-box" id="ch1-theory-box">
@@ -3026,7 +3026,7 @@
         </div>
 
         <!-- Chapter 2: 자원오행 & 레이더 -->
-        <div class="report-card report-card-acc">
+        <div class="report-card report-card-acc" id="ch2">
             <div class="chapter-acc-header" onclick="_toggleChapter('ch2')">
                 <div class="chapter-acc-title-row">
                     <div>
@@ -3036,11 +3036,11 @@
                             <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch2')" title="이론 설명 보기">ⓘ</button>
                         </div>
                     </div>
-                    <button id="toggle-btn-ch2" class="chapter-toggle-btn">자세히 보기 ↓</button>
+                    <button id="toggle-btn-ch2" class="chapter-toggle-btn">접기 ↑</button>
                 </div>
                 <div id="verdict-ch2" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch2">
+            <div class="chapter-acc-body open" id="acc-body-ch2">
             <div class="chapter-theory-box" id="ch2-theory-box">
                 <div class="chapter-theory-title" id="ch2-theory-title">📖 이름이 사주를 채우는 방법</div>
                 <span id="ch2-theory-body">한자 한 글자마다 <b>목(木)·화(火)·토(土)·금(金)·수(水)</b> 다섯 기운 중 하나가 담겨 있습니다. 이름을 매일 수십 번 부를 때마다 그 기운이 아이에게 자연스럽게 스며들어, 사주에서 부족한 자리를 채워줍니다. 오른쪽 레이더 차트의 <b>금색 면적</b>이 넓을수록 이름의 보완 효과가 큽니다.</span>
@@ -3075,7 +3075,7 @@
         </div>
 
         <!-- Chapter 3: 한자 의미 -->
-        <div class="report-card report-card-acc">
+        <div class="report-card report-card-acc" id="ch3">
             <div class="chapter-acc-header" onclick="_toggleChapter('ch3')">
                 <div class="chapter-acc-title-row">
                     <div>
@@ -3085,11 +3085,11 @@
                             <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch3')" title="이론 설명 보기">ⓘ</button>
                         </div>
                     </div>
-                    <button id="toggle-btn-ch3" class="chapter-toggle-btn">자세히 보기 ↓</button>
+                    <button id="toggle-btn-ch3" class="chapter-toggle-btn">접기 ↑</button>
                 </div>
                 <div id="verdict-ch3" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch3">
+            <div class="chapter-acc-body open" id="acc-body-ch3">
             <div class="chapter-theory-box" id="ch3-theory-box">
                 <div class="chapter-theory-title">📖 오행을 담은 한자, 의미까지 담다</div>
                 <span id="ch3-theory-body">앞서 필요한 기운을 파악했다면, 이제 <b>그 기운을 품으면서도 뜻이 아름다운 한자</b>를 고를 차례입니다. 오행 보완이 목적이더라도, 매일 불릴 이름의 한자가 좋은 뜻을 가져야 아이의 인생에 긍정적 에너지가 쌓입니다. 아래에서 각 한자가 어떤 오행을 담고 있으며, 어떤 뜻과 어원을 가지는지 확인하세요.</span>
@@ -3107,7 +3107,7 @@
         </div>
 
         <!-- Chapter 4: 발음 오행 & 음양 -->
-        <div class="report-card report-card-acc">
+        <div class="report-card report-card-acc" id="ch4">
             <div class="chapter-acc-header" onclick="_toggleChapter('ch4')">
                 <div class="chapter-acc-title-row">
                     <div>
@@ -3117,11 +3117,11 @@
                             <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch4')" title="이론 설명 보기">ⓘ</button>
                         </div>
                     </div>
-                    <button id="toggle-btn-ch4" class="chapter-toggle-btn">자세히 보기 ↓</button>
+                    <button id="toggle-btn-ch4" class="chapter-toggle-btn">접기 ↑</button>
                 </div>
                 <div id="verdict-ch4" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch4">
+            <div class="chapter-acc-body open" id="acc-body-ch4">
             <div class="chapter-theory-box" id="ch4-theory-box">
                 <div class="chapter-theory-title">📖 이름이 귀에 닿을 때 — 소리로 검증하다</div>
                 한자의 오행과 뜻을 골랐다면, 마지막으로 <b>소리가 편하고 긍정적인지</b>를 과학적 이론으로 검증합니다. 이름을 소리 낼 때 <b>초성의 발음 위치</b>에 따라 오행이 결정되며(예: ㄱ·ㅋ=木, ㄴ·ㄷ·ㄹ=火, ㅅ·ㅈ·ㅊ=金, ㅁ·ㅂ=水, ㅇ·ㅎ=土), 성씨→이름 순서로 이 오행이 <b>상생(相生) 흐름</b>을 이루어야 기운이 막힘없이 전달됩니다. 모음의 음양 균형까지 맞으면 소리 자체에서 조화로운 에너지가 흘러나옵니다.
@@ -3139,7 +3139,7 @@
         </div>
 
         <!-- Chapter 5-A: 사격수리 -->
-        <div class="report-card report-card-acc">
+        <div class="report-card report-card-acc" id="ch5a">
             <div class="chapter-acc-header" onclick="_toggleChapter('ch5a')">
                 <div class="chapter-acc-title-row">
                     <div>
@@ -3149,11 +3149,11 @@
                             <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch5a')" title="이론 설명 보기">ⓘ</button>
                         </div>
                     </div>
-                    <button id="toggle-btn-ch5a" class="chapter-toggle-btn">자세히 보기 ↓</button>
+                    <button id="toggle-btn-ch5a" class="chapter-toggle-btn">접기 ↑</button>
                 </div>
                 <div id="verdict-ch5a" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch5a">
+            <div class="chapter-acc-body open" id="acc-body-ch5a">
             <div class="chapter-theory-box" id="ch5a-theory-box">
                 <div class="chapter-theory-title">📖 사격수리 — 이름이 그리는 인생의 지도</div>
                 사격수리(四格數理)는 이름 한자의 <b>획수 합</b>으로 인생 초년부터 말년까지의 운세 지도를 그립니다. 동양에서는 1~81 각 수마다 고유한 기운과 길흉이 있다고 봅니다. <b>원격(源格)</b>은 초년의 기질, <b>형격(亨格)</b>은 청장년기 사회운, <b>이격(利格)</b>은 가정·이성운, <b>정격(正格)</b>은 총운을 나타냅니다. 앞서 자원오행·발음오행으로 기운의 질(質)을 맞췄다면, 수리는 <b>기운의 양(量)과 인생 타이밍</b>을 조율합니다.
@@ -3171,7 +3171,7 @@
         </div>
 
         <!-- Chapter 5. 수리 오행 & 음양 -->
-        <div class="report-card report-card-acc">
+        <div class="report-card report-card-acc" id="ch5b">
             <div class="chapter-acc-header" onclick="_toggleChapter('ch5b')">
                 <div class="chapter-acc-title-row">
                     <div>
@@ -3181,11 +3181,11 @@
                             <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch5b')" title="이론 설명 보기">ⓘ</button>
                         </div>
                     </div>
-                    <button id="toggle-btn-ch5b" class="chapter-toggle-btn">자세히 보기 ↓</button>
+                    <button id="toggle-btn-ch5b" class="chapter-toggle-btn">접기 ↑</button>
                 </div>
                 <div id="verdict-ch5b" class="chapter-verdict-strip"></div>
             </div>
-            <div class="chapter-acc-body" id="acc-body-ch5b">
+            <div class="chapter-acc-body open" id="acc-body-ch5b">
             <div class="chapter-theory-box" id="ch5b-theory-box">
                 <div class="chapter-theory-title">📖 사격수리를 보완하는 두 가지 지표</div>
                 사격수리가 <b>인생의 큰 그림</b>을 보여준다면, 수리 오행·음양은 <b>그 그림의 균형을 미세 조정</b>합니다. 획수의 합이 짝수(음)와 홀수(양)로 균형 있게 섞여야 기운이 막히지 않고 흐르며, 각 격의 끝자리 오행이 서로 상생하면 수리가 사주 오행 흐름과도 조화를 이룹니다.
@@ -3202,7 +3202,7 @@
         </div>
 
         <!-- Chapter 5-B: 인생 흐름 (숨김) -->
-        <div class="report-card report-card-acc" style="display:none;">
+        <div class="report-card report-card-acc" id="ch5c" style="display:none;">
             <div class="chapter-acc-header">
                 <div class="chapter-acc-title-row">
                     <div>
