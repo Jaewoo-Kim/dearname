@@ -1275,6 +1275,7 @@
         .season-card { background:#f8fafc;border-radius:16px;padding:20px;border:1px solid var(--border-light);position:relative; }
         .season-card.season-good { border-color:#bbf7d0; background:#f0fdf4; }
         .season-card.season-bad  { border-color:#fecaca; background:#fff5f5; }
+        .season-card.season-avg  { border-color:#fde68a; background:#fffbeb; }
         .season-card.season-jeong { border:2.5px solid var(--gold-premium) !important; background:#fffcf3 !important; }
         /* 흐름 패턴 배너 */
         .suri-pattern-banner {
@@ -3815,7 +3816,7 @@
         };
         // ── 이름 3: 박지윤 (朴祉玧) ─────────────────────────────────
         // 祉(지,木,9획) + 玧(윤,金,9획)
-        // 수리: 원격18(발전격,길) / 형격15(통솔격,길) / 이격15(통솔격,길) / 정격24(출세격,길) 전격 길
+        // 수리: 원격18(발전격,길) / 형격15(통솔격,대길) / 이격15(통솔격,대길) / 정격24(입신격,대길) 전격 대길
         // 발음: 박(ㅂ=Water)→지(ㅈ=金)→윤(ㅇ=土): Water↔金 상생, 金↔土 상생 2/2 매우 좋음
         const _demo3 = {
             familyKr: '박', familyHanja: '朴',
@@ -3838,7 +3839,7 @@
             lifeFlow: {
                 early:  '원격 18수(발전격)로 성실한 학습과 꾸준한 노력으로 탄탄한 기반을 다지는 시기',
                 middle: '형격·이격 모두 15수(통솔격)로 인품과 포용력으로 주변을 이끄는 신뢰받는 리더로 성장하는 시기',
-                late:   '정격 24수(출세격)로 쌓아온 덕망과 능력이 사회에서 높이 인정받아 빛나는 완성에 이르는 시기'
+                late:   '정격 24수(입신격)로 쌓아온 덕망과 능력이 사회에서 높이 인정받아 빛나는 완성에 이르는 시기'
             },
             careerAdvice: '지윤의 사주는 일간 갑목(甲木)의 복스럽고 생명력 넘치는 기질 위에 풍부한 수(Water)의 감수성과 화(火)·토(土)의 따뜻한 안정감이 더해진 형상입니다. 여기에 이름 祉(木)가 복스러운 포용력과 성장 에너지를, 玧(金)이 사주에 없던 결단력과 집중력을 채워줌으로써, 지윤이는 사람의 마음을 깊이 이해하면서도 마지막까지 흔들리지 않고 해내는 탁월한 실행 능력을 갖추게 됩니다. 넉넉한 포용력(Water·木·土)과 따뜻한 리더십, 이름이 심어주는 金의 단단한 집중력이 하나로 어우러진 지윤이는 사람들에게 신뢰를 주면서도 자신만의 분야에서 독보적인 전문성을 쌓아갑니다. 의료·복지·교육·심리·사회적 리더십·행정처럼 사람을 이끌고 성장을 돕는 분야에서 특히 빛을 발할 것입니다.',
             careerJobs: ['의료·복지 전문가', '교육자 / 심리 상담사', '사회적 리더 / 행정가', '연구자 / 학자', '기획자 / 매니저', '문화·예술 큐레이터'],
@@ -6163,14 +6164,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const g4 = isOija ? s0+s1 : s0+s1+s2;
         const rawNums = [g1, g2, g3, g4];
 
-        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
-        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#1d4ed8','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
-        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
-        const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
-        const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
-        const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
-        // 등급 → 점수 (-2~2)
-        const _score  = g => ({'매우 좋음':2,'좋음':1,'나쁨':-1,'매우 나쁨':-2})[_normG(g)] || 0;
+        // 5단계 등급 헬퍼 (대길/길/평/흉/대흉)
+        const _normG  = g => ({'대길':'대길','길':'길','평':'평','흉':'흉','대흉':'대흉',
+                               '매우 좋음':'대길','좋음':'길','나쁨':'흉','매우 나쁨':'대흉'}[g]||'평');
+        const _gColor = g => ({'대길':'#14532d','길':'#1d4ed8','평':'#92400e','흉':'#b45309','대흉':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'대길':'#f0fdf4','길':'#eff6ff','평':'#fef3c7','흉':'#fff7ed','대흉':'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _label  = g => ({'대길':'✦ 대길','길':'좋음','평':'평','흉':'나쁨','대흉':'✗ 대흉'})[_normG(g)]||g;
+        const _badge  = g => `<span style="display:inline-block;background:${_gBg(g)};color:${_gColor(g)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${_label(g)}</span>`;
+        const _isGood = g => { const ng=_normG(g); return ng==='대길'||ng==='길'; };
+        const _isBad  = g => { const ng=_normG(g); return ng==='대흉'||ng==='흉'; };
+        // 등급 → 점수 (-2~2), 평=0 중립
+        const _score  = g => ({'대길':2,'길':1,'평':0,'흉':-1,'대흉':-2})[_normG(g)] ?? 0;
 
         // ── 수리 데이터 추출 ───────────────────────────────────────────
         const seasons = [
@@ -6233,7 +6237,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const cardsHtml = seasons.map((s, i) => {
             const d   = suriDatas[i];
             const cls = (s.isJeong ? 'season-jeong ' : '') +
-                        (_isGood(d.grade) ? 'season-good' : _isBad(d.grade) ? 'season-bad' : '');
+                        (_isGood(d.grade) ? 'season-good' : _isBad(d.grade) ? 'season-bad' :
+                         _normG(d.grade)==='평' ? 'season-avg' : '');
             // 대길수/대흉수/총운 특수 배지
             const specialBadge = d.grade === '대길'  ? `<div><span class="suri-special-badge ssb-daegil">★ 대표 대길수</span></div>` :
                                   d.grade === '대흉'  ? `<div><span class="suri-special-badge ssb-daehyung">⚠ 대표 흉수</span></div>` : '';
