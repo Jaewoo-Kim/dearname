@@ -1275,6 +1275,48 @@
         .season-card { background:#f8fafc;border-radius:16px;padding:20px;border:1px solid var(--border-light);position:relative; }
         .season-card.season-good { border-color:#bbf7d0; background:#f0fdf4; }
         .season-card.season-bad  { border-color:#fecaca; background:#fff5f5; }
+        .season-card.season-jeong { border:2.5px solid var(--gold-premium) !important; background:#fffcf3 !important; }
+        /* 흐름 패턴 배너 */
+        .suri-pattern-banner {
+            display:flex; align-items:center; gap:14px;
+            border-radius:14px; padding:16px 20px; margin-bottom:16px;
+            border:1.5px solid;
+        }
+        .suri-pattern-banner.rising  { background:linear-gradient(135deg,#fffcf3,#fff8e1); border-color:#d4af37; }
+        .suri-pattern-banner.stable  { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border-color:#4ade80; }
+        .suri-pattern-banner.falling { background:linear-gradient(135deg,#fef2f2,#fee2e2); border-color:#f87171; }
+        .suri-pattern-banner.mixed   { background:linear-gradient(135deg,#f8fafc,#f1f5f9); border-color:#94a3b8; }
+        .suri-pattern-banner.peak    { background:linear-gradient(135deg,#eff6ff,#dbeafe); border-color:#60a5fa; }
+        .spb-icon { font-size:2rem; flex-shrink:0; }
+        .spb-name { font-size:0.98rem; font-weight:900; margin-bottom:3px; }
+        .spb-name.rising  { color:#92400e; }
+        .spb-name.stable  { color:#14532d; }
+        .spb-name.falling { color:#991b1b; }
+        .spb-name.mixed   { color:#475569; }
+        .spb-name.peak    { color:#1d4ed8; }
+        .spb-desc { font-size:0.81rem; line-height:1.55; }
+        .spb-desc.rising  { color:#78350f; }
+        .spb-desc.stable  { color:#166534; }
+        .spb-desc.falling { color:#7f1d1d; }
+        .spb-desc.mixed   { color:#475569; }
+        .spb-desc.peak    { color:#1e3a8a; }
+        .spb-tag {
+            margin-left:auto; flex-shrink:0;
+            font-size:0.7rem; font-weight:800; border-radius:20px; padding:4px 13px; color:white;
+        }
+        .spb-tag.rising  { background:#d4af37; }
+        .spb-tag.stable  { background:#16a34a; }
+        .spb-tag.falling { background:#dc2626; }
+        .spb-tag.mixed   { background:#64748b; }
+        .spb-tag.peak    { background:#2563eb; }
+        /* 수리 특수 배지 */
+        .suri-special-badge {
+            display:inline-block; font-size:0.62rem; font-weight:800;
+            border-radius:10px; padding:2px 8px; margin-top:5px;
+        }
+        .ssb-daegil  { background:#d4af37; color:white; }
+        .ssb-daehyung{ background:#dc2626; color:white; }
+        .ssb-total   { background:rgba(212,175,55,0.15); color:#92400e; border:1px solid rgba(212,175,55,0.4); }
         .season-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
         .season-meta { display:flex;align-items:center;gap:8px; }
         .season-emoji { font-size:1.2rem; }
@@ -6111,7 +6153,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             </div>`;
     }
 
-    // ── 사격수리 카드 렌더링 (시즌 카드 디자인) ─────────────────────
+    // ── 사격수리 카드 렌더링 (시즌 카드 + 흐름 패턴 배너) ────────────
     function _renderSuriCards(s0, s1, s2, isOija) {
         const el = document.getElementById('report-suri-cards');
         if (!el) return;
@@ -6127,20 +6169,75 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
         const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
         const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
+        // 등급 → 점수 (-2~2)
+        const _score  = g => ({'매우 좋음':2,'좋음':1,'나쁨':-1,'매우 나쁨':-2})[_normG(g)] || 0;
 
+        // ── 수리 데이터 추출 ───────────────────────────────────────────
         const seasons = [
-            { emoji:'🌱', period:'봄 · 초년 (0~20대)',    label:_tip('원격'), rawNum: rawNums[0] },
-            { emoji:'☀️', period:'여름 · 청년 (20~40대)', label:_tip('형격'), rawNum: rawNums[1] },
-            { emoji:'🍂', period:'가을 · 장년 (40~60대)', label:_tip('이격'), rawNum: rawNums[2] },
-            { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:_tip('정격'), rawNum: rawNums[3] },
+            { emoji:'🌱', period:'봄 · 초년 (0~20대)',    label:_tip('원격'), rawNum: rawNums[0], isJeong: false },
+            { emoji:'☀️', period:'여름 · 청년 (20~40대)', label:_tip('형격'), rawNum: rawNums[1], isJeong: false },
+            { emoji:'🍂', period:'가을 · 장년 (40~60대)', label:_tip('이격'), rawNum: rawNums[2], isJeong: false },
+            { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:_tip('정격'), rawNum: rawNums[3], isJeong: true  },
         ];
-
-        const cardsHtml = seasons.map(s => {
+        const suriDatas = seasons.map(s => {
             let num = s.rawNum > 81 ? s.rawNum % 81 : s.rawNum;
             if (num === 0) num = 81;
-            const d = (typeof SURI_DATA !== 'undefined' && SURI_DATA[num])
+            return (typeof SURI_DATA !== 'undefined' && SURI_DATA[num])
                 ? SURI_DATA[num] : { name:'', grade:'평', desc:'' };
-            const cls = _isGood(d.grade) ? 'season-good' : _isBad(d.grade) ? 'season-bad' : '';
+        });
+        const scores = suriDatas.map(d => _score(d.grade)); // [원,형,이,정]
+
+        // ── 흐름 패턴 판정 ────────────────────────────────────────────
+        const allGood    = scores.every(s => s >= 1);
+        const allBad     = scores.every(s => s <= -1);
+        const frontScore = scores[0] + scores[1];  // 초년+청년
+        const backScore  = scores[2] + scores[3];  // 장년+말년
+        const midScore   = scores[1] + scores[2];  // 청년+장년
+        const outerScore = scores[0] + scores[3];  // 원격+정격
+        const trend      = backScore - frontScore;  // 양수=상승, 음수=하강
+
+        let pattern;
+        if (allGood)                         pattern = 'stable';   // 안정형
+        else if (allBad)                     pattern = 'falling';  // 전체흉
+        else if (trend >= 2)                 pattern = 'rising';   // 상승형
+        else if (trend <= -2)                pattern = 'falling';  // 하강형
+        else if (midScore >= 2 && outerScore <= 0) pattern = 'peak'; // 중반전성형
+        else                                 pattern = 'mixed';    // 파란만장형
+
+        const patternInfo = {
+            stable:  { icon:'🏆', name:'안정형 — 전 생애에 걸친 고른 행운의 흐름',
+                        desc:'4격이 모두 길수로 구성된 최상의 수리 배열입니다. 어느 시기에도 흔들리지 않는 든든한 기운이 이름을 받쳐줍니다.', tag:'🏆 안정형' },
+            rising:  { icon:'🌅', name:'상승형 — 고생 끝에 꽃이 피는 인생',
+                        desc:'초·청년기보다 장년·말년으로 갈수록 운세가 강해집니다. 꾸준히 쌓아가면 후반부에 크게 빛나는 이름입니다.', tag:'🌅 상승형' },
+            falling: { icon:'📉', name:'하강형 — 초반의 기세를 잘 지켜야 하는 이름',
+                        desc:'청년기까지의 좋은 기운이 장년·말년에 약해집니다. 자원오행·발음오행의 보완이 더욱 중요하게 작용합니다.', tag:'📉 하강형' },
+            peak:    { icon:'⚡', name:'중반전성형 — 청·장년기가 인생의 정점',
+                        desc:'사회에서 가장 활발하게 활동하는 20~60대가 운세의 절정입니다. 그 시기에 집중하면 최대 성과를 낼 수 있습니다.', tag:'⚡ 중반전성형' },
+            mixed:   { icon:'🎢', name:'파란만장형 — 굴곡 속에 반전이 있는 인생',
+                        desc:'길·흉이 교차하며 다채로운 흐름을 만듭니다. 어려운 시기를 버텨내면 반드시 좋은 시기가 찾아오는 구조입니다.', tag:'🎢 파란만장형' },
+        };
+        const pi = patternInfo[pattern];
+
+        // ── 패턴 배너 HTML ────────────────────────────────────────────
+        const bannerHtml = `
+        <div class="suri-pattern-banner ${pattern}">
+            <div class="spb-icon">${pi.icon}</div>
+            <div>
+                <div class="spb-name ${pattern}">${pi.name}</div>
+                <div class="spb-desc ${pattern}">${pi.desc}</div>
+            </div>
+            <div class="spb-tag ${pattern}">${pi.tag}</div>
+        </div>`;
+
+        // ── 카드 HTML ─────────────────────────────────────────────────
+        const cardsHtml = seasons.map((s, i) => {
+            const d   = suriDatas[i];
+            const cls = (s.isJeong ? 'season-jeong ' : '') +
+                        (_isGood(d.grade) ? 'season-good' : _isBad(d.grade) ? 'season-bad' : '');
+            // 대길수/대흉수/총운 특수 배지
+            const specialBadge = d.grade === '대길'  ? `<div><span class="suri-special-badge ssb-daegil">★ 대표 대길수</span></div>` :
+                                  d.grade === '대흉'  ? `<div><span class="suri-special-badge ssb-daehyung">⚠ 대표 흉수</span></div>` : '';
+            const totalBadge   = s.isJeong ? `<div><span class="suri-special-badge ssb-total">총운</span></div>` : '';
             return `<div class="season-card ${cls}">
                 <div class="season-top">
                     <div class="season-meta">
@@ -6155,10 +6252,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 <div class="season-num">${s.rawNum}</div>
                 <div class="season-suri-name">${d.name}</div>
                 <div class="season-desc">${d.desc}</div>
+                ${specialBadge}${totalBadge}
             </div>`;
         }).join('');
 
-        el.innerHTML = `<div class="suri-seasons-grid">${cardsHtml}</div>`;
+        el.innerHTML = bannerHtml + `<div class="suri-seasons-grid">${cardsHtml}</div>`;
     }
 
     // ── 보고서 항목 공통 데이터 빌더 (단일 출처) ────────────────────
