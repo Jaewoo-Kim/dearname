@@ -7558,10 +7558,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
 
         // ── 오행 균형/불균형 뱃지 — calcOhengScores 점수 기준(score<10 = 부족) ──
-        let weakList8, isBalanced8;
+        let weakList8, isBalanced8, strongList8 = [];
         if (ohengScores8) {
             weakList8   = Object.entries(ohengScores8).filter(([,s]) => s < 10).map(([o]) => o);
-            const strongList8 = Object.entries(ohengScores8).filter(([,s]) => s >= 40).map(([o]) => o);
+            strongList8 = Object.entries(ohengScores8).filter(([,s]) => s >= 40).map(([o]) => o);
             isBalanced8 = weakList8.length === 0 && strongList8.length === 0;
         } else {
             weakList8   = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
