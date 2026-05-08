@@ -1603,9 +1603,11 @@
         .ct-rank.r3 { background:#b45309; }
         .ct-row-label { font-size:0.83rem; font-weight:700; color:var(--bg-dark); line-height:1.3; word-break:keep-all; white-space:nowrap; }
         .ct-row-sub { font-size:0.68rem; color:var(--text-muted); margin-top:1px; word-break:keep-all; white-space:nowrap; }
-        .ct-good { color:#15803d; font-weight:800; }
-        .ct-bad  { color:#dc2626; font-weight:800; }
-        .ct-mid  { color:#94a3b8; font-weight:600; }
+        .ct-very-good { color:#15803d; font-weight:800; }
+        .ct-good      { color:#1d4ed8; font-weight:800; }
+        .ct-bad       { color:#b45309; font-weight:800; }
+        .ct-very-bad  { color:#dc2626; font-weight:800; }
+        .ct-mid       { color:#94a3b8; font-weight:600; }
         /* ── 모바일: 비교 테이블 가로 스크롤 + 레이블 너비 보장 ── */
         @media (max-width: 768px) {
             #report-compare-section { padding: 0 14px; }
@@ -5244,9 +5246,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _normGct = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'좋음');
         const gradeHtml = (g) => {
             const ng = _normGct(g);
-            if (ng === '매우 좋음' || ng === '좋음') return `<span class="ct-good">✦ 길</span>`;
-            if (ng === '매우 나쁨' || ng === '나쁨')  return `<span class="ct-bad">▼ 흉</span>`;
-            return `<span class="ct-mid">– 평</span>`;
+            if (ng === '매우 좋음') return `<span class="ct-very-good">✦ 매우 좋음</span>`;
+            if (ng === '좋음')     return `<span class="ct-good">✦ 좋음</span>`;
+            if (ng === '나쁨')     return `<span class="ct-bad">▼ 나쁨</span>`;
+            if (ng === '매우 나쁨') return `<span class="ct-very-bad">▼ 매우 나쁨</span>`;
+            return `<span class="ct-mid">– 보통</span>`;
         };
 
         const rankBadge = (i) => {

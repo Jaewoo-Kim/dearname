@@ -23,6 +23,7 @@ dearname/
 ├── index.html               ← 메인 SPA (합본28_v2.html → rename)
 ├── config.js                ← 운영자 키 설정 (TOSS, Google, Apple)
 ├── server.py                ← Flask 서버 (정적 서빙 + Claude API 프록시)
+├── package.json             ← npm test 스크립트 (Node 설치 시 유닛 테스트)
 ├── mobile_ui_plan.md        ← 모바일 UI 개선 기획 (문제점·우선순위·구현 위치)
 ├── feature_chat_plan.md     ← AI 작명 상담 채팅 기능 기획
 ├── data/
@@ -35,8 +36,11 @@ dearname/
 │   ├── name-spec.js         ← NameSpec 생성 (이름 설계도)
 │   ├── name-search.js       ← 탐색 엔진 Worker 어댑터
 │   └── name-search-worker.js ← Web Worker 탐색 로직
-└── api/
-    └── claude-report.js     ← Claude API 소견서 생성
+├── api/
+│   └── claude-report.js     ← Claude API 소견서 생성
+└── tests/
+    ├── runner.js            ← Node.js 유닛 테스트 (vm.runInContext, npm test)
+    └── test.html            ← 브라우저 테스트 페이지 (localhost:3000/tests/test.html)
 ```
 
 ---
@@ -122,6 +126,7 @@ index.html 인라인 <script> ← 위 전역 변수 모두 참조
 | `GET` | `/data/<filename>` | `data/` 폴더 정적 서빙 |
 | `GET` | `/lib/<filename>` | `lib/` 폴더 정적 서빙 |
 | `GET` | `/api/<filename>` | `api/` 폴더 정적 서빙 |
+| `GET` | `/tests/<filename>` | `tests/` 폴더 정적 서빙 (테스트 페이지) |
 | `POST` | `/proxy/claude` | Claude API 프록시 (CORS 해결) |
 | `GET` | `/health` | 서버 상태 확인 |
 | `POST` | `/proxy/toss/verify` | 토스페이먼츠 결제 검증 |
@@ -552,6 +557,62 @@ const pronGrade = _bp === 0 ? '매우 좋음' : _bp === _tp ? '매우 나쁨'
                 : _bp * 2 <= _tp ? '좋음' : '나쁨';
 const yinGrade  = yinYangs.every(y => y === yinYangs[0]) ? '매우 나쁨' : '매우 좋음';
 ```
+
+---
+
+### 만세력 유닛 테스트 추가 & 버그 수정 (2026-05-08 세션)
+
+#### ① 오행분포 카운팅 버그 수정 (`strongList8` 스코프)
+
+**버그:** `_renderSelfSajuSection()` 내 `strongList8`을 `if (ohengScores8)` 블록 안에서 `const`로 선언 → 블록 밖 참조 시 `ReferenceError` → 함수 전체 중단 → `self-oheng-dist` 갱신 안 됨.
+
+```js
+// Before (블록 스코프 버그)
+let weakList8, isBalanced8;
+if (ohengScores8) {
+    const strongList8 = ...;  // ← 블록 밖 접근 불가
+}
+// 7646번 라인에서 strongList8 참조 → ReferenceError
+
+// After (수정)
+let weakList8, isBalanced8, strongList8 = [];
+if (ohengScores8) {
+    strongList8 = ...;  // ← 외부 let에 할당
+}
+```
+
+**검증:** 1990-02-16 16:20 사주(庚午/戊寅/壬子/戊申) → 오행 木1·火1·土2·金2·水2 정확히 렌더링 확인.
+
+#### ② 만세력 엔진 유닛 테스트 (`tests/`)
+
+**파일:** `tests/runner.js` (Node.js), `tests/test.html` (브라우저)  
+**실행:** `npm test` 또는 `localhost:3000/tests/test.html`
+
+**52개 케이스 — GOLD/LOGIC/SNAP 3등급:**
+
+| 카테고리 | 케이스 수 | 주요 내용 |
+|---|---|---|
+| GOLD | 13 | 엔진 주석 검증, 1990 회귀, 오행 카운트 |
+| LOGIC | 28 | 입춘/절기 경계, 야자시, 30분 보정, 도시 보정, 표준시, 서머타임 |
+| SNAP | 11 | 오행 가중점수, 대운 구조·방향, 범위 외 연도 null |
+
+**회귀 정책:** 새 버그 발견 시 케이스 추가 → 빨간 확인 → 수정 → 초록 확인(TDD 사이클).
+
+#### ③ 후보 비교 테이블 등급 표기 변경
+
+**위치:** `_renderCompareTable()` 내 `gradeHtml()` 함수 (line ~5245)
+
+| Before | After |
+|---|---|
+| `✦ 길` (좋음·매우 좋음 통합) | `✦ 매우 좋음` (초록) / `✦ 좋음` (파랑) |
+| `▼ 흉` (나쁨·매우 나쁨 통합) | `▼ 나쁨` (갈색) / `▼ 매우 나쁨` (빨강) |
+| `– 평` | `– 보통` |
+
+**신규 CSS 클래스:**
+- `.ct-very-good { color:#15803d }` (초록)
+- `.ct-good { color:#1d4ed8 }` (파랑, 기존 ct-good 변경)
+- `.ct-bad { color:#b45309 }` (갈색, 나쁨)
+- `.ct-very-bad { color:#dc2626 }` (빨강, 매우 나쁨)
 
 ---
 
