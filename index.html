@@ -4124,27 +4124,57 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         return [...popular, ...others].map(toOpt).join('');
     }
 
+    // 완성형 한글 음절 여부 (AC00~D7A3)
+    const _isCompleteHangul = c => c.charCodeAt(0) >= 0xAC00 && c.charCodeAt(0) <= 0xD7A3;
+
     function generateHanjaSelectors() {
         const lastName = document.getElementById('kr-last-name').value.trim();
         const firstName = document.getElementById('kr-first-name').value.trim();
         const fullName = lastName + firstName;
         const selectionArea = document.getElementById('hanja-selection-area');
         const dropdownContainer = document.getElementById('hanja-dropdowns');
+
         if (fullName.length === 0) { selectionArea.style.display = 'none'; return; }
 
+        // 완성형 한글이 하나도 없으면 안내 메시지만 표시
+        const validChars = [...fullName].filter(_isCompleteHangul);
+        if (validChars.length === 0) {
+            selectionArea.style.display = 'block';
+            dropdownContainer.innerHTML = `
+                <div style="width:100%;text-align:center;padding:16px 0;color:#94a3b8;font-size:0.88rem;">
+                    완성된 한글 이름을 입력해주세요.<br>
+                    <span style="font-size:0.8rem;color:#cbd5e1;">예: 김, 민준</span>
+                </div>`;
+            return;
+        }
+
+        // 완성형 한글 글자만 처리 (자음·모음·영문·숫자 제외)
         selectionArea.style.display = 'block';
         dropdownContainer.innerHTML = '';
 
+        let lastIdx = 0;
         for (let i = 0; i < fullName.length; i++) {
             const char = fullName[i];
+            if (!_isCompleteHangul(char)) continue; // 미완성 글자 건너뜀
             const isSurname = (i < lastName.length);
-            const hanjaList = (HANJA_DB_FULL||{})[char] || [{h: char, m: '기본(DB없음)', s: 10, o: '水'}];
-            const optionsHTML = _buildHanjaOptions(hanjaList, isSurname, char);
+            const hanjaList = (HANJA_DB_FULL||{})[char] || [];
+            if (hanjaList.length === 0) continue; // DB에 없는 글자 건너뜀
 
+            const optionsHTML = _buildHanjaOptions(hanjaList, isSurname, char);
             const block = document.createElement('div');
             block.className = 'hanja-block';
-            block.innerHTML = `<span>${char}</span><select id="hanja-sel-${i}">${optionsHTML}</select>`;
+            block.innerHTML = `<span>${char}</span><select id="hanja-sel-${lastIdx}">${optionsHTML}</select>`;
             dropdownContainer.appendChild(block);
+            lastIdx++;
+        }
+
+        // 유효한 한자 블록이 없으면 안내
+        if (lastIdx === 0) {
+            dropdownContainer.innerHTML = `
+                <div style="width:100%;text-align:center;padding:16px 0;color:#94a3b8;font-size:0.88rem;">
+                    완성된 한글 이름을 입력해주세요.<br>
+                    <span style="font-size:0.8rem;color:#cbd5e1;">예: 김, 민준</span>
+                </div>`;
         }
     }
 
@@ -4376,9 +4406,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const lastName  = document.getElementById('kr-last-name').value.trim();
         const firstName = document.getElementById('kr-first-name').value.trim();
 
-        // ① 이름 체크
+        // ① 이름 체크 — 완성형 한글만 허용
+        const _fullInput = lastName + firstName;
+        const _validHangul = [..._fullInput].every(_isCompleteHangul);
         if (!lastName || !firstName) {
-            alert('한글 성과 이름을 정확히 입력해주세요.');
+            alert('한글 성과 이름을 입력해주세요.');
+            return;
+        }
+        if (!_validHangul) {
+            alert('성과 이름 모두 완성된 한글로 입력해주세요.\n예) 성: 김  이름: 민준');
             return;
         }
 
