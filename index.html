@@ -4316,7 +4316,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
 
         /* ----------------------------------------------------
-           ⑥ 사주오행 — buildNameSpec 기반 (프리미엄 보고서와 동일 로직)
+           ⑥ 사주오행 — 한자 1자=오행 1개 단순 매칭 (셀프 진단 전용)
+           프리미엄은 지장간 포함 정밀 분석, 셀프는 의도적으로 단순화
            ---------------------------------------------------- */
         const _birthDateRaw = document.getElementById('birth-date')?.value || '';
         const birthTimeVal  = document.getElementById('birth-time')?.value || '12:00';
@@ -4329,44 +4330,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             apply30min: true,
             city:       document.getElementById('birth-location')?.value || ''
         };
-
-        // ── 프리미엄과 동일한 경로: calcSaju → calcOhengScores → buildNameSpec ──
-        let sajuGrade, sajuDesc;
-        const _saju0   = (birthDateVal && typeof calcSaju === 'function')
-            ? calcSaju(birthDateVal, birthTimeVal, _sajuOpts0) : null;
-        const _scores0 = (_saju0 && typeof calcOhengScores === 'function')
-            ? calcOhengScores(_saju0) : null;
-        const _spec0   = (_saju0 && _scores0 && typeof buildNameSpec === 'function')
-            ? buildNameSpec(_saju0, _scores0) : null;
-
-        if (_spec0) {
-            // 프리미엄 _buildReportItems candidate 경로와 동일한 판정
-            const prefer0    = _spec0.prefer || [];
-            const compCount0 = prefer0.filter(p => hanjaOhengs.includes(p)).length;
-            const missing0   = prefer0.filter(p => !hanjaOhengs.includes(p));
-            const _OKR0 = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
-            const _labelize = arr => arr.map(o => _OKR0[o] || o).join(', ');
-            if (prefer0.length === 0) {
-                sajuGrade = '매우 좋음';
-                sajuDesc  = '사주 오행이 고루 균형 잡혀 있어 특별한 보완이 필요 없습니다. 이름의 자원오행이 사주와 잘 어우러집니다.';
-            } else if (compCount0 === prefer0.length) {
-                sajuGrade = '매우 좋음';
-                sajuDesc  = `사주에 필요한 ${_labelize(prefer0)} 기운을 이름이 완벽히 담고 있습니다. 탁월한 선택입니다.`;
-            } else if (compCount0 > 0) {
-                sajuGrade = '나쁨';
-                sajuDesc  = `${_labelize(prefer0.filter(p => hanjaOhengs.includes(p)))}는 보완됐지만 ${_labelize(missing0)} 기운 보완이 아직 필요합니다.`;
-            } else {
-                sajuGrade = '매우 나쁨';
-                sajuDesc  = `사주에 필요한 ${_labelize(prefer0)} 기운이 이름에 반영되지 않았습니다. 해당 오행의 한자 선택을 권장합니다.`;
-            }
-        } else {
-            // fallback: 만세력 범위 외 또는 엔진 미로드 시
-            const _fb = (typeof calcSajuOhengGrade === 'function')
-                ? calcSajuOhengGrade(hanjaOhengs, birthDateVal, birthTimeVal, _sajuOpts0)
-                : { grade: '나쁨', desc: '사주 엔진 로딩 중...' };
-            sajuGrade = _fb.grade;
-            sajuDesc  = _fb.desc;
-        }
+        const _sajuResult = (typeof calcSajuOhengGrade === 'function')
+            ? calcSajuOhengGrade(hanjaOhengs, birthDateVal, birthTimeVal, _sajuOpts0)
+            : { grade: '나쁨', desc: '사주 엔진 로딩 중...' };
+        const sajuGrade = _sajuResult.grade;
+        const sajuDesc  = _sajuResult.desc;
         /* ----------------------------------------------------
            ⑦ 자원오행 — 선택 한자의 오행 구성 요약
            ---------------------------------------------------- */
