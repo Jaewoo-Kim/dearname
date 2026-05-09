@@ -832,38 +832,38 @@
         /* =========================================
            [수정완료] 리포트 헤더 카드형 탭 스타일
            ========================================= */
-        .report-selector-area { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-        .name-card-tab { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 16px; padding: 20px; width: 240px; cursor: pointer; 
-            transition: all 0.3s; backdrop-filter: blur(10px); text-align: left; 
+        .report-selector-area { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; padding: 0 4px; }
+        .name-card-tab {
+            background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12);
+            border-radius: 12px; padding: 10px 14px; cursor: pointer;
+            transition: all 0.2s; text-align: center; min-width: 80px;
         }
-        .name-card-tab:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-5px); }
-        .name-card-tab.active { 
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.05) 100%); 
-            border-color: #d4af37; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2); 
+        .name-card-tab:hover { background: rgba(255,255,255,0.12); }
+        .name-card-tab.active {
+            background: rgba(212,175,55,0.18);
+            border-color: #d4af37; box-shadow: 0 4px 16px rgba(212,175,55,0.2);
         }
-        .card-score-badge { 
-            display: inline-block; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); 
-            padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; margin-bottom: 12px; 
+        .card-score-badge {
+            display: block; color: rgba(255,255,255,0.6);
+            font-size: 0.7rem; font-weight: 700; margin-bottom: 4px;
         }
-        .name-card-tab.active .card-score-badge { background: #d4af37; color: white; }
-        .card-names { display: flex; flex-direction: column; gap: 4px; }
-        .card-kr { color: white; font-size: 1.5rem; font-weight: 800; }
+        .name-card-tab.active .card-score-badge { color: #d4af37; }
+        .card-names { display: flex; flex-direction: column; gap: 2px; }
+        .card-kr { color: white; font-size: 1.1rem; font-weight: 800; }
         .name-card-tab.active .card-kr { color: #d4af37; }
-        .card-hanja { color: rgba(255, 255, 255, 0.5); font-size: 0.9rem; }    
+        .card-hanja { color: rgba(255,255,255,0.45); font-size: 0.78rem; }
 
         /* ── Executive Summary Card ── */
-        .exec-summary { display:flex;align-items:center;gap:28px;background:white;border-radius:24px;border:1px solid var(--border-light);border-top:4px solid var(--gold-premium);padding:32px 36px;box-shadow:var(--shadow-premium);margin-bottom:24px; }
+        .exec-summary { display:flex;align-items:center;gap:20px;background:white;border-radius:20px;border:1px solid var(--border-light);border-top:3px solid var(--gold-premium);padding:20px 22px;box-shadow:var(--shadow-premium);margin-bottom:20px; }
         .exec-score-ring { flex-shrink:0; }
         .exec-score-body { flex:1;min-width:0; }
-        .exec-name { font-size:1.45rem;font-weight:900;color:var(--bg-dark);margin-bottom:4px; }
-        .exec-name span { font-size:1rem;font-weight:400;color:var(--text-muted);margin-left:8px; }
-        .exec-stars { font-size:1rem;color:var(--gold-premium);letter-spacing:3px;margin-bottom:8px; }
-        .exec-msg { font-size:0.92rem;color:var(--text-secondary);font-style:italic;border-left:3px solid var(--gold-premium);padding-left:12px;margin:8px 0 14px;line-height:1.65; }
-        .exec-items { display:flex;flex-wrap:wrap;gap:7px; }
-        .exec-item { display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:0.76rem;font-weight:700;border:1px solid transparent; }
-        .exec-item-grade { padding:2px 7px;border-radius:10px;font-size:0.7rem;font-weight:800;flex-shrink:0; }
+        .exec-name { font-size:1.25rem;font-weight:900;color:var(--bg-dark);margin-bottom:2px; }
+        .exec-name span { font-size:0.9rem;font-weight:400;color:var(--text-muted);margin-left:6px; }
+        .exec-stars { font-size:0.85rem;color:var(--gold-premium);letter-spacing:2px;margin-bottom:6px; }
+        .exec-msg { font-size:0.85rem;color:var(--text-secondary);font-style:italic;border-left:3px solid var(--gold-premium);padding-left:10px;margin:6px 0 10px;line-height:1.6;word-break:keep-all; }
+        .exec-items { display:flex;flex-wrap:wrap;gap:5px; }
+        .exec-item { display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:16px;font-size:0.72rem;font-weight:700;border:1px solid transparent; }
+        .exec-item-grade { padding:1px 6px;border-radius:8px;font-size:0.66rem;font-weight:800;flex-shrink:0; }
         .exec-grade-great { background:#f0fdf4;color:#15803d;border-color:#bbf7d0; }
         .exec-grade-great .exec-item-grade { background:#15803d;color:#fff; }
         .exec-grade-good  { background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe; }
@@ -872,7 +872,6 @@
         .exec-grade-bad   .exec-item-grade { background:#d97706;color:#fff; }
         .exec-grade-worst { background:#fee2e2;color:#991b1b;border-color:#fecaca; }
         .exec-grade-worst .exec-item-grade { background:#dc2626;color:#fff; }
-        @media(max-width:640px){ .exec-summary{ flex-direction:column;align-items:flex-start;gap:16px;padding:24px 22px; } }
 
         /* ── 용어 툴팁 ── */
         .term-tip {
@@ -1364,7 +1363,7 @@
         @media (max-width: 768px) {
             .ai-story-block { padding: 16px 16px; font-size: 0.88rem; line-height: 1.7; }
         }
-        .ai-tagline { font-size:1.35rem; font-weight:800; color:var(--bg-dark); line-height:1.5; margin-bottom:20px; font-style:italic; border-left:4px solid var(--gold-dark); padding-left:18px; }
+        .ai-tagline { font-size:1.15rem; font-weight:800; color:var(--bg-dark); line-height:1.55; margin-bottom:16px; font-style:italic; border-left:4px solid var(--gold-dark); padding-left:16px; word-break:keep-all; overflow-wrap:break-word; }
         .ai-hanja-card { display:flex; gap:20px; align-items:flex-start; padding:22px 0; border-bottom:1px solid var(--border-light); }
         .ai-hanja-card:last-child { border-bottom:none; padding-bottom:0; }
         .ai-hanja-char { width:72px; height:72px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2.4rem; font-weight:900; color:white; flex-shrink:0; }
@@ -1517,25 +1516,24 @@
         .story-chapter-label { margin-bottom: 6px; }
         .chapter-verdict-strip { margin-top: 10px; }
 
-        /* 플로팅 챕터 네비게이터 — 심플 dot */
+        /* 플로팅 챕터 네비게이터 — 미니멀 dot */
         #chapter-float-nav {
-            position: fixed; right: 12px; top: 50%; transform: translateY(-50%);
-            z-index: 200; display: none; flex-direction: column; gap: 8px;
-            background: white; border-radius: 20px; padding: 10px 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+            position: fixed; right: 10px; top: 50%; transform: translateY(-50%);
+            z-index: 200; display: none; flex-direction: column; gap: 6px;
+            background: white; border-radius: 20px; padding: 10px 7px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
             border: 1px solid var(--border-light);
         }
         #chapter-float-nav.visible { display: flex; }
         .cfn-item {
-            width: 10px; height: 10px; border-radius: 50%;
+            width: 7px; height: 7px; border-radius: 50%;
             background: #cbd5e1;
-            cursor: pointer; transition: all 0.18s; border: none; padding: 0;
-            position: relative;
+            cursor: pointer; transition: all 0.2s; border: none; padding: 0;
         }
-        .cfn-item:hover { background: #94a3b8; transform: scale(1.3); }
-        .cfn-item.cfn-active { background: var(--gold-premium); transform: scale(1.4); }
+        .cfn-item:hover { background: #94a3b8; transform: scale(1.5); }
+        .cfn-item.cfn-active { background: var(--gold-premium); transform: scale(1.6); width: 7px; height: 14px; border-radius: 4px; }
         @media (max-width: 768px) {
-            #chapter-float-nav { right: 6px; padding: 8px 6px; }
+            #chapter-float-nav { right: 5px; }
         }
         /* AI 해석 블록 접기 */
         .ai-story-block.ai-clamped {
@@ -1857,7 +1855,21 @@
             border-radius: 0 0 10px 10px; font-size: 0.82rem; line-height: 1.65;
             border: 1px solid #bfdbfe; border-top: none; color: var(--text-primary);
         }
-        .saju-mingsik-wrap { overflow-x: auto; margin: 24px 0 32px; border-radius: 20px; border: 1px solid var(--border-light); overflow: hidden; }
+        /* 사주 기둥 안내 strip */
+        .pillar-guide-strip {
+            display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; margin-top: 4px;
+        }
+        .pg-item {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.76rem; color: var(--text-secondary);
+            background: #f8fafc; border: 1px solid var(--border-light);
+            border-radius: 8px; padding: 4px 8px; font-weight: 600;
+        }
+        .pg-item.pg-me {
+            background: #fffbeb; border-color: var(--gold-premium);
+            color: var(--gold-dark); font-weight: 700;
+        }
+        .saju-mingsik-wrap { overflow-x: auto; margin: 0 0 24px; border-radius: 16px; border: 1px solid var(--border-light); overflow: hidden; }
         .saju-mingsik { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
         .saju-mingsik th, .saju-mingsik td { border-bottom: 1px solid var(--border-light); border-right: 1px solid var(--border-light); padding: 0; text-align: center; }
         .saju-mingsik th:last-child, .saju-mingsik td:last-child { border-right: none; }
@@ -2700,18 +2712,12 @@
             </div>
             <div class="chapter-acc-body open" id="acc-body-self-ch1">
             <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:16px;margin-top:12px;" id="self-saju-meta-label"></p>
-            <details class="saju-theory-details" style="margin-bottom:16px;">
-                <summary>📖 사주 원국(四柱八字)이란?</summary>
-                <div class="theory-detail-body">
-                    태어난 해·달·날·시, 네 기둥(四柱)의 여덟 글자(八字)가 아이의 타고난 기운 지도입니다.
-                    <div class="chapter-theory-pillars" style="margin:10px 0 6px;">
-                        <div class="pillar-explain"><span class="pe-year">연주(年柱)</span> 조상·초년운 (0~20대)</div>
-                        <div class="pillar-explain"><span class="pe-month">월주(月柱)</span> 부모형제·청장년운</div>
-                        <div class="pillar-explain pe-me"><span class="pe-day">일주(日柱) ★</span> <b>이 아이 본인</b> · 배우자궁</div>
-                        <div class="pillar-explain"><span class="pe-time">시주(時柱)</span> 자식·말년운 (60대~)</div>
-                    </div>
-                </div>
-            </details>
+            <div class="pillar-guide-strip">
+                <span class="pg-item"><span class="pe-year">연주</span> 조상·초년</span>
+                <span class="pg-item"><span class="pe-month">월주</span> 부모·청장년</span>
+                <span class="pg-item pg-me"><span class="pe-day">일주★</span> <b>아이 본인</b></span>
+                <span class="pg-item"><span class="pe-time">시주</span> 자식·말년</span>
+            </div>
             <div class="saju-mingsik-wrap">
                 <table class="saju-mingsik" id="self-saju-table">
                     <thead><tr><th>사주</th><th>시주</th><th>일주</th><th>월주</th><th>연주</th></tr></thead>
@@ -3053,19 +3059,12 @@
             <div class="chapter-acc-body open" id="acc-body-ch1">
 
             <!-- 사주 이론 설명 박스 (동적) -->
-            <details class="saju-theory-details">
-                <summary>📖 사주 원국(四柱八字)이란?</summary>
-                <div class="theory-detail-body" id="ch1-theory-box">
-                    좋은 이름을 짓기 위해서는 먼저 <b>아이가 타고난 기운의 지도</b>를 읽어야 합니다. 사주(四柱)는 태어난 해·달·날·시, 네 기둥이 이루는 <b>8글자의 우주</b>입니다.
-                    <div class="chapter-theory-pillars" style="margin:10px 0 8px;">
-                        <div class="pillar-explain"><span class="pe-year">연주(年柱)</span> 조상·초년운 (0~20대)</div>
-                        <div class="pillar-explain"><span class="pe-month">월주(月柱)</span> 부모형제·청장년운</div>
-                        <div class="pillar-explain pe-me"><span class="pe-day">일주(日柱) ★</span> <b>이 아이 본인</b> · 배우자궁</div>
-                        <div class="pillar-explain"><span class="pe-time">시주(時柱)</span> 자식·말년운 (60대~)</div>
-                    </div>
-                    <span style="font-size:0.78rem;color:var(--gold-dark);font-weight:700;" id="ch1-theory-footer">아래 사주 원국을 확인한 뒤, 부족한 기운이 무엇인지 살펴보세요. 그 답이 챕터 2의 자원오행으로 이어집니다.</span>
-                </div>
-            </details>
+            <div class="pillar-guide-strip">
+                <span class="pg-item"><span class="pe-year">연주</span> 조상·초년</span>
+                <span class="pg-item"><span class="pe-month">월주</span> 부모·청장년</span>
+                <span class="pg-item pg-me"><span class="pe-day">일주★</span> <b>아이 본인</b></span>
+                <span class="pg-item"><span class="pe-time">시주</span> 자식·말년</span>
+            </div>
 
             <div class="saju-grid" id="report-saju-grid"></div>
             <div class="oheng-layout">
@@ -3123,6 +3122,10 @@
                         <text x="100" y="95" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="700">━ 상생(相生)</text>
                         <text x="100" y="108" text-anchor="middle" fill="#ef4444" font-size="8" font-weight="700">- - 상극(相剋)</text>
                     </svg>
+                    <div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.5;margin-top:6px;text-align:left;padding:0 4px;">
+                        <span style="color:#22c55e;font-weight:700;">상생(相生)</span> — 서로 생성·강화하는 조화로운 흐름<br>
+                        <span style="color:#ef4444;font-weight:700;">상극(相剋)</span> — 서로 억제·약화시키는 견제 관계
+                    </div>
                 </div>
                 <div class="oheng-bars" id="report-oheng-bars"></div>
             </div>
@@ -5539,9 +5542,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // 메타 정보
         const metaEl = document.getElementById('premium-report-meta');
-        if (metaEl && _saju) {
+        if (metaEl) {
             const gender = _currentState.constraints.gender === 'F' ? '여성' : '남성';
-            metaEl.textContent = `${_currentState.familyName.kr} ${h1.kr}${h2?.kr||''} · ${gender} · ${_toHangul(_saju.day.gan)}${_toHangul(_saju.day.ji)}(${_saju.day.gan}${_saju.day.ji}) 일주`;
+            const bDateRaw = document.getElementById('prem-birth-date')?.value || '';
+            const bTime    = document.getElementById('prem-birth-time')?.value || '';
+            const bDateFmt = bDateRaw.replace(/-/g, '. ');
+            const timePart = bTime && bTime !== '12:00' ? ` ${bTime}` : '';
+            metaEl.textContent = `${gender} · ${bDateFmt}${timePart} 출생`;
         }
 
         // ── 챕터 0 연결 서사 (프리미엄 보고서 동적) ───────────────────
@@ -6293,15 +6300,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         else                                 pattern = 'mixed';    // 파란만장형
 
         const patternInfo = {
-            stable:  { icon:'🏆', name:'안정형 — 전 생애에 걸친 고른 행운의 흐름',
+            stable:  { icon:'🏆', name:'전 생애에 걸친 고른 행운의 흐름',
                         desc:'4격이 모두 길수로 구성된 최상의 수리 배열입니다. 어느 시기에도 흔들리지 않는 든든한 기운이 이름을 받쳐줍니다.', tag:'🏆 안정형' },
-            rising:  { icon:'🌅', name:'상승형 — 고생 끝에 꽃이 피는 인생',
+            rising:  { icon:'🌅', name:'고생 끝에 꽃이 피는 상승하는 인생',
                         desc:'초·청년기보다 장년·말년으로 갈수록 운세가 강해집니다. 꾸준히 쌓아가면 후반부에 크게 빛나는 이름입니다.', tag:'🌅 상승형' },
-            falling: { icon:'📉', name:'하강형 — 초반의 기세를 잘 지켜야 하는 이름',
+            falling: { icon:'📉', name:'초반의 기세를 잘 지켜야 하는 이름',
                         desc:'청년기까지의 좋은 기운이 장년·말년에 약해집니다. 자원오행·발음오행의 보완이 더욱 중요하게 작용합니다.', tag:'📉 하강형' },
-            peak:    { icon:'⚡', name:'중반전성형 — 청·장년기가 인생의 정점',
+            peak:    { icon:'⚡', name:'청·장년기가 인생의 정점인 이름',
                         desc:'사회에서 가장 활발하게 활동하는 20~60대가 운세의 절정입니다. 그 시기에 집중하면 최대 성과를 낼 수 있습니다.', tag:'⚡ 중반전성형' },
-            mixed:   { icon:'🎢', name:'파란만장형 — 굴곡 속에 반전이 있는 인생',
+            mixed:   { icon:'🎢', name:'굴곡 속에 반전이 있는 파란만장한 인생',
                         desc:'길·흉이 교차하며 다채로운 흐름을 만듭니다. 어려운 시기를 버텨내면 반드시 좋은 시기가 찾아오는 구조입니다.', tag:'🎢 파란만장형' },
         };
         const pi = patternInfo[pattern];
@@ -6441,17 +6448,21 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                             : compCount > 0 ? '나쁨' : '매우 나쁨';
 
             // 흉 개수 기준으로 등급 판정 (평 중립, good/bad 분리)
-            const _sg4raw  = [g1,g2,g3,g4].map(n => {
+            const _sg4raw    = [g1,g2,g3,g4].map(n => {
                 let num = n > 81 ? n % 81 : n; if (!num) num = 81;
                 return (typeof SURI_DATA!=='undefined' && SURI_DATA[num]) ? SURI_DATA[num].grade : '평';
             });
-            const _sg4Good = _sg4raw.filter(g=>g==='대길'||g==='길').length;
-            const _sg4Bad  = _sg4raw.filter(g=>g==='흉'||g==='대흉').length;
-            const _sg4Grade = _sg4Bad===0 && _sg4Good>=3 ? '매우 좋음'
-                            : _sg4Bad===0               ? '좋음'
-                            : _sg4Bad===1 && _sg4Good>=3 ? '좋음'
-                            : _sg4Bad>=3                ? '매우 나쁨'
-                            :                             '나쁨';
+            const _sg4Daegil = _sg4raw.filter(g=>g==='대길').length;
+            const _sg4Good   = _sg4raw.filter(g=>g==='대길'||g==='길').length;
+            const _sg4Bad    = _sg4raw.filter(g=>g==='흉'||g==='대흉').length;
+            const _sg4Daehyung = _sg4raw.filter(g=>g==='대흉').length;
+            // _applyVerdicts와 완전히 동일한 로직: 대길 2개 이상이어야 매우 좋음
+            const _sg4Grade = (_sg4Daehyung > 0 || _sg4Bad >= 3)    ? '매우 나쁨'
+                            : _sg4Bad >= 2                           ? '나쁨'
+                            : (_sg4Bad === 1 && _sg4Good >= 3)       ? '좋음'
+                            : _sg4Bad > 0                            ? '나쁨'
+                            : _sg4Daegil >= 2                        ? '매우 좋음'
+                            :                                          '좋음';
             return [
                 { label:'자원오행',   sub:'자원오행 매칭',  grade: sajuGrade },
                 { label:'발음 오행',  sub:'초성 상생 흐름', grade: _pronGrade(fullKr) },
