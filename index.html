@@ -528,15 +528,16 @@
         
         #report-view .report-header { background: linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-dark) 100%); }
         #self-report-view .report-header { background: linear-gradient(145deg, var(--text-primary) 0%, var(--bg-dark) 100%); }
-        /* 이론 가이드 헤더 특별 컬러 */
-        #theory-detail-view .report-header { background: linear-gradient(145deg, #2c3e50 0%, #1a202c 100%); }
+        /* 이론 가이드 헤더 — 보고서와 동일한 딥다크 그라데이션 */
+        #theory-detail-view .report-header { background: linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-dark) 100%); }
 
         .score-badge { display: inline-block; background: var(--gold-premium); color: white; padding: 10px 25px; border-radius: var(--radius-pill); font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 30px; box-shadow: var(--shadow-glow); white-space: nowrap; }
         #self-report-view .score-badge { background: #334155; box-shadow: none; border: 1px solid #475569; }
-        #theory-detail-view .score-badge { background: #475569; box-shadow: none; border: 1px solid var(--text-secondary); margin-bottom: 20px;}
+        /* 이론 가이드 배지 — 골드로 통일 */
+        #theory-detail-view .score-badge { background: var(--gold-premium); box-shadow: var(--shadow-glow); border: none; margin-bottom: 20px; }
 
         .report-header h1 { font-size: 4.5rem; margin: 0 0 15px; font-weight: 900; letter-spacing: -2px; position: relative; z-index: 1;}
-        #theory-detail-view .report-header h1 { font-size: 3.5rem; }
+        #theory-detail-view .report-header h1 { font-size: 3.2rem; letter-spacing: -1.5px; }
         .report-header h1 span { font-weight: 300; font-size: 2rem; color: rgba(255,255,255,0.6); margin-left: 15px; }
         .meta-info { color: rgba(255,255,255,0.9); font-size: 1.15rem; margin-top: 25px; background: rgba(0,0,0,0.3); display: inline-block; padding: 12px 30px; border-radius: var(--radius-pill); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); position: relative; z-index: 1;}
 
@@ -614,17 +615,164 @@
         .advice-card h4 { margin: 0 0 20px; color: var(--bg-dark); font-size: 1.2rem; font-weight: 800; border-bottom: 2px solid var(--bg-light); padding-bottom: 15px; }
         .advice-card p { margin: 0; font-size: 1rem; color: var(--text-secondary); line-height: 1.7; }
 
-        /* [NEW] 이론 가이드 상세 뷰 전용 스타일 */
-        #theory-detail-view .report-card { padding: 50px 60px; }
-        .theory-intro-box { background: var(--bg-white); border-left: 6px solid var(--gold-premium); padding: 30px 40px; border-radius: 0 20px 20px 0; margin-bottom: 40px; box-shadow: var(--shadow-card);}
-        .theory-intro-box p { margin: 0; font-size: 1.15rem; color: var(--bg-dark); font-weight: 600; line-height: 1.8; }
-        .theory-tip-box { background: var(--bg-warm); padding: 25px 35px; border-radius: var(--radius-lg); border: 1px dashed var(--gold-premium); margin-top: 25px; }
-        .theory-tip-box h5 { margin: 0 0 10px; color: var(--gold-dark); font-size: 1.1rem; font-weight: 800; display: flex; align-items: center;}
-        .theory-tip-box h5::before { content: '💡'; margin-right: 8px; }
-        .theory-tip-box p { margin: 0; font-size: 1rem; color: var(--text-secondary); line-height: 1.7; }
-        .theory-list { padding-left: 20px; margin-bottom: 0;}
-        .theory-list li { margin-bottom: 15px; font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8;}
-        .theory-list li b { color: var(--bg-dark); font-weight: 800;}
+        /* ── 이론 가이드 상세 뷰 전용 스타일 ─────────────────────── */
+
+        /* 헤더 아래 목차 칩 행 */
+        .theory-toc-row {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            justify-content: center; margin-top: 28px;
+            position: relative; z-index: 1;
+        }
+        .theory-toc-chip {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(212,175,55,0.4);
+            color: rgba(255,255,255,0.85);
+            padding: 7px 18px; border-radius: var(--radius-pill);
+            font-size: 0.82rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; backdrop-filter: blur(4px);
+        }
+        .theory-toc-chip:hover {
+            background: var(--gold-premium); color: white;
+            border-color: var(--gold-premium); box-shadow: var(--shadow-glow);
+        }
+
+        /* 카드 패딩 + 좌측 골드 라인 */
+        #theory-detail-view .report-card {
+            padding: 44px 56px;
+            border-left: 4px solid var(--gold-premium);
+        }
+
+        /* 챕터 레이블 (CHAPTER 01 스타일) */
+        .theory-chapter-label {
+            font-size: 0.68rem; font-weight: 800; letter-spacing: 0.18em;
+            color: var(--gold-dark); text-transform: uppercase;
+            margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+        }
+        .theory-chapter-label::before {
+            content: ''; display: inline-block;
+            width: 24px; height: 2px; background: var(--gold-premium);
+        }
+
+        /* 이론 번호 골드 원형 배지 */
+        .theory-num-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-premium), var(--gold-dark));
+            color: white; font-size: 1rem; font-weight: 900;
+            box-shadow: 0 4px 12px rgba(212,175,55,0.4);
+            flex-shrink: 0; margin-right: 14px;
+        }
+
+        /* 이론 제목 행 */
+        .theory-title-row {
+            display: flex; align-items: center; margin-bottom: 20px;
+        }
+        .theory-title-row .section-title {
+            font-size: 1.55rem; font-weight: 800; color: var(--bg-dark);
+            margin: 0; letter-spacing: -0.02em; line-height: 1.3;
+        }
+
+        /* 인트로 박스 */
+        .theory-intro-box {
+            background: linear-gradient(135deg, #fffef9 0%, #fff8e6 100%);
+            border-left: 5px solid var(--gold-premium);
+            padding: 32px 40px; border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin-bottom: 36px; box-shadow: var(--shadow-card);
+        }
+        .theory-intro-box p { margin: 0; font-size: 1.08rem; color: var(--bg-dark); font-weight: 500; line-height: 1.9; }
+
+        /* 팁 박스 — 보고서 ai-story-block과 동일 패턴 */
+        .theory-tip-box {
+            background: #fffbeb;
+            padding: 20px 28px 20px 24px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            border-left: 4px solid var(--gold-dark);
+            border-top: none; border-right: none; border-bottom: none;
+            margin-top: 20px; margin-bottom: 24px;
+        }
+        .theory-tip-box h5 {
+            margin: 0 0 8px;
+            color: var(--gold-dark); font-size: 0.82rem; font-weight: 800;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .theory-tip-box h5::before { content: '✦'; font-size: 0.75rem; }
+        .theory-tip-box p { margin: 0; font-size: 0.97rem; color: var(--text-secondary); line-height: 1.75; }
+
+        /* 리스트 */
+        .theory-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .theory-list li {
+            margin-bottom: 14px; font-size: 1.02rem;
+            color: var(--text-secondary); line-height: 1.8;
+            padding-left: 20px; position: relative;
+        }
+        .theory-list li::before {
+            content: '▸'; position: absolute; left: 0;
+            color: var(--gold-premium); font-size: 0.8rem; top: 3px;
+        }
+        .theory-list li b { color: var(--bg-dark); font-weight: 800; }
+
+        /* 테이블 — th 다크 배경 */
+        #theory-detail-view .tech-table th {
+            background: var(--bg-dark); color: #f1f5f9;
+            font-weight: 700; font-size: 0.95rem; width: 160px;
+        }
+        #theory-detail-view .tech-table td { font-size: 1rem; }
+        #theory-detail-view .tech-table tr:hover td { background: var(--bg-subtle); }
+
+        /* 오행 컬러 도트 (발음오행 테이블용) */
+        .oheng-dot {
+            display: inline-block; width: 10px; height: 10px;
+            border-radius: 50%; margin-right: 7px; vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* 구분선 + 보너스 팁 헤더 */
+        .theory-bonus-title {
+            font-size: 1.05rem; font-weight: 800; color: var(--bg-dark);
+            margin: 0 0 14px; padding-top: 28px;
+            border-top: 1px dashed var(--border-light);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* 하단 CTA 카드 */
+        .theory-cta-card {
+            background: linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-dark) 100%);
+            border-radius: var(--radius-lg); padding: 56px 60px;
+            color: white; text-align: center; position: relative;
+            overflow: hidden; margin-top: 60px; margin-bottom: 20px;
+            box-shadow: var(--shadow-deep);
+        }
+        .theory-cta-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at top right, rgba(212,175,55,0.12), transparent 65%);
+            pointer-events: none;
+        }
+        .theory-cta-card .tc-tag {
+            font-size: 0.75rem; font-weight: 800; letter-spacing: 0.18em;
+            color: var(--gold-premium); text-transform: uppercase; margin-bottom: 16px;
+        }
+        .theory-cta-card h3 {
+            font-size: 1.9rem; font-weight: 900; letter-spacing: -0.03em;
+            margin: 0 0 12px; position: relative; z-index: 1;
+        }
+        .theory-cta-card p {
+            font-size: 1.0rem; color: rgba(255,255,255,0.65);
+            margin: 0 0 32px; line-height: 1.7; position: relative; z-index: 1;
+        }
+        .theory-cta-btns {
+            display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+            position: relative; z-index: 1;
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            #theory-detail-view .report-card { padding: 28px 20px; }
+            .theory-cta-card { padding: 40px 24px; }
+            .theory-cta-card h3 { font-size: 1.4rem; }
+            .theory-title-row .section-title { font-size: 1.2rem; }
+            .theory-toc-chip { font-size: 0.76rem; padding: 6px 14px; }
+        }
 
         /* =========================================
            [6] 모달 팝업
@@ -4081,143 +4229,167 @@
 
 <div id="theory-detail-view">
     <header class="report-header">
-        <div class="score-badge">디어네임 작명 기준</div>
-        <h1>정통 성명학 5대 핵심 이론 가이드</h1>
-        <div class="meta-info">
-            왕초보도 단숨에 이해할 수 있는, 아주 친절하고 깊이 있는 성명학 해설
+        <div class="score-badge">✦ 디어네임 작명 기준</div>
+        <h1>정통 성명학<br><span style="font-weight:300;font-size:2.2rem;color:rgba(255,255,255,0.7);letter-spacing:-0.5px;">5대 핵심 이론 가이드</span></h1>
+        <div class="meta-info" style="margin-top:20px;">
+            사주 · 한자 · 소리 · 획수 — 이름 하나에 담는 다섯 가지 기준
+        </div>
+        <div class="theory-toc-row">
+            <button class="theory-toc-chip" onclick="document.getElementById('th-jawon').scrollIntoView({behavior:'smooth',block:'start'})">① 자원오행</button>
+            <button class="theory-toc-chip" onclick="document.getElementById('th-sound').scrollIntoView({behavior:'smooth',block:'start'})">② 발음오행</button>
+            <button class="theory-toc-chip" onclick="document.getElementById('th-yinyang').scrollIntoView({behavior:'smooth',block:'start'})">③ 발음음양</button>
+            <button class="theory-toc-chip" onclick="document.getElementById('th-suri').scrollIntoView({behavior:'smooth',block:'start'})">④ 81수리</button>
+            <button class="theory-toc-chip" onclick="document.getElementById('th-suriyy').scrollIntoView({behavior:'smooth',block:'start'})">⑤ 수리음양</button>
         </div>
     </header>
 
     <main class="report-main">
-        
+
         <div class="theory-intro-box">
             <p>
                 "이름은 인생이라는 집을 짓는 것과 같습니다."<br>
-                사주팔자(생년월일시)가 집이 지어질 <b>'땅(기반)'</b>이라면, 이름은 그 땅 위에 세우는 <b>'건축물'</b>입니다. 아무리 좋은 땅이라도 기둥이 약하면 무너지고, 비가 새는 땅이라면 지붕을 튼튼히 덮어주어야 합니다.<br><br>
-                디어네임의 프리미엄 작명은 감(感)이 아닌 <b>데이터와 명리학적 검증 시스템</b>을 따릅니다. 우리 아이의 완벽한 이름을 완성하는 5가지 튼튼한 기둥을 지금부터 아주 쉽게 설명해 드리겠습니다.
+                사주팔자가 집이 지어질 <b>땅(기반)</b>이라면, 이름은 그 위에 세우는 <b>건축물</b>입니다. 아무리 좋은 땅이라도 기둥이 약하면 무너지듯, 사주에 부족한 기운을 이름으로 채워야 아이의 인생이 균형 있게 펼쳐집니다.<br><br>
+                디어네임의 프리미엄 작명은 감(感)이 아닌 <b>데이터와 명리학적 검증 시스템</b>을 따릅니다. 아래 다섯 가지 기준이 모두 충족된 이름만 최종 추천됩니다.
             </p>
         </div>
 
-        <div class="report-card">
-            <span class="section-tag">이론 1. 자원오행</span>
-            <h2 class="section-title">1. 자원오행 (字源五行) : 우리 아이를 위한 '맞춤 비타민'</h2>
-            
-            <p style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 25px; line-height: 1.8;">
-                <b>자원오행</b>은 한자의 부수나 의미 자체가 품고 있는 본질적인 에너지(목·화·토·금·수)를 말합니다. 작명에서 가장 어렵고도 핵심적인 과정으로, <b>사주팔자를 분석해 아이에게 가장 필요한 기운(용신/희신)을 찾아내어 이름표라는 처방전으로 채워주는 역할</b>을 합니다.
-            </p>
-            
-            <div class="theory-tip-box" style="margin-bottom: 30px;">
-                <h5>초보자 맞춤 설명</h5>
-                <p>만약 아이가 <b>한겨울(추움)</b>에 태어났고 사주에 <b>물(水)</b>이 너무 많다면 어떨까요? 아이는 꽁꽁 얼어붙어 성장이 더딜 수 있습니다. 이때 이름에 똑같은 물(水)의 한자를 넣으면 더 추워지겠죠. 이럴 때는 따뜻한 <b>난로 역할(불/火)</b>이나 물을 흡수할 <b>나무(木)</b>의 기운을 가진 한자를 이름에 넣어주어야 인생이 따뜻하게 풀립니다. 이것이 자원오행의 핵심입니다.</p>
+        <!-- ① 자원오행 -->
+        <div class="report-card" id="th-jawon">
+            <div class="theory-chapter-label">CHAPTER 01 · 자원오행</div>
+            <div class="theory-title-row">
+                <div class="theory-num-badge">1</div>
+                <h2 class="section-title">자원오행 (字源五行)<br><span style="font-size:1rem;font-weight:500;color:var(--text-secondary);">우리 아이를 위한 '맞춤 비타민'</span></h2>
             </div>
-
-            <h4 style="font-size: 1.2rem; color: var(--bg-dark); font-weight: 800; margin-bottom: 15px;">🔍 전문가들은 어떻게 용신(필요한 기운)을 찾을까요?</h4>
+            <p style="font-size:1.05rem;color:var(--text-primary);margin-bottom:20px;line-height:1.85;">
+                <b>자원오행</b>은 한자의 부수나 의미 자체가 품고 있는 본질적인 에너지(목·화·토·금·수)를 말합니다. 작명에서 가장 핵심적인 과정으로, <b>사주팔자를 분석해 아이에게 가장 필요한 기운(용신)을 찾아내어 이름으로 채워주는 역할</b>을 합니다.
+            </p>
+            <div class="theory-tip-box">
+                <h5>초보자 맞춤 설명</h5>
+                <p>아이가 <b>한겨울</b>에 태어났고 사주에 <b>물(水)</b>이 너무 많다면 꽁꽁 얼어붙어 성장이 더딜 수 있어요. 이때 이름에도 물(水) 한자를 넣으면 더 추워집니다. 반대로 따뜻한 <b>불(火)</b>이나 물을 흡수할 <b>나무(木)</b> 기운의 한자를 넣어주면 인생이 따뜻하게 풀립니다. 이것이 자원오행의 핵심입니다.</p>
+            </div>
+            <p style="font-size:0.95rem;font-weight:700;color:var(--bg-dark);margin:20px 0 10px;">전문가들은 어떻게 필요한 기운을 찾을까요?</p>
             <ul class="theory-list">
-                <li><b>억부법(抑扶法) - 저울 맞추기 :</b> 아이의 본래 기운(일간)이 너무 강하면 힘을 빼주고(억제), 너무 약하면 힘을 보태주어(부양) 시소를 수평으로 맞춥니다.</li>
-                <li><b>조후법(調候法) - 온도 맞추기 :</b> 사주가 너무 뜨거우면 시원한 물(水)을, 너무 춥고 얼어있으면 따뜻한 불(火)을 넣어 계절의 밸런스를 맞춥니다.</li>
-                <li><b>통관법(通關法) - 다리 놔주기 :</b> 사주 안에서 물(水)과 불(火)처럼 서로 극명하게 싸우는 기운이 있을 때, 그 사이를 화해시켜 주는 나무(木)를 넣어주어 기운을 부드럽게 소통시킵니다. (물 생 나무 → 나무 생 불)</li>
+                <li><b>억부법(抑扶法) — 저울 맞추기</b> : 아이의 본래 기운(일간)이 너무 강하면 억제하고, 너무 약하면 보태주어 시소를 수평으로 맞춥니다.</li>
+                <li><b>조후법(調候法) — 온도 맞추기</b> : 사주가 너무 뜨거우면 시원한 물(水)을, 너무 춥고 얼어있으면 따뜻한 불(火)을 넣어 계절의 밸런스를 맞춥니다.</li>
+                <li><b>통관법(通關法) — 다리 놔주기</b> : 사주 안에서 물과 불처럼 서로 싸우는 기운이 있을 때, 나무(木)로 중재해 기운을 부드럽게 소통시킵니다.</li>
             </ul>
         </div>
 
-        <div class="report-card">
-            <span class="section-tag">이론 2. 발음오행</span>
-            <h2 class="section-title">2. 발음오행 (音靈五行) : 입에서 나오는 소리의 파동</h2>
-            
-            <p style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 25px; line-height: 1.8;">
-                이름은 평생 수만 번 이상 불리게 됩니다. <b>발음오행</b>은 소리가 가진 파동 에너지가 운명에 영향을 미친다는 이론으로, <b>한글 이름의 초성 자음</b>을 오행으로 분류하여 글자와 글자 사이의 소리가 부드럽게 이어지는지(상생) 부딪히는지(상극)를 봅니다.
-            </p>
-
-            <div class="theory-tip-box" style="margin-bottom: 30px;">
-                <h5>초보자 맞춤 설명</h5>
-                <p>소리의 연결을 <b>'이어달리기(릴레이)'</b>라고 생각해 보세요. 1번 주자(성씨)가 2번 주자(이름 첫 자)에게 바통을 부드럽게 넘겨주고(상생), 다시 3번 주자(이름 끝 자)에게 넘겨주면 인생이 막힘없이 술술 풀립니다. 하지만 중간에 바통을 떨어뜨리거나 서로 부딪히면(상극) 인간관계나 건강에 트러블이 생길 수 있다고 봅니다.</p>
+        <!-- ② 발음오행 -->
+        <div class="report-card" id="th-sound">
+            <div class="theory-chapter-label">CHAPTER 02 · 발음오행</div>
+            <div class="theory-title-row">
+                <div class="theory-num-badge">2</div>
+                <h2 class="section-title">발음오행 (音靈五行)<br><span style="font-size:1rem;font-weight:500;color:var(--text-secondary);">입에서 나오는 소리의 파동</span></h2>
             </div>
-
-            <table class="tech-table">
-                <tr><th>木 (나무)</th><td><b>ㄱ, ㅋ</b> (어금니 소리) : 위로 뻗어나가는 성장과 의욕의 기운</td></tr>
-                <tr><th>火 (불)</th><td><b>ㄴ, ㄷ, ㄹ, ㅌ</b> (혓소리) : 따뜻하고 명확하게 퍼져나가는 열정의 기운</td></tr>
-                <tr><th>土 (흙)</th><td><b>ㅇ, ㅎ</b> (목구멍 소리) : 만물을 넓게 품어주고 조절하는 포용의 기운</td></tr>
-                <tr><th>金 (쇠)</th><td><b>ㅅ, ㅈ, ㅊ</b> (잇소리) : 맺고 끊음이 확실한 단단하고 예리한 기운</td></tr>
-                <tr><th>水 (물)</th><td><b>ㅁ, ㅂ, ㅍ</b> (입술 소리) : 부드럽게 흘러가며 지혜를 담는 유연한 기운</td></tr>
+            <p style="font-size:1.05rem;color:var(--text-primary);margin-bottom:20px;line-height:1.85;">
+                이름은 평생 수만 번 이상 불리게 됩니다. <b>발음오행</b>은 소리의 파동 에너지가 운명에 영향을 미친다는 이론으로, <b>한글 이름의 초성 자음</b>을 오행으로 분류하여 글자 사이의 소리가 상생인지 상극인지를 봅니다.
+            </p>
+            <div class="theory-tip-box">
+                <h5>초보자 맞춤 설명</h5>
+                <p>소리의 연결을 <b>'이어달리기'</b>라고 생각하세요. 1번 주자(성씨)가 2번 주자(이름 첫 자)에게 바통을 부드럽게 넘겨주고(상생), 다시 3번 주자(이름 끝 자)에게 넘겨주면 인생이 막힘없이 풀립니다. 중간에 바통이 부딪히면(상극) 인간관계나 건강에 트러블이 생길 수 있습니다.</p>
+            </div>
+            <table class="tech-table" style="margin-top:20px;">
+                <tr><th><span class="oheng-dot" style="background:#22c55e;"></span>木 (나무)</th><td><b>ㄱ, ㅋ</b> (어금닛소리) — 위로 뻗어나가는 성장과 의욕의 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#ef4444;"></span>火 (불)</th><td><b>ㄴ, ㄷ, ㄹ, ㅌ</b> (혓소리) — 따뜻하고 명확하게 퍼져나가는 열정의 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#eab308;"></span>土 (흙)</th><td><b>ㅇ, ㅎ</b> (목구멍 소리) — 만물을 넓게 품어주는 포용의 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#94a3b8;"></span>金 (쇠)</th><td><b>ㅅ, ㅈ, ㅊ</b> (잇소리) — 맺고 끊음이 확실한 단단하고 예리한 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#3b82f6;"></span>水 (물)</th><td><b>ㅁ, ㅂ, ㅍ</b> (입술 소리) — 부드럽게 흘러가며 지혜를 담는 유연한 기운</td></tr>
             </table>
-            
-            <p style="font-size: 1.05rem; color: var(--text-secondary); line-height: 1.8; margin-top: 20px;">
-                <b>👍 좋은 예시 :</b> 김(木) - 도(火) - 윤(土) → 나무가 불을 태우고, 불이 흙을 만드는 완벽한 상생(이어달리기) 구조입니다.
+            <p style="font-size:0.97rem;color:var(--text-secondary);line-height:1.8;margin-top:20px;padding:14px 18px;background:var(--bg-subtle);border-radius:var(--radius-sm);">
+                <b style="color:var(--bg-dark);">✦ 좋은 예시</b> &nbsp; 박(水) → 서(金) → 연(土) — 세 음절이 모두 상생으로 이어지는 이상적인 구조입니다.
             </p>
         </div>
 
-        <div class="report-card">
-            <span class="section-tag">이론 3. 발음 음양</span>
-            <h2 class="section-title">3. 발음음양 : 밝고 어두운 성향의 밸런스</h2>
-            
-            <p style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 25px; line-height: 1.8;">
+        <!-- ③ 발음음양 -->
+        <div class="report-card" id="th-yinyang">
+            <div class="theory-chapter-label">CHAPTER 03 · 발음음양</div>
+            <div class="theory-title-row">
+                <div class="theory-num-badge">3</div>
+                <h2 class="section-title">발음음양 (陰陽)<br><span style="font-size:1rem;font-weight:500;color:var(--text-secondary);">밝고 어두운 성향의 밸런스</span></h2>
+            </div>
+            <p style="font-size:1.05rem;color:var(--text-primary);margin-bottom:20px;line-height:1.85;">
                 자음이 오행을 담당한다면, <b>모음은 음양(陰陽)</b>을 담당합니다. 한글 이름의 모음을 입 모양과 느낌에 따라 밝은 양성 모음과 차분한 음성 모음으로 나누어 성격의 균형을 잡아줍니다.
             </p>
-
-            <div class="theory-tip-box" style="margin-bottom: 30px;">
+            <div class="theory-tip-box">
                 <h5>초보자 맞춤 설명</h5>
-                <p>그림을 그릴 때 밝은색(하이라이트)과 어두운색(그림자)이 적절히 세밀하게 섞여야 깊이 있고 아름다운 입체감이 생기는 것과 같습니다. 이름에 너무 밝은 소리만 있으면 성격이 너무 가벼워질 수 있고, 너무 어두운 소리만 있으면 우울해질 수 있으므로 이를 섞어주는 것입니다.</p>
+                <p>그림을 그릴 때 밝은색(하이라이트)과 어두운색(그림자)이 적절히 섞여야 깊이 있는 입체감이 생깁니다. 이름에 너무 밝은 소리만 있으면 성격이 가벼워질 수 있고, 너무 어두운 소리만 있으면 내향적이 될 수 있어요.</p>
             </div>
-
-            <ul class="theory-list">
-                <li><b>양(陽)의 소리 :</b> ㅏ, ㅗ, ㅑ, ㅛ, ㅐ, ㅘ, ㅙ, ㅚ 등 (입이 크게 벌어지고 밝고 쾌활한 느낌)</li>
-                <li><b>음(陰)의 소리 :</b> ㅓ, ㅜ, ㅕ, ㅠ, ㅔ, ㅝ, ㅟ, ㅡ, ㅣ 등 (입이 모아지고 차분하고 진중한 느낌)</li>
+            <ul class="theory-list" style="margin-top:20px;">
+                <li><b>양(陽)의 소리</b> — ㅏ, ㅗ, ㅑ, ㅛ, ㅐ, ㅘ, ㅙ, ㅚ 등 (입이 크게 벌어지고 밝고 쾌활한 느낌)</li>
+                <li><b>음(陰)의 소리</b> — ㅓ, ㅜ, ㅕ, ㅠ, ㅔ, ㅝ, ㅟ, ㅡ, ㅣ 등 (입이 모아지고 차분하고 진중한 느낌)</li>
             </ul>
         </div>
 
-        <div class="report-card">
-            <span class="section-tag">이론 4. 81수리</span>
-            <h2 class="section-title">4. 수리사격 (81수리) : 내 인생의 4계절 타임라인</h2>
-            
-            <p style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 25px; line-height: 1.8;">
-                이름에 쓰인 한자의 <b>획수를 더하여 인생의 시기별(초년, 청년, 장년, 말년) 운세와 길흉을 판단</b>하는 전통적이고 뼈대가 되는 이론입니다. 씨앗을 뿌리고, 나무가 자라, 열매를 맺고, 거두는 자연의 이치(원형이정)를 이름에 담습니다.
-            </p>
-
-            <div class="theory-tip-box" style="margin-bottom: 30px;">
-                <h5>⚠️ 주의! 원획법(原劃法)이란?</h5>
-                <p>정통 성명학에서는 현재 우리가 흔히 쓰는 간략화된 한자 획수(필획법)가 아닌, <b>한자가 처음 만들어졌을 때의 본래 부수 획수(원획법)</b>를 사용합니다. 예를 들어 물 수(氵) 부수는 쓸 때는 3획이지만, 성명학에서는 물 수(水)의 본래 형태인 4획으로 계산해야 운명이 정확히 맞습니다. 디어네임의 알고리즘은 이 원획법을 완벽히 따릅니다.</p>
+        <!-- ④ 81수리 -->
+        <div class="report-card" id="th-suri">
+            <div class="theory-chapter-label">CHAPTER 04 · 81수리</div>
+            <div class="theory-title-row">
+                <div class="theory-num-badge">4</div>
+                <h2 class="section-title">수리사격 (81수리)<br><span style="font-size:1rem;font-weight:500;color:var(--text-secondary);">이름에 담는 인생의 4계절</span></h2>
             </div>
-
-            <table class="tech-table">
-                <tr><th>원격 (초년운/봄)</th><td><b>이름 첫 자 + 두 번째 자의 합.</b> 유년기부터 20세 전후까지의 기초 성격 형성과 학업운을 주관합니다.</td></tr>
-                <tr><th>형격 (청년운/여름)</th><td><b>성씨 + 이름 첫 자의 합.</b> 20대~40대의 사회생활, 결혼 등 가장 왕성한 시기의 성패를 지배하는 '중심운'입니다.</td></tr>
-                <tr><th>이격 (장년운/가을)</th><td><b>성씨 + 이름 두 번째 자의 합.</b> 40대~60대의 중년 이후 사회적 성취와 가정의 안정을 반영합니다.</td></tr>
-                <tr><th>정격 (말년운/겨울)</th><td><b>성씨와 이름 전체 획수의 총합.</b> 60대 이후 인생 후반의 안락함과 평생의 총운을 결정짓습니다.</td></tr>
+            <p style="font-size:1.05rem;color:var(--text-primary);margin-bottom:20px;line-height:1.85;">
+                이름에 쓰인 한자의 <b>획수를 더하여 인생의 시기별(초년·청년·장년·말년) 운세와 길흉을 판단</b>하는 전통적인 이론입니다. 씨앗을 뿌리고, 나무가 자라, 열매를 맺고, 거두는 자연의 이치(원형이정)를 이름에 담습니다.
+            </p>
+            <div class="theory-tip-box">
+                <h5>원획법(原劃法)이란?</h5>
+                <p>정통 성명학에서는 현재 쓰는 간략화된 획수(필획법)가 아닌, <b>한자가 처음 만들어졌을 때의 본래 부수 획수(원획법)</b>를 사용합니다. 예를 들어 氵(삼수변)는 쓸 때 3획이지만 성명학에서는 水의 본래 형태인 4획으로 계산합니다. 디어네임은 이 원획법을 완벽히 따릅니다.</p>
+            </div>
+            <table class="tech-table" style="margin-top:20px;">
+                <tr><th>원격 (초년운 · 봄)</th><td><b>이름 첫 자 + 두 번째 자의 합.</b> 유년기~20세 전후의 기초 성격 형성과 학업운을 주관합니다.</td></tr>
+                <tr><th>형격 (청년운 · 여름)</th><td><b>성씨 + 이름 첫 자의 합.</b> 20~40대 사회생활, 결혼 등 가장 왕성한 시기의 성패를 지배합니다.</td></tr>
+                <tr><th>이격 (장년운 · 가을)</th><td><b>성씨 + 이름 두 번째 자의 합.</b> 40~60대 사회적 성취와 가정의 안정을 반영합니다.</td></tr>
+                <tr><th>정격 (말년운 · 겨울)</th><td><b>성씨와 이름 전체 획수의 총합.</b> 60대 이후 인생 후반과 평생의 총운을 결정짓습니다.</td></tr>
             </table>
         </div>
 
-        <div class="report-card">
-            <span class="section-tag">이론 5. 수리 음양</span>
-            <h2 class="section-title">5. 수리음양 : 획수의 홀짝 구조</h2>
-            
-            <p style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 25px; line-height: 1.8;">
+        <!-- ⑤ 수리음양 -->
+        <div class="report-card" id="th-suriyy">
+            <div class="theory-chapter-label">CHAPTER 05 · 수리음양</div>
+            <div class="theory-title-row">
+                <div class="theory-num-badge">5</div>
+                <h2 class="section-title">수리음양<br><span style="font-size:1rem;font-weight:500;color:var(--text-secondary);">획수의 홀짝 구조</span></h2>
+            </div>
+            <p style="font-size:1.05rem;color:var(--text-primary);margin-bottom:20px;line-height:1.85;">
                 이름 세 글자를 구성하는 <b>한자 획수가 홀수인지 짝수인지</b>를 보아 음양의 배합을 확인합니다.
             </p>
-            
-            <div class="theory-tip-box" style="margin-bottom: 30px;">
+            <div class="theory-tip-box">
                 <h5>초보자 맞춤 설명</h5>
-                <p>사람이 두 다리로 걸을 때 '왼발, 오른발, 왼발' 교차해야 넘어지지 않듯, 이름의 획수도 <b>홀수(양)와 짝수(음)가 섞여 있어야</b> 인생이 엎어지지 않고 안정적으로 걸어갈 수 있습니다. 세 글자가 모두 홀수이거나 모두 짝수면 외발뛰기를 하는 것처럼 흉운으로 봅니다.</p>
+                <p>두 다리로 걸을 때 '왼발, 오른발, 왼발' 교차해야 넘어지지 않듯, 이름의 획수도 <b>홀수(양)와 짝수(음)가 섞여 있어야</b> 인생이 안정적으로 이어집니다. 세 글자가 모두 홀수이거나 모두 짝수면 흉운으로 봅니다.</p>
             </div>
-
-            <ul class="theory-list" style="margin-bottom: 40px;">
-                <li><b>가장 이상적인 배합 (2:1 비율) :</b> 양-음-음, 음-양-양, 음-양-음, 양-음-양</li>
-                <li><b>절대 피해야 할 배합 :</b> 양-양-양(모두 홀수), 음-음-음(모두 짝수)</li>
+            <ul class="theory-list" style="margin-top:20px;margin-bottom:28px;">
+                <li><b>가장 이상적인 배합 (2:1 비율)</b> — 양-음-음, 음-양-양, 음-양-음, 양-음-양</li>
+                <li><b>절대 피해야 할 배합</b> — 양-양-양(모두 홀수), 음-음-음(모두 짝수)</li>
             </ul>
-
-            <h4 style="font-size: 1.2rem; color: var(--bg-dark); font-weight: 800; margin-bottom: 15px; border-top: 1px dashed var(--border-light); padding-top: 30px;">🎁 전문가의 실전 작명 숨은 노하우 (보너스 팁)</h4>
+            <p class="theory-bonus-title">🎁 전문가의 실전 작명 노하우</p>
             <ul class="theory-list">
-                <li><b>분파(分破) 피하기 :</b> 이름 한자 세 글자가 모두 세로로 갈라지거나(예: 朴, 崔), 모두 가로로 갈라지는 모양이면 기운이 흩어지고 가족과 흩어질 수 있어 전문가들은 절대 쓰지 않습니다.</li>
-                <li><b>불용문자(不用文字) 배제 :</b> 뜻은 좋아 보이나 성명학적으로 인생에 파란을 일으킨다고 알려진 특정 한자들(예: 극, 수, 국 등)은 리스트에서 철저히 걸러냅니다.</li>
+                <li><b>분파(分破) 피하기</b> — 이름 한자 세 글자가 모두 세로로 갈라지는 모양(예: 朴·崔·林)이면 기운이 흩어진다고 보아 전문가들은 절대 쓰지 않습니다.</li>
+                <li><b>불용문자(不用文字) 배제</b> — 뜻은 좋아 보이나 성명학적으로 파란을 일으킨다고 알려진 특정 한자들은 철저히 걸러냅니다.</li>
             </ul>
         </div>
-        
-        <div style="text-align: center; margin-top: 80px;">
-            <button onclick="showMainView()" class="btn-navy" style="width: auto; padding: 18px 50px; font-size: 1.1rem;">
-                메인 화면으로 돌아가기
-            </button>
+
+        <!-- 하단 CTA 카드 -->
+        <div class="theory-cta-card">
+            <div class="tc-tag">✦ DearName Premium</div>
+            <h3>이 5가지 기준을 모두 통과한<br>이름만 추천합니다</h3>
+            <p>사주 분석부터 자원오행 · 발음 · 수리 전 항목 검증까지<br>AI가 수천 가지 후보 중 최적의 이름 3개를 골라드립니다.</p>
+            <div class="theory-cta-btns">
+                <button onclick="showMainView(); setTimeout(function(){document.getElementById('premium').scrollIntoView({behavior:'smooth'});},100);"
+                    class="btn-cta-gold" style="font-size:0.95rem;padding:14px 32px;">
+                    ✦ AI 프리미엄 작명 의뢰하기
+                </button>
+                <button onclick="showMainView(); setTimeout(function(){document.getElementById('self-naming').scrollIntoView({behavior:'smooth'});},100);"
+                    class="btn-report-ghost" style="color:rgba(255,255,255,0.75);border-color:rgba(255,255,255,0.2);">
+                    무료 셀프 작명 해보기
+                </button>
+            </div>
         </div>
+
     </main>
 
 </div>
+
+
 
 <div id="login-modal" class="modal-overlay">
     <div class="modal-content" style="max-width: 400px; padding: 50px 40px;">
