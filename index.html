@@ -141,7 +141,7 @@
         /* =========================================
            [3] 공통 컴포넌트
            ========================================= */
-        .btn { width: 100%; padding: 20px; border: none; border-radius: 16px; font-weight: 800; font-size: 1.15rem; cursor: pointer; transition: all 0.3s ease; text-align: center; letter-spacing: 0.5px; }
+        .btn { width: 100%; padding: 20px; border: none; border-radius: 16px; font-weight: 800; font-size: 1.15rem; cursor: pointer; transition: all 0.3s ease; text-align: center; letter-spacing: 0.5px; box-sizing: border-box; }
         .btn-gold { background: linear-gradient(135deg, var(--gold-premium) 0%, var(--gold-dark) 100%); color: white; box-shadow: var(--shadow-glow); }
         .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4); }
         .btn-navy { background: var(--bg-dark); color: white; }
@@ -534,7 +534,7 @@
                 position: fixed;
                 top: 61px; left: 0; right: 0;
                 background: #fff;
-                padding: 8px 14px 20px;
+                padding: 6px 14px 18px;
                 box-shadow: 0 16px 48px rgba(0,0,0,0.14);
                 border-top: 1px solid #f1f5f9;
                 z-index: 150;
@@ -546,45 +546,67 @@
                 from { opacity: 0; transform: translateY(-6px); }
                 to   { opacity: 1; transform: translateY(0); }
             }
+            /* 일반 링크 */
             .main-nav-links.mobile-open a {
                 margin-left: 0;
-                padding: 13px 16px;
-                border-radius: 12px;
+                padding: 12px 14px;
+                border-radius: 10px;
                 border-bottom: none;
-                font-size: 0.97rem;
+                font-size: 0.93rem;
                 font-weight: 600;
                 text-align: left;
-                color: #334155;
+                color: #475569;
                 transition: background 0.15s;
             }
             .main-nav-links.mobile-open a:hover,
             .main-nav-links.mobile-open a:active { background: #f8fafc; }
             .main-nav-links.mobile-open a + a { border-top: 1px solid #f1f5f9; }
-            .main-nav-links.mobile-open a.premium-link {
+            /* 하단 CTA 행: 의뢰 + 마이페이지/로그인 나란히 */
+            .main-nav-links.mobile-open .nav-cta-row {
+                display: flex;
+                gap: 8px;
                 margin-top: 10px;
-                text-align: center;
-                background: linear-gradient(135deg, #fffbeb, #fef3c7);
-                border: 1.5px solid var(--border-gold);
-                color: var(--gold-dark);
-                font-weight: 800;
-                border-radius: 14px;
+                padding-top: 10px;
+                border-top: 1px solid #f1f5f9;
             }
-            .main-nav-links.mobile-open a.premium-link + * { border-top: none; }
+            .main-nav-links.mobile-open .nav-cta-row a,
+            .main-nav-links.mobile-open .nav-cta-row > div {
+                flex: 1;
+                border-top: none !important;
+                text-align: center;
+                padding: 12px 8px;
+                border-radius: 12px;
+                font-size: 0.88rem;
+                font-weight: 800;
+                cursor: pointer;
+            }
+            .main-nav-links.mobile-open a.premium-link {
+                background: linear-gradient(135deg, var(--gold-premium), var(--gold-dark));
+                color: white !important;
+                border: none;
+            }
             .main-nav-links.mobile-open a.login-link {
                 margin-left: 0;
-                margin-top: 8px;
-                text-align: center;
-                display: block;
-                background: #f8fafc;
-                border-radius: 14px;
+                background: #f1f5f9;
+                border-radius: 12px;
                 color: #334155;
                 font-weight: 700;
             }
             .main-nav-links.mobile-open #user-badge {
                 margin-left: 0 !important;
-                margin-top: 8px;
+                background: #f1f5f9;
+                border-radius: 12px;
                 justify-content: center;
                 width: 100%;
+                padding: 12px 8px;
+                font-size: 0.88rem;
+                font-weight: 800;
+            }
+            .main-nav-links.mobile-open #user-badge a {
+                border-top: none !important;
+                font-weight: 800;
+                color: #334155;
+                padding: 0;
             }
 
             /* ─ 그리드 1열 ─ */
@@ -1273,9 +1295,10 @@
         .suri-seasons-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px; }
         @media(max-width:600px){ .suri-seasons-grid{ grid-template-columns:1fr; } }
         .season-card { background:#f8fafc;border-radius:16px;padding:20px;border:1px solid var(--border-light);position:relative; }
-        .season-card.season-good { border-color:#bbf7d0; background:#f0fdf4; }
-        .season-card.season-bad  { border-color:#fecaca; background:#fff5f5; }
-        .season-card.season-avg  { border-color:#fde68a; background:#fffbeb; }
+        .season-card.season-daegil{ border-color:#86efac; background:#f0fdf4; }
+        .season-card.season-good  { border-color:#bfdbfe; background:#eff6ff; }
+        .season-card.season-bad   { border-color:#fecaca; background:#fff5f5; }
+        .season-card.season-avg   { border-color:#fde68a; background:#fffbeb; }
         .season-card.season-jeong { border:2.5px solid var(--gold-premium) !important; background:#fffcf3 !important; }
         /* 흐름 패턴 배너 */
         .suri-pattern-banner {
@@ -1301,9 +1324,11 @@
         .spb-desc.falling { color:#7f1d1d; }
         .spb-desc.mixed   { color:#475569; }
         .spb-desc.peak    { color:#1e3a8a; }
+        .spb-left { display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; }
         .spb-tag {
-            margin-left:auto; flex-shrink:0;
-            font-size:0.7rem; font-weight:800; border-radius:20px; padding:4px 13px; color:white;
+            flex-shrink:0;
+            font-size:0.68rem; font-weight:800; border-radius:20px; padding:3px 10px; color:white;
+            white-space:nowrap;
         }
         .spb-tag.rising  { background:#d4af37; }
         .spb-tag.stable  { background:#16a34a; }
@@ -1482,26 +1507,35 @@
         #theory-popover-body .chapter-theory-title { display: none; }
         #theory-popover-body .chapter-theory-pillars { margin-top: 14px; }
         #theory-popover-body .pillar-explain { margin-bottom: 5px; font-size: 0.82rem; }
-        /* 플로팅 챕터 네비게이터 */
+        /* 챕터 헤더 내 section-title: 2.8rem 전역값 대신 소형화 */
+        .chapter-acc-header .section-title {
+            font-size: 1.35rem !important;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            margin-bottom: 4px;
+        }
+        .story-chapter-label { margin-bottom: 6px; }
+        .chapter-verdict-strip { margin-top: 10px; }
+
+        /* 플로팅 챕터 네비게이터 — 심플 dot */
         #chapter-float-nav {
-            position: fixed; right: 14px; top: 50%; transform: translateY(-50%);
-            z-index: 200; display: none; flex-direction: column; gap: 5px;
-            background: white; border-radius: 18px; padding: 8px 6px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            position: fixed; right: 12px; top: 50%; transform: translateY(-50%);
+            z-index: 200; display: none; flex-direction: column; gap: 8px;
+            background: white; border-radius: 20px; padding: 10px 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
             border: 1px solid var(--border-light);
         }
         #chapter-float-nav.visible { display: flex; }
         .cfn-item {
-            width: 30px; height: 30px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.68rem; font-weight: 900; color: var(--text-secondary);
-            cursor: pointer; transition: all 0.18s; border: none; background: none;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #cbd5e1;
+            cursor: pointer; transition: all 0.18s; border: none; padding: 0;
+            position: relative;
         }
-        .cfn-item:hover { background: #f1f5f9; color: var(--bg-dark); }
-        .cfn-item.cfn-active { background: var(--gold-premium); color: white; }
+        .cfn-item:hover { background: #94a3b8; transform: scale(1.3); }
+        .cfn-item.cfn-active { background: var(--gold-premium); transform: scale(1.4); }
         @media (max-width: 768px) {
-            #chapter-float-nav { right: 6px; padding: 6px 4px; }
-            .cfn-item { width: 26px; height: 26px; font-size: 0.6rem; }
+            #chapter-float-nav { right: 6px; padding: 8px 6px; }
         }
         /* AI 해석 블록 접기 */
         .ai-story-block.ai-clamped {
@@ -1805,6 +1839,24 @@
 
 
         /* ── 사주명식 표 ── */
+        /* 사주 원국 설명 토글 */
+        details.saju-theory-details { margin-bottom: 16px; }
+        details.saju-theory-details > summary {
+            font-size: 0.78rem; font-weight: 800; color: #3b82f6; letter-spacing: 0.04em;
+            cursor: pointer; list-style: none; padding: 8px 14px;
+            background: #eff6ff; border-radius: 10px;
+            display: flex; align-items: center; gap: 6px;
+            border: 1px solid #bfdbfe; user-select: none;
+        }
+        details.saju-theory-details > summary::-webkit-details-marker { display: none; }
+        details.saju-theory-details[open] > summary { border-radius: 10px 10px 0 0; }
+        details.saju-theory-details > summary::after { content: '↓'; margin-left: auto; font-weight: 900; }
+        details.saju-theory-details[open] > summary::after { content: '↑'; }
+        details.saju-theory-details .theory-detail-body {
+            padding: 12px 14px 14px; background: white;
+            border-radius: 0 0 10px 10px; font-size: 0.82rem; line-height: 1.65;
+            border: 1px solid #bfdbfe; border-top: none; color: var(--text-primary);
+        }
         .saju-mingsik-wrap { overflow-x: auto; margin: 24px 0 32px; border-radius: 20px; border: 1px solid var(--border-light); overflow: hidden; }
         .saju-mingsik { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
         .saju-mingsik th, .saju-mingsik td { border-bottom: 1px solid var(--border-light); border-right: 1px solid var(--border-light); padding: 0; text-align: center; }
@@ -1932,11 +1984,13 @@
             <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('report').scrollIntoView();}, 100);">보고서 미리보기</a>
             <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('theory').scrollIntoView();}, 100);">작명 기준</a>
             <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('self-naming').scrollIntoView();}, 100);">셀프 작명</a>
-            <a class="premium-link" onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 작명 의뢰</a>
-            <a class="login-link" onclick="closeMobileMenu(); openLoginModal()">로그인</a>
-            <div id="user-badge" style="display:none;align-items:center;gap:8px;cursor:pointer;margin-left:20px;" onclick="closeMobileMenu(); showMypageView()" title="마이페이지">
-                <img class="user-avatar" src="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:none;">
-                <a class="login-link" style="margin-left:0;cursor:pointer;">마이페이지</a>
+            <div class="nav-cta-row">
+                <a class="premium-link" onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 의뢰</a>
+                <a class="login-link" onclick="closeMobileMenu(); openLoginModal()">로그인</a>
+                <div id="user-badge" style="display:none;align-items:center;gap:6px;cursor:pointer;" onclick="closeMobileMenu(); showMypageView()" title="마이페이지">
+                    <img class="user-avatar" src="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:none;">
+                    <span style="font-size:0.88rem;font-weight:800;color:#334155;">마이페이지</span>
+                </div>
             </div>
         </div>
         <a onclick="showMainView()" class="report-back-link" id="report-nav">&larr; 메인으로 돌아가기</a>
@@ -2240,7 +2294,7 @@
         <div class="section-inner">
             <div style="text-align: center; margin-bottom: 60px;">
                 <span class="section-tag" style="color: var(--gold-premium); display: inline-block;">프리미엄 작명 의뢰</span>
-                <h2 class="section-title" style="color: white; margin-bottom: 20px;">우리 아이에게 꼭 맞는 이름, <br>직접 지어드립니다.</h2>
+                <h2 class="section-title" style="color: white; margin-bottom: 20px; word-break: keep-all;">우리 아이에게 꼭 맞는 이름, 직접 지어드립니다.</h2>
                 <p style="color: rgba(255,255,255,0.65); max-width: 600px; margin: 0 auto; font-size: 1.15rem;">전통 성명학의 다양한 기준들을 복합적으로 분석하여,<br>왜 이 이름이 아이에게 최고인지 알기 쉽게 설명해드립니다.</p>
             </div>
 
@@ -2645,7 +2699,19 @@
                 <div id="verdict-self-ch1" class="chapter-verdict-strip"></div>
             </div>
             <div class="chapter-acc-body open" id="acc-body-self-ch1">
-            <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:20px;margin-top:12px;" id="self-saju-meta-label"></p>
+            <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:16px;margin-top:12px;" id="self-saju-meta-label"></p>
+            <details class="saju-theory-details" style="margin-bottom:16px;">
+                <summary>📖 사주 원국(四柱八字)이란?</summary>
+                <div class="theory-detail-body">
+                    태어난 해·달·날·시, 네 기둥(四柱)의 여덟 글자(八字)가 아이의 타고난 기운 지도입니다.
+                    <div class="chapter-theory-pillars" style="margin:10px 0 6px;">
+                        <div class="pillar-explain"><span class="pe-year">연주(年柱)</span> 조상·초년운 (0~20대)</div>
+                        <div class="pillar-explain"><span class="pe-month">월주(月柱)</span> 부모형제·청장년운</div>
+                        <div class="pillar-explain pe-me"><span class="pe-day">일주(日柱) ★</span> <b>이 아이 본인</b> · 배우자궁</div>
+                        <div class="pillar-explain"><span class="pe-time">시주(時柱)</span> 자식·말년운 (60대~)</div>
+                    </div>
+                </div>
+            </details>
             <div class="saju-mingsik-wrap">
                 <table class="saju-mingsik" id="self-saju-table">
                     <thead><tr><th>사주</th><th>시주</th><th>일주</th><th>월주</th><th>연주</th></tr></thead>
@@ -2987,17 +3053,19 @@
             <div class="chapter-acc-body open" id="acc-body-ch1">
 
             <!-- 사주 이론 설명 박스 (동적) -->
-            <div class="chapter-theory-box" id="ch1-theory-box">
-                <div class="chapter-theory-title">📖 왜 사주를 먼저 파악해야 할까요?</div>
-                좋은 이름을 짓기 위해서는 먼저 <b>아이가 타고난 기운의 지도</b>를 읽어야 합니다. 사주(四柱)는 태어난 해·달·날·시, 네 기둥이 이루는 <b>8글자의 우주</b>입니다. 이 지도에서 <b>어떤 기운이 넘치고, 어떤 기운이 부족한지</b>를 파악해야만 — 이름이 정확히 그 빈자리를 채워줄 수 있습니다.
-                <div class="chapter-theory-pillars">
-                    <div class="pillar-explain"><span class="pe-year">연주(年柱)</span> 조상·초년운 (0~20대)</div>
-                    <div class="pillar-explain"><span class="pe-month">월주(月柱)</span> 부모형제·청장년운</div>
-                    <div class="pillar-explain pe-me"><span class="pe-day">일주(日柱) ★</span> <b>이 아이 본인</b> · 배우자궁</div>
-                    <div class="pillar-explain"><span class="pe-time">시주(時柱)</span> 자식·말년운 (60대~)</div>
+            <details class="saju-theory-details">
+                <summary>📖 사주 원국(四柱八字)이란?</summary>
+                <div class="theory-detail-body" id="ch1-theory-box">
+                    좋은 이름을 짓기 위해서는 먼저 <b>아이가 타고난 기운의 지도</b>를 읽어야 합니다. 사주(四柱)는 태어난 해·달·날·시, 네 기둥이 이루는 <b>8글자의 우주</b>입니다.
+                    <div class="chapter-theory-pillars" style="margin:10px 0 8px;">
+                        <div class="pillar-explain"><span class="pe-year">연주(年柱)</span> 조상·초년운 (0~20대)</div>
+                        <div class="pillar-explain"><span class="pe-month">월주(月柱)</span> 부모형제·청장년운</div>
+                        <div class="pillar-explain pe-me"><span class="pe-day">일주(日柱) ★</span> <b>이 아이 본인</b> · 배우자궁</div>
+                        <div class="pillar-explain"><span class="pe-time">시주(時柱)</span> 자식·말년운 (60대~)</div>
+                    </div>
+                    <span style="font-size:0.78rem;color:var(--gold-dark);font-weight:700;" id="ch1-theory-footer">아래 사주 원국을 확인한 뒤, 부족한 기운이 무엇인지 살펴보세요. 그 답이 챕터 2의 자원오행으로 이어집니다.</span>
                 </div>
-                <span style="font-size:0.8rem;color:var(--gold-dark);font-weight:700;" id="ch1-theory-footer">아래 사주 원국을 확인한 뒤, 부족한 기운이 무엇인지 살펴보세요. 그 답이 챕터 2의 자원오행으로 이어집니다.</span>
-            </div>
+            </details>
 
             <div class="saju-grid" id="report-saju-grid"></div>
             <div class="oheng-layout">
@@ -3362,11 +3430,11 @@
 
     <!-- ── 플로팅 챕터 네비게이터 ── -->
     <div id="chapter-float-nav">
-        <button class="cfn-item" onclick="_jumpToChapter('ch1')" data-ch="ch1" title="사주 원국">①</button>
-        <button class="cfn-item" onclick="_jumpToChapter('ch2')" data-ch="ch2" title="자원오행">②</button>
-        <button class="cfn-item" onclick="_jumpToChapter('ch3')" data-ch="ch3" title="한자 의미">③</button>
-        <button class="cfn-item" onclick="_jumpToChapter('ch4')" data-ch="ch4" title="발음 오행">④</button>
-        <button class="cfn-item" onclick="_jumpToChapter('ch5a')" data-ch="ch5a" title="사격수리">⑤</button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch1')" data-ch="ch1" title="① 사주 원국"></button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch2')" data-ch="ch2" title="② 자원오행"></button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch3')" data-ch="ch3" title="③ 한자 의미"></button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch4')" data-ch="ch4" title="④ 발음 오행"></button>
+        <button class="cfn-item" onclick="_jumpToChapter('ch5a')" data-ch="ch5a" title="⑤ 사격수리"></button>
     </div>
 </div>
 
@@ -6241,20 +6309,25 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // ── 패턴 배너 HTML ────────────────────────────────────────────
         const bannerHtml = `
         <div class="suri-pattern-banner ${pattern}">
-            <div class="spb-icon">${pi.icon}</div>
+            <div class="spb-left">
+                <div class="spb-icon">${pi.icon}</div>
+                <div class="spb-tag ${pattern}">${pi.tag}</div>
+            </div>
             <div>
                 <div class="spb-name ${pattern}">${pi.name}</div>
                 <div class="spb-desc ${pattern}">${pi.desc}</div>
             </div>
-            <div class="spb-tag ${pattern}">${pi.tag}</div>
         </div>`;
 
         // ── 카드 HTML ─────────────────────────────────────────────────
         const cardsHtml = seasons.map((s, i) => {
             const d   = suriDatas[i];
+            const ng  = _normG(d.grade);
             const cls = (s.isJeong ? 'season-jeong ' : '') +
-                        (_isGood(d.grade) ? 'season-good' : _isBad(d.grade) ? 'season-bad' :
-                         _normG(d.grade)==='평' ? 'season-avg' : '');
+                        (ng === '대길' ? 'season-daegil' :
+                         ng === '길'   ? 'season-good' :
+                         ng === '평'   ? 'season-avg' :
+                         (ng === '흉' || ng === '대흉') ? 'season-bad' : '');
             // 대길수/대흉수/총운 특수 배지
             const specialBadge = d.grade === '대길'  ? `<div><span class="suri-special-badge ssb-daegil">★ 대표 대길수</span></div>` :
                                   d.grade === '대흉'  ? `<div><span class="suri-special-badge ssb-daehyung">⚠ 대표 흉수</span></div>` : '';
