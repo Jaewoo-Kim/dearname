@@ -1542,6 +1542,8 @@
         @media (max-width: 768px) {
             #chapter-float-nav { right: 2px; }
         }
+        /* 빈 스토리 블록 숨김 */
+        .ai-story-block:empty { display: none !important; }
         /* AI 해석 블록 접기 */
         .ai-story-block.ai-clamped {
             max-height: 9em; overflow: hidden; position: relative;
@@ -5664,7 +5666,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         _renderSajuGrid(_saju);
         _renderOhengBars(_scores, candidate);
         const sajuStoryEl = document.getElementById('ai-saju-story');
-        if (sajuStoryEl) sajuStoryEl.textContent = report.sajuStory || report.sajuAnalysis || '';
+        if (sajuStoryEl) sajuStoryEl.textContent = _ensureHanjaLabel(report.sajuStory || report.sajuAnalysis || '');
 
         // Ch2: 자원오행 & 레이더
         document.getElementById('report-tagline').textContent = report.tagline || '';
@@ -5694,7 +5696,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
 
         const jawonStoryEl = document.getElementById('ai-jawon-story');
-        if (jawonStoryEl) jawonStoryEl.textContent = report.jawonStory || report.namingLogic || '';
+        if (jawonStoryEl) jawonStoryEl.textContent = _ensureHanjaLabel(report.jawonStory || report.namingLogic || '');
 
         // ── Chapter 3 theory box 동적 업데이트 ────────────────────────
         (function _updateCh3Theory() {
@@ -5730,14 +5732,14 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // Ch3: 한자 의미
         _renderHanjaDetails(report.hanjaDetails || [], h1, h2);
         const hanjaStoryEl = document.getElementById('ai-hanja-story');
-        if (hanjaStoryEl) hanjaStoryEl.textContent = report.hanjaStory || '';
+        if (hanjaStoryEl) hanjaStoryEl.textContent = _ensureHanjaLabel(report.hanjaStory || '');
         // Section 1: 한자이야기
         _renderHanjaStoryS1(candidate);
 
         // Ch4: 발음
         _renderSoundSection(candidate, report);
         const soundStoryEl = document.getElementById('ai-sound-story');
-        if (soundStoryEl) soundStoryEl.textContent = report.soundStory || '';
+        if (soundStoryEl) soundStoryEl.textContent = _ensureHanjaLabel(report.soundStory || '');
 
         // Ch5: 수리 + 라이프플로우
         _renderSuriCards(s0, s1, s2, isOija);
@@ -5875,7 +5877,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         })();
         const suriStoryEl = document.getElementById('ai-suri-story');
         if (suriStoryEl) {
-            suriStoryEl.textContent = report.suriStory || '';
+            suriStoryEl.textContent = _ensureHanjaLabel(report.suriStory || '');
         }
 
         // ── Chapter 대운 theory box 동적 업데이트 ─────────────────────
@@ -5940,6 +5942,21 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                ({'나무':'木','불':'火','흙':'土','쇠':'金','물':'水'}[o] || o); // 한글→한자 정규화
     };
     const _ohengToKr = o => _OHENG_KR_MAP[o] || _OHENG_KR_MAP[_normOheng(o)] || o;
+
+    // 독립된 오행 한자(木火土金水)에 한글 읽기를 자동 보충
+    // 이미 "(木)" 또는 한자/한글이 앞에 붙은 경우는 건드리지 않음
+    function _ensureHanjaLabel(text) {
+        if (!text) return text;
+        const KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        return text.replace(/[木火土金水]/g, (ch, off, str) => {
+            const prev = off > 0 ? str.charAt(off - 1) : '';
+            // 앞이 CJK·한글·'(' → 이미 문맥이 있음
+            if (/[一-鿿가-힣㄰-㆏(]/.test(prev)) return ch;
+            // 뒤가 ')' → (木) 형태의 괄호 안
+            if (str.charAt(off + 1) === ')') return ch;
+            return `${KR[ch]}(${ch})`;
+        });
+    }
 
     function _renderOhengBars(scores, candidate) {
         if (!scores) return;
@@ -6168,8 +6185,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                         <span style="color:${oc};font-weight:800;">${ohengLabel} 기운</span>
                         <span>${d.strokes||''}획</span>
                     </div>
-                    <p style="font-size:0.95rem;color:var(--text-primary);line-height:1.7;margin:6px 0;">${d.meaning||''}</p>
-                    ${d.synergyWithSaju ? `<div class="ai-hanja-synergy">✦ 사주 시너지 &nbsp;${d.synergyWithSaju}</div>` : ''}
+                    <p style="font-size:0.95rem;color:var(--text-primary);line-height:1.7;margin:6px 0;">${_ensureHanjaLabel(d.meaning||'')}</p>
+                    ${d.synergyWithSaju ? `<div class="ai-hanja-synergy">✦ 사주 시너지 &nbsp;${_ensureHanjaLabel(d.synergyWithSaju)}</div>` : ''}
                 </div>
             </div>`;
         }).join('');
