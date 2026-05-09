@@ -1046,14 +1046,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
-            padding: 28px 32px;
+            gap: 14px;
+            padding: 16px 20px;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f2744 100%);
-            border: 2px solid rgba(212, 175, 55, 0.5);
-            border-radius: 24px;
+            border: 1.5px solid rgba(212, 175, 55, 0.4);
+            border-radius: 16px;
             cursor: pointer;
-            transition: all 0.25s;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(212,175,55,0.15);
+            transition: all 0.22s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.14);
             position: relative;
             overflow: hidden;
         }
@@ -1079,16 +1079,17 @@
             opacity: 0.85;
         }
         .expert-toggle-title {
-            font-size: 1.15rem;
-            font-weight: 900;
+            font-size: 0.97rem;
+            font-weight: 800;
             color: #ffffff;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
+            margin-bottom: 3px;
+            letter-spacing: -0.01em;
         }
         .expert-toggle-desc {
-            font-size: 0.84rem;
-            color: rgba(255,255,255,0.55);
-            line-height: 1.65;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.5;
+            display: none;
         }
         #expert-toggle-btn {
             background: linear-gradient(135deg, var(--gold-premium) 0%, var(--gold-dark) 100%) !important;
@@ -1516,30 +1517,36 @@
         .story-chapter-label { margin-bottom: 6px; }
         .chapter-verdict-strip { margin-top: 10px; }
 
-        /* 플로팅 챕터 네비게이터 — 미니멀 dot */
+        /* 플로팅 챕터 네비게이터 — dot + 큰 터치 영역 */
         #chapter-float-nav {
-            position: fixed; right: 10px; top: 50%; transform: translateY(-50%);
-            z-index: 200; display: none; flex-direction: column; gap: 6px;
-            background: white; border-radius: 20px; padding: 10px 7px;
+            position: fixed; right: 6px; top: 50%; transform: translateY(-50%);
+            z-index: 200; display: none; flex-direction: column; gap: 0;
+            background: white; border-radius: 20px; padding: 6px 4px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.12);
             border: 1px solid var(--border-light);
         }
         #chapter-float-nav.visible { display: flex; }
         .cfn-item {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: #cbd5e1;
-            cursor: pointer; transition: all 0.2s; border: none; padding: 0;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: transparent;
+            cursor: pointer; transition: all 0.18s; border: none;
+            display: flex; align-items: center; justify-content: center;
         }
-        .cfn-item:hover { background: #94a3b8; transform: scale(1.5); }
-        .cfn-item.cfn-active { background: var(--gold-premium); transform: scale(1.6); width: 7px; height: 14px; border-radius: 4px; }
+        .cfn-item::after {
+            content: ''; display: block;
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #cbd5e1; transition: all 0.18s;
+        }
+        .cfn-item:hover::after { background: #94a3b8; transform: scale(1.3); }
+        .cfn-item.cfn-active::after { background: var(--gold-premium); width: 7px; height: 14px; border-radius: 4px; }
         @media (max-width: 768px) {
-            #chapter-float-nav { right: 5px; }
+            #chapter-float-nav { right: 2px; }
         }
         /* AI 해석 블록 접기 */
         .ai-story-block.ai-clamped {
-            max-height: 5.6em; overflow: hidden; position: relative;
-            -webkit-mask-image: linear-gradient(180deg,#000 55%,transparent 100%);
-            mask-image: linear-gradient(180deg,#000 55%,transparent 100%);
+            max-height: 9em; overflow: hidden; position: relative;
+            -webkit-mask-image: linear-gradient(180deg,#000 70%,transparent 100%);
+            mask-image: linear-gradient(180deg,#000 70%,transparent 100%);
         }
         .ai-expand-btn {
             display: block; font-size: 0.78rem; font-weight: 700;
@@ -3174,9 +3181,11 @@
                         </p>
                     </div>
                 </div>
-                <div style="background:white;padding:30px;border-radius:24px;border:1px solid var(--border-light);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.02);">
-                    <canvas id="sajuRadar"></canvas>
-                    <p style="font-size:0.88rem;color:var(--text-secondary);margin-top:16px;font-weight:700;">▲ 작명 후 변화된 잠재력 밸런스</p>
+                <div style="background:white;padding:20px 16px 16px;border-radius:20px;border:1px solid var(--border-light);text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+                    <div style="position:relative;width:100%;height:260px;">
+                        <canvas id="sajuRadar" style="display:block;"></canvas>
+                    </div>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);margin-top:10px;font-weight:700;">▲ 작명 후 변화된 잠재력 밸런스</p>
                 </div>
             </div>
             </div><!-- /acc-body-ch2 -->
@@ -4986,13 +4995,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     ]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         r: {
                             min: 0,
                             max: 100,
                             angleLines: { color: 'rgba(0,0,0,0.05)' },
                             grid: { color: 'rgba(0,0,0,0.05)' },
-                            pointLabels: { color: '#0f172a', font: { size: 12, family: 'Pretendard', weight: '700' } },
+                            pointLabels: { color: '#0f172a', font: { size: 11, family: 'Pretendard', weight: '700' } },
                             ticks: { display: false }
                         }
                     },
@@ -5000,7 +5011,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                         legend: {
                             display: true,
                             position: 'bottom',
-                            labels: { font: { family: 'Pretendard', size: 11 }, boxWidth: 14, padding: 10,
+                            labels: { font: { family: 'Pretendard', size: 10 }, boxWidth: 12, padding: 8,
                                       color: '#475569' }
                         }
                     }
