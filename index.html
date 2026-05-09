@@ -262,8 +262,8 @@
         /* =========================================
            [4] 메인 뷰 특화 스타일
            ========================================= */
-        .bg-hero::before { content: ''; position: absolute; width: 1200px; height: 1200px; background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 65%); top: -400px; left: 50%; transform: translateX(-50%); }
-        .bg-hero::after { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%); bottom: -100px; right: 5%; z-index: 0; }
+        .bg-hero::before { content: ''; position: absolute; width: 1200px; height: 1200px; background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 65%); top: -400px; left: 50%; transform: translateX(-50%); pointer-events: none; }
+        .bg-hero::after { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%); bottom: -100px; right: 5%; z-index: 0; pointer-events: none; }
         .hero { padding: 280px 24px 200px; text-align: center; color: white; position: relative; z-index: 10; }
         .hero-eyebrow { font-size: 1.05rem; font-weight: 500; letter-spacing: 0.18em; color: var(--gold-premium); margin-bottom: 28px; display: block; }
         .hero h1 { font-size: 5rem; font-weight: 800; margin-bottom: 36px; letter-spacing: -0.04em; line-height: 1.15; text-shadow: 0 10px 40px rgba(0,0,0,0.5); }
