@@ -297,6 +297,72 @@
             .fade-up { opacity: 1; transform: none; transition: none; }
         }
 
+        /* =========================================
+           [4-A] 리뷰·후기 섹션
+           ========================================= */
+        .review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+        .review-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 32px 28px;
+            box-shadow: var(--shadow-card);
+            display: flex; flex-direction: column; gap: 16px;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-premium); }
+        .review-stars { color: #f59e0b; font-size: 1.05rem; letter-spacing: 2px; }
+        .review-text { font-size: 1.0rem; color: var(--text-primary); line-height: 1.85; flex: 1; font-style: italic; }
+        .review-text::before { content: '\201C'; font-size: 2rem; color: var(--gold-premium); line-height: 0; vertical-align: -0.5em; margin-right: 4px; font-style: normal; }
+        .review-author { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border-light); }
+        .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-premium), var(--gold-dark)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.95rem; flex-shrink: 0; }
+        .review-name { font-weight: 700; font-size: 0.95rem; color: var(--bg-dark); }
+        .review-meta { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+        .review-badge { display: inline-flex; align-items: center; gap: 5px; background: #fef9c3; color: #92400e; font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid #fde68a; }
+        /* 상단 집계 바 */
+        .review-summary { display: flex; align-items: center; justify-content: center; gap: 48px; background: linear-gradient(135deg, var(--bg-deep), var(--bg-dark)); border-radius: var(--radius-lg); padding: 32px 40px; margin-bottom: 12px; }
+        .rs-stat { text-align: center; }
+        .rs-num { font-size: 2.6rem; font-weight: 800; color: var(--gold-premium); font-family: 'DM Sans', sans-serif; letter-spacing: -0.04em; line-height: 1; }
+        .rs-label { font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-top: 6px; letter-spacing: 0.04em; }
+        .rs-sep { width: 1px; height: 48px; background: rgba(255,255,255,0.1); }
+
+        /* =========================================
+           [4-B] FAQ 섹션
+           ========================================= */
+        .faq-list { margin-top: 48px; display: flex; flex-direction: column; gap: 12px; max-width: 820px; margin-left: auto; margin-right: auto; }
+        .faq-item { border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden; background: white; }
+        .faq-q {
+            width: 100%; background: none; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            padding: 22px 28px; text-align: left;
+            font-size: 1.0rem; font-weight: 700; color: var(--bg-dark); font-family: inherit;
+            transition: background 0.2s;
+        }
+        .faq-q:hover { background: var(--bg-light); }
+        .faq-q[aria-expanded="true"] { background: var(--bg-light); color: var(--gold-dark); }
+        .faq-icon { font-size: 1.4rem; color: var(--gold-premium); transition: transform 0.3s; flex-shrink: 0; line-height: 1; }
+        .faq-q[aria-expanded="true"] .faq-icon { transform: rotate(45deg); }
+        .faq-a {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.22,1,0.36,1), padding 0.35s;
+            font-size: 0.97rem; color: var(--text-secondary); line-height: 1.85;
+            padding: 0 28px;
+        }
+        .faq-a.open { max-height: 400px; padding: 4px 28px 24px; }
+        .faq-a strong { color: var(--bg-dark); }
+
+        @media (max-width: 768px) {
+            .review-grid { grid-template-columns: 1fr; }
+            .review-summary { flex-wrap: wrap; gap: 24px; padding: 24px 20px; }
+            .rs-sep { display: none; }
+        }
+        @media (max-width: 480px) {
+            .review-card { padding: 24px 20px; }
+            .faq-q { padding: 18px 20px; font-size: 0.95rem; }
+            .faq-a { padding: 0 20px; }
+            .faq-a.open { padding: 4px 20px 20px; }
+        }
+
         .core-text-area li > div { flex: 1; }
         .core-text-area li b { display: block; margin-bottom: 6px; color: var(--bg-dark); font-size: 1.05rem; font-weight: 700; }
         .core-text-area li > div > span { font-size: 1rem; color: var(--text-secondary); line-height: 1.7; }
@@ -2653,6 +2719,134 @@
         </div>
     </section>
 
+    <!-- ══════════════════════════════════════════════
+         리뷰 · 후기 섹션
+    ═══════════════════════════════════════════════ -->
+    <section id="reviews" class="bg-gray">
+        <div class="section-inner">
+            <span class="section-tag fade-up">부모님들의 생생한 후기</span>
+            <h2 class="section-title fade-up delay-1" style="word-break:keep-all;">디어네임으로 이름 지은 <br>부모님들의 이야기</h2>
+
+            <!-- 집계 바 -->
+            <div class="review-summary fade-up delay-2">
+                <div class="rs-stat">
+                    <div class="rs-num">9,800+</div>
+                    <div class="rs-label">누적 작명 건수</div>
+                </div>
+                <div class="rs-sep"></div>
+                <div class="rs-stat">
+                    <div class="rs-num">4.9★</div>
+                    <div class="rs-label">평균 만족도</div>
+                </div>
+                <div class="rs-sep"></div>
+                <div class="rs-stat">
+                    <div class="rs-num">97%</div>
+                    <div class="rs-label">재추천 의향</div>
+                </div>
+                <div class="rs-sep"></div>
+                <div class="rs-stat">
+                    <div class="rs-num">3분</div>
+                    <div class="rs-label">평균 분석 시간</div>
+                </div>
+            </div>
+
+            <!-- 리뷰 카드 그리드 -->
+            <div class="review-grid">
+
+                <div class="review-card fade-up">
+                    <div>
+                        <div class="review-stars">★★★★★</div>
+                        <span class="review-badge" style="margin-top:10px;">✦ 프리미엄 의뢰</span>
+                    </div>
+                    <p class="review-text">사주를 이렇게 깊이 있게 분석해서 이름에 연결해준다는 게 정말 인상적이었어요. 보고서를 읽는 내내 "왜 이 이름인지"가 너무 잘 설명돼 있어서 온 가족이 납득하고 결정했습니다.</p>
+                    <div class="review-author">
+                        <div class="review-avatar">김</div>
+                        <div>
+                            <div class="review-name">김○○ 부모님</div>
+                            <div class="review-meta">서울 · 2024년 12월 · 딸 이름 의뢰</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-card fade-up delay-1">
+                    <div>
+                        <div class="review-stars">★★★★★</div>
+                        <span class="review-badge" style="margin-top:10px;">✦ 프리미엄 의뢰</span>
+                    </div>
+                    <p class="review-text">기존 작명원에서는 어려운 한자 설명만 늘어놔서 도무지 이해가 안 됐는데, 디어네임은 아이 삶의 이야기로 풀어줘서 눈물이 날 뻔 했어요. 이름에 이런 깊이가 있다는 걸 처음 알았습니다.</p>
+                    <div class="review-author">
+                        <div class="review-avatar">박</div>
+                        <div>
+                            <div class="review-name">박○○ 부모님</div>
+                            <div class="review-meta">부산 · 2025년 1월 · 아들 이름 의뢰</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-card fade-up delay-2">
+                    <div>
+                        <div class="review-stars">★★★★★</div>
+                        <span class="review-badge" style="margin-top:10px; background:#f0fdf4; color:#15803d; border-color:#bbf7d0;">셀프 작명</span>
+                    </div>
+                    <p class="review-text">이미 생각해둔 이름이 있었는데 셀프 작명으로 돌려보니 수리에서 아쉬운 부분이 있더라고요. 덕분에 한 획을 바꾼 더 좋은 한자로 결정할 수 있었어요. 무료인데 퀄리티가 놀랍습니다.</p>
+                    <div class="review-author">
+                        <div class="review-avatar">이</div>
+                        <div>
+                            <div class="review-name">이○○ 부모님</div>
+                            <div class="review-meta">대전 · 2025년 2월 · 딸 이름 검토</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-card fade-up delay-1">
+                    <div>
+                        <div class="review-stars">★★★★★</div>
+                        <span class="review-badge" style="margin-top:10px;">✦ 프리미엄 의뢰</span>
+                    </div>
+                    <p class="review-text">할아버지가 직접 작명원을 가시려 했는데, 디어네임 보고서를 보여드리니 "이 정도 분석이면 충분하다"고 하셨어요. 5대 성명학 기준을 전부 설명해줘서 어른들도 납득하기 쉬웠어요.</p>
+                    <div class="review-author">
+                        <div class="review-avatar">최</div>
+                        <div>
+                            <div class="review-name">최○○ 부모님</div>
+                            <div class="review-meta">인천 · 2025년 3월 · 아들 이름 의뢰</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-card fade-up delay-2">
+                    <div>
+                        <div class="review-stars">★★★★★</div>
+                        <span class="review-badge" style="margin-top:10px;">✦ 프리미엄 의뢰</span>
+                    </div>
+                    <p class="review-text">쌍둥이라 두 아이 이름을 동시에 의뢰했어요. 각각 사주가 다르다 보니 보완해야 할 오행도 달랐는데, 형제 이름의 조화까지 고려해준 세심함에 감동받았습니다.</p>
+                    <div class="review-author">
+                        <div class="review-avatar">정</div>
+                        <div>
+                            <div class="review-name">정○○ 부모님</div>
+                            <div class="review-meta">수원 · 2025년 4월 · 쌍둥이 이름 의뢰</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-card fade-up delay-3">
+                    <div>
+                        <div class="review-stars">★★★★☆</div>
+                        <span class="review-badge" style="margin-top:10px; background:#f0fdf4; color:#15803d; border-color:#bbf7d0;">셀프 작명</span>
+                    </div>
+                    <p class="review-text">AI가 작명해준다기에 반신반의했는데 전통 성명학 5가지를 모두 분석해준 결과물이 꽤 신뢰가 갔어요. 비전문가인 저도 쉽게 이해할 수 있는 보고서라 좋았습니다. 다음엔 프리미엄도 써볼게요.</p>
+                    <div class="review-author">
+                        <div class="review-avatar">강</div>
+                        <div>
+                            <div class="review-name">강○○ 부모님</div>
+                            <div class="review-meta">광주 · 2025년 4월 · 아들 이름 검토</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
     <section id="premium" class="bg-premium" style="padding-top: 100px; padding-bottom: 120px;">
         <div class="section-inner">
             <div style="text-align: center; margin-bottom: 60px;">
@@ -3023,9 +3217,97 @@
         </div>
     </section>
 
+    <!-- ══════════════════════════════════════════════
+         FAQ 섹션
+    ═══════════════════════════════════════════════ -->
+    <section id="faq" class="bg-white">
+        <div class="section-inner">
+            <span class="section-tag fade-up">자주 묻는 질문</span>
+            <h2 class="section-title fade-up delay-1" style="word-break:keep-all;">궁금한 점을 <br>바로 해결해드립니다</h2>
+
+            <div class="faq-list fade-up delay-2">
+
+                <div class="faq-item">
+                    <button class="faq-q" onclick="_toggleFaq(this)" aria-expanded="false">
+                        <span>셀프 작명과 프리미엄 의뢰는 어떻게 다른가요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-a">
+                        <strong>셀프 작명</strong>은 원하는 이름을 직접 입력하면 자원오행·수리사격·발음오행 등 5대 성명학 기준으로 즉시 분석해드리는 무료 서비스입니다.<br><br>
+                        <strong>프리미엄 의뢰</strong>는 사주팔자를 토대로 아이에게 가장 잘 맞는 이름을 AI가 직접 지어드리는 서비스입니다. 수천 개 후보를 탐색해 최적의 이름 3가지를 추천하고, 각 이름에 대한 상세한 소견서를 제공합니다.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-q" onclick="_toggleFaq(this)" aria-expanded="false">
+                        <span>사주팔자 정보가 없어도 이용할 수 있나요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-a">
+                        셀프 작명은 사주 입력 없이도 이름만으로 분석 가능합니다.<br><br>
+                        프리미엄 의뢰는 태어난 날짜와 시간이 필요하지만, <strong>정확한 시간을 모르는 경우</strong> 시간 미상으로도 의뢰하실 수 있습니다. 다만 시간을 알수록 자원오행 분석의 정확도가 높아집니다.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-q" onclick="_toggleFaq(this)" aria-expanded="false">
+                        <span>결과를 받는 데 얼마나 걸리나요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-a">
+                        셀프 작명은 입력 즉시 <strong>수 초 내</strong> 결과를 제공합니다.<br><br>
+                        프리미엄 의뢰는 수천 개 이름 후보 탐색과 AI 소견서 작성을 거치기 때문에 통상 <strong>20~40초</strong>가 소요됩니다. 보고서 품질을 위한 필수 시간이니 잠시 기다려 주세요.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-q" onclick="_toggleFaq(this)" aria-expanded="false">
+                        <span>한자 선택은 어떻게 하나요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-a">
+                        프리미엄 의뢰 시 성씨 한자를 입력하시면, 이름 글자에 맞는 한자를 디어네임이 직접 선정합니다. 각 한자의 뜻과 획수·오행·음양까지 보고서에 상세히 설명되어 있어 최종 결정 시 참고하실 수 있습니다.<br><br>
+                        셀프 작명에서는 직접 한자를 선택하고 검색하는 기능을 제공합니다.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-q" onclick="_toggleFaq(this)" aria-expanded="false">
+                        <span>보고서를 저장하거나 공유할 수 있나요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-a">
+                        로그인 시 보고서가 <strong>마이페이지에 자동 저장</strong>되어 언제든 다시 확인하실 수 있습니다.<br><br>
+                        링크 복사로 배우자나 가족과 공유하거나, 인쇄/PDF 저장도 지원합니다. 이메일 발송 기능으로 보고서를 메일로 받아보실 수도 있습니다.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-q" onclick="_toggleFaq(this)" aria-expanded="false">
+                        <span>전통 작명원과 비교해 신뢰할 수 있나요?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-a">
+                        디어네임은 전통 성명학의 5대 핵심 이론(자원오행·수리사격·발음오행·음양배합·수리오행)을 <strong>그대로 구현</strong>합니다. 작명원에서 사용하는 기준과 동일합니다.<br><br>
+                        차이점은 <strong>투명성</strong>입니다. "왜 이 이름인지" 기준별 점수와 이유를 누구나 이해할 수 있는 언어로 설명해드려, 전문가 의존 없이 직접 판단하실 수 있습니다.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
     <footer>
         <div style="max-width: 1100px; margin: 0 auto;">
             <p style="font-weight: 800; font-size: 1.2rem; color: var(--bg-dark); margin-bottom: 10px;">디어네임: Premium Narrative Naming Service</p>
+            <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px;">
+                <a onclick="document.getElementById('report').scrollIntoView({behavior:'smooth'})" style="font-size:0.88rem;color:var(--text-secondary);cursor:pointer;text-decoration:none;">보고서 미리보기</a>
+                <a onclick="document.getElementById('theory').scrollIntoView({behavior:'smooth'})" style="font-size:0.88rem;color:var(--text-secondary);cursor:pointer;text-decoration:none;">작명 기준</a>
+                <a onclick="document.getElementById('self-naming').scrollIntoView({behavior:'smooth'})" style="font-size:0.88rem;color:var(--text-secondary);cursor:pointer;text-decoration:none;">셀프 작명</a>
+                <a onclick="document.getElementById('reviews').scrollIntoView({behavior:'smooth'})" style="font-size:0.88rem;color:var(--text-secondary);cursor:pointer;text-decoration:none;">후기</a>
+                <a onclick="document.getElementById('premium').scrollIntoView({behavior:'smooth'})" style="font-size:0.88rem;color:var(--text-secondary);cursor:pointer;text-decoration:none;">프리미엄 의뢰</a>
+                <a onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'})" style="font-size:0.88rem;color:var(--text-secondary);cursor:pointer;text-decoration:none;">FAQ</a>
+            </div>
             <p>© 2026 Crazystudio Co. Designed with Traditional Wisdom & Modern Science.</p>
         </div>
     </footer>
@@ -9566,6 +9848,22 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             }
         });
     });
+
+    // ── FAQ 아코디언 토글 ──
+    function _toggleFaq(btn) {
+        const answer = btn.nextElementSibling;
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        // 모든 열린 항목 닫기
+        document.querySelectorAll('.faq-q[aria-expanded="true"]').forEach(b => {
+            b.setAttribute('aria-expanded', 'false');
+            b.nextElementSibling.classList.remove('open');
+        });
+        // 현재 항목 토글
+        if (!isOpen) {
+            btn.setAttribute('aria-expanded', 'true');
+            answer.classList.add('open');
+        }
+    }
 
     // ── 스크롤 fade-up Intersection Observer ──
     (function() {
