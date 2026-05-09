@@ -1833,6 +1833,106 @@
         #load-more-btn:hover { background: var(--gold-premium); color: var(--bg-dark); }
 
 
+        /* ═══════════════════════════════════════════════════════
+           데스크톱 (≥ 769px) 확장 — 폰트·카드·여백 업스케일
+           ═══════════════════════════════════════════════════════ */
+        @media (min-width: 769px) {
+
+            /* ── 챕터 헤더 제목 ── */
+            .chapter-acc-header .section-title {
+                font-size: 1.72rem !important;
+                letter-spacing: -0.4px;
+                margin-bottom: 6px;
+            }
+            .story-chapter-label { font-size: 0.78rem; letter-spacing: 2px; }
+            .chapter-verdict-strip { padding: 10px 16px; font-size: 0.9rem; }
+
+            /* 보고서 카드 내 섹션 제목 (챕터 헤더 제외): 2.8rem은 너무 크므로 조정 */
+            #report-view .section-title,
+            #self-result-area .section-title,
+            #analysis-result-area .section-title { font-size: 1.85rem; letter-spacing: -0.5px; }
+
+            /* ── Executive Summary ── */
+            .exec-summary { padding: 28px 36px; gap: 28px; border-radius: 22px; }
+            .exec-name { font-size: 1.5rem; }
+            .exec-msg { font-size: 0.94rem; line-height: 1.72; }
+            .exec-item { font-size: 0.78rem; padding: 5px 12px; gap: 5px; }
+
+            /* ── AI 태그라인 ── */
+            .ai-tagline { font-size: 1.3rem; padding-left: 20px; line-height: 1.6; }
+
+            /* ── AI 스토리 블록 ── */
+            .ai-story-block { font-size: 1.02rem; padding: 22px 28px; line-height: 1.82; }
+
+            /* ── 한자 카드 (자원 심층 분석) ── */
+            .ai-hanja-card { gap: 28px; padding: 24px 0; }
+            .ai-hanja-char { width: 84px; height: 84px; font-size: 2.7rem; border-radius: 18px; }
+            .ai-hanja-body p { font-size: 0.98rem; line-height: 1.78; }
+            .ai-hanja-synergy { font-size: 0.87rem; padding: 10px 16px; }
+            .ai-hanja-meta { font-size: 0.78rem; }
+            .ai-hanja-meta span { padding: 3px 12px; }
+
+            /* ── 이름 후보 탭 ── */
+            .name-card-tab { padding: 14px 20px; border-radius: 14px; min-width: 100px; }
+            .card-kr { font-size: 1.22rem; }
+            .card-hanja { font-size: 0.88rem; }
+            .card-score-badge { font-size: 0.82rem; padding: 6px 12px; }
+
+            /* ── 사격수리 카드 ── */
+            .season-card { padding: 24px 22px; border-radius: 18px; }
+            .season-num { font-size: 2.6rem; }
+            .season-suri-name { font-size: 0.95rem; margin-bottom: 10px; }
+            .season-desc { font-size: 0.88rem; line-height: 1.65; }
+
+            /* ── 발음 오행 unified ── */
+            .sound-unified { font-size: 1.0rem; padding: 22px 28px; line-height: 1.9; }
+
+            /* ── 자원오행 칩 ── */
+            .jawon-chip { padding: 12px 22px; gap: 14px; border-radius: 36px; }
+            .jawon-chip-hanja { font-size: 1.75rem; }
+            .jawon-chip-label { font-size: 0.8rem; }
+
+            /* ── 오행 밸런스 바 ── */
+            #report-oheng-bars .oheng-item { gap: 14px; margin-bottom: 12px; }
+            #report-oheng-bars .oheng-label { width: 82px; font-size: 0.9rem; }
+            #report-oheng-bars .oheng-bar-bg { height: 10px; }
+            #report-oheng-bars .oheng-count { font-size: 0.85rem; }
+
+            /* ── 오행 분포 아이템 ── */
+            .oheng-dist-item { padding: 12px 22px; gap: 12px; border-radius: 16px; }
+            .oheng-dist-hanja { font-size: 0.94rem; }
+            .oheng-dist-count { font-size: 0.92rem; }
+
+            /* ── 사주 원국 ── */
+            .saju-mingsik .gan-cell { font-size: 1.85rem; }
+            .saju-mingsik .ji-cell { font-size: 2.5rem; }
+            .saju-mingsik .gan-kr, .saju-mingsik .ji-kr { font-size: 0.82rem; }
+            .saju-mingsik .am-cell { font-size: 0.88rem; }
+
+            /* ── 인생 흐름 패턴 배너 ── */
+            .suri-pattern-banner { padding: 20px 24px; border-radius: 18px; gap: 20px; }
+            .spb-name { font-size: 1.05rem; }
+            .spb-desc { font-size: 0.88rem; }
+
+            /* ── 수리 시즌 그리드 ── */
+            .suri-seasons-grid { gap: 18px; }
+
+            /* ── 전문 분석 토글 ── */
+            #expert-toggle-bar { padding: 20px 28px; }
+            .expert-toggle-title { font-size: 1.02rem; }
+
+            /* ── 종합 결론 서신 ── */
+            .conclusion-letter-wrap { padding: 36px 40px; }
+            .conclusion-letter-text { font-size: 1.0rem; line-height: 2.0; }
+
+            /* ── 점수 카드 ── */
+            .score-criteria-grid { gap: 12px; }
+            .sci-label { font-size: 0.82rem; }
+
+            /* ── 인트로 그리드 gap ── */
+            .intro-grid { gap: 60px; }
+        }
+
         /* ── DearName v2: 인쇄 스타일 ── */
         @media print {
             #main-nav, #report-nav, #user-badge,
