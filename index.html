@@ -66,8 +66,14 @@
             --border-light: #e2e8f0;
             --border-gold: rgba(212, 175, 55, 0.3);
 
-            --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.06);
-            --shadow-glow: 0 0 30px rgba(212, 175, 55, 0.15);
+            --shadow-sm:       0 4px 16px rgba(0, 0, 0, 0.04);
+            --shadow-card:     0 10px 30px rgba(0, 0, 0, 0.06);
+            --shadow-premium:  0 20px 40px rgba(0, 0, 0, 0.08);
+            --shadow-deep:     0 30px 60px rgba(0, 0, 0, 0.28);
+            --shadow-glow:     0 0 24px rgba(212, 175, 55, 0.22);
+            --shadow-glow-lg:  0 10px 28px rgba(212, 175, 55, 0.38);
+            --shadow-navy:     0 4px 15px rgba(15, 23, 42, 0.2);
+            --shadow-navy-lg:  0 10px 25px rgba(15, 23, 42, 0.3);
 
             /* ── Border-radius 4단계 ── */
             --radius-sm:   12px;   /* 배지, 태그, 작은 칩 */
@@ -119,7 +125,7 @@
             -webkit-backdrop-filter: blur(20px);
             z-index: var(--z-nav);
             border-bottom: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.02);
+            box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
         }
         .nav-inner {
@@ -142,7 +148,7 @@
 
         .main-nav-links a.login-link {
             background: var(--bg-dark); color: white; padding: 8px 22px; border-radius: var(--radius-pill);
-            margin-left: 35px; font-weight: 600; letter-spacing: 0.02em; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
+            margin-left: 35px; font-weight: 600; letter-spacing: 0.02em; box-shadow: var(--shadow-navy);
         }
         .main-nav-links a.login-link:hover { background: var(--gold-premium); color: white; box-shadow: var(--shadow-glow); border-color: transparent;}
 
@@ -177,9 +183,9 @@
            ========================================= */
         .btn { width: 100%; padding: 20px; border: none; border-radius: var(--radius-md); font-weight: 600; font-size: 1.15rem; cursor: pointer; transition: all 0.3s ease; text-align: center; letter-spacing: 0.03em; box-sizing: border-box; }
         .btn-gold { background: linear-gradient(135deg, var(--gold-premium) 0%, var(--gold-dark) 100%); color: white; box-shadow: var(--shadow-glow); }
-        .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4); }
+        .btn-gold:hover { transform: translateY(-3px); box-shadow: var(--shadow-glow-lg); }
         .btn-navy { background: var(--bg-dark); color: white; }
-        .btn-navy:hover { background: #1e293b; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3); }
+        .btn-navy:hover { background: #1e293b; transform: translateY(-3px); box-shadow: var(--shadow-navy-lg); }
         .btn-outline-gold { background: transparent; border: 2px solid var(--gold-premium); color: var(--gold-dark); padding: 10px 22px; border-radius: var(--radius-pill); font-weight: 600; font-size: 0.95rem; letter-spacing: 0.02em; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; margin-bottom: 10px;}
         .btn-outline-gold:hover { background: var(--gold-premium); color: white; box-shadow: var(--shadow-glow); }
 
@@ -246,14 +252,14 @@
         .theory-row-2 { grid-template-columns: repeat(2, 1fr); }
         .theory-row-3 { grid-template-columns: repeat(3, 1fr); }
         .theory-grid-uniform { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .theory-card-clean { background: white; padding: 30px; border-radius: var(--radius-lg); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 4px 16px rgba(0,0,0,0.03); transition: all 0.3s ease; display: flex; flex-direction: column; gap: 12px; }
+        .theory-card-clean { background: white; padding: 30px; border-radius: var(--radius-lg); border: 1px solid rgba(0,0,0,0.04); box-shadow: var(--shadow-sm); transition: all 0.3s ease; display: flex; flex-direction: column; gap: 12px; }
         .theory-card-clean:hover { transform: translateY(-4px); border-color: var(--border-gold); box-shadow: var(--shadow-premium); }
         .theory-card-clean .tc-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #fffcf0, #fff8e0); border: 1px solid var(--border-gold); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--gold-dark); }
         .theory-card-clean .tc-icon svg { width: 22px; height: 22px; }
         .theory-card-clean h3 { font-size: 1.1rem; font-weight: 700; color: var(--bg-dark); margin: 0; letter-spacing: -0.01em; }
         .theory-card-clean .tc-sub { font-size: 0.8rem; font-weight: 600; color: var(--gold-dark); letter-spacing: 0.08em; }
         .theory-card-clean p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.75; margin: 0; }
-        .theory-card { background: white; padding: 40px; border-radius: var(--radius-lg); border: 1px solid rgba(0,0,0,0.03); transition: all 0.4s ease; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .theory-card { background: white; padding: 40px; border-radius: var(--radius-lg); border: 1px solid rgba(0,0,0,0.03); transition: all 0.4s ease; display: flex; flex-direction: column; box-shadow: var(--shadow-card); }
         .theory-card:hover { transform: translateY(-10px); border-color: var(--border-gold); box-shadow: var(--shadow-premium); }
         .theory-header { display: flex; align-items: center; margin-bottom: 25px; }
         .theory-icon { background: var(--bg-light); width: 64px; height: 64px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-right: 20px; color: var(--gold-premium); border: 1px solid var(--border-light); flex-shrink: 0; transition: 0.3s; }
@@ -327,12 +333,12 @@
         .result-row-2 { grid-template-columns: repeat(2, 1fr); }
         .result-row-4 { grid-template-columns: repeat(4, 1fr); }
         .result-row-3 { grid-template-columns: repeat(3, 1fr); }
-        .result-box { background: var(--bg-white); padding: 30px; border-radius: var(--radius-lg); border: 1px solid var(--border-light); box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+        .result-box { background: var(--bg-white); padding: 30px; border-radius: var(--radius-lg); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); }
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .result-header h4 { margin: 0; font-size: 1.15rem; color: var(--bg-dark); font-weight: 800;}
 
         /* 프리미엄 의뢰 UI */
-        .premium-box { background: linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-dark) 100%); border-radius: var(--radius-lg); padding: 80px; color: white; position: relative; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+        .premium-box { background: linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-dark) 100%); border-radius: var(--radius-lg); padding: 80px; color: white; position: relative; overflow: hidden; box-shadow: var(--shadow-deep); }
         .premium-box::before { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.1), transparent 60%); pointer-events: none; }
         
         .premium-form .form-grid { gap: 24px; }
@@ -451,8 +457,8 @@
 
         /* 81수리 분석 */
         .suri-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
-        .suri-card { background: white; border: 1px solid rgba(0,0,0,0.05); border-radius: var(--radius-lg); padding: 35px; display: flex; gap: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
-        .suri-badge { background: var(--bg-dark); color: white; width: 70px; height: 70px; border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2); }
+        .suri-card { background: white; border: 1px solid rgba(0,0,0,0.05); border-radius: var(--radius-lg); padding: 35px; display: flex; gap: 25px; box-shadow: var(--shadow-card); }
+        .suri-badge { background: var(--bg-dark); color: white; width: 70px; height: 70px; border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow-navy); }
         .suri-badge .num { font-size: 1.6rem; font-weight: 900; line-height: 1; }
         .suri-badge .txt { font-size: 0.8rem; font-weight: 600; opacity: 0.8; margin-top: 5px; }
         .suri-info h5 { margin: 0 0 12px; font-size: 1.3rem; color: var(--bg-dark); font-weight: 800; display:flex; align-items:center;}
@@ -460,7 +466,7 @@
         .suri-info p { margin: 0; font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; }
 
         /* 생애 주기 흐름 컨테이너 */
-        .chart-container-large { background: var(--bg-white); padding: 40px 20px 20px; border-radius: var(--radius-lg); border: 1px solid rgba(0,0,0,0.05); margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); height: 350px; }
+        .chart-container-large { background: var(--bg-white); padding: 40px 20px 20px; border-radius: var(--radius-lg); border: 1px solid rgba(0,0,0,0.05); margin-bottom: 40px; box-shadow: var(--shadow-card); height: 350px; }
 
         .timeline { border-left: 4px solid var(--bg-light); padding-left: 50px; margin-left: 20px; }
         .time-step { position: relative; margin-bottom: 60px; }
@@ -471,14 +477,14 @@
         .time-step p { margin: 0; font-size: 1.1rem; color: var(--text-primary); line-height: 1.8; }
 
         .advice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 60px; }
-        .advice-card { background: white; padding: 40px 30px; border-radius: var(--radius-lg); border: 1px solid var(--border-light); box-shadow: 0 10px 30px rgba(0,0,0,0.02); text-align: center;}
+        .advice-card { background: white; padding: 40px 30px; border-radius: var(--radius-lg); border: 1px solid var(--border-light); box-shadow: var(--shadow-card); text-align: center;}
         .advice-icon { font-size: 2.5rem; margin-bottom: 20px; }
         .advice-card h4 { margin: 0 0 20px; color: var(--bg-dark); font-size: 1.2rem; font-weight: 800; border-bottom: 2px solid var(--bg-light); padding-bottom: 15px; }
         .advice-card p { margin: 0; font-size: 1rem; color: var(--text-secondary); line-height: 1.7; }
 
         /* [NEW] 이론 가이드 상세 뷰 전용 스타일 */
         #theory-detail-view .report-card { padding: 50px 60px; }
-        .theory-intro-box { background: var(--bg-white); border-left: 6px solid var(--gold-premium); padding: 30px 40px; border-radius: 0 20px 20px 0; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);}
+        .theory-intro-box { background: var(--bg-white); border-left: 6px solid var(--gold-premium); padding: 30px 40px; border-radius: 0 20px 20px 0; margin-bottom: 40px; box-shadow: var(--shadow-card);}
         .theory-intro-box p { margin: 0; font-size: 1.15rem; color: var(--bg-dark); font-weight: 600; line-height: 1.8; }
         .theory-tip-box { background: #fffcf5; padding: 25px 35px; border-radius: var(--radius-lg); border: 1px dashed var(--gold-premium); margin-top: 25px; }
         .theory-tip-box h5 { margin: 0 0 10px; color: var(--gold-dark); font-size: 1.1rem; font-weight: 800; display: flex; align-items: center;}
@@ -500,7 +506,7 @@
         .modal-content {
             background: white; padding: 50px 40px; border-radius: var(--radius-lg);
             text-align: center; max-width: 450px; width: 90%;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.3); position: relative;
+            box-shadow: var(--shadow-deep); position: relative;
         }
         .close-modal {
             position: absolute; top: 20px; right: 25px; font-size: 1.8rem; cursor: pointer; 
@@ -3369,7 +3375,7 @@
                         </p>
                     </div>
                 </div>
-                <div style="background:white;padding:20px 16px 16px;border-radius: var(--radius-lg);border:1px solid var(--border-light);text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+                <div style="background:white;padding:20px 16px 16px;border-radius: var(--radius-lg);border:1px solid var(--border-light);text-align:center;box-shadow: var(--shadow-sm);">
                     <div style="position:relative;width:100%;height:260px;">
                         <canvas id="sajuRadar" style="display:block;"></canvas>
                     </div>
