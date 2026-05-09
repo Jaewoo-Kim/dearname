@@ -627,12 +627,12 @@
             .saju-story { font-size: 0.74rem; line-height: 1.7; }
             /* 이름 탭: 모바일 가로 컴팩트 (점수 | 이름) */
             .report-selector-area { gap: 10px; flex-direction: column; align-items: stretch; padding: 0 16px; }
-            .name-card-tab { width: 100%; min-width: 0; padding: 12px 16px;
-                display: flex; align-items: center; gap: 14px; }
-            .card-score-badge { margin-bottom: 0; flex-shrink: 0; min-width: 50px; text-align: center; padding: 5px 10px; font-size: 0.78rem; }
-            .card-names { flex: 1; gap: 2px; }
-            .card-kr { font-size: 1.25rem; }
-            .card-hanja { font-size: 0.82rem; }
+            .name-card-tab { width: 100%; min-width: 0; padding: 14px 18px;
+                display: flex; align-items: center; gap: 16px; }
+            .card-score-badge { margin-bottom: 0; flex-shrink: 0; min-width: 52px; text-align: center; padding: 5px 10px; font-size: 0.82rem; }
+            .card-names { flex: 1; gap: 3px; }
+            .card-kr { font-size: 1.45rem; }
+            .card-hanja { font-size: 0.88rem; }
             section { padding: 60px 20px; }
             .hero { padding: 140px 20px 90px; }
             .hero h1 { font-size: 2.6rem; letter-spacing: -1.5px; }
@@ -832,11 +832,11 @@
         /* =========================================
            [수정완료] 리포트 헤더 카드형 탭 스타일
            ========================================= */
-        .report-selector-area { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; padding: 0 4px; }
+        .report-selector-area { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; padding: 0 4px; }
         .name-card-tab {
             background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12);
-            border-radius: 12px; padding: 10px 14px; cursor: pointer;
-            transition: all 0.2s; text-align: center; min-width: 80px;
+            border-radius: 14px; padding: 16px 20px; cursor: pointer;
+            transition: all 0.2s; text-align: center; min-width: 110px;
         }
         .name-card-tab:hover { background: rgba(255,255,255,0.12); }
         .name-card-tab.active {
@@ -845,13 +845,13 @@
         }
         .card-score-badge {
             display: block; color: rgba(255,255,255,0.6);
-            font-size: 0.7rem; font-weight: 700; margin-bottom: 4px;
+            font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;
         }
         .name-card-tab.active .card-score-badge { color: #d4af37; }
-        .card-names { display: flex; flex-direction: column; gap: 2px; }
-        .card-kr { color: white; font-size: 1.1rem; font-weight: 800; }
+        .card-names { display: flex; flex-direction: column; gap: 3px; }
+        .card-kr { color: white; font-size: 1.45rem; font-weight: 800; }
         .name-card-tab.active .card-kr { color: #d4af37; }
-        .card-hanja { color: rgba(255,255,255,0.45); font-size: 0.78rem; }
+        .card-hanja { color: rgba(255,255,255,0.5); font-size: 0.88rem; }
 
         /* ── Executive Summary Card ── */
         .exec-summary { display:flex;align-items:center;gap:20px;background:white;border-radius:20px;border:1px solid var(--border-light);border-top:3px solid var(--gold-premium);padding:20px 22px;box-shadow:var(--shadow-premium);margin-bottom:20px; }
@@ -1899,10 +1899,11 @@
             .ai-hanja-meta span { padding: 3px 12px; }
 
             /* ── 이름 후보 탭 ── */
-            .name-card-tab { padding: 13px 18px; border-radius: 14px; min-width: 96px; }
-            .card-kr { font-size: 1.15rem; }             /* 19.5px */
-            .card-hanja { font-size: 0.82rem; }          /* 14px */
-            .card-score-badge { font-size: 0.76rem; padding: 5px 11px; } /* 13px */
+            .report-selector-area { gap: 16px; }
+            .name-card-tab { padding: 20px 28px; border-radius: 16px; min-width: 160px; }
+            .card-kr { font-size: 1.65rem; }             /* 28px — 원본 수준으로 복원 */
+            .card-hanja { font-size: 0.94rem; }          /* 16px */
+            .card-score-badge { font-size: 0.82rem; margin-bottom: 8px; } /* 14px */
 
             /* ── 사격수리 카드 ── */
             .season-card { padding: 22px 20px; border-radius: 18px; }
