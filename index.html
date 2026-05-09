@@ -40,10 +40,10 @@
     <!-- Google Identity Services (GOOGLE_CLIENT_ID 설정 시 활성화) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <!-- 폰트: Pretendard (본문) + Noto Serif KR (제목) -->
+    <!-- 폰트: Pretendard (한국어 전체) + DM Sans (숫자·영문 accent) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
     <style>
         /* =========================================
@@ -89,7 +89,18 @@
             background-color: var(--bg-white);
             color: var(--text-primary);
             line-height: 1.7;
+            font-weight: 400;
             scroll-behavior: smooth;
+        }
+
+        /* 숫자·영문 accent: DM Sans */
+        .hero-badge-num,
+        .card-score-badge,
+        .season-num,
+        .score-num,
+        .section-tag,
+        .story-chapter-label {
+            font-family: 'DM Sans', 'Pretendard', sans-serif;
         }
 
         /* =========================================
@@ -110,26 +121,26 @@
             padding: 18px 24px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .logo { font-size: 1.3rem; font-weight: 900; color: var(--bg-dark); letter-spacing: 2px; text-decoration: none; cursor: pointer; }
-        
+        .logo { font-size: 1.3rem; font-weight: 900; color: var(--bg-dark); letter-spacing: 0.12em; text-decoration: none; cursor: pointer; }
+
         .main-nav-links { display: flex; align-items: center; flex-wrap: nowrap; }
         #user-badge { align-self: center; }
         .nav-cta-row { display: flex; align-items: center; gap: 0; }
         .nav-cta-row a.premium-link,
         .nav-cta-row a.login-link { margin-left: 35px; }
         .nav-cta-row #user-badge { margin-left: 35px; }
-        .main-nav-links a { text-decoration: none; color: var(--text-secondary); margin-left: 35px; font-weight: 600; font-size: 0.9rem; transition: 0.3s; letter-spacing: 0.5px; cursor: pointer; }
+        .main-nav-links a { text-decoration: none; color: var(--text-secondary); margin-left: 35px; font-weight: 500; font-size: 0.9rem; transition: 0.3s; letter-spacing: 0.01em; cursor: pointer; }
         .main-nav-links a:hover { color: var(--gold-premium); }
-        .main-nav-links a.premium-link { color: var(--gold-premium); border: 1px solid var(--border-gold); padding: 8px 16px; border-radius: 30px; background: rgba(212, 175, 55, 0.05); }
+        .main-nav-links a.premium-link { color: var(--gold-premium); border: 1px solid var(--border-gold); padding: 8px 16px; border-radius: 30px; background: rgba(212, 175, 55, 0.05); font-weight: 600; }
         .main-nav-links a.premium-link:hover { background: var(--gold-premium); color: white; }
-        
+
         .main-nav-links a.login-link {
             background: var(--bg-dark); color: white; padding: 8px 22px; border-radius: 30px;
-            margin-left: 35px; font-weight: 700; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
+            margin-left: 35px; font-weight: 600; letter-spacing: 0.02em; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
         }
         .main-nav-links a.login-link:hover { background: var(--gold-premium); color: white; box-shadow: var(--shadow-glow); border-color: transparent;}
-        
-        .report-back-link { color: var(--text-secondary); text-decoration: none; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: none; padding: 8px 16px; border-radius: 30px; background: #f1f5f9; }
+
+        .report-back-link { color: var(--text-secondary); text-decoration: none; font-size: 0.95rem; font-weight: 500; cursor: pointer; display: none; padding: 8px 16px; border-radius: 30px; background: #f1f5f9; }
         .report-back-link:hover { color: var(--bg-dark); background: #e2e8f0; }
 
         /* =========================================
@@ -138,19 +149,16 @@
         section { padding: 120px 24px; width: 100%; box-sizing: border-box; }
         .section-inner { max-width: 1100px; margin: 0 auto; }
         
-        /* 세리프 폰트: 제목·Display 계열 */
-        h1, h2, h3,
-        .section-title,
-        .hero h1,
-        .report-header h1,
-        .chapter-acc-header .section-title,
-        .exec-name,
-        .ai-tagline {
-            font-family: 'Noto Serif KR', 'Pretendard', serif;
-        }
+        /* ── 타입 위계 (Pretendard 단일 패밀리) ──────────────────────
+         *  900  로고
+         *  800  Hero H1 (Display)
+         *  700  섹션 타이틀, 카드 제목
+         *  600  네비, 레이블, 버튼
+         *  400  본문
+         * ──────────────────────────────────────────────────────── */
 
-        .section-tag { color: var(--gold-premium); font-weight: 800; font-size: 0.85rem; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 15px; display: inline-block; }
-        .section-title { font-size: 2.8rem; font-weight: 700; margin-top: 0; margin-bottom: 60px; color: var(--bg-dark); letter-spacing: -0.02em; line-height: 1.3; }
+        .section-tag { color: var(--gold-premium); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 15px; display: inline-block; }
+        .section-title { font-size: 2.8rem; font-weight: 700; margin-top: 0; margin-bottom: 60px; color: var(--bg-dark); letter-spacing: -0.03em; line-height: 1.25; }
         .title-flex-container { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px; }
 
         .bg-hero { background: linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-dark) 100%); position: relative; overflow: hidden; }
@@ -161,16 +169,16 @@
         /* =========================================
            [3] 공통 컴포넌트
            ========================================= */
-        .btn { width: 100%; padding: 20px; border: none; border-radius: 16px; font-weight: 800; font-size: 1.15rem; cursor: pointer; transition: all 0.3s ease; text-align: center; letter-spacing: 0.5px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 20px; border: none; border-radius: 16px; font-weight: 600; font-size: 1.15rem; cursor: pointer; transition: all 0.3s ease; text-align: center; letter-spacing: 0.03em; box-sizing: border-box; }
         .btn-gold { background: linear-gradient(135deg, var(--gold-premium) 0%, var(--gold-dark) 100%); color: white; box-shadow: var(--shadow-glow); }
         .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4); }
         .btn-navy { background: var(--bg-dark); color: white; }
         .btn-navy:hover { background: #1e293b; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3); }
-        .btn-outline-gold { background: transparent; border: 2px solid var(--gold-premium); color: var(--gold-dark); padding: 10px 22px; border-radius: 30px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; margin-bottom: 10px;}
+        .btn-outline-gold { background: transparent; border: 2px solid var(--gold-premium); color: var(--gold-dark); padding: 10px 22px; border-radius: 30px; font-weight: 600; font-size: 0.95rem; letter-spacing: 0.02em; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; margin-bottom: 10px;}
         .btn-outline-gold:hover { background: var(--gold-premium); color: white; box-shadow: var(--shadow-glow); }
 
-        /* 영역별 평가 뱃지 (매우 좋음, 좋음, 나쁨, 매우 나쁨) */
-        .grade-badge { padding: 6px 16px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.5px; display: inline-block;}
+        /* 영역별 평가 뱃지 */
+        .grade-badge { padding: 6px 16px; border-radius: 12px; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.04em; display: inline-block;}
         .grade-very-good { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
         .grade-high      { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
         .grade-mid       { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
@@ -179,7 +187,7 @@
         .tech-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden;}
         .tech-table th, .tech-table td { padding: 20px; border-bottom: 1px solid var(--border-light); text-align: left; font-size: 1.05rem; line-height: 1.6; }
         .tech-table tr:last-child th, .tech-table tr:last-child td { border-bottom: none; }
-        .tech-table th { background: var(--bg-light); color: var(--bg-dark); font-weight: 800; width: 25%; }
+        .tech-table th { background: var(--bg-light); color: var(--bg-dark); font-weight: 600; width: 25%; letter-spacing: 0.01em; }
         .tech-table td { color: var(--text-primary); background: white;}
         .tech-table ul { margin: 0; padding-left: 20px;}
         .tech-table li { margin-bottom: 10px; }
@@ -190,29 +198,29 @@
         .bg-hero::before { content: ''; position: absolute; width: 1200px; height: 1200px; background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 65%); top: -400px; left: 50%; transform: translateX(-50%); }
         .bg-hero::after { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%); bottom: -100px; right: 5%; z-index: 0; }
         .hero { padding: 280px 24px 200px; text-align: center; color: white; position: relative; z-index: 10; }
-        .hero-eyebrow { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.22em; color: var(--gold-premium); margin-bottom: 28px; display: block; }
-        .hero h1 { font-size: 5rem; font-weight: 700; margin-bottom: 36px; letter-spacing: -0.02em; line-height: 1.18; text-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        .hero-eyebrow { font-size: 1.05rem; font-weight: 500; letter-spacing: 0.18em; color: var(--gold-premium); margin-bottom: 28px; display: block; }
+        .hero h1 { font-size: 5rem; font-weight: 800; margin-bottom: 36px; letter-spacing: -0.04em; line-height: 1.15; text-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .hero h1 span { color: var(--gold-premium); }
-        .hero-sub { font-size: 1.35rem; color: rgba(255,255,255,0.72); max-width: 680px; margin: 0 auto 56px; font-weight: 300; letter-spacing: 0.01em; line-height: 1.95; }
+        .hero-sub { font-size: 1.35rem; color: rgba(255,255,255,0.7); max-width: 680px; margin: 0 auto 56px; font-weight: 300; letter-spacing: 0em; line-height: 1.9; }
         .hero-divider { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold-premium), transparent); margin: 0 auto 56px; }
         .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 70px; }
         .hero-cta .btn { width: auto; padding: 18px 40px; font-size: 1.05rem; border-radius: 50px; }
-        .btn-ghost-white { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+        .btn-ghost-white { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
         .btn-ghost-white:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
         .hero-badges { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; }
         .hero-badge { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .hero-badge-num { font-size: 1.5rem; font-weight: 900; color: var(--gold-premium); letter-spacing: -1px; }
-        .hero-badge-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: 400; letter-spacing: 0.5px; }
+        .hero-badge-num { font-size: 1.5rem; font-weight: 700; color: var(--gold-premium); letter-spacing: -0.03em; }
+        .hero-badge-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: 400; letter-spacing: 0.06em; }
         .hero-badge-sep { width: 1px; height: 40px; background: rgba(255,255,255,0.12); align-self: center; }
 
         .live-ticker { background: rgba(0,0,0,0.5); padding: 22px 0; overflow: hidden; border-top: 1px solid rgba(212,175,55,0.12); border-bottom: 1px solid rgba(212,175,55,0.12); backdrop-filter: blur(10px); }
         .ticker-wrap { display: flex; white-space: nowrap; animation: ticker 15s linear infinite; }
-        .ticker-wrap span { color: rgba(255,255,255,0.65); font-size: 1.1rem; margin-right: 100px; font-weight: 300; letter-spacing: -0.3px; }
-        .ticker-wrap b { color: var(--gold-premium); font-weight: 800; margin-right: 6px; font-size: 1.15rem; }
+        .ticker-wrap span { color: rgba(255,255,255,0.65); font-size: 1.1rem; margin-right: 100px; font-weight: 300; letter-spacing: 0em; }
+        .ticker-wrap b { color: var(--gold-premium); font-weight: 700; margin-right: 6px; font-size: 1.15rem; }
         @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         .core-text-area li > div { flex: 1; }
-        .core-text-area li b { display: block; margin-bottom: 6px; color: var(--bg-dark); font-size: 1.05rem; font-weight: 800; }
+        .core-text-area li b { display: block; margin-bottom: 6px; color: var(--bg-dark); font-size: 1.05rem; font-weight: 700; }
         .core-text-area li > div > span { font-size: 1rem; color: var(--text-secondary); line-height: 1.7; }
 
         .core-report-box { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: center; }
@@ -223,8 +231,8 @@
         
         .report-visual { background: white; padding: 50px; border-radius: 32px; box-shadow: var(--shadow-premium); position: relative; border: 1px solid var(--border-light); }
         .report-visual::before { content: ''; position: absolute; inset: -2px; border-radius: 34px; background: linear-gradient(135deg, var(--gold-premium), transparent); z-index: -1; opacity: 0.3; }
-        .report-visual h4 { margin-top: 0; color: var(--bg-dark); font-size: 1.5rem; font-weight: 800; border-bottom: 2px solid var(--bg-light); padding-bottom: 20px; }
-        .badge-premium { position: absolute; top: 25px; right: 25px; font-size: 0.75rem; font-weight: 800; color: white; background: var(--gold-premium); padding: 6px 12px; border-radius: 20px; letter-spacing: 1px; box-shadow: var(--shadow-glow); }
+        .report-visual h4 { margin-top: 0; color: var(--bg-dark); font-size: 1.5rem; font-weight: 700; border-bottom: 2px solid var(--bg-light); padding-bottom: 20px; letter-spacing: -0.02em; }
+        .badge-premium { position: absolute; top: 25px; right: 25px; font-size: 0.75rem; font-weight: 600; color: white; background: var(--gold-premium); padding: 6px 12px; border-radius: 20px; letter-spacing: 0.08em; box-shadow: var(--shadow-glow); }
         .report-narrative { background: var(--bg-light); padding: 25px; border-radius: 20px; margin: 30px 0; font-size: 1.05rem; color: var(--bg-dark); font-style: italic; line-height: 1.8; border-left: 4px solid var(--gold-premium); }
 
         .theory-grid { display: flex; flex-direction: column; gap: 30px; }
@@ -236,20 +244,20 @@
         .theory-card-clean:hover { transform: translateY(-4px); border-color: var(--border-gold); box-shadow: var(--shadow-premium); }
         .theory-card-clean .tc-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #fffcf0, #fff8e0); border: 1px solid var(--border-gold); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--gold-dark); }
         .theory-card-clean .tc-icon svg { width: 22px; height: 22px; }
-        .theory-card-clean h3 { font-size: 1.1rem; font-weight: 800; color: var(--bg-dark); margin: 0; }
-        .theory-card-clean .tc-sub { font-size: 0.8rem; font-weight: 700; color: var(--gold-dark); letter-spacing: 0.5px; }
-        .theory-card-clean p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin: 0; }
+        .theory-card-clean h3 { font-size: 1.1rem; font-weight: 700; color: var(--bg-dark); margin: 0; letter-spacing: -0.01em; }
+        .theory-card-clean .tc-sub { font-size: 0.8rem; font-weight: 600; color: var(--gold-dark); letter-spacing: 0.08em; }
+        .theory-card-clean p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.75; margin: 0; }
         .theory-card { background: white; padding: 40px; border-radius: 24px; border: 1px solid rgba(0,0,0,0.03); transition: all 0.4s ease; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
         .theory-card:hover { transform: translateY(-10px); border-color: var(--border-gold); box-shadow: var(--shadow-premium); }
         .theory-header { display: flex; align-items: center; margin-bottom: 25px; }
         .theory-icon { background: var(--bg-light); width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-right: 20px; color: var(--gold-premium); border: 1px solid var(--border-light); flex-shrink: 0; transition: 0.3s; }
         .theory-card:hover .theory-icon { background: var(--gold-premium); color: white; }
         .theory-icon svg { width: 30px; height: 30px; }
-        .theory-header h3 { font-size: 1.4rem; color: var(--bg-dark); margin: 0 0 5px; font-weight: 800; }
-        .theory-subtitle { font-size: 0.9rem; color: var(--gold-dark); font-weight: 700; }
+        .theory-header h3 { font-size: 1.4rem; color: var(--bg-dark); margin: 0 0 5px; font-weight: 700; letter-spacing: -0.02em; }
+        .theory-subtitle { font-size: 0.9rem; color: var(--gold-dark); font-weight: 600; letter-spacing: 0.04em; }
         .theory-card > p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 30px; line-height: 1.7; flex-grow: 1; }
         .theory-example { background: var(--bg-light); border-radius: 16px; padding: 24px; font-size: 0.95rem; border: 1px solid rgba(0,0,0,0.03); }
-        .theory-example .example-label { font-weight: 800; color: var(--bg-dark); margin-top: 0; margin-bottom: 10px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .theory-example .example-label { font-weight: 600; color: var(--bg-dark); margin-top: 0; margin-bottom: 10px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; }
         .theory-card.full-width { grid-column: 1 / -1; }
         
         .theory-split { display: flex; flex-direction: row; gap: 40px; align-items: center; }
@@ -260,7 +268,7 @@
         .form-card { background: white; padding: 60px; border-radius: 32px; border: 1px solid var(--border-light); box-shadow: var(--shadow-premium); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .full-width-form { grid-column: span 2; }
-        .input-label { display: block; font-size: 0.9rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 12px; }
+        .input-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--bg-dark); margin-bottom: 12px; letter-spacing: 0.02em; }
         input, select, textarea { width: 100%; padding: 16px 20px; border: 1px solid var(--border-light); border-radius: 16px; font-size: 1.05rem; box-sizing: border-box; background: var(--bg-light); transition: all 0.3s ease; color: var(--text-primary); font-family: 'Pretendard', sans-serif;}
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold-premium); background: white; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
         /* ── 출생 정보 입력 (1줄 인라인) ── */
