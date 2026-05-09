@@ -25,6 +25,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DearName | 프리미엄 AI 작명 소견서</title>
+    <meta name="description" content="사주팔자 기반 자원오행·수리·발음 분석으로 아이에게 꼭 맞는 이름을 지어드립니다. AI가 작성하는 프리미엄 작명 소견서.">
+    <meta name="keywords" content="작명, AI작명, 프리미엄작명, 사주작명, 자원오행, 수리사격, 이름짓기, 아기이름">
+    <!-- Open Graph (카카오·페이스북 공유) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DearName">
+    <meta property="og:title" content="DearName | 프리미엄 AI 작명 소견서">
+    <meta property="og:description" content="사주팔자 기반 자원오행·수리·발음 분석으로 아이에게 꼭 맞는 이름을 지어드립니다.">
+    <meta property="og:image" content="https://dearname.co.kr/og-image.png">
+    <meta property="og:url" content="https://dearname.co.kr">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DearName | 프리미엄 AI 작명 소견서">
+    <meta name="twitter:description" content="사주팔자 기반 자원오행·수리·발음 분석으로 아이에게 꼭 맞는 이름을 지어드립니다.">
+    <meta name="twitter:image" content="https://dearname.co.kr/og-image.png">
+    <!-- 검색엔진 -->
+    <link rel="canonical" href="https://dearname.co.kr">
     <!-- DearName v2: 데이터 파일 -->
     <script src="data/lunar-calendar.js"></script>
     <script src="data/hanja-db.js"></script>
@@ -193,6 +209,15 @@
         .btn-navy:hover { background: var(--text-primary); transform: translateY(-3px); box-shadow: var(--shadow-navy-lg); }
         .btn-outline-gold { background: transparent; border: 2px solid var(--gold-premium); color: var(--gold-dark); padding: 10px 22px; border-radius: var(--radius-pill); font-weight: 600; font-size: 0.95rem; letter-spacing: 0.02em; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; margin-bottom: 10px;}
         .btn-outline-gold:hover { background: var(--gold-premium); color: white; box-shadow: var(--shadow-glow); }
+
+        /* 보고서 하단 공유·인쇄·이메일 버튼 */
+        .btn-report-ghost { display:inline-flex; align-items:center; gap:8px; background:transparent; border:1.5px solid var(--border-light); color:var(--text-secondary); border-radius:var(--radius-pill); font-weight:700; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+        .btn-report-ghost:hover { border-color:#94a3b8; color:var(--text-primary); }
+        .btn-report-gold-sm { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,var(--gold-premium),var(--gold-dark)); border:none; color:white; border-radius:var(--radius-pill); font-weight:700; cursor:pointer; box-shadow:0 4px 15px rgba(212,175,55,0.35); transition:all 0.2s; font-family:inherit; }
+        .btn-report-gold-sm:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(212,175,55,0.45); }
+        /* CTA 골드 버튼 (프리미엄 섹션 대형) */
+        .btn-cta-gold { display:inline-flex; align-items:center; gap:10px; background:linear-gradient(135deg,var(--gold-premium),var(--gold-dark)); border:none; color:white; padding:16px 40px; border-radius:var(--radius-pill); font-size:1rem; font-weight:900; cursor:pointer; box-shadow:0 6px 24px rgba(212,175,55,0.4); transition:all 0.25s; letter-spacing:0.02em; font-family:inherit; }
+        .btn-cta-gold:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(212,175,55,0.55); }
 
         /* 영역별 평가 뱃지 */
         .grade-badge { padding: 6px 16px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.04em; display: inline-block;}
@@ -2206,7 +2231,7 @@
                 <a class="premium-link" onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 의뢰</a>
                 <a class="login-link" onclick="closeMobileMenu(); openLoginModal()">로그인</a>
                 <div id="user-badge" style="display:none;align-items:center;gap:6px;cursor:pointer;" onclick="closeMobileMenu(); showMypageView()" title="마이페이지">
-                    <img class="user-avatar" src="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:none;">
+                    <img class="user-avatar" src="" alt="프로필" style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:none;">
                     <span style="font-size:0.88rem;font-weight:800;color:#334155;">마이페이지</span>
                 </div>
             </div>
@@ -2226,6 +2251,34 @@
                 전통 성명학의 다양한 기준들을 복합적으로 분석하여,<br>
                 우리 아이에게 꼭 맞는 최고의 이름을 찾아드립니다.
             </p>
+
+            <!-- CTA 버튼 행 -->
+            <div class="hero-cta">
+                <button onclick="document.getElementById('self-form').scrollIntoView({behavior:'smooth'})" class="btn btn-gold">
+                    ✦ 무료 셀프 작명 시작하기
+                </button>
+                <button onclick="document.getElementById('premium').scrollIntoView({behavior:'smooth'})" class="btn btn-ghost-white">
+                    AI 프리미엄 의뢰 보기
+                </button>
+            </div>
+
+            <!-- 신뢰 지표 뱃지 행 -->
+            <div class="hero-badges">
+                <div class="hero-badge">
+                    <span class="hero-badge-num">9,800+</span>
+                    <span class="hero-badge-label">누적 작명 건수</span>
+                </div>
+                <div class="hero-badge-sep"></div>
+                <div class="hero-badge">
+                    <span class="hero-badge-num">4.9★</span>
+                    <span class="hero-badge-label">평균 만족도</span>
+                </div>
+                <div class="hero-badge-sep"></div>
+                <div class="hero-badge">
+                    <span class="hero-badge-num">5대</span>
+                    <span class="hero-badge-label">성명학 기준 분석</span>
+                </div>
+            </div>
         </div>
     </section>
     
@@ -2293,7 +2346,7 @@
                 <div class="theory-card-clean">
                     <div class="tc-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
                     <div><span class="tc-sub">자원지정 작명의 핵심</span><h3>자원 오행</h3></div>
-                    <p>태어난 사주에서 부족한 기운(용신)을 찾아, 그 기운을 보완하는 한자 부수로 이름의 별대를 세움니다.</p>
+                    <p>태어난 사주에서 부족한 기운(용신)을 찾아, 그 기운을 보완하는 한자 부수로 이름의 뼈대를 세웁니다.</p>
                 </div>
 
                 <div class="theory-card-clean">
@@ -2305,7 +2358,7 @@
                 <div class="theory-card-clean">
                     <div class="tc-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg></div>
                     <div><span class="tc-sub">이름 소리의 조화</span><h3>발음 오행</h3></div>
-                    <p>이름 초성을 木·火·土·金·水로 분류해 서로 돵는 상생 관계가 되도록 소리의 흐름을 설계합니다.</p>
+                    <p>이름 초성을 木·火·土·金·水로 분류해 서로 맞는 상생 관계가 되도록 소리의 흐름을 설계합니다.</p>
                 </div>
 
                 <div class="theory-card-clean">
@@ -3065,8 +3118,7 @@
             <!-- CTA 버튼 -->
             <div style="text-align:center;">
                 <button onclick="showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView({behavior:'smooth'});}, 100);"
-                    style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--gold-premium),var(--gold-dark));border:none;color:white;padding:16px 40px;border-radius: var(--radius-pill);font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 6px 24px rgba(212,175,55,0.4);transition:all 0.25s;letter-spacing:0.02em;"
-                    onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(212,175,55,0.55)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 6px 24px rgba(212,175,55,0.4)'">
+                    class="btn-cta-gold">
                     ✦ AI 프리미엄 작명 의뢰하기
                 </button>
                 <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin:12px 0 0;">사주팔자 + 성명학 + AI 분석의 완벽한 조합</p>
@@ -3076,18 +3128,15 @@
         <!-- 하단 보조 버튼 -->
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
             <button id="self-share-btn" onclick="copyShareLink()"
-                style="display:inline-flex;align-items:center;gap:6px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:10px 22px;border-radius: var(--radius-pill);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
-                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
+                class="btn-report-ghost" style="padding:10px 22px;font-size:0.85rem;">
                 🔗 링크 복사
             </button>
             <button onclick="window.print();"
-                style="display:inline-flex;align-items:center;gap:6px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:10px 22px;border-radius: var(--radius-pill);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
-                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
+                class="btn-report-ghost" style="padding:10px 22px;font-size:0.85rem;">
                 🖨️ 인쇄 / PDF
             </button>
             <button onclick="openEmailModal()"
-                style="display:inline-flex;align-items:center;gap:6px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:10px 22px;border-radius: var(--radius-pill);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
-                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
+                class="btn-report-ghost" style="padding:10px 22px;font-size:0.85rem;">
                 ✉️ 이메일 발송
             </button>
         </div>
@@ -3602,18 +3651,15 @@
         <!-- 하단 공유/인쇄 버튼 -->
         <div style="display:flex;gap:12px;justify-content:center;margin:32px 0 20px;flex-wrap:wrap;">
             <button onclick="copyShareLink()"
-                style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:13px 28px;border-radius: var(--radius-pill);font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
-                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
+                class="btn-report-ghost" style="padding:13px 28px;font-size:0.92rem;">
                 🔗 공유하기
             </button>
             <button onclick="printReport()"
-                style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--border-light);color:var(--text-secondary);padding:13px 28px;border-radius: var(--radius-pill);font-size:0.92rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
-                onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border-light)';this.style.color='var(--text-secondary)'">
+                class="btn-report-ghost" style="padding:13px 28px;font-size:0.92rem;">
                 🖨️ 인쇄 / PDF
             </button>
             <button onclick="emailReport()"
-                style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold-premium),var(--gold-dark));border:none;color:white;padding:13px 28px;border-radius: var(--radius-pill);font-size:0.92rem;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.35);transition:all 0.2s;"
-                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(212,175,55,0.45)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.35)'">
+                class="btn-report-gold-sm" style="padding:13px 28px;font-size:0.92rem;">
                 ✉️ 이메일로 보내기
             </button>
         </div>
@@ -4194,10 +4240,10 @@
             const lastName = document.getElementById('prem-last-name')?.value?.trim();
             const hour     = document.getElementById('prem-time-hour')?.value;
             const ns       = document.querySelector('input[name="prem_name_style"]:checked');
-            if (!bd)       { alert('생년월일을 입력해주세요.'); return; }
-            if (!lastName) { alert('성씨를 입력해주세요.'); return; }
-            if (!hour)     { alert('태어난 시간을 입력해주세요.'); return; }
-            if (!ns)       { alert('이름 스타일을 선택해주세요.'); return; }
+            if (!bd)       { _showToast('⚠️ 생년월일을 입력해주세요.'); return; }
+            if (!lastName) { _showToast('⚠️ 성씨를 입력해주세요.'); return; }
+            if (!hour)     { _showToast('⚠️ 태어난 시간을 입력해주세요.'); return; }
+            if (!ns)       { _showToast('⚠️ 이름 스타일을 선택해주세요.'); return; }
         }
         const cur  = document.getElementById(`wstep-${step}`);
         const next = document.getElementById(`wstep-${step + 1}`);
@@ -4280,7 +4326,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         } catch(err) {
             if (err?.code !== 'USER_CANCEL') {
                 console.error('결제 오류:', err);
-                alert('결제 처리 중 오류가 발생했습니다: ' + (err?.message || ''));
+                _showToast('결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
             }
         }
     }
@@ -4307,7 +4353,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             window.addEventListener('load', () => startPremiumReportGeneration(count));
         } else if (payStatus === 'fail') {
             history.replaceState(null, '', location.pathname);
-            alert('결제가 취소되었거나 실패했습니다.');
+            _showToast('결제가 취소되었거나 실패했습니다.');
         }
     })();
 
@@ -4743,7 +4789,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _fullInput = lastName + firstName;
         const _validHangul = [..._fullInput].every(_isCompleteHangul);
         if (!lastName || !firstName) {
-            alert('한글 성과 이름을 입력해주세요.');
+            _showToast('⚠️ 한글 성과 이름을 입력해주세요.');
             return;
         }
         if (!_validHangul) {
@@ -4759,7 +4805,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
         for (const sel of hanjaSelects) {
             if (!sel.value) {
-                alert('모든 글자의 한자를 선택해주세요.');
+                _showToast('⚠️ 모든 글자의 한자를 선택해주세요.');
                 return;
             }
         }
@@ -4768,9 +4814,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const birthYear  = document.getElementById('birth-date-year')?.value;
         const birthMonth = document.getElementById('birth-date-month')?.value;
         const birthDay   = document.getElementById('birth-date-day')?.value;
-        if (!birthYear)  { alert('출생 연도를 선택해주세요.'); return; }
-        if (!birthMonth) { alert('출생 월을 선택해주세요.');   return; }
-        if (!birthDay)   { alert('출생 일을 선택해주세요.');   return; }
+        if (!birthYear)  { _showToast('⚠️ 출생 연도를 선택해주세요.'); return; }
+        if (!birthMonth) { _showToast('⚠️ 출생 월을 선택해주세요.');   return; }
+        if (!birthDay)   { _showToast('⚠️ 출생 일을 선택해주세요.');   return; }
 
         const data = getAnalysisData(lastName, firstName);
         
@@ -5502,7 +5548,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             }
             if (_allCandidates.length === 0) {
                 hideLoadingOverlay();
-                alert('조건에 맞는 이름 후보를 찾지 못했습니다. 입력 정보를 확인하거나 조건을 완화해 주세요.');
+                _showToast('조건에 맞는 이름 후보를 찾지 못했습니다. 조건을 완화해 주세요.');
                 return;
             }
 
@@ -5553,7 +5599,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         } catch(err) {
             hideLoadingOverlay();
             console.error('소견서 생성 오류:', err);
-            alert('소견서 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+            _showToast('소견서 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
         }
     }
 
@@ -5587,7 +5633,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
             if (unique.length === 0) {
                 document.getElementById('load-more-btn').style.display = 'none';
-                alert('더 이상 조건에 맞는 후보가 없습니다.');
+                _showToast('더 이상 조건에 맞는 후보가 없습니다.');
             }
         } catch(err) {
             hideLoadingOverlay();
@@ -8645,7 +8691,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     function _clearHistory() {
         localStorage.removeItem(_HISTORY_KEY);
-        alert('히스토리가 삭제되었습니다.');
+        _showToast('✓ 히스토리가 삭제되었습니다.');
     }
 
     // ── 셀프작명 음력 라벨 ─────────────────────────────────────────
@@ -8789,13 +8835,14 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             closeLoginModal();
         } catch(e) {
             console.error('Google 로그인 오류:', e);
-            alert('Google 로그인 중 오류가 발생했습니다.');
+            _showToast('Google 로그인 중 오류가 발생했습니다.');
         }
     }
 
     function _onGoogleAuthCode(response) {
         // Code Flow — 실서비스에서는 서버로 code를 전달해 access_token 교환
-        console.log('Google Auth Code:', response.code);
+        // 보안: 인증 코드를 콘솔에 출력하지 않음
+        if (response?.code) _handleGoogleCode(response.code);
     }
 
     // ── 게스트 로그인 ────────────────────────────────────────────────
@@ -8814,7 +8861,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     async function appleSignIn() {
         const AID = window.APPLE_SERVICE_ID;
         if (!AID || typeof AppleID === 'undefined') {
-            alert('Apple 로그인이 설정되지 않았습니다. Google 로그인을 이용해주세요.');
+            _showToast('Apple 로그인이 설정되지 않았습니다. Google 로그인을 이용해주세요.');
             return;
         }
         try {
@@ -8948,7 +8995,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const birthDate = document.getElementById('prem-birth-date')?.value;
         const calType   = _getCalType('prem');
 
-        if (!familyKr) { alert('성(姓)을 입력해주세요.'); return false; }
+        if (!familyKr) { _showToast('⚠️ 성(姓)을 입력해주세요.'); return false; }
         if (!birthDate) { alert('출생일을 입력해주세요.'); return false; }
 
         // 양력 연도 범위 검사 (만세력 지원 범위)
@@ -8998,7 +9045,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // ── 이름 후보 PDF/이미지 저장 안내 ──────────────────────────────
     function downloadReport() {
-        alert('브라우저의 인쇄(Ctrl+P) 기능을 사용해 PDF로 저장하실 수 있습니다.');
+        _showToast('인쇄(Ctrl+P) 기능으로 PDF 저장이 가능합니다.');
     }
 
     // ════════════════════════════════════════════════════════════════
