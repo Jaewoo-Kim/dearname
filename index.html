@@ -840,9 +840,11 @@
         .name-card-tab {
             background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12);
             border-radius: 14px; padding: 16px 20px; cursor: pointer;
-            transition: all 0.2s; text-align: center; min-width: 110px;
+            transition: all 0.15s; text-align: center; min-width: 110px;
+            user-select: none; -webkit-user-select: none;
         }
-        .name-card-tab:hover { background: rgba(255,255,255,0.12); }
+        .name-card-tab:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .name-card-tab:active { transform: translateY(0) scale(0.97); box-shadow: none; background: rgba(255,255,255,0.1); }
         .name-card-tab.active {
             background: rgba(212,175,55,0.18);
             border-color: #d4af37; box-shadow: 0 4px 16px rgba(212,175,55,0.2);
@@ -5634,7 +5636,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
             const rpt = _allReports[i];
             return `<div class="name-card-tab${i===_currentIdx?' active':''}"
-                onclick="_selectReportTab(this, ${i})" data-idx="${i}">
+                role="button" tabindex="${i}" aria-pressed="${i===_currentIdx}"
+                onclick="_selectReportTab(this, ${i})"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_selectReportTab(this,${i})}"
+                data-idx="${i}">
                 <div class="card-score-badge">${c.score}점</div>
                 <div class="card-names">
                     <span class="card-kr">${kr}</span>
