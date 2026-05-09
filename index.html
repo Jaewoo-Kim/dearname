@@ -5896,6 +5896,14 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 hanja:   familyHanja,
                 strokes: _familyStrokes
             },
+            // ── 메타 정보용 원본 입력값 ──
+            _inputRaw: {
+                birthDate: birthDateRaw,
+                birthTime,
+                calType,
+                city: document.getElementById('prem-city')?.value || '',
+                gender
+            },
             constraints: {
                 gender,
                 dolrim:   dolrimHanja ? { kr: document.getElementById('prem-dolrim')?.value||'', hanja:dolrimHanja, strokes:getHanjaStrokes(dolrimHanja), pos:dolrimPos } : null,
@@ -6142,36 +6150,47 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     function _selectReportTab(el, idx) {
-        document.querySelectorAll('.name-card-tab').forEach(t => t.classList.remove('active'));
+        // 잔류 스켈레톤 강제 해제
+        _hideReportSkeleton();
+
+        document.querySelectorAll('.name-card-tab').forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-pressed', 'false');
+        });
         el.classList.add('active');
+        el.setAttribute('aria-pressed', 'true');
         _currentIdx = idx;
+
         const c   = _allCandidates[idx];
         const rpt = _allReports[idx];
-        if (c && rpt) _renderReportContent(c, rpt, idx);
+        if (!c) return;
+
+        // 헤더 즉시 갱신 (rpt 없어도)
         const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
         const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
         const scoreBadge = document.getElementById('main-score-badge');
-        if(scoreBadge) scoreBadge.textContent = `프리미엄 작명 종합 점수 : ${c.score} / 100 점`;
+        if (scoreBadge) scoreBadge.textContent = `프리미엄 작명 종합 점수 : ${c.score} / 100 점`;
         const titleArea = document.getElementById('premium-report-title');
-        if(titleArea) titleArea.innerHTML = `${kr} <span>${hj}</span>`;
+        if (titleArea) titleArea.innerHTML = `${kr} <span>${hj}</span>`;
+
+        // 보고서 본문 갱신
+        if (rpt) _renderReportContent(c, rpt, idx);
+
         // 비교 테이블 활성 열 갱신
         _renderCompareTable(idx);
-        // 탭 전환 시 보고서 최상단으로 스크롤
-        const reportView = document.getElementById('report-view');
-        if (reportView) window.scrollTo({ top: reportView.offsetTop - 60, behavior: 'smooth' });
+
+        // 탭 전환 시 헤더로 스크롤
+        const header = document.querySelector('#report-view .report-header');
+        if (header) header.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function _showReportSkeleton() {
         const sk = document.getElementById('report-skeleton');
-        const main = document.getElementById('report-section-story');
         if (sk) sk.classList.add('active');
-        if (main) main.style.visibility = 'hidden';
     }
     function _hideReportSkeleton() {
         const sk = document.getElementById('report-skeleton');
-        const main = document.getElementById('report-section-story');
         if (sk) sk.classList.remove('active');
-        if (main) main.style.visibility = '';
     }
 
     // ── 보고서 본문 렌더링 ───────────────────────────────────────────
@@ -6213,12 +6232,30 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // 메타 정보
         const metaEl = document.getElementById('premium-report-meta');
         if (metaEl) {
-            const gender = _currentState.constraints.gender === 'F' ? '여성' : '남성';
-            const bDateRaw = document.getElementById('prem-birth-date')?.value || '';
-            const bTime    = document.getElementById('prem-birth-time')?.value || '';
-            const bDateFmt = bDateRaw.replace(/-/g, '. ');
-            const timePart = bTime && bTime !== '12:00' ? ` ${bTime}` : '';
-            metaEl.textContent = `${gender} · ${bDateFmt}${timePart} 출생`;
+            const raw = _currentState._inputRaw || {};
+            // 날짜: "2025-03-24" → "2025.03.24"
+            const dateFmt = (raw.birthDate || document.getElementById('prem-birth-date')?.value || '')
+                .replace(/-/g, '.');
+            // 시간: "16:02" → "오후 4시 2분"
+            const timeStr = raw.birthTime || document.getElementById('prem-birth-time')?.value || '';
+            let timeFmt = '';
+            if (timeStr && timeStr !== '12:00') {
+                const [hh, mm] = timeStr.split(':').map(Number);
+                const ampm = hh < 12 ? '오전' : '오후';
+                const h12  = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
+                timeFmt = `${ampm} ${h12}시${mm > 0 ? ' ' + mm + '분' : ''}`;
+            }
+            // 음양력
+            const calMap = { solar: '양력', lunar: '음력', leap: '윤달' };
+            const calFmt  = calMap[raw.calType] || '양력';
+            // 성별
+            const genderFmt = (raw.gender || _currentState.constraints?.gender) === 'F' ? '여성' : '남성';
+            // 도시
+            const cityVal = raw.city || document.getElementById('prem-city')?.value || '';
+            const cityFmt = cityVal ? `${cityVal} 태생` : '';
+
+            const parts = [dateFmt, timeFmt, calFmt, genderFmt, cityFmt].filter(Boolean);
+            metaEl.textContent = parts.join(' · ');
         }
 
         // ── 챕터 0 연결 서사 (프리미엄 보고서 동적) ───────────────────
