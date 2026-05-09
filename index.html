@@ -1834,103 +1834,140 @@
 
 
         /* ═══════════════════════════════════════════════════════
-           데스크톱 (≥ 769px) 확장 — 폰트·카드·여백 업스케일
+           데스크톱 (≥ 769px) — 네이버 수준 타이포그래피 스케일
+           루트 17px 기준: 1rem=17px / 0.88rem≈15px / 0.76rem≈13px
            ═══════════════════════════════════════════════════════ */
         @media (min-width: 769px) {
 
-            /* ── 챕터 헤더 제목 ── */
-            .chapter-acc-header .section-title {
-                font-size: 1.72rem !important;
-                letter-spacing: -0.4px;
-                margin-bottom: 6px;
-            }
-            .story-chapter-label { font-size: 0.78rem; letter-spacing: 2px; }
-            .chapter-verdict-strip { padding: 10px 16px; font-size: 0.9rem; }
+            /* ── 루트 폰트 기준: 17px (네이버 본문 14-16px 기준에 맞춤) ── */
+            html { font-size: 17px; }
 
-            /* 보고서 카드 내 섹션 제목 (챕터 헤더 제외): 2.8rem은 너무 크므로 조정 */
+            /* ── 네비게이션 ── */
+            .main-nav-links a { font-size: 0.88rem; }   /* 15px */
+            .logo { font-size: 1.25rem; }                /* 21px */
+
+            /* ── 랜딩 히어로 ── */
+            .hero h1 { font-size: 4.5rem; }             /* 76px — 약간 줄임 */
+            .hero-sub { font-size: 1.2rem; }             /* 20px */
+            .hero-eyebrow { font-size: 0.94rem; }        /* 16px */
+            .section-title { font-size: 2.5rem; }        /* 42px */
+            .section-tag { font-size: 0.8rem; }          /* 13.6px */
+
+            /* ── 랜딩 이론 카드 ── */
+            .theory-card-clean h3 { font-size: 1.0rem; } /* 17px */
+            .theory-card-clean p  { font-size: 0.88rem; }/* 15px */
+            .theory-card-clean .tc-sub { font-size: 0.76rem; } /* 13px */
+
+            /* ── 보고서 헤더 ── */
+            .report-header h1 { font-size: 2.8rem; }     /* 48px */
+            .meta-info { font-size: 0.88rem; }           /* 15px */
+
+            /* ── 챕터 헤더 ── */
+            .chapter-acc-header .section-title {
+                font-size: 1.6rem !important;            /* 27px */
+                letter-spacing: -0.4px;
+            }
+            .story-chapter-label { font-size: 0.76rem; letter-spacing: 2px; } /* 13px */
+            .chapter-verdict-strip { padding: 10px 16px; font-size: 0.88rem; }/* 15px */
+
+            /* 보고서 카드 섹션 제목 (챕터 헤더 제외) */
             #report-view .section-title,
             #self-result-area .section-title,
-            #analysis-result-area .section-title { font-size: 1.85rem; letter-spacing: -0.5px; }
+            #analysis-result-area .section-title {
+                font-size: 1.75rem;                      /* 30px */
+                letter-spacing: -0.5px;
+            }
 
             /* ── Executive Summary ── */
-            .exec-summary { padding: 28px 36px; gap: 28px; border-radius: 22px; }
-            .exec-name { font-size: 1.5rem; }
-            .exec-msg { font-size: 0.94rem; line-height: 1.72; }
-            .exec-item { font-size: 0.78rem; padding: 5px 12px; gap: 5px; }
+            .exec-summary { padding: 26px 32px; gap: 26px; border-radius: 22px; }
+            .exec-name { font-size: 1.35rem; }           /* 23px */
+            .exec-msg { font-size: 0.88rem; line-height: 1.72; } /* 15px */
+            .exec-item { font-size: 0.76rem; padding: 5px 12px; gap: 5px; } /* 13px */
 
             /* ── AI 태그라인 ── */
-            .ai-tagline { font-size: 1.3rem; padding-left: 20px; line-height: 1.6; }
+            .ai-tagline { font-size: 1.2rem; padding-left: 20px; line-height: 1.6; } /* 20px */
 
             /* ── AI 스토리 블록 ── */
-            .ai-story-block { font-size: 1.02rem; padding: 22px 28px; line-height: 1.82; }
+            .ai-story-block { font-size: 0.94rem; padding: 20px 26px; line-height: 1.85; } /* 16px */
 
-            /* ── 한자 카드 (자원 심층 분석) ── */
-            .ai-hanja-card { gap: 28px; padding: 24px 0; }
-            .ai-hanja-char { width: 84px; height: 84px; font-size: 2.7rem; border-radius: 18px; }
-            .ai-hanja-body p { font-size: 0.98rem; line-height: 1.78; }
-            .ai-hanja-synergy { font-size: 0.87rem; padding: 10px 16px; }
-            .ai-hanja-meta { font-size: 0.78rem; }
+            /* ── 한자 카드 ── */
+            .ai-hanja-card { gap: 26px; padding: 22px 0; }
+            .ai-hanja-char { width: 80px; height: 80px; font-size: 2.5rem; border-radius: 18px; }
+            .ai-hanja-body p { font-size: 0.91rem; line-height: 1.78; }  /* 15.5px */
+            .ai-hanja-synergy { font-size: 0.82rem; padding: 9px 14px; } /* 14px */
+            .ai-hanja-meta { font-size: 0.76rem; }       /* 13px */
             .ai-hanja-meta span { padding: 3px 12px; }
 
             /* ── 이름 후보 탭 ── */
-            .name-card-tab { padding: 14px 20px; border-radius: 14px; min-width: 100px; }
-            .card-kr { font-size: 1.22rem; }
-            .card-hanja { font-size: 0.88rem; }
-            .card-score-badge { font-size: 0.82rem; padding: 6px 12px; }
+            .name-card-tab { padding: 13px 18px; border-radius: 14px; min-width: 96px; }
+            .card-kr { font-size: 1.15rem; }             /* 19.5px */
+            .card-hanja { font-size: 0.82rem; }          /* 14px */
+            .card-score-badge { font-size: 0.76rem; padding: 5px 11px; } /* 13px */
 
             /* ── 사격수리 카드 ── */
-            .season-card { padding: 24px 22px; border-radius: 18px; }
-            .season-num { font-size: 2.6rem; }
-            .season-suri-name { font-size: 0.95rem; margin-bottom: 10px; }
-            .season-desc { font-size: 0.88rem; line-height: 1.65; }
+            .season-card { padding: 22px 20px; border-radius: 18px; }
+            .season-num { font-size: 2.4rem; }           /* 41px */
+            .season-suri-name { font-size: 0.88rem; margin-bottom: 9px; } /* 15px */
+            .season-desc { font-size: 0.82rem; line-height: 1.65; }       /* 14px */
 
             /* ── 발음 오행 unified ── */
-            .sound-unified { font-size: 1.0rem; padding: 22px 28px; line-height: 1.9; }
+            .sound-unified { font-size: 0.94rem; padding: 20px 26px; line-height: 1.88; } /* 16px */
 
             /* ── 자원오행 칩 ── */
-            .jawon-chip { padding: 12px 22px; gap: 14px; border-radius: 36px; }
-            .jawon-chip-hanja { font-size: 1.75rem; }
-            .jawon-chip-label { font-size: 0.8rem; }
+            .jawon-chip { padding: 11px 20px; gap: 12px; border-radius: 32px; }
+            .jawon-chip-hanja { font-size: 1.6rem; }     /* 27px */
+            .jawon-chip-label { font-size: 0.76rem; }    /* 13px */
 
             /* ── 오행 밸런스 바 ── */
-            #report-oheng-bars .oheng-item { gap: 14px; margin-bottom: 12px; }
-            #report-oheng-bars .oheng-label { width: 82px; font-size: 0.9rem; }
+            #report-oheng-bars .oheng-item { gap: 13px; margin-bottom: 11px; }
+            #report-oheng-bars .oheng-label { width: 80px; font-size: 0.85rem; } /* 14.5px */
             #report-oheng-bars .oheng-bar-bg { height: 10px; }
-            #report-oheng-bars .oheng-count { font-size: 0.85rem; }
+            #report-oheng-bars .oheng-count { font-size: 0.82rem; }
 
             /* ── 오행 분포 아이템 ── */
-            .oheng-dist-item { padding: 12px 22px; gap: 12px; border-radius: 16px; }
-            .oheng-dist-hanja { font-size: 0.94rem; }
-            .oheng-dist-count { font-size: 0.92rem; }
+            .oheng-dist-item { padding: 11px 20px; gap: 11px; border-radius: 14px; }
+            .oheng-dist-hanja { font-size: 0.88rem; }    /* 15px */
+            .oheng-dist-count { font-size: 0.85rem; }
 
             /* ── 사주 원국 ── */
-            .saju-mingsik .gan-cell { font-size: 1.85rem; }
-            .saju-mingsik .ji-cell { font-size: 2.5rem; }
-            .saju-mingsik .gan-kr, .saju-mingsik .ji-kr { font-size: 0.82rem; }
-            .saju-mingsik .am-cell { font-size: 0.88rem; }
+            .saju-mingsik .gan-cell { font-size: 1.7rem; }  /* 29px */
+            .saju-mingsik .ji-cell { font-size: 2.3rem; }   /* 39px */
+            .saju-mingsik .gan-kr, .saju-mingsik .ji-kr { font-size: 0.76rem; } /* 13px */
+            .saju-mingsik .am-cell { font-size: 0.82rem; }  /* 14px */
 
             /* ── 인생 흐름 패턴 배너 ── */
-            .suri-pattern-banner { padding: 20px 24px; border-radius: 18px; gap: 20px; }
-            .spb-name { font-size: 1.05rem; }
-            .spb-desc { font-size: 0.88rem; }
+            .suri-pattern-banner { padding: 18px 22px; border-radius: 18px; gap: 18px; }
+            .spb-name { font-size: 0.97rem; }            /* 16.5px */
+            .spb-desc { font-size: 0.82rem; }            /* 14px */
 
             /* ── 수리 시즌 그리드 ── */
-            .suri-seasons-grid { gap: 18px; }
+            .suri-seasons-grid { gap: 16px; }
 
             /* ── 전문 분석 토글 ── */
-            #expert-toggle-bar { padding: 20px 28px; }
-            .expert-toggle-title { font-size: 1.02rem; }
+            #expert-toggle-bar { padding: 18px 26px; }
+            .expert-toggle-title { font-size: 0.97rem; } /* 16.5px */
 
             /* ── 종합 결론 서신 ── */
-            .conclusion-letter-wrap { padding: 36px 40px; }
-            .conclusion-letter-text { font-size: 1.0rem; line-height: 2.0; }
+            .conclusion-letter-wrap { padding: 34px 38px; }
+            .conclusion-letter-text { font-size: 0.94rem; line-height: 2.0; } /* 16px */
 
             /* ── 점수 카드 ── */
-            .score-criteria-grid { gap: 12px; }
-            .sci-label { font-size: 0.82rem; }
+            .score-criteria-grid { gap: 11px; }
+            .sci-label { font-size: 0.76rem; }           /* 13px */
+
+            /* ── 이론 박스 ── */
+            .chapter-theory-title { font-size: 0.82rem; } /* 14px */
+            .chapter-theory-box { font-size: 0.88rem; line-height: 1.75; } /* 15px */
+
+            /* ── 판정 뱃지 ── */
+            .grade-badge { font-size: 0.8rem; padding: 5px 14px; }
 
             /* ── 인트로 그리드 gap ── */
             .intro-grid { gap: 60px; }
+
+            /* ── result-box ── */
+            .result-header h4 { font-size: 0.88rem; }    /* 15px */
+            .result-box > p { font-size: 0.82rem !important; }  /* 14px */
         }
 
         /* ── DearName v2: 인쇄 스타일 ── */
