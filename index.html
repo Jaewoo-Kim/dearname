@@ -5395,7 +5395,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             pronounceYin: { grade: pyGrade, desc: pyDesc },
             math4: { grade: math4Grade, desc: math4Desc },
             mathOheng: { grade: moGrade, desc: moDesc },
-            mathYin: { grade: myGrade, desc: myDesc },
+            mathYin: { grade: myGrade, desc: myDesc, seq: myStrokes.map(v=>({val:v, yin:v%2!==0?'양':'음'})) },
             sajuOheng: { grade: sajuGrade, desc: sajuDesc },
             jawonohaeng: { grade: jawonGrade, desc: jawonDesc },
             suriGrades: [
@@ -6715,12 +6715,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                                  : _moBad===2?'수리오행 간 상극이 여러 곳에서 발생합니다.'
                                  :'수리오행 전 구간에서 상극이 발생합니다.';
 
-            // 수리음양 (4격 홀짝 균형)
-            const _myYs       = _g4Ns.map(n=>n%2!==0?'양':'음');
+            // 수리음양 (성·이름1·이름2 각 획수 홀짝 균형 — 이론 기준)
+            const _indivStrokes = [s0,s1,s2].filter(Boolean);
+            const _myYs        = _indivStrokes.map(n=>n%2!==0?'양':'음');
             const mathYinGrade = (_myYs.every(y=>y==='양')||_myYs.every(y=>y==='음'))?'매우 나쁨':'매우 좋음';
             const mathYinDesc  = mathYinGrade==='매우 좋음'
-                               ?'4격 수리의 음과 양이 고루 배합되어 균형이 잡혀 있습니다.'
-                               :'4격 수리가 모두 홀수 또는 짝수로 치우쳐 음양 균형이 깨져 있습니다.';
+                               ?'각 한자 획수의 음(짝수)과 양(홀수)이 고루 배합되어 균형이 잡혀 있습니다.'
+                               :'모든 한자 획수가 홀수 또는 짝수로 치우쳐 음양의 균형이 깨져 있습니다.';
 
             // 자원오행 (candidate 한자 오행 직접 사용)
             const _nameOs   = [h1,h2].filter(Boolean).map(x=>(_normOheng?_normOheng(x.o):x.o)).filter(Boolean);
@@ -6771,7 +6772,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const suriOhengYinEl = document.getElementById('report-suri-oheng-yin');
             if (suriOhengYinEl) {
                 suriOhengYinEl.innerHTML = _buildSuriSubHtml(
-                    { grade: mathYinGrade, desc: mathYinDesc, seq: _g4Ns.map((v,i)=>({val:v,yin:_myYs[i]})) },
+                    { grade: mathYinGrade, desc: mathYinDesc, seq: _indivStrokes.map(v=>({val:v,yin:v%2!==0?'양':'음'})) },
                     { grade: mathOhengGrade, desc: mathOhengDesc }
                 );
             }
