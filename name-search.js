@@ -109,6 +109,7 @@ class NameSearchEngine {
     const prefer  = nameSpec.prefer || [];
     const avoid   = nameSpec.avoid  || [];
     const bulyong = typeof BULYONG_HANJA !== 'undefined' ? BULYONG_HANJA : [];
+    const bunpa   = typeof BUNPA_HANJA   !== 'undefined' ? BUNPA_HANJA   : new Set();
     const pool = [];
 
     for (const [kr, list] of Object.entries(HANJA_DB_FULL)) {
@@ -141,6 +142,10 @@ class NameSearchEngine {
       for (let j = 0; j < safePool.length; j++) {
         const h1 = safePool[i], h2 = safePool[j];
         if (h1.h === h2.h) continue;
+
+        // 분파 하드 필터
+        const _fh = [familyName.hanja, h1.h, h2.h].filter(Boolean);
+        if (_fh.length >= 2 && _fh.every(h => bunpa.has(h))) continue;
 
         const ohengSet = [h1.o, h2.o];
         let score = 0;
