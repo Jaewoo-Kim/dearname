@@ -5588,8 +5588,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const _OHENG_COLOR_R = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
         const _OHENG_KR_R    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const _normG      = g => _GRADE4[g] || g; // 구 등급 → 4단계 (applyBadge와 동일 맵 사용)
-        const _gradeColor = g => ({'매우 좋음':'#14532d','좋음':'#1d4ed8','나쁨':'#92400e','매우 나쁨':'#dc2626'}[_normG(g)]||'#64748b');
-        const _gradeBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'}[_normG(g)]||'#f1f5f9');
+        const _gradeColor = g => ({'매우 좋음':'#15803d','좋음':'#1d4ed8','나쁨':'#d97706','매우 나쁨':'#dc2626'}[_normG(g)]||'#64748b');
+        const _gradeBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fffbeb','매우 나쁨':'#fee2e2'}[_normG(g)]||'#f1f5f9');
         const _badgeHtml  = (g,label) => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gradeBg(ng)};color:${_gradeColor(ng)};border-radius: var(--radius-lg);padding:3px 12px;font-size:0.78rem;font-weight:800;">${label||ng}</span>`; };
         const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
         const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
@@ -5734,7 +5734,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:'정격', data: sGrades[3] },
         ];
         const seasonsHtml = seasons.map(s => {
-            const cls = _isGood(s.data.grade) ? 'season-good' : _isBad(s.data.grade) ? 'season-bad' : '';
+            const _ng4 = _normG(s.data.grade); // 4단계 정규화
+            const cls  = _ng4 === '매우 좋음' ? 'season-daegil' :
+                         _ng4 === '좋음'    ? 'season-good'   :
+                         _isBad(s.data.grade) ? 'season-bad'  : '';
             return `<div class="season-card ${cls}">
                 <div class="season-top">
                     <div class="season-meta">
@@ -7261,9 +7264,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // 5단계 등급 헬퍼 (대길/길/평/흉/대흉)
         const _normG  = g => ({'대길':'대길','길':'길','평':'평','흉':'흉','대흉':'대흉',
                                '매우 좋음':'대길','좋음':'길','나쁨':'흉','매우 나쁨':'대흉'}[g]||'평');
-        const _gColor = g => ({'대길':'#14532d','길':'#1d4ed8','평':'#92400e','흉':'#b45309','대흉':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gColor = g => ({'대길':'#15803d','길':'#1d4ed8','평':'#92400e','흉':'#d97706','대흉':'#dc2626'})[_normG(g)]||'#64748b';
         const _gBg    = g => ({'대길':'#f0fdf4','길':'#eff6ff','평':'#fef3c7','흉':'#fff7ed','대흉':'#fee2e2'})[_normG(g)]||'#f1f5f9';
-        const _label  = g => ({'대길':'✦ 대길','길':'좋음','평':'평','흉':'나쁨','대흉':'✗ 대흉'})[_normG(g)]||g;
+        const _label  = g => ({'대길':'매우 좋음','길':'좋음','평':'보통','흉':'나쁨','대흉':'매우 나쁨'})[_normG(g)]||g;
         const _badge  = g => `<span style="display:inline-block;background:${_gBg(g)};color:${_gColor(g)};border-radius: var(--radius-lg);padding:3px 12px;font-size:0.78rem;font-weight:800;">${_label(g)}</span>`;
         const _isGood = g => { const ng=_normG(g); return ng==='대길'||ng==='길'; };
         const _isBad  = g => { const ng=_normG(g); return ng==='대흉'||ng==='흉'; };
