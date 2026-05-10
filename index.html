@@ -2063,6 +2063,19 @@
         }
 
 
+        /* ── 오행 계산방식 안내 박스 ── */
+        .oheng-diff-note {
+            display: flex; align-items: flex-start; gap: 12px;
+            background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b;
+            border-radius: var(--radius-sm); padding: 12px 16px;
+            margin-bottom: 20px; font-size: 0.84rem; color: #78350f; line-height: 1.7;
+        }
+        .oheng-diff-note .odn-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+        .oheng-diff-note b { color: #92400e; }
+        .oheng-diff-note code {
+            background: rgba(0,0,0,0.06); border-radius: 4px;
+            padding: 1px 5px; font-size: 0.8rem; font-family: inherit; color: inherit;
+        }
         /* ── AI 작명 상담 채팅 ── */
         #report-chat-section { margin-top:12px; }
         #chat-example-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
@@ -4081,6 +4094,7 @@
                         <div class="story-chapter-label">Chapter 4. 소리의 기운</div>
                         <div class="ch-title-row">
                             <h2 class="section-title"><span class="term-tip" data-tip="이름을 소리 낼 때 초성의 움직임에서 발생하는 오행 기운의 흐름입니다.">발음 오행</span> & <span class="term-tip" data-tip="이름 모음의 밝고 어두운 배합. 양성(밝은 소리)과 음성(어두운 소리)이 고르게 섞일수록 균형 있는 기운이 됩니다.">음양</span> 분석</h2>
+                            <span style="font-size:0.68rem;font-weight:800;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:20px;padding:2px 10px;white-space:nowrap;align-self:center;">초성 기준</span>
                             <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch4')" title="이론 설명 보기">ⓘ</button>
                         </div>
                     </div>
@@ -4145,6 +4159,7 @@
                         <div class="story-chapter-label">Chapter 5. 수리 보조 지표</div>
                         <div class="ch-title-row">
                             <h2 class="section-title">수리 <span class="term-tip" data-tip="목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.">오행</span> & <span class="term-tip" data-tip="획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.">음양</span> 분석</h2>
+                            <span style="font-size:0.68rem;font-weight:800;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:20px;padding:2px 10px;white-space:nowrap;align-self:center;">획수 끝자리 기준</span>
                             <button class="theory-info-btn" onclick="event.stopPropagation();_showTheoryPopover('ch5b')" title="이론 설명 보기">ⓘ</button>
                         </div>
                     </div>
@@ -7153,6 +7168,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         };
 
         return `
+            <!-- 계산 방식 안내 -->
+            <div class="oheng-diff-note">
+                <span class="odn-icon">💡</span>
+                <div>
+                    <b>이 챕터의 오행은 자원오행·발음오행과 또 다른 기준입니다.</b><br>
+                    수리오행은 <b>원·형·이·정격 각 획수의 끝자리 숫자</b>로 오행을 분류합니다. (획수 자체의 의미나 소리와는 무관합니다.)<br>
+                    <span style="margin-top:4px;display:inline-block;">
+                        끝자리 <code>1·2→木</code> &nbsp;<code>3·4→火</code> &nbsp;<code>5·6→土</code> &nbsp;<code>7·8→金</code> &nbsp;<code>9·0→水</code>
+                    </span>
+                </div>
+            </div>
             <!-- 수리 오행 카드 -->
             <div class="sound-unified" style="margin-bottom:16px;">
                 <div class="sound-grade-row" style="margin-bottom:8px;">
@@ -7600,6 +7626,18 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         // ── 통합 카드 렌더링 (오행 + 음양 한 박스) ──────────────────
         const combinedHtml = `
+            <!-- 계산 방식 안내 -->
+            <div class="oheng-diff-note">
+                <span class="odn-icon">💡</span>
+                <div>
+                    <b>이 챕터의 오행은 자원오행(한자)과 다른 기준입니다.</b><br>
+                    자원오행이 <b>한자 자체에 담긴 기운</b>이라면, 발음오행은 <b>이름을 소리 낼 때의 첫 자음(초성)</b>으로 오행을 분류합니다.<br>
+                    <span style="margin-top:4px;display:inline-block;">
+                        예) <code>박(ㅂ)→水</code> &nbsp;·&nbsp; <code>서(ㅅ)→金</code> &nbsp;·&nbsp; <code>연(ㅇ)→土</code>
+                        &nbsp;&nbsp;— 같은 이름이라도 한자 오행과 소리 오행은 다를 수 있습니다.
+                    </span>
+                </div>
+            </div>
             <!-- 발음 오행 카드 -->
             <div class="sound-unified" style="margin-bottom:16px;">
                 <div style="margin-bottom:16px;">
