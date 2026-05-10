@@ -671,6 +671,8 @@
         #self-report-view .report-header { background: linear-gradient(145deg, var(--text-primary) 0%, var(--bg-dark) 100%); }
         /* 이론 가이드 헤더 — 보고서와 동일한 딥다크 그라데이션 */
         #theory-detail-view .report-header { background: linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-dark) 100%); }
+        /* 이론 가이드 h1 서브타이틀 */
+        .theory-h1-sub { font-weight: 300; font-size: 2.2rem; color: rgba(255,255,255,0.7); letter-spacing: -0.5px; }
 
         .score-badge { display: inline-block; background: var(--gold-premium); color: white; padding: 10px 25px; border-radius: var(--radius-pill); font-size: 0.95rem; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 30px; box-shadow: var(--shadow-glow); white-space: nowrap; }
         #self-report-view .score-badge { background: #334155; box-shadow: none; border: 1px solid #475569; }
@@ -906,13 +908,48 @@
             position: relative; z-index: 1;
         }
 
-        /* 모바일 대응 */
+        /* 모바일 대응 — 이론 가이드 전용 */
         @media (max-width: 768px) {
-            #theory-detail-view .report-card { padding: 28px 20px; }
-            .theory-cta-card { padding: 40px 24px; }
-            .theory-cta-card h3 { font-size: 1.4rem; }
-            .theory-title-row .section-title { font-size: 1.2rem; }
-            .theory-toc-chip { font-size: 0.76rem; padding: 6px 14px; }
+            /* 헤더 h1 & 서브타이틀 (인라인 스타일 강제 override) */
+            #theory-detail-view .report-header h1 { font-size: 1.9rem; letter-spacing: -0.5px; }
+            #theory-detail-view .report-header h1 span { font-size: 1.1rem !important; display: block; margin: 6px 0 0; letter-spacing: 0 !important; }
+            /* TOC 칩 행 */
+            .theory-toc-row { gap: 7px; margin-top: 18px; }
+            .theory-toc-chip { font-size: 0.74rem; padding: 6px 12px; }
+            /* 카드 패딩 & 좌측 골드 라인 가늘게 */
+            #theory-detail-view .report-card { padding: 24px 18px; border-left-width: 3px; margin-bottom: 20px; }
+            /* 챕터 레이블 */
+            .theory-chapter-label { font-size: 0.62rem; margin-bottom: 8px; }
+            /* 이론 번호 배지 소형화 */
+            .theory-num-badge { width: 28px; height: 28px; font-size: 0.85rem; margin-right: 10px; flex-shrink: 0; }
+            /* 제목 행 — 배지와 제목을 상단 기준 정렬 */
+            .theory-title-row { align-items: flex-start; margin-bottom: 14px; }
+            .theory-title-row .section-title { font-size: 1.15rem; line-height: 1.4; }
+            /* 인트로 박스 */
+            .theory-intro-box { padding: 18px 18px; margin-bottom: 22px; }
+            .theory-intro-box p { font-size: 0.91rem; line-height: 1.82; }
+            /* 팁 박스 */
+            .theory-tip-box { padding: 14px 16px 14px 14px; margin-top: 14px; margin-bottom: 16px; }
+            .theory-tip-box p { font-size: 0.88rem; line-height: 1.72; }
+            /* 본문 리스트 */
+            .theory-list li { font-size: 0.91rem; line-height: 1.75; margin-bottom: 10px; }
+            /* 테이블 — 데스크톱 th width: 160px 무력화 후 블록 스타일 정비 */
+            #theory-detail-view .tech-table th { width: 100% !important; padding: 9px 14px; font-size: 0.84rem; }
+            #theory-detail-view .tech-table td { padding: 10px 14px; font-size: 0.87rem; }
+            /* CTA 카드 */
+            .theory-cta-card { padding: 36px 20px; margin-top: 36px; }
+            .theory-cta-card h3 { font-size: 1.3rem; }
+            /* CTA 버튼 세로 스택 & 전체 너비 */
+            .theory-cta-btns { flex-direction: column; gap: 10px; }
+            .theory-cta-btns > * { text-align: center !important; width: 100% !important; box-sizing: border-box; }
+            /* 보너스 구분 제목 */
+            .theory-bonus-title { font-size: 0.95rem; padding-top: 22px; }
+        }
+        @media (max-width: 480px) {
+            #theory-detail-view .report-header h1 { font-size: 1.65rem; }
+            #theory-detail-view .report-header h1 span { font-size: 1.0rem !important; }
+            #theory-detail-view .report-card { padding: 20px 14px; }
+            .theory-title-row .section-title { font-size: 1.05rem; }
         }
 
         /* =========================================
@@ -4549,7 +4586,7 @@
 <div id="theory-detail-view">
     <header class="report-header">
         <div class="score-badge">✦ 디어네임 작명 기준</div>
-        <h1>정통 성명학<br><span style="font-weight:300;font-size:2.2rem;color:rgba(255,255,255,0.7);letter-spacing:-0.5px;">5대 핵심 이론 가이드</span></h1>
+        <h1>정통 성명학<br><span class="theory-h1-sub">5대 핵심 이론 가이드</span></h1>
         <div class="meta-info" style="margin-top:20px;">
             사주 · 한자 · 소리 · 획수 — 이름 하나에 담는 다섯 가지 기준
         </div>
