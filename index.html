@@ -10471,48 +10471,88 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         });
     });
 
-    // ── 모바일 가로 스크롤 Dot 인디케이터 ──────────────────────
-    function _initScrollDots(gridId, dotsId) {
-        const grid = document.getElementById(gridId);
+    // ── 모바일 가로 스크롤 캐러셀 (Dot + Auto-play) ─────────────
+    function _initCarousel(gridId, dotsId, intervalMs) {
+        const grid     = document.getElementById(gridId);
         const dotsWrap = document.getElementById(dotsId);
-        if (!grid || !dotsWrap) return;
-
-        // 모바일에서만 작동
-        if (window.innerWidth > 768) return;
+        if (!grid || !dotsWrap || window.innerWidth > 768) return;
 
         const cards = Array.from(grid.children);
         if (cards.length < 2) return;
 
-        // dot 생성
+        const GAP = 12;
+        let current   = 0;
+        let timer     = null;
+        let isPaused  = false;
+
+        // ── Dot 생성 ──
         dotsWrap.innerHTML = cards.map((_, i) =>
             `<div class="scroll-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></div>`
         ).join('');
-
         const dots = dotsWrap.querySelectorAll('.scroll-dot');
 
-        // 스크롤 → dot 업데이트
+        const updateDots = (idx) => {
+            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        };
+
+        // ── 특정 인덱스로 이동 ──
+        const goTo = (idx) => {
+            current = (idx + cards.length) % cards.length;
+            const cardW = cards[0].offsetWidth;
+            grid.scrollTo({ left: (cardW + GAP) * current, behavior: 'smooth' });
+            updateDots(current);
+        };
+
+        // ── Auto-play ──
+        const startAuto = () => {
+            if (timer) clearInterval(timer);
+            timer = setInterval(() => {
+                if (!isPaused) goTo(current + 1);
+            }, intervalMs);
+        };
+
+        // ── 터치: 드래그 중 일시정지 / 손 떼면 재개 ──
+        grid.addEventListener('touchstart', () => { isPaused = true; },  { passive: true });
+        grid.addEventListener('touchend',   () => {
+            // 스냅 완료 후 현재 위치 동기화
+            setTimeout(() => {
+                const cardW = cards[0].offsetWidth;
+                current = Math.round(grid.scrollLeft / (cardW + GAP));
+                updateDots(current);
+                isPaused = false;
+            }, 400);
+        }, { passive: true });
+
+        // ── 스크롤 → dot 실시간 업데이트 ──
         let ticking = false;
         grid.addEventListener('scroll', () => {
             if (ticking) return;
             ticking = true;
             requestAnimationFrame(() => {
-                const idx = Math.round(grid.scrollLeft / (cards[0].offsetWidth + 12));
-                dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+                const cardW = cards[0].offsetWidth;
+                const idx = Math.round(grid.scrollLeft / (cardW + GAP));
+                updateDots(idx);
                 ticking = false;
             });
         }, { passive: true });
 
-        // dot 클릭 → 해당 카드로 이동
+        // ── dot 클릭 → 해당 카드로 이동 ──
         dots.forEach((d, i) => {
-            d.addEventListener('click', () => {
-                grid.scrollTo({ left: (cards[i].offsetWidth + 12) * i, behavior: 'smooth' });
-            });
+            d.addEventListener('click', () => { isPaused = false; goTo(i); });
         });
+
+        // ── 페이지 visibility 변경 시 멈춤/재개 ──
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) { isPaused = true; }
+            else { isPaused = false; }
+        });
+
+        startAuto();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        _initScrollDots('why-grid',    'why-dots');
-        _initScrollDots('review-grid', 'review-dots');
+        _initCarousel('why-grid',    'why-dots',    3200);
+        _initCarousel('review-grid', 'review-dots', 4000);
     });
 
 
