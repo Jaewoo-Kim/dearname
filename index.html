@@ -1864,6 +1864,50 @@
         #theory-popover-body .chapter-theory-title { display: none; }
         #theory-popover-body .chapter-theory-pillars { margin-top: 14px; }
         #theory-popover-body .pillar-explain { margin-bottom: 5px; font-size: 0.82rem; }
+
+        /* ── 데스크톱 말풍선 팝오버 (769px+) ───────────────────── */
+        @media (min-width: 769px) {
+            #theory-popover-overlay { background: transparent; }
+            #theory-popover {
+                bottom: auto; left: auto; right: auto;
+                width: 400px; max-width: calc(100vw - 32px);
+                max-height: min(70vh, 540px);
+                border-radius: 12px;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 16px 48px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+                transform: translateY(-8px); opacity: 0;
+                transition: opacity 0.18s ease, transform 0.18s ease;
+            }
+            #theory-popover.open { transform: translateY(0); opacity: 1; }
+            #theory-popover-handle { display: none; }
+            #theory-popover-inner { padding: 16px 20px 24px; }
+            /* 말풍선 꼬리 — 외곽선 삼각 */
+            #theory-popover::before {
+                content: '';
+                position: absolute;
+                top: -8px;
+                left: var(--tp-tail, 28px);
+                transform: translateX(-50%);
+                border: 8px solid transparent;
+                border-top: 0;
+                border-bottom-color: #e2e8f0;
+                z-index: 1;
+                pointer-events: none;
+            }
+            /* 말풍선 꼬리 — 흰색 채움 */
+            #theory-popover::after {
+                content: '';
+                position: absolute;
+                top: -6px;
+                left: var(--tp-tail, 28px);
+                transform: translateX(-50%);
+                border: 7px solid transparent;
+                border-top: 0;
+                border-bottom-color: #fff;
+                z-index: 2;
+                pointer-events: none;
+            }
+        }
         /* 챕터 헤더 내 section-title: 2.8rem 전역값 대신 소형화 */
         .chapter-acc-header .section-title {
             font-size: 1.35rem !important;
@@ -7856,6 +7900,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function _showTheoryPopover(chId) {
         const theoryBox = document.getElementById(chId + '-theory-box');
         if (!theoryBox) return;
+
+        // 콘텐츠 주입
         const titleEl = theoryBox.querySelector('.chapter-theory-title');
         const title = titleEl ? titleEl.textContent.replace(/^📖\s*/, '') : '이론 설명';
         document.getElementById('theory-popover-title').textContent = title;
@@ -7864,18 +7910,54 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const clonedTitle = clone.querySelector('.chapter-theory-title');
         if (clonedTitle) clonedTitle.remove();
         bodyEl.innerHTML = clone.innerHTML;
-        document.getElementById('theory-popover-overlay').style.display = 'block';
+
+        const overlay = document.getElementById('theory-popover-overlay');
         const popover = document.getElementById('theory-popover');
+        overlay.style.display = 'block';
         popover.style.display = 'block';
+
+        // 데스크톱(769px+): 버튼 아래 말풍선으로 위치 결정
+        if (window.innerWidth >= 769) {
+            // ⓘ 버튼 찾기 — onclick 속성에 chId 포함된 것
+            const btn = [...document.querySelectorAll('.theory-info-btn')].find(b =>
+                b.getAttribute('onclick')?.includes("'" + chId + "'")
+            );
+            if (btn) {
+                const r = btn.getBoundingClientRect();
+                const pw = 400;
+                // 말풍선 왼쪽 위치 (꼬리가 버튼 중앙 아래에 오도록)
+                let pLeft = r.left + r.width / 2 - 28;
+                pLeft = Math.min(Math.max(16, pLeft), window.innerWidth - pw - 16);
+                // 꼬리 위치 (팝오버 왼쪽 기준 오프셋)
+                const tailPos = Math.max(20, Math.min(pw - 20, (r.left + r.width / 2) - pLeft));
+                // 아래 공간 부족하면 버튼 위쪽으로
+                const spaceBelow = window.innerHeight - r.bottom - 10;
+                const estH = Math.min(540, window.innerHeight * 0.7);
+                if (spaceBelow < estH && r.top > estH) {
+                    popover.style.top = (r.top - estH - 10) + 'px';
+                    popover.style.setProperty('--tp-tail-dir', 'bottom');
+                } else {
+                    popover.style.top = (r.bottom + 10) + 'px';
+                    popover.style.removeProperty('--tp-tail-dir');
+                }
+                popover.style.left = pLeft + 'px';
+                popover.style.setProperty('--tp-tail', tailPos + 'px');
+            }
+        }
+
         requestAnimationFrame(() => popover.classList.add('open'));
     }
     function _closeTheoryPopover() {
         const popover = document.getElementById('theory-popover');
         popover.classList.remove('open');
+        const delay = window.innerWidth >= 769 ? 200 : 300;
         setTimeout(() => {
             document.getElementById('theory-popover-overlay').style.display = 'none';
             popover.style.display = 'none';
-        }, 300);
+            // 데스크톱 인라인 위치 초기화
+            popover.style.top = '';
+            popover.style.left = '';
+        }, delay);
     }
     window._showTheoryPopover = _showTheoryPopover;
     window._closeTheoryPopover = _closeTheoryPopover;
