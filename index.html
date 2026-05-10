@@ -2019,36 +2019,32 @@
             line-height: 1.6;
         }
 
-        /* ── 후보 비교 테이블 (탭 방식) ── */
+        /* ── 후보 비교 테이블 ── */
         #report-compare-section { max-width:780px; margin:0 auto 12px; }
-        .ct-section-header { margin-bottom:12px; }
-        .ct-section-header h3 { font-size:0.85rem; font-weight:800; color:var(--text-secondary); letter-spacing:1.5px; text-transform:uppercase; margin:0 0 2px; }
-        .ct-section-header p { font-size:0.73rem; color:var(--text-muted); margin:0; }
-        /* 이름 선택 미니 탭 바 */
-        .ct-mini-tabs { display:flex; gap:8px; margin-bottom:12px; }
-        .ct-mini-tab { flex:1; border:1.5px solid var(--border-light); border-radius:var(--radius-sm); padding:10px 6px; cursor:pointer; background:var(--bg-light); text-align:center; transition:all 0.15s; font-family:inherit; }
-        .ct-mini-tab:hover { border-color:var(--gold-premium); background:#fffbf0; }
-        .ct-mini-tab.active { background:var(--bg-dark); border-color:var(--gold-premium); box-shadow:0 2px 10px rgba(212,175,55,0.25); }
-        .ctmt-score { display:block; font-size:0.68rem; font-weight:700; color:var(--text-muted); margin-bottom:2px; }
-        .ct-mini-tab.active .ctmt-score { color:var(--gold-premium); }
-        .ctmt-name { display:block; font-size:0.98rem; font-weight:900; color:var(--text-primary); }
-        .ct-mini-tab.active .ctmt-name { color:white; }
-        .ctmt-hanja { display:block; font-size:0.65rem; color:var(--text-muted); margin-top:1px; }
-        .ct-mini-tab.active .ctmt-hanja { color:rgba(255,255,255,0.5); }
-        /* 선택된 이름 점수 행 */
-        .ct-selected-score { display:flex; align-items:center; justify-content:space-between; background:#f8f7f3; border-radius:var(--radius-sm); padding:10px 16px; margin-bottom:8px; border:1px solid var(--border-light); }
-        .ct-selected-label { font-size:0.78rem; color:var(--text-muted); font-weight:600; }
-        .ct-selected-name { font-size:1rem; font-weight:900; color:var(--text-primary); }
-        .ct-selected-pts { font-size:1.3rem; font-weight:900; color:var(--gold-dark); }
-        /* 2열 상세 테이블 */
-        .compare-table { width:100%; border-collapse:collapse; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border-light); box-shadow:0 2px 12px rgba(0,0,0,0.04); }
-        .compare-table tbody tr { border-bottom:1px solid var(--border-light); }
+        .compare-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:var(--radius-md); border:1px solid var(--border-light); box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+        .compare-table { width:100%; border-collapse:collapse; min-width:380px; }
+        .compare-table thead tr { background:var(--bg-dark); }
+        .ct-label-col { padding:10px 16px; text-align:left; }
+        .ct-name-col { padding:14px 10px; text-align:center; cursor:pointer; transition:background 0.15s; min-width:110px; }
+        .ct-name-col:hover { background:rgba(255,255,255,0.08); }
+        .ct-name-col.ct-active { background:rgba(212,175,55,0.22); }
+        .ct-name-kr { font-size:1.05rem; font-weight:900; color:white; line-height:1.2; }
+        .ct-name-hj { font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:2px; }
+        .ct-now-badge { display:inline-block; font-size:0.6rem; font-weight:800; color:var(--gold-premium); background:rgba(212,175,55,0.2); border:1px solid rgba(212,175,55,0.4); border-radius:var(--radius-lg); padding:2px 8px; margin-top:5px; }
+        thead .ct-label-col { font-size:0.7rem; font-weight:700; color:rgba(255,255,255,0.45); letter-spacing:1px; text-transform:uppercase; vertical-align:bottom; padding-bottom:12px; }
+        .compare-table tbody tr { border-bottom:1px solid var(--border-light); transition:background 0.12s; }
         .compare-table tbody tr:last-child { border-bottom:none; }
         .compare-table tbody tr:hover { background:#fafaf8; }
-        .ct-label-col { padding:11px 16px; text-align:left; width:48%; background:white; }
-        .ct-val-col { padding:11px 16px; text-align:right; background:white; font-size:0.9rem; }
-        .ct-row-label { font-size:0.83rem; font-weight:700; color:var(--bg-dark); line-height:1.3; }
-        .ct-row-sub { font-size:0.68rem; color:var(--text-muted); margin-top:1px; }
+        .ct-val-col { padding:9px 10px; text-align:center; font-size:0.88rem; }
+        .ct-val-col.ct-active { background:#fffcf3; }
+        .ct-score-row td { background:#f8f7f3; }
+        .ct-score-row td.ct-active { background:#fffbea; }
+        .ct-score-num { font-size:1.15rem; font-weight:900; color:var(--gold-dark); }
+        .ct-rank { display:inline-block; font-size:0.6rem; font-weight:800; color:white; background:var(--gold-premium); border-radius:var(--radius-lg); padding:1px 7px; margin-left:3px; vertical-align:middle; }
+        .ct-rank.r2 { background:var(--text-muted); }
+        .ct-rank.r3 { background:#b45309; }
+        .ct-row-label { font-size:0.83rem; font-weight:700; color:var(--bg-dark); line-height:1.3; word-break:keep-all; }
+        .ct-row-sub { font-size:0.68rem; color:var(--text-muted); margin-top:1px; word-break:keep-all; }
         .ct-very-good { color:#15803d; font-weight:800; }
         .ct-good      { color:#1d4ed8; font-weight:800; }
         .ct-bad       { color:#b45309; font-weight:800; }
@@ -2057,12 +2053,14 @@
         /* ── 모바일: 비교 테이블 ── */
         @media (max-width: 768px) {
             #report-compare-section { padding: 0 14px; }
-            .ct-mini-tab { padding: 8px 4px; }
-            .ctmt-name { font-size: 0.88rem; }
-            .ct-label-col { padding: 9px 12px; }
-            .ct-val-col { padding: 9px 12px; }
-            .ct-row-label { font-size: 0.78rem; }
+            .ct-label-col { padding: 8px 10px; }
+            .ct-name-col { min-width: 100px !important; padding: 10px 6px !important; }
+            .ct-row-label { font-size: 0.75rem; }
             .ct-row-sub { font-size: 0.62rem; }
+            .ct-name-kr { font-size: 0.9rem; }
+            .ct-name-hj { font-size: 0.65rem; }
+            .ct-val-col { padding: 8px 6px !important; font-size: 0.78rem; }
+            .ct-score-num { font-size: 0.95rem; }
         }
 
 
@@ -6249,11 +6247,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (candidates.length < 2) { el.style.display = 'none'; return; }
         el.style.display = 'block';
 
-        // 현재 선택된 후보 데이터
-        const c = candidates[currentIdx] || candidates[0];
-        const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
-        const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
-        const items = _buildReportItems(c.familyKr, `${c.h1.kr}${c.h2?.kr||''}`, c);
+        // 등수: 점수 내림차순 정렬 후 rank 매핑
+        const ranked = [...candidates].map((c,i) => ({score:c.score,origIdx:i}))
+            .sort((a,b) => b.score - a.score);
+        const rankOf = (i) => ranked.findIndex(r => r.origIdx === i) + 1;
+
+        // 각 후보 지표 빌드
+        const allItems = candidates.map(c =>
+            _buildReportItems(c.familyKr, `${c.h1.kr}${c.h2?.kr||''}`, c)
+        );
+        const rowDefs = allItems[0].map(x => ({ label: x.label, sub: x.sub }));
 
         const gradeHtml = (g) => {
             const norm = {'대길':'매우 좋음','길':'좋음','평':'보통','흉':'나쁨','대흉':'매우 나쁨'}[g] || g || '보통';
@@ -6264,42 +6267,60 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             return `<span class="ct-mid">– 보통</span>`;
         };
 
+        const rankBadge = (i) => {
+            const r = rankOf(i);
+            const cls = r===1?'':r===2?' r2':' r3';
+            const label = r===1?'1위 ★':r===2?'2위':'3위';
+            return `<span class="ct-rank${cls}">${label}</span>`;
+        };
+
         el.innerHTML = `
-            <div class="ct-section-header">
-                <h3>이름 후보 비교</h3>
-                <p>이름을 선택하면 해당 항목별 평가를 확인합니다.</p>
+            <div style="margin-bottom:10px;">
+                <h3 style="font-size:0.88rem;font-weight:800;color:var(--text-secondary);letter-spacing:1.5px;text-transform:uppercase;margin:0 0 2px;">이름 후보 비교</h3>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">이름 열을 클릭하면 해당 보고서로 전환됩니다.</p>
             </div>
-            <div class="ct-mini-tabs">
-                ${candidates.map((cand, i) => {
-                    const ckr = `${cand.familyKr}${cand.h1.kr}${cand.h2?.kr||''}`;
-                    const chj = `${cand.familyHanja}${cand.h1.h}${cand.h2?.h||''}`;
-                    return `<button class="ct-mini-tab${i===currentIdx?' active':''}"
-                        onclick="var tabs=document.querySelectorAll('.name-card-tab');if(tabs[${i}])_selectReportTab(tabs[${i}],${i})">
-                        <span class="ctmt-score">${cand.score}점</span>
-                        <span class="ctmt-name">${ckr}</span>
-                        <span class="ctmt-hanja">${chj}</span>
-                    </button>`;
-                }).join('')}
-            </div>
-            <div class="ct-selected-score">
-                <div>
-                    <div class="ct-selected-label">현재 선택</div>
-                    <div class="ct-selected-name">${kr} <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">${hj}</span></div>
-                </div>
-                <div class="ct-selected-pts">${c.score}점</div>
-            </div>
-            <table class="compare-table">
-                <tbody>
-                    ${items.map(item => `
+            <div class="compare-table-wrap">
+                <table class="compare-table">
+                    <thead>
                         <tr>
+                            <th class="ct-label-col">항목</th>
+                            ${candidates.map((c,i) => {
+                                const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
+                                const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
+                                return `<th class="ct-name-col${i===currentIdx?' ct-active':''}"
+                                    onclick="var t=document.querySelectorAll('.name-card-tab');if(t[${i}])_selectReportTab(t[${i}],${i})">
+                                    <div class="ct-name-kr">${kr}</div>
+                                    <div class="ct-name-hj">${hj}</div>
+                                    ${i===currentIdx?'<div class="ct-now-badge">현재 보고서</div>':''}
+                                </th>`;
+                            }).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="ct-score-row">
                             <td class="ct-label-col">
-                                <div class="ct-row-label">${item.label}</div>
-                                <div class="ct-row-sub">${item.sub}</div>
+                                <div class="ct-row-label">종합 점수</div>
+                                <div class="ct-row-sub">성명학 종합</div>
                             </td>
-                            <td class="ct-val-col">${gradeHtml(item.grade)}</td>
-                        </tr>`).join('')}
-                </tbody>
-            </table>`;
+                            ${candidates.map((c,i) => `
+                                <td class="ct-val-col${i===currentIdx?' ct-active':''}">
+                                    <span class="ct-score-num">${c.score}점</span>${rankBadge(i)}
+                                </td>`).join('')}
+                        </tr>
+                        ${rowDefs.map((row, ri) => `
+                            <tr>
+                                <td class="ct-label-col">
+                                    <div class="ct-row-label">${row.label}</div>
+                                    <div class="ct-row-sub">${row.sub}</div>
+                                </td>
+                                ${allItems.map((items, ci) => `
+                                    <td class="ct-val-col${ci===currentIdx?' ct-active':''}">
+                                        ${gradeHtml(items[ri]?.grade)}
+                                    </td>`).join('')}
+                            </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
     }
 
     // ── 이름 탭 렌더링 ──────────────────────────────────────────────
