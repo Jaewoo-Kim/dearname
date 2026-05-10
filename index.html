@@ -427,9 +427,31 @@
         .faq-a strong { color: var(--bg-dark); }
 
         @media (max-width: 768px) {
-            .review-grid { grid-template-columns: 1fr; }
-            .review-summary { flex-wrap: wrap; gap: 24px; padding: 24px 20px; }
-            .rs-sep { display: none; }
+            /* 집계 바 — 숫자 폰트 축소 */
+            .review-summary { flex-wrap: nowrap; gap: 0; padding: 20px 16px; justify-content: space-around; }
+            .rs-sep { width: 1px; height: 36px; display: block; }
+            .rs-num { font-size: 1.55rem; }
+            .rs-label { font-size: 0.72rem; margin-top: 4px; }
+
+            /* 리뷰 카드 — 가로 스크롤 */
+            .review-grid {
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 14px;
+                margin-top: 32px;
+                padding-bottom: 12px;
+                scrollbar-width: none;
+            }
+            .review-grid::-webkit-scrollbar { display: none; }
+            .review-card {
+                min-width: 78vw;
+                max-width: 78vw;
+                scroll-snap-align: start;
+                flex-shrink: 0;
+            }
         }
         @media (max-width: 480px) {
             .review-card { padding: 24px 20px; }
