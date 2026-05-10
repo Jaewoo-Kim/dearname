@@ -2206,8 +2206,6 @@
         .time-step h4 { font-size: 1.05rem; font-weight: 800; color: var(--bg-dark); margin: 0 0 10px; }
         .time-step h4 span { font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; margin-left: 8px; }
         .time-step p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.75; margin: 0; }
-        #load-more-btn { background: transparent; border: 2px solid var(--gold-premium); color: var(--gold-dark); padding: 14px 32px; border-radius: var(--radius-pill); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; }
-        #load-more-btn:hover { background: var(--gold-premium); color: var(--bg-dark); }
 
 
         /* ═══════════════════════════════════════════════════════
@@ -4265,12 +4263,7 @@
             </button>
         </div>
 
-        <!-- 더보기 버튼 -->
-        <div style="text-align:center;margin:20px 0 40px;">
-            <button class="btn btn-outline" id="load-more-btn" onclick="loadMoreCandidates()" style="display:none;">
-                ✨ 더 많은 이름 후보 보기
-            </button>
-        </div>
+        <div style="margin:20px 0 40px;"></div>
     </main>
 
     <!-- ── 이론 설명 팝오버 (바텀 시트) ── -->
@@ -4818,7 +4811,6 @@
         document.getElementById('main-nav').style.display = 'none';
         document.getElementById('nav-hamburger').style.display = 'none';
         document.getElementById('report-nav').style.display = 'block';
-        document.getElementById('load-more-btn').style.display = 'none';
         window.scrollTo(0, 0);
         setTimeout(() => {
             renderCharts();
@@ -6235,9 +6227,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 birthDate:  _currentState._saju ? 'set' : 'none'
             });
 
-            // 더보기 버튼 표시 조건
-            document.getElementById('load-more-btn').style.display =
-                _allCandidates.length >= _currentState.searchControl.maxResults ? 'inline-block' : 'none';
+            // (더보기 기능 제거됨)
 
             showReportViewWithoutLock();
 
@@ -6248,43 +6238,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
     }
 
-    // ── 더보기 (인풋 기반 페이징 — 품질 완화) ───────────────────────
-    async function loadMoreCandidates() {
-        if (!_currentState) return;
-        showLoadingOverlay('추가 후보를 탐색 중입니다...');
-        try {
-            const relaxed = await _searchEngine.searchRelaxed(_currentState,
-                p => showLoadingOverlay(`추가 탐색 중... ${p.progress}%`)
-            );
-            _currentState = relaxed.relaxedState || _searchEngine.getRelaxedState(_currentState);
-            const newCands = (relaxed.results || []).map(c => ({
-                ...c,
-                familyKr:    _currentState.familyName.kr,
-                familyHanja: _currentState.familyName.hanja
-            }));
-
-            // 중복 제거 후 추가
-            const existingKeys = new Set(_allCandidates.map(c => c.h1.h + (c.h2?.h||'')));
-            const unique = newCands.filter(c => !existingKeys.has(c.h1.h + (c.h2?.h||'')));
-
-            const newTop = unique.slice(0, 3);
-            const newReports = await generateAllReports(newTop, _currentState);
-
-            _allCandidates.push(...unique);
-            _allReports.push(...newReports);
-
-            hideLoadingOverlay();
-            _renderReportTabs(_allCandidates);
-
-            if (unique.length === 0) {
-                document.getElementById('load-more-btn').style.display = 'none';
-                _showToast('더 이상 조건에 맞는 후보가 없습니다.');
-            }
-        } catch(err) {
-            hideLoadingOverlay();
-            console.error('더보기 오류:', err);
-        }
-    }
+    // (더보기 기능 제거 — 81수리 엄격 기준으로 후보 품질 보장)
 
     // ── 후보 비교 테이블 ─────────────────────────────────────────────
     function _renderCompareTable(currentIdx) {
