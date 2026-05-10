@@ -4351,12 +4351,13 @@
                 <p>소리의 연결을 <b>'이어달리기'</b>라고 생각하세요. 1번 주자(성씨)가 2번 주자(이름 첫 자)에게 바통을 부드럽게 넘겨주고(상생), 다시 3번 주자(이름 끝 자)에게 넘겨주면 인생이 막힘없이 풀립니다. 중간에 바통이 부딪히면(상극) 인간관계나 건강에 트러블이 생길 수 있습니다.</p>
             </div>
             <table class="tech-table" style="margin-top:20px;">
-                <tr><th><span class="oheng-dot" style="background:#22c55e;"></span>木 (나무)</th><td><b>ㄱ, ㅋ</b> (어금닛소리) — 위로 뻗어나가는 성장과 의욕의 기운</td></tr>
-                <tr><th><span class="oheng-dot" style="background:#ef4444;"></span>火 (불)</th><td><b>ㄴ, ㄷ, ㄹ, ㅌ</b> (혓소리) — 따뜻하고 명확하게 퍼져나가는 열정의 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#22c55e;"></span>木 (나무)</th><td><b>ㄱ, ㅋ, ㄲ</b> (어금닛소리) — 위로 뻗어나가는 성장과 의욕의 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#ef4444;"></span>火 (불)</th><td><b>ㄴ, ㄷ, ㄹ, ㅌ, ㄸ</b> (혓소리) — 따뜻하고 명확하게 퍼져나가는 열정의 기운</td></tr>
                 <tr><th><span class="oheng-dot" style="background:#eab308;"></span>土 (흙)</th><td><b>ㅇ, ㅎ</b> (목구멍 소리) — 만물을 넓게 품어주는 포용의 기운</td></tr>
-                <tr><th><span class="oheng-dot" style="background:#94a3b8;"></span>金 (쇠)</th><td><b>ㅅ, ㅈ, ㅊ</b> (잇소리) — 맺고 끊음이 확실한 단단하고 예리한 기운</td></tr>
-                <tr><th><span class="oheng-dot" style="background:#0f172a;"></span>水 (물)</th><td><b>ㅁ, ㅂ, ㅍ</b> (입술 소리) — 부드럽게 흘러가며 지혜를 담는 유연한 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#94a3b8;"></span>金 (쇠)</th><td><b>ㅅ, ㅈ, ㅊ, ㅆ, ㅉ</b> (잇소리) — 맺고 끊음이 확실한 단단하고 예리한 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#0f172a;"></span>水 (물)</th><td><b>ㅁ, ㅂ, ㅍ, ㅃ</b> (입술 소리) — 부드럽게 흘러가며 지혜를 담는 유연한 기운</td></tr>
             </table>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:10px;">※ ㄲ·ㄸ·ㅃ·ㅆ·ㅉ(경음)은 각 기본 자음과 동일한 오행으로 분류됩니다.</p>
             <p style="font-size:0.97rem;color:var(--text-secondary);line-height:1.8;margin-top:20px;padding:14px 18px;background:var(--bg-subtle);border-radius:var(--radius-sm);">
                 <b style="color:var(--bg-dark);">✦ 좋은 예시</b> &nbsp; 박(水) → 서(金) → 연(土) — 세 음절이 모두 상생으로 이어지는 이상적인 구조입니다.
             </p>
@@ -4603,8 +4604,8 @@
     // ================================================================
     const _TIPS = {
         '대운':     '인생을 10년 단위로 나눈 운세 흐름입니다. 사주팔자가 평생의 그릇이라면, 대운은 그 그릇이 놓이는 계절과 같습니다.',
-        '원격':     '성 획수 + 이름 첫째 자 획수의 합. 유년~20세 초반까지의 학업운·성격 형성을 주관합니다.',
-        '형격':     '성 획수 + 이름 첫째 자 획수의 합. 20~40대 사회 진출·결혼 등 가장 왕성한 시기의 운세를 주관합니다.',
+        '원격':     '이름 첫째 자 + 이름 둘째 자 획수의 합. 유년기~20세 초반까지의 학업운·성격 형성을 주관합니다.',
+        '형격':     '성씨 + 이름 첫째 자 획수의 합. 20~40대 사회 진출·결혼 등 가장 왕성한 시기의 운세를 주관합니다.',
         '이격':     '성 획수 + 이름 둘째 자 획수의 합. 40~60대 중년의 재물·명예·가정 안정을 반영합니다.',
         '정격':     '성 + 이름 전체 획수의 총합. 60대 이후 말년운과 평생 종합운을 결정합니다.',
         '사격수리': '원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.',
@@ -5329,15 +5330,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         /* ----------------------------------------------------
            ⑤ 수리음양 (획수의 홀/짝 밸런스)
            ---------------------------------------------------- */
-        // 수리음양: 각 한자 획수가 아닌 4격 수리(원·형·이·정격)의 홀짝 기준
+        // 수리음양: 각 한자 개별 획수의 홀짝 기준 (이론 페이지와 동일)
         const isYang = (s) => s % 2 !== 0;
-        const myYangs = [g1_num, g2_num, g3_num, g4_num].map(n => isYang(n) ? '양' : '음');
+        const myStrokes = [s1, s2, s3].filter(Boolean); // 성·이름1·이름2 각 획수
+        const myYangs = myStrokes.map(n => isYang(n) ? '양' : '음');
         const mAllYang = myYangs.every(y => y === '양');
         const mAllYin  = myYangs.every(y => y === '음');
 
-        let myGrade = '매우 좋음', myDesc = '4격 수리의 음(짝수)과 양(홀수)이 고루 배합되어 균형이 잘 잡혀 있습니다.';
+        let myGrade = '매우 좋음', myDesc = '각 한자 획수의 음(짝수)과 양(홀수)이 고루 배합되어 균형이 잘 잡혀 있습니다.';
         if(mAllYang || mAllYin) {
-            myGrade = '매우 나쁨'; myDesc = '4격 수리가 모두 홀수 또는 짝수로 치우쳐 음양 균형이 깨져 있습니다.';
+            myGrade = '매우 나쁨'; myDesc = '모든 한자 획수가 홀수 또는 짝수로 치우쳐 음양의 균형이 깨져 있습니다.';
         }
 
         /* ----------------------------------------------------
@@ -7366,9 +7368,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const moOs4     = moNums4.map(_numOheng);
             const moBad4    = moOs4.filter((o,i)=>i<3&&!_isSS(o,moOs4[i+1])).length;
             const mathOhengGrade = moBad4===0?'매우 좋음':moBad4===1?'좋음':moBad4===2?'나쁨':'매우 나쁨';
-            // 수리 음양 (4격 수리의 홀짝)
-            const g4Nums = [g1,g2,g3,g4];
-            const mathYinGrade = g4Nums.every(n=>n%2===0)||g4Nums.every(n=>n%2!==0) ? '매우 나쁨' : '매우 좋음';
+            // 수리 음양 (각 한자 개별 획수의 홀짝 — 이론 페이지 기준)
+            const yyStrokes = [s0,s1,s2].filter(Boolean);
+            const mathYinGrade = yyStrokes.every(n=>n%2===0)||yyStrokes.every(n=>n%2!==0) ? '매우 나쁨' : '매우 좋음';
 
             // 사주 보완 (자원오행이 saju prefer 를 얼마나 채우는가)
             const prefer    = _currentState?.nameSpec?.prefer || [];
