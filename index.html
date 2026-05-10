@@ -4355,7 +4355,7 @@
                 <tr><th><span class="oheng-dot" style="background:#ef4444;"></span>火 (불)</th><td><b>ㄴ, ㄷ, ㄹ, ㅌ</b> (혓소리) — 따뜻하고 명확하게 퍼져나가는 열정의 기운</td></tr>
                 <tr><th><span class="oheng-dot" style="background:#eab308;"></span>土 (흙)</th><td><b>ㅇ, ㅎ</b> (목구멍 소리) — 만물을 넓게 품어주는 포용의 기운</td></tr>
                 <tr><th><span class="oheng-dot" style="background:#94a3b8;"></span>金 (쇠)</th><td><b>ㅅ, ㅈ, ㅊ</b> (잇소리) — 맺고 끊음이 확실한 단단하고 예리한 기운</td></tr>
-                <tr><th><span class="oheng-dot" style="background:#3b82f6;"></span>水 (물)</th><td><b>ㅁ, ㅂ, ㅍ</b> (입술 소리) — 부드럽게 흘러가며 지혜를 담는 유연한 기운</td></tr>
+                <tr><th><span class="oheng-dot" style="background:#0f172a;"></span>水 (물)</th><td><b>ㅁ, ㅂ, ㅍ</b> (입술 소리) — 부드럽게 흘러가며 지혜를 담는 유연한 기운</td></tr>
             </table>
             <p style="font-size:0.97rem;color:var(--text-secondary);line-height:1.8;margin-top:20px;padding:14px 18px;background:var(--bg-subtle);border-radius:var(--radius-sm);">
                 <b style="color:var(--bg-dark);">✦ 좋은 예시</b> &nbsp; 박(水) → 서(金) → 연(土) — 세 음절이 모두 상생으로 이어지는 이상적인 구조입니다.
@@ -7103,7 +7103,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const badge   = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius: var(--radius-lg);padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
 
         // 수리오행 — 오행 흐름 시각화용
-        const O_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
+        const O_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#0f172a'};
         const O_KR    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const CYCLE   = ['木','火','土','金','水'];
         const isSS    = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
@@ -7647,7 +7647,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const h1 = candidate.h1, h2 = candidate.h2;
 
         // ── 오행 컬러 맵 ─────────────────────────────────────────
-        const OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
+        const OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#0f172a'};
         const OHENG_ICON  = {'木':'🌱','火':'🔥','土':'🏔️','金':'⚔️','水':'💧'};
         const OHENG_KR    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
 
@@ -8034,7 +8034,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const JI_O   = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
         const GAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
         const JI_KR  = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
-        const O_COLOR= {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
+        const O_COLOR= {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#0f172a'};
         const O_KR2  = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
         const CYCLE  = ['木','火','土','金','水'];
         const isSS   = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
@@ -8270,7 +8270,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (!el) return;
 
         // ── 오행 데이터 ──────────────────────────────────────────────
-        const _OC  = { '木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#3b82f6' };
+        const _OC  = { '木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a' };
         const _OBG = { '木':'#f0fdf4','火':'#fff5f5','土':'#fefce8','金':'#f8fafc','水':'#eff6ff' };
         const _OBD = { '木':'#bbf7d0','火':'#fecaca','土':'#fef08a','金':'#e2e8f0','水':'#bfdbfe' };
         const _ON  = { '木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)' };
