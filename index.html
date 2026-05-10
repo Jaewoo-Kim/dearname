@@ -945,14 +945,13 @@
             .saju-box-inner { padding: 16px 12px 14px; }
             .saju-hanja { font-size: 2.1rem; }
             .saju-story { font-size: 0.74rem; line-height: 1.7; }
-            /* 이름 탭: 모바일 가로 컴팩트 (점수 | 이름) */
-            .report-selector-area { gap: 10px; flex-direction: column; align-items: stretch; padding: 0 16px; }
-            .name-card-tab { width: 100%; min-width: 0; padding: 14px 18px;
-                display: flex; align-items: center; gap: 16px; }
-            .card-score-badge { margin-bottom: 0; flex-shrink: 0; min-width: 52px; text-align: center; padding: 5px 10px; font-size: 0.82rem; }
-            .card-names { flex: 1; gap: 3px; }
-            .card-kr { font-size: 1.45rem; }
-            .card-hanja { font-size: 0.88rem; }
+            /* 이름 탭: 모바일 가로 3열 컴팩트 */
+            .report-selector-area { gap: 6px; padding: 0 10px; flex-direction: row; flex-wrap: nowrap; align-items: stretch; }
+            .name-card-tab { flex: 1; min-width: 0; padding: 10px 8px; display: block; text-align: center; }
+            .card-score-badge { margin-bottom: 4px; display: block; font-size: 0.72rem; padding: 3px 8px; }
+            .card-names { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+            .card-kr { font-size: 1.05rem; }
+            .card-hanja { font-size: 0.72rem; }
             section { padding: 60px 20px; }
             .hero { padding: 140px 20px 90px; }
             .hero h1 { font-size: 2.6rem; letter-spacing: -1.5px; }
@@ -1079,12 +1078,13 @@
             .form-card { padding: 20px 12px; }
             .premium-box { padding: 32px 16px; }
             .modal-content { padding: 32px 20px; border-radius: var(--radius-lg); }
-            /* ─ 이름 탭 1열 (가로 컴팩트는 768px에서 이미 적용) ─ */
-            .name-card-tab { padding: 10px 14px; }
-            .card-kr { font-size: 1.15rem; }
+            /* ─ 이름 탭 (480px 추가 축소) ─ */
+            .name-card-tab { padding: 8px 6px; }
+            .card-kr { font-size: 0.92rem; }
+            .card-hanja { font-size: 0.65rem; }
             /* ─ 사주 ─ */
             .saju-hanja { font-size: 1.8rem; }
-            .saju-story { display: none; }
+            .saju-story { display: block; font-size: 0.7rem; line-height: 1.65; margin-top: 10px; padding-top: 10px; }
             /* ─ 보고서 헤더 ─ */
             .report-header h1 { font-size: 2.2rem; }
             /* ─ 섹션 제목 ─ */
