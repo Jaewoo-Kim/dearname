@@ -397,8 +397,34 @@
         }
         .why-card--accent .why-card-stat span { color: rgba(255,255,255,0.4); }
         @media (max-width: 768px) {
-            .why-grid { grid-template-columns: 1fr; gap: 16px; }
-            .why-card { padding: 28px 24px; }
+            #why-dearname { padding: 56px 0 48px; }
+            #why-dearname .section-inner { padding: 0 20px; }
+            #why-dearname h2.section-title { font-size: 1.8rem; margin-bottom: 12px; }
+            #why-dearname p { font-size: 0.92rem; }
+            /* 가로 스크롤 */
+            .why-grid {
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 14px;
+                padding: 4px 20px 16px;
+                margin: 0 -20px;
+                scrollbar-width: none;
+            }
+            .why-grid::-webkit-scrollbar { display: none; }
+            .why-card {
+                min-width: 76vw;
+                max-width: 76vw;
+                scroll-snap-align: start;
+                flex-shrink: 0;
+                padding: 24px 22px;
+                gap: 8px;
+            }
+            .why-card-title { font-size: 1.05rem; }
+            .why-card-desc { font-size: 0.85rem; line-height: 1.7; }
+            .why-card-stat { font-size: 1.15rem; margin-top: 4px; }
         }
 
         /* =========================================
@@ -2796,13 +2822,13 @@
     <!-- ── 왜 잘할 수밖에 없는가 섹션 ── -->
     <section id="why-dearname" class="bg-white" style="padding: 100px 24px;">
         <div class="section-inner">
-            <div style="text-align:center;margin-bottom:56px;">
+            <div style="text-align:center;margin-bottom:48px;">
                 <span class="section-tag fade-up">왜 DearName인가</span>
                 <h2 class="section-title fade-up delay-1" style="margin-bottom:16px;">
                     좋은 이름엔 이유가 있습니다
                 </h2>
                 <p class="fade-up delay-2" style="font-size:1.05rem;color:var(--text-secondary);line-height:1.85;margin:0 auto;max-width:560px;">
-                    전통 성명학의 깊이와 AI의 정밀함이 만나<br>어떤 방식과도 다른 분석이 가능합니다.
+                    수백 년 전통 이론과 정밀한 연산 분석이 만나<br>어떤 방식과도 다른 결과를 만들어냅니다.
                 </p>
             </div>
 
@@ -2814,20 +2840,20 @@
                     <h3 class="why-card-title">수백 년 이론,<br>하나도 빠짐없이</h3>
                     <p class="why-card-desc">
                         자원오행·발음오행·발음음양·사격수리·수리오행 —
-                        검증된 전통 성명학의 5가지 기준을 모두 적용합니다.
-                        한 가지 기준에 치우치지 않아 균형 잡힌 이름이 나옵니다.
+                        검증된 5가지 기준을 모두 적용합니다.
+                        한 가지에 치우치지 않아 균형 잡힌 이름이 나옵니다.
                     </p>
                     <div class="why-card-stat">5가지 <span>성명학 기준 완전 적용</span></div>
                 </div>
 
                 <div class="why-card why-card--accent">
                     <div class="why-card-icon">⚡</div>
-                    <div class="why-card-kicker">AI 정밀 분석</div>
-                    <h3 class="why-card-title">사람이 놓치는 것을<br>AI는 놓치지 않습니다</h3>
+                    <div class="why-card-kicker">정밀 연산 분석</div>
+                    <h3 class="why-card-title">수천 가지 조합을<br>실시간으로 따집니다</h3>
                     <p class="why-card-desc">
-                        획수 계산, 음양 판별, 81수리 배합은
-                        수십 가지 변수를 동시에 따져야 합니다.
-                        AI가 모든 조합을 교차 검증해 최적의 결과만 골라냅니다.
+                        획수·음양·수리·오행의 경우의 수는
+                        사람이 일일이 계산하기엔 너무 많습니다.
+                        모든 조합을 즉시 교차 검증해 최적의 결과만 골라냅니다.
                     </p>
                     <div class="why-card-stat">81가지 <span>수리 전수 교차 분석</span></div>
                 </div>
@@ -2839,7 +2865,7 @@
                     <p class="why-card-desc">
                         타고난 사주의 오행 강약을 먼저 분석하고,
                         부족한 기운을 채워주는 한자와 획수를 설계합니다.
-                        이름이 단순한 호칭이 아닌 평생의 기운이 되는 이유입니다.
+                        이름이 평생의 기운이 되는 이유입니다.
                     </p>
                     <div class="why-card-stat">100% <span>사주 기반 개인 맞춤</span></div>
                 </div>
