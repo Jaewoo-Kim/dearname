@@ -2020,12 +2020,11 @@
 
         /* ── 후보 비교 테이블 ── */
         #report-compare-section { max-width:780px; margin:0 auto 12px; }
-        .compare-table-wrap { overflow-x:auto; border-radius: var(--radius-md); border:1px solid var(--border-light); box-shadow:0 4px 20px rgba(0,0,0,0.05); }
-        .compare-table { width:100%; border-collapse:collapse; min-width:380px; }
+        .compare-table-wrap { border-radius: var(--radius-md); border:1px solid var(--border-light); box-shadow:0 4px 20px rgba(0,0,0,0.05); overflow:hidden; }
+        .compare-table { width:100%; border-collapse:collapse; table-layout:fixed; }
         .compare-table thead tr { background:var(--bg-dark); }
-        .ct-label-col { padding:10px 16px; text-align:left; }
-        .ct-name-col { padding:14px 10px; text-align:center; cursor:pointer; transition:background 0.15s; min-width:110px; }
-        .ct-name-col:hover { background:rgba(255,255,255,0.08); }
+        .ct-label-col { padding:10px 16px; text-align:left; width:30%; }
+        .ct-name-col { padding:14px 10px; text-align:center; }
         .ct-name-col.ct-active { background:rgba(212,175,55,0.22); }
         .ct-name-kr { font-size:1.05rem; font-weight:900; color:white; line-height:1.2; }
         .ct-name-hj { font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:2px; }
@@ -2049,19 +2048,17 @@
         .ct-bad       { color:#b45309; font-weight:800; }
         .ct-very-bad  { color:#dc2626; font-weight:800; }
         .ct-mid       { color:var(--text-muted); font-weight:600; }
-        /* ── 모바일: 비교 테이블 가로 스크롤 + 레이블 너비 보장 ── */
+        /* ── 모바일: 비교 테이블 ── */
         @media (max-width: 768px) {
             #report-compare-section { padding: 0 14px; }
-            .compare-table-wrap { position: relative; }
-            .compare-table-wrap::after { content:''; position:absolute; top:0; right:0; width:24px; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.85)); pointer-events:none; border-radius:0 18px 18px 0; }
-            .compare-table { min-width: 460px; }
-            .ct-label-col { min-width: 96px !important; padding: 8px 10px !important; }
-            .ct-name-col { min-width: 105px !important; padding: 12px 6px !important; }
-            .ct-row-label { font-size: 0.78rem; }
-            .ct-row-sub { font-size: 0.65rem; }
-            .ct-name-kr { font-size: 0.95rem; }
-            .ct-val-col { padding: 8px 6px !important; font-size: 0.8rem; }
-            .ct-score-num { font-size: 1rem; }
+            .ct-label-col { width: 32%; padding: 8px 8px !important; }
+            .ct-name-col { padding: 10px 4px !important; }
+            .ct-row-label { font-size: 0.75rem; }
+            .ct-row-sub { font-size: 0.62rem; }
+            .ct-name-kr { font-size: 0.88rem; }
+            .ct-name-hj { font-size: 0.68rem; }
+            .ct-val-col { padding: 8px 4px !important; font-size: 0.75rem; }
+            .ct-score-num { font-size: 0.95rem; }
         }
 
 
@@ -6279,7 +6276,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         el.innerHTML = `
             <div style="margin-bottom:10px;">
                 <h3 style="font-size:0.88rem;font-weight:800;color:var(--text-secondary);letter-spacing:1.5px;text-transform:uppercase;margin:0 0 2px;">이름 후보 비교</h3>
-                <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">이름을 클릭하면 해당 보고서로 전환됩니다.</p>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">위 이름 탭을 클릭하면 해당 보고서로 전환됩니다.</p>
             </div>
             <div class="compare-table-wrap">
                 <table class="compare-table">
@@ -6289,8 +6286,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                             ${candidates.map((c,i) => {
                                 const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
                                 const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
-                                return `<th class="ct-name-col${i===currentIdx?' ct-active':''}"
-                                    onclick="document.querySelectorAll('.name-card-tab')[${i}]&&_selectReportTab(document.querySelectorAll('.name-card-tab')[${i}],${i})">
+                                return `<th class="ct-name-col${i===currentIdx?' ct-active':''}">
                                     <div class="ct-name-kr">${kr}</div>
                                     <div class="ct-name-hj">${hj}</div>
                                     ${i===currentIdx?'<div class="ct-now-badge">현재 보고서</div>':''}
