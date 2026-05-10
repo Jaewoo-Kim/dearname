@@ -5820,16 +5820,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const _ng2 = g => _normG(g); // 4단계 정규화
             _renderVerdict('verdict-self-ch1',
                 _ng2(data.sajuOheng.grade),
-                `자원오행 <b>${_ng2(data.sajuOheng.grade)}</b>`);
+                `자원오행이 <b>${_ng2(data.sajuOheng.grade)}</b>입니다.`);
             _renderVerdict('verdict-self-ch2',
                 _wg(data.pronounceOheng.grade, data.pronounceYin.grade),
-                `발음 오행 <b>${_ng2(data.pronounceOheng.grade)}</b> · 발음 음양 <b>${_ng2(data.pronounceYin.grade)}</b>`);
+                `발음 오행 <b>${_ng2(data.pronounceOheng.grade)}</b> · 발음 음양 <b>${_ng2(data.pronounceYin.grade)}</b>입니다.`);
             _renderVerdict('verdict-self-ch3',
                 _ng2(data.math4.grade),
-                `사격수리 <b>${_ng2(data.math4.grade)}</b>`);
+                `사격수리가 <b>${_ng2(data.math4.grade)}</b>입니다.`);
             _renderVerdict('verdict-self-ch4',
                 _wg(data.mathOheng.grade, data.mathYin.grade),
-                `수리 오행 <b>${_ng2(data.mathOheng.grade)}</b> · 수리 음양 <b>${_ng2(data.mathYin.grade)}</b>`);
+                `수리 오행 <b>${_ng2(data.mathOheng.grade)}</b> · 수리 음양 <b>${_ng2(data.mathYin.grade)}</b>입니다.`);
         }
 
         // ── 실천 가이드 ───────────────────────────────────────────────
@@ -6804,12 +6804,12 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const _ch4g = (pronGrade==='매우 나쁨'||yinGrade==='매우 나쁨')?'매우 나쁨'
                         : (pronGrade==='나쁨'&&yinGrade==='나쁨')?'나쁨'
                         : (pronGrade==='매우 좋음'&&yinGrade==='매우 좋음')?'매우 좋음':'좋음';
-            _renderVerdict('verdict-ch4', _ch4g, `발음 오행 <b>${pronGrade}</b> · 발음 음양 <b>${yinGrade}</b>`);
+            _renderVerdict('verdict-ch4', _ch4g, `발음 오행 <b>${pronGrade}</b> · 발음 음양 <b>${yinGrade}</b>입니다.`);
             _renderVerdict('verdict-ch5a', math4Grade, math4Desc);
             const _ch5bg = (mathOhengGrade==='매우 나쁨'||mathYinGrade==='매우 나쁨')?'매우 나쁨'
                          : (mathOhengGrade==='나쁨'||mathYinGrade==='나쁨')?'나쁨'
                          : (mathOhengGrade==='매우 좋음'&&mathYinGrade==='매우 좋음')?'매우 좋음':'좋음';
-            _renderVerdict('verdict-ch5b', _ch5bg, `수리 오행 <b>${mathOhengGrade}</b> · 수리 음양 <b>${mathYinGrade}</b>`);
+            _renderVerdict('verdict-ch5b', _ch5bg, `수리 오행 <b>${mathOhengGrade}</b> · 수리 음양 <b>${mathYinGrade}</b>입니다.`);
 
             // 수리오행·음양 섹션 콘텐츠
             const suriOhengYinEl = document.getElementById('report-suri-oheng-yin');
@@ -7060,16 +7060,22 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const jiColor   = _KR_COLOR[jiO]  || '#888';
             const story = _getPillarStory(p, key);
             // 천간/지지 오행 — 같더라도 항상 두 개 표시 (예: 쇠쇠)
+            const ganTip = (_GAN_STORY[p.gan] || p.gan) + ` · ${ganO}(${CHEONGAN_OHENG_KR[p.gan]||''}) 기운 · 천간(天干)`;
+            const jiTip  = (_JI_STORY[p.ji]  || p.ji)  + ` · ${jiO}(${JIJI_OHENG_KR[p.ji]||''}) 기운 · 지지(地支)`;
             const ohengPills = `
-                <span class="saju-oheng-pill" style="background:${pillColor};" title="천간(天干) — 하늘의 기운">${ganO}</span>
-                <span class="saju-oheng-pill" style="background:${jiColor};margin-left:4px;" title="지지(地支) — 땅의 기운">${jiO}</span>`;
+                <span class="saju-oheng-pill" style="background:${pillColor};">${ganO} 천간</span>
+                <span class="saju-oheng-pill" style="background:${jiColor};margin-left:4px;">${jiO} 지지</span>`;
             return `<div class="saju-box${isPoint ? ' point' : ''}">
                 <div class="saju-box-bar" style="${isPoint ? '' : `background:${pillColor}33;`}">
                     ${isPoint ? `<div class="saju-me-badge">👤 나 · 이 아이</div>` : ''}
                 </div>
                 <div class="saju-box-inner">
                     <div class="saju-label">${label}</div>
-                    <div class="saju-hanja"><span style="color:${pillColor};">${p.gan}</span> <span style="color:${jiColor};">${p.ji}</span></div>
+                    <div class="saju-hanja">
+                        <span class="term-tip" data-tip="${ganTip}" style="color:${pillColor};border-bottom-color:${pillColor}88;">${p.gan}</span>
+                        <span style="color:var(--border-light);font-size:1.4rem;margin:0 2px;">·</span>
+                        <span class="term-tip" data-tip="${jiTip}" style="color:${jiColor};border-bottom-color:${jiColor}88;">${p.ji}</span>
+                    </div>
                     <div class="saju-kor">${_toHangul(p.gan)}${_toHangul(p.ji)}</div>
                     <div style="margin-top:4px;">${ohengPills}</div>
                     <div class="saju-story">${story}</div>
