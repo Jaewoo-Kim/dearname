@@ -408,15 +408,15 @@
                 overflow-x: auto;
                 scroll-snap-type: x mandatory;
                 -webkit-overflow-scrolling: touch;
-                gap: 14px;
-                padding: 4px 20px 16px;
+                gap: 12px;
+                padding: 4px 20px 4px;
                 margin: 0 -20px;
                 scrollbar-width: none;
             }
             .why-grid::-webkit-scrollbar { display: none; }
             .why-card {
-                min-width: 76vw;
-                max-width: 76vw;
+                min-width: 72vw;
+                max-width: 72vw;
                 scroll-snap-align: start;
                 flex-shrink: 0;
                 padding: 24px 22px;
@@ -466,17 +466,38 @@
                 overflow-x: auto;
                 scroll-snap-type: x mandatory;
                 -webkit-overflow-scrolling: touch;
-                gap: 14px;
-                margin-top: 32px;
-                padding-bottom: 12px;
+                gap: 12px;
+                margin-top: 24px;
+                padding: 4px 20px 4px;
+                margin-left: -20px;
+                margin-right: -20px;
                 scrollbar-width: none;
             }
             .review-grid::-webkit-scrollbar { display: none; }
             .review-card {
-                min-width: 78vw;
-                max-width: 78vw;
+                min-width: 72vw;
+                max-width: 72vw;
                 scroll-snap-align: start;
                 flex-shrink: 0;
+            }
+            /* 스크롤 dot 인디케이터 공통 */
+            .scroll-dots {
+                display: flex;
+                justify-content: center;
+                gap: 6px;
+                margin-top: 16px;
+            }
+            .scroll-dot {
+                width: 6px; height: 6px;
+                border-radius: 50%;
+                background: var(--border-light);
+                transition: background 0.2s, width 0.2s;
+                cursor: pointer;
+            }
+            .scroll-dot.active {
+                background: var(--gold-premium);
+                width: 18px;
+                border-radius: 3px;
             }
         }
         @media (max-width: 480px) {
@@ -2832,7 +2853,7 @@
                 </p>
             </div>
 
-            <div class="why-grid fade-up delay-2">
+            <div class="why-grid fade-up delay-2" id="why-grid">
 
                 <div class="why-card">
                     <div class="why-card-icon">📜</div>
@@ -2871,6 +2892,7 @@
                 </div>
 
             </div>
+            <div class="scroll-dots" id="why-dots"></div>
         </div>
     </section>
 
@@ -3164,7 +3186,7 @@
             </div>
 
             <!-- 리뷰 카드 그리드 -->
-            <div class="review-grid">
+            <div class="review-grid" id="review-grid">
 
                 <div class="review-card fade-up">
                     <div>
@@ -3257,6 +3279,7 @@
                 </div>
 
             </div>
+            <div class="scroll-dots" id="review-dots"></div>
         </div>
     </section>
 
@@ -10449,6 +10472,50 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 sendChatMessage();
             }
         });
+    });
+
+    // ── 모바일 가로 스크롤 Dot 인디케이터 ──────────────────────
+    function _initScrollDots(gridId, dotsId) {
+        const grid = document.getElementById(gridId);
+        const dotsWrap = document.getElementById(dotsId);
+        if (!grid || !dotsWrap) return;
+
+        // 모바일에서만 작동
+        if (window.innerWidth > 768) return;
+
+        const cards = Array.from(grid.children);
+        if (cards.length < 2) return;
+
+        // dot 생성
+        dotsWrap.innerHTML = cards.map((_, i) =>
+            `<div class="scroll-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></div>`
+        ).join('');
+
+        const dots = dotsWrap.querySelectorAll('.scroll-dot');
+
+        // 스크롤 → dot 업데이트
+        let ticking = false;
+        grid.addEventListener('scroll', () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => {
+                const idx = Math.round(grid.scrollLeft / (cards[0].offsetWidth + 12));
+                dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+                ticking = false;
+            });
+        }, { passive: true });
+
+        // dot 클릭 → 해당 카드로 이동
+        dots.forEach((d, i) => {
+            d.addEventListener('click', () => {
+                grid.scrollTo({ left: (cards[i].offsetWidth + 12) * i, behavior: 'smooth' });
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        _initScrollDots('why-grid',    'why-dots');
+        _initScrollDots('review-grid', 'review-dots');
     });
 
 
