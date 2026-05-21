@@ -9092,28 +9092,18 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         `;
 
         // ── 오행 분포 계산 (사주 기반) ──────────────────────────────
-        // calcOhengScores(지장간 가중치)와 동일한 기준으로 균형 판정
-        let ohengScores8 = null;
-        if (typeof calcOhengScores === 'function') {
-            ohengScores8 = calcOhengScores(saju);
-        }
-        // fallback: 단순 8자 카운트
+        // 셀프 진단: 지장간 미포함, 단순 8자 카운트 기준으로 통일
+        // (칩 표시·진단 텍스트·등급 세 곳 모두 동일 기준 적용)
         const ohengCount = {'木':0,'火':0,'土':0,'金':0,'水':0};
         for (const p of pillars) {
             const go = _CG_OHENG[p.gan]; if (go) ohengCount[go]++;
             const jo = _JJ_OHENG[p.ji];  if (jo) ohengCount[jo]++;
         }
 
-        // ── 오행 균형/불균형 뱃지 — calcOhengScores 점수 기준(score<10 = 부족) ──
-        let weakList8, isBalanced8, strongList8 = [];
-        if (ohengScores8) {
-            weakList8   = Object.entries(ohengScores8).filter(([,s]) => s < 10).map(([o]) => o);
-            strongList8 = Object.entries(ohengScores8).filter(([,s]) => s >= 40).map(([o]) => o);
-            isBalanced8 = weakList8.length === 0 && strongList8.length === 0;
-        } else {
-            weakList8   = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
-            isBalanced8 = weakList8.length === 0;
-        }
+        // ── 오행 균형/불균형 뱃지 — 단순 카운트 기준(c === 0 = 부재) ──
+        const weakList8   = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
+        const strongList8 = Object.entries(ohengCount).filter(([,c]) => c >= 3).map(([o]) => o);
+        const isBalanced8 = weakList8.length === 0;
         const balanceBadge = document.getElementById('self-oheng-balance-badge');
         if (balanceBadge) {
             balanceBadge.innerHTML = isBalanced8
