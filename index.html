@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 === DearName v2 운영자 설정 가이드 ===
 
 [토스페이먼츠 연동]
@@ -9135,34 +9135,45 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             let diagHtml = '';
 
             if (isBalanced8) {
-                // 균형 사주 — 4 시나리오
+                // 균형 사주 — 5 시나리오 (상대적 강약 세분화)
                 const _avg      = Object.values(ohengCount).reduce((a,b)=>a+b,0) / 5;
                 const _relWeak  = Object.entries(ohengCount).filter(([,c])=>c < _avg).map(([o])=>o);
-                const _relStrong= Object.entries(ohengCount).filter(([,c])=>c >= _avg).map(([o])=>o);
+                const _relStrong= Object.entries(ohengCount).filter(([,c])=>c > _avg).map(([o])=>o);  // strict gt — 완전균등 시 빈배열
                 let _balMsg = '', _balBg = 'linear-gradient(135deg,#f0fdf4,#dcfce7)', _balBorder = '#86efac', _balColor = '#15803d', _balTitle = '#16a34a', _balTitleTxt = '✦ 사주 원국 진단';
 
                 if (!hasNameOheng) {
                     _balMsg = '특정 기운에 치우침이 없어 이름의 자원오행 선택 자유도가 높습니다. 아이의 원하는 기질과 성향에 맞추어 이름을 지어주세요.';
                 } else {
-                    const _ohKr  = o => _OHENG_NAME[o] || _OHENG_NAME[{'나무':'木','불':'火','흙':'土','쇠':'金','물':'水','\uF90A':'金'}[o]] || o;
+                    const _ohKr  = o => _OHENG_NAME[o] || _OHENG_NAME[{'나무':'木','불':'火','흙':'土','쇠':'金','물':'水','金':'金'}[o]] || o;
                     const _nd    = nameOhengItems.map(it=>`${it.hanja}(${_ohKr(it.ohaeng)})`).join(', ');
                     const _cw    = _nameSet.some(o=>_relWeak.includes(o));
-                    const _cs    = _nameSet.some(o=>_relStrong.includes(o));
+                    const _cs    = _relStrong.length > 0 && _nameSet.some(o=>_relStrong.includes(o));
                     if (_cw && !_cs) {
+                        // 최선: 상대적 약한 오행만 보충
                         const _fkr = _nameSet.filter(o=>_relWeak.includes(o)).map(o=>_OHENG_NAME[o]||o).join(', ');
                         _balMsg = `선택한 이름의 자원오행(${_nd})이 사주에서 상대적으로 약한 <b>${_fkr}</b> 기운을 보충합니다. 균형 잡힌 사주를 더욱 탄탄하게 완성해주는 좋은 선택입니다.`;
                         _balTitleTxt = '✦ 사주 원국 진단 — 이름이 균형을 강화합니다';
-                    } else if (_cs && !_cw) {
+                    } else if (_cw && _cs) {
+                        // 부분 보완: 약한 오행도, 강한 오행도 함께 강화
+                        const _fkr = _nameSet.filter(o=>_relWeak.includes(o)).map(o=>_OHENG_NAME[o]||o).join(', ');
                         const _dkr = _nameSet.filter(o=>_relStrong.includes(o)).map(o=>_OHENG_NAME[o]||o).join(', ');
-                        _balMsg = `선택한 이름의 자원오행(${_nd})이 사주에서 이미 강한 <b>${_dkr}</b> 기운을 더욱 강화합니다. 다른 오행의 한자도 함께 검토해보세요.`;
+                        const _allWeakKr = _relWeak.map(o=>_OHENG_NAME[o]||o).join(', ');
+                        _balMsg = `선택한 이름의 자원오행(${_nd})이 상대적으로 약한 <b>${_fkr}</b> 기운을 보충하지만, 이미 강한 <b>${_dkr}</b> 기운도 함께 강화합니다. <b>${_allWeakKr}</b> 위주의 한자 선택이 더 이상적입니다.`;
+                        _balBg='linear-gradient(135deg,#fffbeb,#fef9ec)';_balBorder='#fde68a';_balColor='#78350f';_balTitle='#92400e';
+                        _balTitleTxt = '✦ 사주 원국 진단 — 부분적 보완 (더 나은 선택이 있습니다)';
+                    } else if (_cs && !_cw) {
+                        // 비추: 이미 강한 오행만 더 강화
+                        const _dkr = _nameSet.filter(o=>_relStrong.includes(o)).map(o=>_OHENG_NAME[o]||o).join(', ');
+                        const _allWeakKr = _relWeak.map(o=>_OHENG_NAME[o]||o).join(', ');
+                        _balMsg = `선택한 이름의 자원오행(${_nd})이 사주에서 이미 강한 <b>${_dkr}</b> 기운을 더욱 강화합니다. 상대적으로 약한 <b>${_allWeakKr}</b> 기운의 한자 선택을 권장합니다.`;
                         _balBg='linear-gradient(135deg,#fffbeb,#fef3c7)';_balBorder='#fcd34d';_balColor='#92400e';_balTitle='#b45309';
                         _balTitleTxt = '✦ 사주 원국 진단 — 기운 과집중 주의';
                     } else {
+                        // 중립: 이름 오행이 중간값 or 완전균등 사주
                         _balMsg = `선택한 이름의 자원오행(${_nd})이 고루 분산되어 있습니다. 균형 잡힌 사주와 조화를 이루며 아이의 다채로운 기질을 이름에 담아줍니다.`;
                         _balTitleTxt = '✦ 사주 원국 진단 — 이름과 사주가 조화롭습니다';
                     }
-                }
-                diagHtml = `
+                }                diagHtml = `
                 <div style="background:${_balBg};border:1px solid ${_balBorder};border-radius: var(--radius-md);padding:20px 24px;">
                     <div style="font-size:0.82rem;font-weight:800;color:${_balTitle};letter-spacing:1px;margin-bottom:8px;">${_balTitleTxt}</div>
                     <p style="font-size:0.92rem;color:${_balColor};line-height:1.8;margin:0;">
