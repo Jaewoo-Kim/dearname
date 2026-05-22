@@ -3968,19 +3968,20 @@
                     <div style="font-size:0.7rem;font-weight:800;color:#94a3b8;letter-spacing:1px;margin-bottom:10px;">이 보고서 (셀프 진단)</div>
                     <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px;">
                         <li style="font-size:0.82rem;color:rgba(255,255,255,0.5);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✓</span> 사주 원국 & 오행 분포 확인</li>
-                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.5);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✓</span> 6대 성명학 지표 즉시 분석</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.5);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✓</span> 발음·수리·사주 6대 지표 즉시 분석</li>
                         <li style="font-size:0.82rem;color:rgba(255,255,255,0.5);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✓</span> 이름 종합 점수 확인</li>
-                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> 대운 10년 흐름 없음</li>
-                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> AI 개인화 소견서 없음</li>
-                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> 후보 이름 비교 없음</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.5);display:flex;gap:7px;align-items:flex-start;"><span style="color:#22c55e;flex-shrink:0;">✓</span> 한자별 획수 · 뜻 확인</li>
+                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> 조후·통관 정밀 사주 분석 없음</li>
+                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> 한자 스토리 · 이름 이야기 없음</li>
+                        <li style="font-size:0.82rem;color:#64748b;display:flex;gap:7px;align-items:flex-start;"><span style="color:#ef4444;flex-shrink:0;">✕</span> AI 소견서 · 후보 이름 비교 없음</li>
                     </ul>
                 </div>
                 <div style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.25);border-radius: var(--radius-md);padding:16px;">
                     <div style="font-size:0.7rem;font-weight:800;color:var(--gold-premium);letter-spacing:1px;margin-bottom:10px;">AI 프리미엄 작명</div>
                     <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px;">
-                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#d4af37;flex-shrink:0;">✦</span> 7챕터 사주·한자·수리 정밀 분석</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#d4af37;flex-shrink:0;">✦</span> 조후·통관·격국 정밀 사주 분석</li>
                         <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#d4af37;flex-shrink:0;">✦</span> 자원오행 레이더 차트 시각화</li>
-                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#d4af37;flex-shrink:0;">✦</span> 대운 10년 인생 흐름 차트</li>
+                        <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#d4af37;flex-shrink:0;">✦</span> 한자 스토리 & 아이의 미래 이야기</li>
                         <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#d4af37;flex-shrink:0;">✦</span> 후보 이름 비교 분석표</li>
                         <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#d4af37;flex-shrink:0;">✦</span> AI 개인화 작명 소견서</li>
                         <li style="font-size:0.82rem;color:rgba(255,255,255,0.85);display:flex;gap:7px;align-items:flex-start;"><span style="color:#d4af37;flex-shrink:0;">✦</span> AI 작명 채팅 상담</li>
@@ -5766,10 +5767,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // 셀프 리포트 뷰 오픈 이벤트
     function showSelfReportView() {
         if (!_isSubscribed()) { openSubscribeModal(); return; }
+
+        // ── 필수 입력 검증 ──
+        const _bd = document.getElementById('birth-date')?.value;
+        if (!_bd) { _showToast('⚠️ 생년월일을 입력해주세요.'); return; }
+        const _hourVal = document.getElementById('birth-time-hour')?.value;
+        if (!_hourVal) { _showToast('⚠️ 태어난 시간을 선택해주세요.'); return; }
+
         const lastName  = document.getElementById('kr-last-name').value.trim()  || '홍';
         const firstName = document.getElementById('kr-first-name').value.trim() || '길동';
         const gender    = (document.querySelector('[name="self_gender"]:checked')?.value || 'M') === 'M' ? '남자' : '여자';
-        const bDate     = document.getElementById('birth-date').value || '2026-03-07';
+        const bDate     = _bd;
         const bTime     = document.getElementById('birth-time').value || '12:00';
         const selects   = document.querySelectorAll('#hanja-dropdowns select');
         let hanjaStr = '';
