@@ -9101,9 +9101,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
 
         // ── 오행 균형/불균형 뱃지 — 단순 카운트 기준(c === 0 = 부재) ──
-        const weakList8   = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
-        const strongList8 = Object.entries(ohengCount).filter(([,c]) => c >= 3).map(([o]) => o);
-        const isBalanced8 = weakList8.length === 0;
+        const weakList8      = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
+        const strongList8    = Object.entries(ohengCount).filter(([,c]) => c >= 3).map(([o]) => o);
+        const isBalanced8    = weakList8.length === 0;
+        const maxOhengCount  = Math.max(...Object.values(ohengCount));
         const balanceBadge = document.getElementById('self-oheng-balance-badge');
         if (balanceBadge) {
             balanceBadge.innerHTML = isBalanced8
@@ -9219,6 +9220,19 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:10px;">✦ 사주 원국 진단</div>
                     <p style="font-size:0.92rem;color:var(--text-secondary);line-height:1.65;margin:0;">${parts.join('<br>')}</p>
                 </div>`;
+            }
+            // ── 알고리즘 한계 안내 (자연스럽게, 비강압적) ──
+            if (maxOhengCount >= 4) {
+                // 한 오행이 4개 이상 — 특수격(종격) 가능성, 좀 더 눈에 띄는 안내
+                diagHtml += `<p style="margin:10px 0 0;font-size:0.74rem;color:#92400e;line-height:1.6;">
+                    ⚠ 사주에 특정 기운이 집중된 경우, 오히려 그 기운을 강화하는 것이 유리할 수 있습니다.
+                    계절 기운(조후)·오행 집중(특수격) 등 심층 분석은 <span style="font-weight:700;">프리미엄 보고서</span>에서 확인하실 수 있습니다.
+                </p>`;
+            } else {
+                // 일반 안내 — 아주 작게, 회색
+                diagHtml += `<p style="margin:8px 0 0;font-size:0.72rem;color:#94a3b8;line-height:1.5;">
+                    💡 계절 기운(조후)·오행 대립(통관) 등 정밀 분석은 프리미엄에서 반영됩니다.
+                </p>`;
             }
             diagEl.innerHTML = diagHtml;
         }
