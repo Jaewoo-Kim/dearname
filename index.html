@@ -6020,7 +6020,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         const selfSuriOhengYinEl = document.getElementById('self-suri-oheng-yin');
         if (selfSuriOhengYinEl) {
-            selfSuriOhengYinEl.innerHTML = _buildSuriSubHtml(data.mathYin, data.mathOheng);
+            selfSuriOhengYinEl.innerHTML = _buildSuriSubHtmlSelf(data.mathYin, data.mathOheng);
         }
 
         // ── ⑥ 종합 결론 섹션 ─────────────────────────────────────────
@@ -7508,6 +7508,64 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     ${badge(myG)}
                 </div>
                 <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(myG)]}</p>
+            </div>`;
+    }
+
+    // ── 수리 오행·음양 — 셀프 전용 간소화 버전 ──────────────────────
+    function _buildSuriSubHtmlSelf(mathYin, mathOheng) {
+        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#1d4ed8','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const badge   = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius: var(--radius-lg);padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
+
+        const moG = _normG(mathOheng?.grade || '평');
+        const myG = _normG(mathYin?.grade   || '평');
+
+        // 수리 음양 획수 칩
+        const yinSeq  = mathYin?.seq || [];
+        const yyChips = yinSeq.length
+            ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">${
+                yinSeq.map(s => {
+                    const isYang = s.yin === '양';
+                    return `<div style="text-align:center;">
+                        <div style="font-size:1rem;font-weight:800;color:var(--bg-dark);">${s.val}</div>
+                        <div style="margin-top:3px;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius: var(--radius-lg);
+                            background:${isYang?'#fff7ed':'#eff6ff'};color:${isYang?'#c2410c':'#1d4ed8'};display:inline-block;">${s.yin||'?'}</div>
+                    </div>`;
+                }).join(`<div style="font-size:0.9rem;color:var(--text-muted);align-self:flex-start;padding-top:4px;">·</div>`)
+              }</div>`
+            : '';
+
+        const ohengTexts = {
+            '매우 좋음': `원·형·이·정격 획수의 오행이 모두 <b>상생(相生)</b>으로 연결됩니다. 인생 각 시기의 기운이 막힘없이 이어지는 구성입니다.`,
+            '좋음':      `수리의 오행 흐름에 상생이 우세합니다. 일부 혼재된 흐름은 자원오행·발음오행이 보완해줍니다.`,
+            '나쁨':      `수리 오행 사이에 상극이 포함되어 있습니다. 자원오행과 발음오행에서 보완 기운을 함께 살펴보세요.`,
+            '매우 나쁨': `수리 오행 전 구간에 <b>상극(相剋)</b>이 발생합니다. 가능하다면 획수 구성을 재검토하는 것을 권장합니다.`,
+        };
+        const yinTexts = {
+            '매우 좋음': `이름 한자들의 획수가 홀수(양·陽)와 짝수(음·陰)로 균형 있게 배합되어 있습니다.`,
+            '좋음':      `이름 획수의 음양 배합이 대체로 균형 잡혀 있습니다.`,
+            '나쁨':      `이름 획수의 음양 배합이 다소 한쪽으로 치우쳐 있습니다.`,
+            '매우 나쁨': `이름 획수가 홀수 또는 짝수 한쪽으로만 쏠려 <b>음양 균형이 깨진</b> 상태입니다.`,
+        };
+
+        return `
+            <!-- 수리 오행 카드 -->
+            <div class="sound-unified" style="margin-bottom:16px;">
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">${_tip('수리오행','tip-left')}</span>
+                    ${badge(moG)}
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.75;color:var(--text-primary);">${ohengTexts[moG]||ohengTexts['좋음']}</p>
+            </div>
+            <!-- 수리 음양 카드 -->
+            <div class="sound-unified">
+                ${yyChips}
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">${_tip('음양','tip-left')}</span>
+                    ${badge(myG)}
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.75;color:var(--text-primary);">${yinTexts[myG]||yinTexts['좋음']}</p>
             </div>`;
     }
 
