@@ -9231,14 +9231,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             }
             // ── 알고리즘 한계 안내 (자연스럽게, 비강압적) ──
             if (maxOhengCount >= 4) {
-                // 한 오행이 4개 이상 — 특수격 가능성, 결론이 뒤집힐 수 있음을 암시
+                // 한 오행이 4개 이상 — 특수격(종격) 가능성, 좀 더 눈에 띄는 안내
                 diagHtml += `<p style="margin:10px 0 0;font-size:0.74rem;color:#92400e;line-height:1.6;">
-                    ⚠ 이 결과는 8글자 단순 배분 기준입니다. 특정 기운이 집중된 사주는 오히려 그 기운을 더 키우는 것이 유리한 경우가 있어, 프리미엄 분석에서 <span style="font-weight:700;">전혀 다른 결론</span>이 나올 수 있습니다.
+                    ⚠ 사주에 특정 기운이 집중된 경우, 오히려 그 기운을 강화하는 것이 유리할 수 있습니다.
+                    계절 기운(조후)·오행 집중(특수격) 등 심층 분석은 <span style="font-weight:700;">프리미엄 보고서</span>에서 확인하실 수 있습니다.
                 </p>`;
             } else {
-                // 일반 안내 — 결론이 달라질 수 있다는 여지
+                // 일반 안내 — 아주 작게, 회색
                 diagHtml += `<p style="margin:8px 0 0;font-size:0.72rem;color:#94a3b8;line-height:1.5;">
-                    💡 이 결과는 8글자 단순 배분 기준입니다. 계절 기운(조후)·오행 충돌(통관)까지 반영하면 결론이 달라질 수 있습니다.
+                    💡 계절 기운(조후)·오행 대립(통관) 등 정밀 분석은 프리미엄에서 반영됩니다.
                 </p>`;
             }
             diagEl.innerHTML = diagHtml;
