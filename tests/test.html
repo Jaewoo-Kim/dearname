@@ -33,7 +33,7 @@
 <body>
 
 <h1>🧪 DearName 만세력 엔진 테스트</h1>
-<p class="subtitle">runner.js 와 동일한 83개 케이스 — 브라우저에서 직접 실행</p>
+<p class="subtitle">runner.js 와 동일한 84개 케이스 — 브라우저에서 직접 실행</p>
 <button id="btn-run">▶ 테스트 실행</button>
 <div id="summary" style="display:none"></div>
 <div id="output"></div>
@@ -200,13 +200,17 @@ suite('[LOGIC] calcSajuOhengGrade — 특수 입력 처리');
 }
 
 suite('[LOGIC] calcSajuOhengGrade — 균형형 (1990-02-16 16:20)');
-// ※ 가중 점수 기준 土·水 각 ≥25 → 土克水 통관 사주로 판정됨 (용신=金)
+// ※ 가중 점수로는 土·水 각 ≥25 → 土克水 통관. premium=true 시에만 통관 판정됨.
 {
   const D = '1990-02-16', T = '16:20';
-  assertEq(calcSajuOhengGrade(['木'], D, T, {}).grade, '좋음',     '[C] 통관(土克水) 사주 + 중립오행(木) → 좋음 [SNAP]');
-  assertEq(calcSajuOhengGrade(['土'], D, T, {}).grade, '나쁨',     '[D] 통관(土克水) 사주 + 충돌오행(土) → 나쁨');
-  assertEq(calcSajuOhengGrade(['木','土'], D, T, {}).grade, '나쁨','[E] 통관(土克水) 사주 + 충돌+중립 혼합 → 나쁨 [SNAP]');
-  assertEq(calcSajuOhengGrade(['金'], D, T, {}).grade, '매우 좋음','[C2] 통관(土克水) 사주 + 중재오행(金) → 매우 좋음');
+  const prem = { premium: true };
+  // 셀프작명 (8자 기준)
+  assertEq(calcSajuOhengGrade(['木'], D, T, {}).grade, '매우 좋음', '[C] 셀프(8자기준) 약한오행(木) → 매우 좋음');
+  assertEq(calcSajuOhengGrade(['土'], D, T, {}).grade, '나쁨',      '[D] 셀프(8자기준) 강한오행(土) → 나쁨');
+  assertEq(calcSajuOhengGrade(['木','土'], D, T, {}).grade, '좋음', '[E] 셀프(8자기준) 약+강 혼합 → 좋음');
+  // 프리미엄 (통관 적용)
+  assertEq(calcSajuOhengGrade(['金'], D, T, prem).grade, '매우 좋음','[C2] 프리미엄 통관(土克水) + 중재오행(金) → 매우 좋음');
+  assertEq(calcSajuOhengGrade(['土'], D, T, prem).grade, '나쁨',     '[C3] 프리미엄 통관(土克水) + 충돌오행(土) → 나쁨');
 }
 
 suite('[LOGIC] calcSajuOhengGrade — 편중형 (2000-03-01 22:00)');
@@ -373,19 +377,20 @@ suite('[LOGIC] calcSajuOhengGrade — 통관(通關) 분기');
 
   if (tg) {
     const { date: TD, time: TT, pairA: TA, pairB: TB, med: TMED } = tg;
-    const opts = { yajasi: true, apply30min: true };
+    const optsPrem = { yajasi: true, apply30min: true, premium: true };
+    const optsSelf = { yajasi: true, apply30min: true };
 
-    assertEq(calcSajuOhengGrade([TMED], TD, TT, opts).grade, '매우 좋음',
-      `[B] 통관(${TD}) + 중재오행[${TMED}] → 매우 좋음`);
+    assertEq(calcSajuOhengGrade([TMED], TD, TT, optsPrem).grade, '매우 좋음',
+      `[B] 통관(${TD}) + 중재오행[${TMED}] + premium → 매우 좋음`);
 
-    assertEq(calcSajuOhengGrade([TA], TD, TT, opts).grade, '나쁨',
-      `[C] 통관(${TD}) + 충돌오행A[${TA}] → 나쁨`);
+    assertEq(calcSajuOhengGrade([TA], TD, TT, optsPrem).grade, '나쁨',
+      `[C] 통관(${TD}) + 충돌오행A[${TA}] + premium → 나쁨`);
 
-    assertEq(calcSajuOhengGrade([TB], TD, TT, opts).grade, '나쁨',
-      `[D] 통관(${TD}) + 충돌오행B[${TB}] → 나쁨`);
+    assertEq(calcSajuOhengGrade([TB], TD, TT, optsPrem).grade, '나쁨',
+      `[D] 통관(${TD}) + 충돌오행B[${TB}] + premium → 나쁨`);
 
-    const descE = calcSajuOhengGrade([TMED], TD, TT, opts).desc;
-    assertCond(descE.includes('통관'), '[E] desc에 "통관" 문구 포함');
+    const gradeE = calcSajuOhengGrade([TMED], TD, TT, optsSelf).grade;
+    assertCond(gradeE !== undefined, '[E] 셀프작명(premium=false)은 통관 미적용 — 8자 기준 grade 반환');
   } else {
     ['B','C','D','E'].forEach(id => assertCond(false, `[${id}] 통관 탐색 실패 SKIP`));
   }

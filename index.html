@@ -7065,7 +7065,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if (!_nameOs.length) {
                 jawonGrade = '나쁨'; jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
             } else if (typeof calcSajuOhengGrade === 'function') {
-                const _gRes = calcSajuOhengGrade(_nameOs, _jawonBD, _jawonBT, _jawonOpts);
+                const _gRes = calcSajuOhengGrade(_nameOs, _jawonBD, _jawonBT, { ..._jawonOpts, premium: true });
                 jawonGrade  = _gRes.grade;
                 jawonDesc   = _gRes.desc;
             } else {
