@@ -33,7 +33,7 @@
 <body>
 
 <h1>🧪 DearName 만세력 엔진 테스트</h1>
-<p class="subtitle">runner.js 와 동일한 63개 케이스 — 브라우저에서 직접 실행</p>
+<p class="subtitle">runner.js 와 동일한 83개 케이스 — 브라우저에서 직접 실행</p>
 <button id="btn-run">▶ 테스트 실행</button>
 <div id="summary" style="display:none"></div>
 <div id="output"></div>
@@ -42,6 +42,7 @@
 <script src="../data/manjuryeok.js"></script>
 <script src="../data/lunar-calendar.js"></script>
 <script src="../lib/saju-engine.js"></script>
+<script src="../lib/name-spec.js"></script>
 
 <script>
 // ── 미니 테스트 프레임워크 ──────────────────────────────────────────
@@ -199,11 +200,13 @@ suite('[LOGIC] calcSajuOhengGrade — 특수 입력 처리');
 }
 
 suite('[LOGIC] calcSajuOhengGrade — 균형형 (1990-02-16 16:20)');
+// ※ 가중 점수 기준 土·水 각 ≥25 → 土克水 통관 사주로 판정됨 (용신=金)
 {
   const D = '1990-02-16', T = '16:20';
-  assertEq(calcSajuOhengGrade(['木'], D, T, {}).grade, '매우 좋음', '[C] 균형형 약한오행보충 → 매우 좋음');
-  assertEq(calcSajuOhengGrade(['土'], D, T, {}).grade, '나쁨',      '[D] 균형형 강한오행강화 → 나쁨');
-  assertEq(calcSajuOhengGrade(['木','土'], D, T, {}).grade, '좋음', '[E] 균형형 약+강 혼합 → 좋음');
+  assertEq(calcSajuOhengGrade(['木'], D, T, {}).grade, '좋음',     '[C] 통관(土克水) 사주 + 중립오행(木) → 좋음 [SNAP]');
+  assertEq(calcSajuOhengGrade(['土'], D, T, {}).grade, '나쁨',     '[D] 통관(土克水) 사주 + 충돌오행(土) → 나쁨');
+  assertEq(calcSajuOhengGrade(['木','土'], D, T, {}).grade, '나쁨','[E] 통관(土克水) 사주 + 충돌+중립 혼합 → 나쁨 [SNAP]');
+  assertEq(calcSajuOhengGrade(['金'], D, T, {}).grade, '매우 좋음','[C2] 통관(土克水) 사주 + 중재오행(金) → 매우 좋음');
 }
 
 suite('[LOGIC] calcSajuOhengGrade — 편중형 (2000-03-01 22:00)');
@@ -327,6 +330,64 @@ suite('[LOGIC] calcSajuOhengGrade — 종격(從格) 분기');
     assertCond(descE.includes('종격'), '[E] desc에 "종격" 문구 포함');
   } else {
     ['B','C','D','E'].forEach(id => assertCond(false, `[${id}] 종격 탐색 실패 SKIP`));
+  }
+}
+
+// ── 4-15. calcSajuOhengGrade — 통관(通關) 분기 ────────────────────
+suite('[LOGIC] calcSajuOhengGrade — 통관(通關) 분기');
+{
+  const _TG_PAIRS   = [['木','土'],['火','金'],['土','水'],['金','木'],['水','火']];
+  const _TG_MED_MAP = {
+    '木土':'火','土木':'火','火金':'土','金火':'土',
+    '土水':'金','水土':'金','金木':'水','木金':'水','水火':'木','火水':'木'
+  };
+  const _TG_CTRL = {'木':'金','火':'水','土':'木','金':'火','水':'土'};
+
+  function findTonggwan(startYear) {
+    const opts = { yajasi: true, apply30min: true };
+    for (let yr = startYear; yr <= startYear + 10; yr++) {
+      for (let m = 1; m <= 12; m++) {
+        for (let d = 1; d <= 28; d++) {
+          for (const h of ['02:00','10:00','22:00']) {
+            const dateStr = `${yr}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const s = calcSaju(dateStr, h, opts);
+            if (!s) continue;
+            const sc = calcOhengScores(s);
+            const isJong = Object.entries(sc).some(([o, v]) => v >= 60 && sc[_TG_CTRL[o]] < 5);
+            if (isJong) continue;
+            for (const [a, b] of _TG_PAIRS) {
+              if (sc[a] >= 25 && sc[b] >= 25) {
+                return { date: dateStr, time: h, scores: sc, pairA: a, pairB: b, med: _TG_MED_MAP[a + b] };
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  const tg = findTonggwan(1960);
+
+  assertCond(tg !== null, '[A] 통관 사주 탐색 성공 (상극쌍 각 ≥25점 확인)');
+
+  if (tg) {
+    const { date: TD, time: TT, pairA: TA, pairB: TB, med: TMED } = tg;
+    const opts = { yajasi: true, apply30min: true };
+
+    assertEq(calcSajuOhengGrade([TMED], TD, TT, opts).grade, '매우 좋음',
+      `[B] 통관(${TD}) + 중재오행[${TMED}] → 매우 좋음`);
+
+    assertEq(calcSajuOhengGrade([TA], TD, TT, opts).grade, '나쁨',
+      `[C] 통관(${TD}) + 충돌오행A[${TA}] → 나쁨`);
+
+    assertEq(calcSajuOhengGrade([TB], TD, TT, opts).grade, '나쁨',
+      `[D] 통관(${TD}) + 충돌오행B[${TB}] → 나쁨`);
+
+    const descE = calcSajuOhengGrade([TMED], TD, TT, opts).desc;
+    assertCond(descE.includes('통관'), '[E] desc에 "통관" 문구 포함');
+  } else {
+    ['B','C','D','E'].forEach(id => assertCond(false, `[${id}] 통관 탐색 실패 SKIP`));
   }
 }
 

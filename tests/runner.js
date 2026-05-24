@@ -318,21 +318,28 @@ suite('[LOGIC] calcSajuOhengGrade — 특수 입력 처리');
 }
 
 suite('[LOGIC] calcSajuOhengGrade — 균형형 (1990-02-16 16:20)');
-// 木1 火1 土2 金2 水2 / avg=1.6 / relWeak: 木, 火 / relStrong: 土, 金, 水
+// 8자: 木1 火1 土2 金2 水2 / avg=1.6
+// ※ 가중 점수(calcOhengScores)로는 土·水 각 ≥25 → 土克水 통관 사주로 판정됨
+//   통관 용신 = 金 (土→金→水 중재)
+//   이 suite는 통관 분기를 검증하는 역할로 업데이트됨
 {
   const D = '1990-02-16', T = '16:20';
 
-  // [C] 상대적으로 약한 오행(木)만 → 매우 좋음
+  // [C] 중재 오행(金) 외 중립 오행(木) → 통관 사주 기준 '좋음' [SNAP updated]
   const rC = ctx.calcSajuOhengGrade(['木'], D, T, {});
-  assertEq(rC.grade, '매우 좋음', '[C] 균형형 약한오행보충 → 매우 좋음');
+  assertEq(rC.grade, '좋음', '[C] 통관(土克水) 사주 + 중립오행(木) → 좋음 [SNAP]');
 
-  // [D] 강한 오행(土)만 → 나쁨
+  // [D] 충돌 쌍(土) → 나쁨
   const rD = ctx.calcSajuOhengGrade(['土'], D, T, {});
-  assertEq(rD.grade, '나쁨', '[D] 균형형 강한오행강화 → 나쁨');
+  assertEq(rD.grade, '나쁨', '[D] 통관(土克水) 사주 + 충돌오행(土) → 나쁨');
 
-  // [E] 약한(木) + 강한(土) 혼합 → 좋음
+  // [E] 중립(木) + 충돌(土) 혼합 → 충돌오행 포함이므로 나쁨 [SNAP updated]
   const rE = ctx.calcSajuOhengGrade(['木','土'], D, T, {});
-  assertEq(rE.grade, '좋음', '[E] 균형형 약+강 혼합 → 좋음');
+  assertEq(rE.grade, '나쁨', '[E] 통관(土克水) 사주 + 충돌+중립 혼합 → 나쁨 [SNAP]');
+
+  // [C2] 통관 용신(金) → 매우 좋음
+  const rC2 = ctx.calcSajuOhengGrade(['金'], D, T, {});
+  assertEq(rC2.grade, '매우 좋음', '[C2] 통관(土克水) 사주 + 중재오행(金) → 매우 좋음');
 }
 
 suite('[LOGIC] calcSajuOhengGrade — 편중형 (2000-03-01 22:00)');
@@ -499,6 +506,74 @@ suite('[LOGIC] 오행 분류 — 균형/편중/특수격/불균형');
   } else {
     // [B][C][D][E] — 탐색 실패 시 SKIP (passed 카운트 유지용 더미)
     ['B','C','D','E'].forEach(id => assert(false, `[${id}] 종격 사주 탐색 실패 — SKIP`));
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  Suite 4-15: calcSajuOhengGrade — 통관(通關) 분기 [LOGIC]
+// ════════════════════════════════════════════════════════
+{
+  const _TG_PAIRS   = [['木','土'],['火','金'],['土','水'],['金','木'],['水','火']];
+  const _TG_MED_MAP = {
+    '木土':'火','土木':'火','火金':'土','金火':'土',
+    '土水':'金','水土':'金','金木':'水','木金':'水','水火':'木','火水':'木'
+  };
+  const _TG_CTRL = {'木':'金','火':'水','土':'木','金':'火','水':'土'};
+
+  // 통관 사주 동적 탐색 (종격 아닌 것만)
+  function findTonggwan(startYear) {
+    const opts = { yajasi: true, apply30min: true };
+    for (let yr = startYear; yr <= startYear + 10; yr++) {
+      for (let m = 1; m <= 12; m++) {
+        for (let d = 1; d <= 28; d++) {
+          for (const h of ['02:00','10:00','22:00']) {
+            const dateStr = `${yr}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const s = ctx.calcSaju(dateStr, h, opts);
+            if (!s) continue;
+            const sc = ctx.calcOhengScores(s);
+            // 종격 제외 (종격이 먼저 판정됨)
+            const isJong = Object.entries(sc).some(([o, v]) => v >= 60 && sc[_TG_CTRL[o]] < 5);
+            if (isJong) continue;
+            for (const [a, b] of _TG_PAIRS) {
+              if (sc[a] >= 25 && sc[b] >= 25) {
+                return { date: dateStr, time: h, scores: sc, pairA: a, pairB: b, med: _TG_MED_MAP[a + b] };
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  suite('[LOGIC] calcSajuOhengGrade — 통관(通關) 분기');
+
+  const tg = findTonggwan(1960);
+
+  // [A] 통관 사주 탐색 성공
+  assert(tg !== null, '[A] 통관 사주 탐색 성공 (상극쌍 각 ≥25점 확인)');
+
+  if (tg) {
+    const { date: TD, time: TT, pairA: TA, pairB: TB, med: TMED } = tg;
+    const opts = { yajasi: true, apply30min: true };
+
+    // [B] 중재 오행 → 매우 좋음
+    assertEq(ctx.calcSajuOhengGrade([TMED], TD, TT, opts).grade, '매우 좋음',
+      `[B] 통관(${TD}) + 중재오행[${TMED}] → 매우 좋음`);
+
+    // [C] 충돌 오행 A → 나쁨
+    assertEq(ctx.calcSajuOhengGrade([TA], TD, TT, opts).grade, '나쁨',
+      `[C] 통관(${TD}) + 충돌오행A[${TA}] → 나쁨`);
+
+    // [D] 충돌 오행 B → 나쁨
+    assertEq(ctx.calcSajuOhengGrade([TB], TD, TT, opts).grade, '나쁨',
+      `[D] 통관(${TD}) + 충돌오행B[${TB}] → 나쁨`);
+
+    // [E] desc에 "통관" 문구 포함
+    const descE = ctx.calcSajuOhengGrade([TMED], TD, TT, opts).desc;
+    assert(descE.includes('통관'), `[E] desc에 "통관" 문구 포함`);
+  } else {
+    ['B','C','D','E'].forEach(id => assert(false, `[${id}] 통관 사주 탐색 실패 — SKIP`));
   }
 }
 
