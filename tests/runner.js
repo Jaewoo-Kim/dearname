@@ -39,8 +39,10 @@ function loadScript(relPath, ctx) {
 const ctx = vm.createContext({ console });
 loadScript('data/manjuryeok.js', ctx);
 loadScript('lib/saju-engine.js', ctx);
+loadScript('lib/name-spec.js',   ctx);   // Suite 4-14 종격 판정에 필요
 
-['calcSaju', 'calcOhengScores', 'calcDaeun', 'calcSajuOhengGrade', 'MANJURYEOK'].forEach(name => {
+// MANJURYEOK 은 const 선언이라 ctx 객체 프로퍼티로 노출되지 않으나 vm 스코프 내부에서는 정상 접근 가능
+['calcSaju', 'calcOhengScores', 'calcDaeun', 'calcSajuOhengGrade', 'buildNameSpec'].forEach(name => {
   if (!ctx[name]) {
     console.error(`엔진 로드 오류: ${name} 를 찾을 수 없습니다.`);
     process.exit(1);
@@ -438,6 +440,66 @@ suite('[LOGIC] 오행 분류 — 균형/편중/특수격/불균형');
 
   // [E] {木2,火2,土2,金2,水0} → 빈오행 있음 → 불균형
   assertEq(classify({木:2,火:2,土:2,金:2,水:0}), '불균형', '[E] 불균형 (水=0)');
+}
+
+// ════════════════════════════════════════════════════════
+//  Suite 4-14: calcSajuOhengGrade — 종격(從格) 분기 [LOGIC]
+// ════════════════════════════════════════════════════════
+{
+  // 종격 사주 동적 탐색 헬퍼
+  function findJonggyeok(startYear) {
+    const opts = { yajasi: true, apply30min: true };
+    for (let yr = startYear; yr <= startYear + 5; yr++) {
+      for (let m = 1; m <= 12; m++) {
+        for (let d = 1; d <= 28; d++) {
+          for (const h of ['02:00','10:00','22:00']) {
+            const dateStr = `${yr}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const s = ctx.calcSaju(dateStr, h, opts);
+            if (!s) continue;
+            const sp = ctx.buildNameSpec(s, ctx.calcOhengScores(s));
+            if (sp.strategy === 'reinforce') return { date: dateStr, time: h, spec: sp };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  suite('[LOGIC] calcSajuOhengGrade — 종격(從格) 분기');
+
+  const found = findJonggyeok(1930);
+
+  // [A] 종격 사주 동적 탐색 성공 확인
+  assert(found !== null, '[A] 종격 사주 탐색 성공 (strategy=reinforce 확인)');
+
+  if (found) {
+    const { date: JD, time: JT, spec: JSP } = found;
+    const opts = { yajasi: true, apply30min: true };
+    const JDom  = JSP.prefer[0];   // 지배 오행
+    const JCtrl = JSP.avoid[0];    // 극오행 (피해야 할 오행)
+    const CTRL_MAP = {'木':'金','火':'水','土':'木','金':'火','水':'土'};
+    const SUP_MAP  = {'木':'水','火':'木','土':'火','金':'土','水':'金'};
+    const JSup  = SUP_MAP[JDom];   // 수호 오행
+
+    // [B] 종격 + 지배 오행 이름 → '매우 좋음'
+    assertEq(ctx.calcSajuOhengGrade([JDom], JD, JT, opts).grade, '매우 좋음',
+      `[B] 종격(${JD}) + 지배오행[${JDom}] → 매우 좋음`);
+
+    // [C] 종격 + 극오행 이름 → '나쁨'
+    assertEq(ctx.calcSajuOhengGrade([JCtrl], JD, JT, opts).grade, '나쁨',
+      `[C] 종격(${JD}) + 극오행[${JCtrl}] → 나쁨`);
+
+    // [D] 종격 + 수호 오행 이름 → '매우 좋음'
+    assertEq(ctx.calcSajuOhengGrade([JSup], JD, JT, opts).grade, '매우 좋음',
+      `[D] 종격(${JD}) + 수호오행[${JSup}] → 매우 좋음`);
+
+    // [E] desc에 "종격" 문구 포함 확인
+    const descE = ctx.calcSajuOhengGrade([JDom], JD, JT, opts).desc;
+    assert(descE.includes('종격'), `[E] desc에 "종격" 문구 포함`);
+  } else {
+    // [B][C][D][E] — 탐색 실패 시 SKIP (passed 카운트 유지용 더미)
+    ['B','C','D','E'].forEach(id => assert(false, `[${id}] 종격 사주 탐색 실패 — SKIP`));
+  }
 }
 
 // ════════════════════════════════════════════════════════

@@ -6888,6 +6888,18 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             else if (_max===3){ _bl='편중';   _bc='#b45309'; _bb='#fef3c7'; _bt=`${_domOs} 기운이 다소 강한 편중 사주입니다.`; }
             else              { _bl='균형';   _bc='#16a34a'; _bb='#dcfce7'; _bt='오행이 고르게 분포된 균형 사주입니다.'; }
             _pb.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:${_bb};color:${_bc};font-size:0.8rem;font-weight:700;">오행 분포 <b>${_bl}</b></span><span style="font-size:0.8rem;color:#64748b;margin-left:8px;">${_bt}</span>`;
+
+            // 종격 판정 결과 표시 (nameSpec.strategy==='reinforce'이면 종격)
+            if (_currentState?.nameSpec?.strategy === 'reinforce') {
+                const _KRL = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+                const _jDom  = _currentState.nameSpec.prefer?.[0];
+                const _jType = (typeof SPECIAL_GUK_NAMES !== 'undefined' && SPECIAL_GUK_NAMES[_jDom]) || '종격';
+                const _jCtrl = _currentState.nameSpec.avoid?.[0];
+                _pb.innerHTML += `<div style="margin-top:8px;padding:8px 14px;border-radius:12px;background:#faf5ff;border:1px solid #d8b4fe;font-size:0.8rem;line-height:1.6;">
+                    <b style="color:#7c3aed;">종격 (${_jType})</b>
+                    <span style="color:#6b7280;margin-left:6px;">${_KRL[_jDom]||_jDom} 기운에 순응하는 사주 — 이름도 ${_KRL[_jDom]||_jDom} 기운을 강화합니다.${_jCtrl?' ('+(_KRL[_jCtrl]||_jCtrl)+' 기운 회피)':''}</span>
+                </div>`;
+            }
         })();
 
         // Ch2: 자원오행 & 레이더

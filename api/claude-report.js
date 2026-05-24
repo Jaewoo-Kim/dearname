@@ -202,6 +202,16 @@ async function generatePremiumReport(candidate, state) {
     ? `※ 지장간 가중치 기준으로는 오행 점수가 비교적 균형에 가깝습니다 (단순 카운트와 다름).`
     : '';
   const _cnt8Str = `木${_cnt8['木']} 火${_cnt8['火']} 土${_cnt8['土']} 金${_cnt8['金']} 水${_cnt8['水']}`;
+
+  // 종격 판정 결과 (buildNameSpec의 strategy:'reinforce'와 동일 조건)
+  const _isReinforce  = nameSpec?.strategy === 'reinforce';
+  const _jongDomOheng = nameSpec?.prefer?.[0];
+  const _SPECIAL_GUK  = {'木':'종왕/종강격','火':'종아격','土':'전왕격','金':'종재격','水':'종살격'};
+  const _jongTypeName = (typeof SPECIAL_GUK_NAMES !== 'undefined' && SPECIAL_GUK_NAMES?.[_jongDomOheng])
+    || _SPECIAL_GUK[_jongDomOheng] || '종격';
+  const _jongAvoidOheng = nameSpec?.avoid?.[0];
+  const _ohengKr2 = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+
   const parentOheng = state.parentOheng;
   const parentOhengStr = parentOheng
     ? ['father','mother'].map(p => {
@@ -242,7 +252,12 @@ NameSpec Prefer: [${nameSpec?.prefer?.join(', ')||''}] / Avoid: [${nameSpec?.avo
 [사주 오행 분류 — 8자 단순 카운트]
 ${_cnt8Str} → ${_class8}
 ${_class8Note}
-
+${_isReinforce ? `
+[종격(從格) 판정]
+유형: ${_jongTypeName} — ${_jongDomOheng}(${_ohengKr2[_jongDomOheng]||_jongDomOheng}) 기운이 압도적 (지장간 가중 60점 이상)
+종격 원칙: 강한 기운에 순응(從) → ${_jongDomOheng} 기운 강화 이름이 최적 (일반 보완 원칙 역전)
+피해야 할 기운: ${_jongAvoidOheng||''}(${_ohengKr2[_jongAvoidOheng]||''}) — 극오행 포함 이름은 나쁨
+` : ''}
 [이름 분석]
 한자: ${familyHanja}(${familyKr}) · ${h1.h}(${h1.kr}) · ${h2?h2.h+'('+h2.kr+')':''}
 자원오행: ${h1.o}${h2?'+'+h2.o:''} / 원획법: ${familyHanja} ${s0}획 · ${h1.h} ${s1}획${h2?' · '+h2.h+' '+s2+'획':''}
@@ -258,7 +273,7 @@ ${traitStr}
 아래 JSON 구조로 정확하게 반환해주세요 (각 필드의 분량 지침 준수):
 {
   "tagline": "핵심 한 줄 시그니처 (따옴표로 감싼 시적 표현, 20~40자)",
-  "sajuStory": "사주 원국 서사. 일주를 중심으로 아이의 타고난 기질, 사주 지형의 특징, 부족한 기운과 넘치는 기운의 의미를 3~4문장으로 풍부하게 서술. 부모가 읽으면 고개를 끄덕이게 되는 이야기여야 함. 【필수】위 [사주 오행 분류]가 불균형·편중형·강세인 경우 결핍/강한 기운을 반드시 언급할 것. 8자 분류와 지장간 점수가 불일치하는 경우(※ 메모가 있을 때)에는 '표면상 ○ 기운이 강해 보이지만, 지장간의 실질 에너지까지 고려하면 균형에 가깝습니다'처럼 한 문장으로 명시할 것.",
+  "sajuStory": "사주 원국 서사. 일주를 중심으로 아이의 타고난 기질, 사주 지형의 특징, 부족한 기운과 넘치는 기운의 의미를 3~4문장으로 풍부하게 서술. 부모가 읽으면 고개를 끄덕이게 되는 이야기여야 함. 【필수】위 [사주 오행 분류]가 불균형·편중형·강세인 경우 결핍/강한 기운을 반드시 언급할 것. 8자 분류와 지장간 점수가 불일치하는 경우(※ 메모가 있을 때)에는 '표면상 ○ 기운이 강해 보이지만, 지장간의 실질 에너지까지 고려하면 균형에 가깝습니다'처럼 한 문장으로 명시할 것. 【종격 필수】[종격 판정] 섹션이 있으면: ①이 사주가 종격임을 밝히고, ②일반 사주와 달리 강한 기운에 순응(따라가야)해야 하는 원리를 쉽게 설명하며, ③강한 기운을 억제하는 것이 오히려 역효과임을 언급할 것.",
   "jawonStory": "자원오행 보완 서사. 선택된 이름의 한자들이 어떻게 사주의 빈자리를 채우는지, 구체적인 오행 흐름과 함께 2~3문장으로 설명.",
   "hanjaDetails": [
     {
