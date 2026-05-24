@@ -42,7 +42,7 @@ loadScript('lib/saju-engine.js', ctx);
 loadScript('lib/name-spec.js',   ctx);   // Suite 4-14 종격 판정에 필요
 
 // MANJURYEOK 은 const 선언이라 ctx 객체 프로퍼티로 노출되지 않으나 vm 스코프 내부에서는 정상 접근 가능
-['calcSaju', 'calcOhengScores', 'calcDaeun', 'calcSajuOhengGrade', 'buildNameSpec'].forEach(name => {
+['calcSaju', 'calcOhengScores', 'calcDaeun', 'calcSajuOhengGrade', 'buildNameSpec', 'calcYongsin'].forEach(name => {
   if (!ctx[name]) {
     console.error(`엔진 로드 오류: ${name} 를 찾을 수 없습니다.`);
     process.exit(1);
@@ -580,6 +580,52 @@ suite('[LOGIC] 오행 분류 — 균형/편중/특수격/불균형');
   } else {
     ['B','C','D','E'].forEach(id => assert(false, `[${id}] 통관 사주 탐색 실패 — SKIP`));
   }
+}
+
+// ════════════════════════════════════════════════════════
+//  Suite 4-16: calcYongsin — 억부법(抑扶法) 용신 [LOGIC]
+// ════════════════════════════════════════════════════════
+{
+  // 합성 사주 생성 헬퍼 (일간만 중요)
+  function makeSajuForYs(dayGan) {
+    return { day:{gan:dayGan,ji:'子'}, year:{gan:'甲',ji:'子'}, month:{gan:'丁',ji:'巳'}, time:{gan:'甲',ji:'子'} };
+  }
+
+  suite('[LOGIC] calcYongsin — 억부법(抑扶法) 용신');
+
+  // 일간 甲(木): 인성=水, 비겁=木, 식상=火, 재성=土, 관살=金
+  // [A] 신강: 인비(60pt) >> 식재관(15pt) → isGangShin=true
+  const _sgScores = {'木':30,'水':30,'火':5,'土':5,'金':5};
+  const _sgYs = ctx.calcYongsin(makeSajuForYs('甲'), _sgScores);
+  assert(_sgYs?.isGangShin === true,
+    '[A] 신강 판정 (인비 60 > 식재관 15×1.2=18)');
+
+  // [B] 신강 → 용신 = 식재관 최약 오행 (火·土·金 동점 → 식상 火 우선)
+  assertEq(_sgYs?.yongsinOheng, '火',
+    '[B] 신강 → 용신=식상(火) (식재관 동점시 식상 우선)');
+
+  // [C] 신약: 식재관(75pt) >> 인비(10pt) → isYakShin=true
+  const _skScores = {'木':5,'水':5,'火':25,'土':25,'金':25};
+  const _skYs = ctx.calcYongsin(makeSajuForYs('甲'), _skScores);
+  assert(_skYs?.isYakShin === true,
+    '[C] 신약 판정 (식재관 75 > 인비 10×1.2=12)');
+
+  // [D] 신약 → 용신 = 인비 최약 오행 (水5·木5 동점 → 인성 水 우선)
+  assertEq(_skYs?.yongsinOheng, '水',
+    '[D] 신약 → 용신=인성(水) (인비 동점시 인성 우선)');
+
+  // [E] 중화: 인비=식재관=25pt → yongsinOheng null
+  const _chScores = {'木':10,'水':15,'火':10,'土':10,'金':5};
+  const _chYs = ctx.calcYongsin(makeSajuForYs('甲'), _chScores);
+  assert(_chYs?.yongsinOheng === null,
+    '[E] 중화(인비 25 ≈ 식재관 25) → 용신 없음(null)');
+
+  // [F] buildNameSpec 반환값에 yongsin 필드 포함
+  const _rawF = ctx.calcSaju('1990-02-16','16:20',{});
+  const _scF  = ctx.calcOhengScores(_rawF);
+  const _nsF  = ctx.buildNameSpec(_rawF, _scF);
+  assert('yongsin' in _nsF,
+    '[F] buildNameSpec 반환값에 yongsin 필드 포함');
 }
 
 // ════════════════════════════════════════════════════════

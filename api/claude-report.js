@@ -212,6 +212,30 @@ async function generatePremiumReport(candidate, state) {
   const _jongAvoidOheng = nameSpec?.avoid?.[0];
   const _ohengKr2 = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
 
+  // 조후(調候) 판정
+  const _johuDiag   = nameSpec?.diagnosis?.find(d => d.type === '조후');
+  const _isHotJi    = ['巳','午','未'].includes(_saju?.month?.ji || '');
+  const _isColdJi   = ['亥','子','丑'].includes(_saju?.month?.ji || '');
+  const _johuStr    = _johuDiag
+    ? `긴급 — ${_johuDiag.msg}`
+    : (_isHotJi
+        ? `여름 월지(${_saju?.month?.ji||''}) — 水:${(_scores?.['水']||0).toFixed(1)}pt (충분, 긴급 없음)`
+        : _isColdJi
+          ? `겨울 월지(${_saju?.month?.ji||''}) — 火:${(_scores?.['火']||0).toFixed(1)}pt (충분, 긴급 없음)`
+          : `봄·가을 월지(${_saju?.month?.ji||''}) — 조후 긴급 없음`);
+
+  // 억부법(抑扶法) 용신
+  const _ys    = nameSpec?.yongsin;
+  const _ysStr = _ys
+    ? (`${_ys.desc}\n`
+     + `일간: ${_ys.dayGan}(${_ohengKr2[_ys.dayOheng]||_ys.dayOheng}) / `
+     + `인비: ${_ys.inbiScore.toFixed(1)}pt(${_ohengKr2[_ys.inOheng]||_ys.inOheng}+${_ohengKr2[_ys.bikOheng]||_ys.bikOheng}) / `
+     + `식재관: ${_ys.sjgScore.toFixed(1)}pt\n`
+     + `용신: ${_ys.yongsinOheng ? (_ohengKr2[_ys.yongsinOheng]||_ys.yongsinOheng) : '중화(없음)'} / `
+     + `희신: ${_ys.heesinOheng ? (_ohengKr2[_ys.heesinOheng]||_ys.heesinOheng) : '-'} / `
+     + `기신: ${_ys.gisinOheng  ? (_ohengKr2[_ys.gisinOheng ]||_ys.gisinOheng ) : '-'}`)
+    : '일간 정보 없음';
+
   const parentOheng = state.parentOheng;
   const parentOhengStr = parentOheng
     ? ['father','mother'].map(p => {
@@ -258,6 +282,12 @@ ${_isReinforce ? `
 종격 원칙: 강한 기운에 순응(從) → ${_jongDomOheng} 기운 강화 이름이 최적 (일반 보완 원칙 역전)
 피해야 할 기운: ${_jongAvoidOheng||''}(${_ohengKr2[_jongAvoidOheng]||''}) — 극오행 포함 이름은 나쁨
 ` : ''}
+[조후(調候) 판정]
+${_johuStr}
+
+[용신(用神) 분석 — 억부법]
+${_ysStr}
+
 [이름 분석]
 한자: ${familyHanja}(${familyKr}) · ${h1.h}(${h1.kr}) · ${h2?h2.h+'('+h2.kr+')':''}
 자원오행: ${h1.o}${h2?'+'+h2.o:''} / 원획법: ${familyHanja} ${s0}획 · ${h1.h} ${s1}획${h2?' · '+h2.h+' '+s2+'획':''}
@@ -273,7 +303,7 @@ ${traitStr}
 아래 JSON 구조로 정확하게 반환해주세요 (각 필드의 분량 지침 준수):
 {
   "tagline": "핵심 한 줄 시그니처 (따옴표로 감싼 시적 표현, 20~40자)",
-  "sajuStory": "사주 원국 서사. 일주를 중심으로 아이의 타고난 기질, 사주 지형의 특징, 부족한 기운과 넘치는 기운의 의미를 3~4문장으로 풍부하게 서술. 부모가 읽으면 고개를 끄덕이게 되는 이야기여야 함. 【필수】위 [사주 오행 분류]가 불균형·편중형·강세인 경우 결핍/강한 기운을 반드시 언급할 것. 8자 분류와 지장간 점수가 불일치하는 경우(※ 메모가 있을 때)에는 '표면상 ○ 기운이 강해 보이지만, 지장간의 실질 에너지까지 고려하면 균형에 가깝습니다'처럼 한 문장으로 명시할 것. 【종격 필수】[종격 판정] 섹션이 있으면: ①이 사주가 종격임을 밝히고, ②일반 사주와 달리 강한 기운에 순응(따라가야)해야 하는 원리를 쉽게 설명하며, ③강한 기운을 억제하는 것이 오히려 역효과임을 언급할 것.",
+  "sajuStory": "사주 원국 서사. 일주를 중심으로 아이의 타고난 기질, 사주 지형의 특징, 부족한 기운과 넘치는 기운의 의미를 3~4문장으로 풍부하게 서술. 부모가 읽으면 고개를 끄덕이게 되는 이야기여야 함. 【필수】위 [사주 오행 분류]가 불균형·편중형·강세인 경우 결핍/강한 기운을 반드시 언급할 것. 8자 분류와 지장간 점수가 불일치하는 경우(※ 메모가 있을 때)에는 '표면상 ○ 기운이 강해 보이지만, 지장간의 실질 에너지까지 고려하면 균형에 가깝습니다'처럼 한 문장으로 명시할 것. 【종격 필수】[종격 판정] 섹션이 있으면: ①이 사주가 종격임을 밝히고, ②일반 사주와 달리 강한 기운에 순응(따라가야)해야 하는 원리를 쉽게 설명하며, ③강한 기운을 억제하는 것이 오히려 역효과임을 언급할 것. 【억부 참고】[용신 분석] 섹션의 신강/신약 정보를 자연스럽게 녹여 '이 아이의 사주는 ○○ 기운이 강한 신강(身强) 체질' 또는 '신약(身弱)하여 ○○ 기운의 도움이 필요한 체질'임을 한 문장으로 언급할 것 (용신이 있는 경우에만).",
   "jawonStory": "자원오행 보완 서사. 선택된 이름의 한자들이 어떻게 사주의 빈자리를 채우는지, 구체적인 오행 흐름과 함께 2~3문장으로 설명.",
   "hanjaDetails": [
     {

@@ -33,7 +33,7 @@
 <body>
 
 <h1>🧪 DearName 만세력 엔진 테스트</h1>
-<p class="subtitle">runner.js 와 동일한 84개 케이스 — 브라우저에서 직접 실행</p>
+<p class="subtitle">runner.js 와 동일한 90개 케이스 — 브라우저에서 직접 실행</p>
 <button id="btn-run">▶ 테스트 실행</button>
 <div id="summary" style="display:none"></div>
 <div id="output"></div>
@@ -394,6 +394,49 @@ suite('[LOGIC] calcSajuOhengGrade — 통관(通關) 분기');
   } else {
     ['B','C','D','E'].forEach(id => assertCond(false, `[${id}] 통관 탐색 실패 SKIP`));
   }
+}
+
+// ── 4-16. calcYongsin — 억부법(抑扶法) 용신 ─────────────────────────
+suite('[LOGIC] calcYongsin — 억부법(抑扶法) 용신');
+{
+  function makeSajuForYs(dayGan) {
+    return { day:{gan:dayGan,ji:'子'}, year:{gan:'甲',ji:'子'}, month:{gan:'丁',ji:'巳'}, time:{gan:'甲',ji:'子'} };
+  }
+
+  // 일간 甲(木): 인성=水, 비겁=木, 식상=火, 재성=土, 관살=金
+
+  // [A] 신강: 인비(60) >> 식재관(15) → isGangShin
+  const _sgScores = {'木':30,'水':30,'火':5,'土':5,'金':5};
+  const _sgYs = calcYongsin(makeSajuForYs('甲'), _sgScores);
+  assertCond(_sgYs?.isGangShin === true,
+    '[A] 신강 판정 (인비 60 > 식재관 15×1.2=18)');
+
+  // [B] 신강 → 용신=식상(火)
+  assertEq(_sgYs?.yongsinOheng, '火',
+    '[B] 신강 → 용신=식상(火) (식재관 동점시 식상 우선)');
+
+  // [C] 신약: 식재관(75) >> 인비(10) → isYakShin
+  const _skScores = {'木':5,'水':5,'火':25,'土':25,'金':25};
+  const _skYs = calcYongsin(makeSajuForYs('甲'), _skScores);
+  assertCond(_skYs?.isYakShin === true,
+    '[C] 신약 판정 (식재관 75 > 인비 10×1.2=12)');
+
+  // [D] 신약 → 용신=인성(水)
+  assertEq(_skYs?.yongsinOheng, '水',
+    '[D] 신약 → 용신=인성(水) (인비 동점시 인성 우선)');
+
+  // [E] 중화 → yongsinOheng null
+  const _chScores = {'木':10,'水':15,'火':10,'土':10,'金':5};
+  const _chYs = calcYongsin(makeSajuForYs('甲'), _chScores);
+  assertCond(_chYs?.yongsinOheng === null,
+    '[E] 중화(인비 25 ≈ 식재관 25) → 용신 없음(null)');
+
+  // [F] buildNameSpec 반환값에 yongsin 필드 포함
+  const _rawF = calcSaju('1990-02-16','16:20',{});
+  const _scF  = calcOhengScores(_rawF);
+  const _nsF  = buildNameSpec(_rawF, _scF);
+  assertCond('yongsin' in _nsF,
+    '[F] buildNameSpec 반환값에 yongsin 필드 포함');
 }
 
 // ── 렌더링 ──────────────────────────────────────────────────────────

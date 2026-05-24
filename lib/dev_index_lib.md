@@ -204,15 +204,47 @@ const _JONGGYEOK_SUP  = {'木':'水','火':'木','土':'火','金':'土','水':'
 
 ### 공개 함수
 
-#### `buildNameSpec(saju, scores) → Object`
+#### `calcYongsin(saju, scores) → Object|null`
+
+억부법(抑扶法) 용신 계산. 일간 강약(신강/신약/중화)을 판단하고 용신·희신·기신 반환.
+
+| 파라미터 | 타입 | 설명 |
+|---|---|---|
+| `saju` | `Object` | `calcSaju()` 반환값 (day.gan 필수) |
+| `scores` | `Object` | `calcOhengScores()` 반환값 |
+
+**반환:** (일간 불명 시 null)
+```js
+{
+  dayGan, dayOheng,                // 일간 천간 및 오행
+  inOheng, bikOheng,              // 인성, 비겁 오행
+  sikOheng, jaeOheng, gwanOheng,  // 식상, 재성, 관살 오행
+  inbiScore, sjgScore,            // 인비세력 점수, 식재관세력 점수
+  isGangShin, isYakShin,          // 신강/신약 여부
+  yongsinOheng,                   // 용신 오행 (중화면 null)
+  heesinOheng,                    // 희신 오행 (용신이 있을 때)
+  gisinOheng,                     // 기신 오행 (용신이 있을 때)
+  desc                            // 판정 설명 문자열
+}
+```
+
+**판정 기준:**
+- **신강:** 인비세력 > 식재관세력 × 1.2 → 용신 = 식재관 중 최약 오행
+- **신약:** 식재관세력 > 인비세력 × 1.2 → 용신 = 인비 중 최약 오행 (인성 우선)
+- **중화:** 그 외 → yongsinOheng = null
+
+---
+
+#### `buildNameSpec(saju, scores, daeun?) → Object`
 
 사주 + 오행 점수 → 이름 설계도(NameSpec) 생성.  
-3단계 우선순위: **긴급진단 → 특수격 → 일반격 중화**
+판단 우선순위: **긴급진단 → 억부 용신 → 특수격 → 일반격 중화**
 
 | 파라미터 | 타입 | 설명 |
 |---|---|---|
 | `saju` | `Object` | `calcSaju()` 반환값 |
 | `scores` | `Object` | `calcOhengScores()` 반환값 |
+| `daeun` | `Object?` | `calcDaeun()` 반환값 (선택) |
 
 **반환:**
 ```js
@@ -222,22 +254,29 @@ const _JONGGYEOK_SUP  = {'木':'水','火':'木','土':'火','金':'土','水':'
   minCount: { '水': 1 },    // 최소 포함 횟수
   strategy: 'balance',      // 'balance' | 'reinforce'
   gridType: 'general',      // 격 종류 (특수격이면 '종왕격' 등)
-  diagnosis: [              // 긴급진단 결과 메모
-    { type: '조후', msg: '여름 태생 + 水 극약 → 水 최우선' }
-  ]
+  diagnosis: [              // 진단 결과 메모 배열
+    { type: '조후',  msg: '여름 태생 + 水 부족 → 水 최우선 배치' },
+    { type: '통관',  msg: '木↔土 전쟁 → 火으로 중재' },
+    { type: '고립',  msg: '木 고립 + 金 압도 → 水 긴급 수혈' },
+    { type: '억부',  msg: '신강(인비 45pt > 식재관 30pt) — 관살(金) 용신 / 희신:土 기신:火' }
+  ],
+  yongsin: { ... }          // calcYongsin() 반환값 (일간 불명 시 null)
 }
 ```
 
 ### 판단 로직 (우선순위 순)
 
-1. **조후 긴급:** 월지 기준 여름(巳午未) + 水<5점 → prefer Water  
+1. **조후 긴급:** 월지 기준 여름(巳午未) + 水<15점 → prefer 水  
+   겨울(亥子丑) + 火<15점 → prefer 火
 2. **통관 긴급:** 상극 쌍 각 25점↑ 대립 → 중재 오행 prefer  
 3. **고립 긴급:** 오행 5점 미만 + 극하는 오행 40점↑ → 생하는 오행 prefer  
-4. **특수격(종격):** 특정 오행 60점↑ + 극오행 5점 미만 → `strategy:'reinforce'` 반환  
+4. **억부법 용신:** `calcYongsin()` 항상 계산 → diagnosis에 추가.  
+   **긴급진단(1~3)으로 prefer가 비어 있을 때만** 용신·희신을 prefer에, 기신을 avoid에 추가.
+5. **특수격(종격):** 특정 오행 60점↑ + 극오행 5점 미만 → `strategy:'reinforce'` 반환  
    - `prefer: [지배오행, 수호오행]`, `avoid: [극오행]`, `gridType: SPECIAL_GUK_NAMES[지배오행]`
    - 프리미엄 Ch1 뱃지에 보라색 "종격 (XX격)" 안내 표시 (index.html `_renderPremiumOhengBadge`)
    - Claude 프롬프트에 `[종격(從格) 판정]` 섹션 추가 (api/claude-report.js)
-5. **일반격:** 부족(weak↓) prefer, 과다(strong↑) avoid
+6. **일반격:** 부족(weak↓) prefer, 과다(strong↑) avoid
 
 **SPECIAL_GUK_NAMES** (종격 유형명):
 
