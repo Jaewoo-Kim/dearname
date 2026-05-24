@@ -40,7 +40,7 @@ const ctx = vm.createContext({ console });
 loadScript('data/manjuryeok.js', ctx);
 loadScript('lib/saju-engine.js', ctx);
 
-['calcSaju', 'calcOhengScores', 'calcDaeun', 'MANJURYEOK'].forEach(name => {
+['calcSaju', 'calcOhengScores', 'calcDaeun', 'calcSajuOhengGrade', 'MANJURYEOK'].forEach(name => {
   if (!ctx[name]) {
     console.error(`엔진 로드 오류: ${name} 를 찾을 수 없습니다.`);
     process.exit(1);
@@ -289,6 +289,155 @@ suite('[LOGIC] 만세력 범위 외 연도 — null 반환');
   assert(ctx.calcSaju('2041-01-01','12:00',{}) === null, '2041년 → null');
   assert(ctx.calcSaju('1921-01-06','12:00',{}) !== null, '1921년 → 정상 반환');
   assert(ctx.calcSaju('2040-12-25','12:00',{}) !== null, '2040년 → 정상 반환');
+}
+
+// ════════════════════════════════════════════════════════
+//  4-12. calcSajuOhengGrade — 분기별 등급 검증
+// ════════════════════════════════════════════════════════
+// 고정 날짜 (브라우저 엔진 실측, apply30min=true 기준):
+//   1990-02-16 16:20 → 庚午 戊寅 壬子 戊申 → 木1 火1 土2 金2 水2  (균형, avg=1.6)
+//   2000-03-01 22:00 → 庚辰 戊寅 戊午 癸亥 → 木1 火1 土3 金1 水2  (편중형, 土 지배)
+//   2000-03-01 02:00 → 庚辰 戊寅 戊午 癸丑 → 木1 火1 土4 金1 水1  (특수격, 土 지배)
+
+const CG = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+const JJ = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+
+suite('[LOGIC] calcSajuOhengGrade — 특수 입력 처리');
+{
+  // [A] birthDate 없음 → grade 나쁨, "출생일시를 입력" 안내
+  const rA = ctx.calcSajuOhengGrade(['木','火'], '', '12:00', {});
+  assertEq(rA.grade, '나쁨', '[A] 날짜없음 → grade 나쁨');
+  assert(rA.desc.includes('출생일시를 입력'), '[A] 날짜없음 → desc 안내 포함');
+
+  // [B] 만세력 범위 밖 (1920년) → grade 나쁨, "1921~2040" 언급
+  const rB = ctx.calcSajuOhengGrade(['木'], '1920-01-01', '12:00', {});
+  assertEq(rB.grade, '나쁨', '[B] 범위밖 → grade 나쁨');
+  assert(rB.desc.includes('1921') && rB.desc.includes('2040'), '[B] 범위밖 → desc 연도범위 언급');
+}
+
+suite('[LOGIC] calcSajuOhengGrade — 균형형 (1990-02-16 16:20)');
+// 木1 火1 土2 金2 水2 / avg=1.6 / relWeak: 木, 火 / relStrong: 土, 金, 水
+{
+  const D = '1990-02-16', T = '16:20';
+
+  // [C] 상대적으로 약한 오행(木)만 → 매우 좋음
+  const rC = ctx.calcSajuOhengGrade(['木'], D, T, {});
+  assertEq(rC.grade, '매우 좋음', '[C] 균형형 약한오행보충 → 매우 좋음');
+
+  // [D] 강한 오행(土)만 → 나쁨
+  const rD = ctx.calcSajuOhengGrade(['土'], D, T, {});
+  assertEq(rD.grade, '나쁨', '[D] 균형형 강한오행강화 → 나쁨');
+
+  // [E] 약한(木) + 강한(土) 혼합 → 좋음
+  const rE = ctx.calcSajuOhengGrade(['木','土'], D, T, {});
+  assertEq(rE.grade, '좋음', '[E] 균형형 약+강 혼합 → 좋음');
+}
+
+suite('[LOGIC] calcSajuOhengGrade — 편중형 (2000-03-01 22:00)');
+// 庚辰 戊寅 戊午 癸亥 → 木1 火1 土3 金1 水2 / avg=1.6
+// relWeak: 木(1),火(1),金(1) / relStrong: 土(3),水(2) / domSet: 土
+{
+  const D = '2000-03-01', T = '22:00';
+
+  // [F] 지배오행(土) 강화 → 나쁨 강등 (핵심 신규 로직)
+  const rF = ctx.calcSajuOhengGrade(['土'], D, T, {});
+  assertEq(rF.grade, '나쁨', '[F] 편중형 지배오행강화 → 나쁨 강등');
+
+  // [G] 약한 오행(木) 보충 → 매우 좋음
+  const rG = ctx.calcSajuOhengGrade(['木'], D, T, {});
+  assertEq(rG.grade, '매우 좋음', '[G] 편중형 약한오행보충 → 매우 좋음');
+
+  // [H] 지배오행 아닌 relStrong(水) 강화 → 나쁨 [SNAP]
+  const rH = ctx.calcSajuOhengGrade(['水'], D, T, {});
+  assertEq(rH.grade, '나쁨', '[H] 편중형 relStrong(非지배,水) 강화 → 나쁨 [SNAP]');
+}
+
+suite('[SNAP] calcSajuOhengGrade — 특수격 (2000-03-01 02:00)');
+// 庚辰 戊寅 戊午 癸丑 → 木1 火1 土4 金1 水1 / avg=1.6
+// relWeak: 木(1),火(1),金(1),水(1) / relStrong: 土(4) / domSet: 土
+{
+  const D = '2000-03-01', T = '02:00';
+
+  // [I] 지배오행(土4) 강화 → 나쁨 (종격 평가는 프리미엄 영역, 현재 relStrong 기준 적용)
+  const rI = ctx.calcSajuOhengGrade(['土'], D, T, {});
+  assertEq(rI.grade, '나쁨', '[I] 특수격 지배오행강화 → 나쁨 [SNAP]');
+
+  // [J] 약한 오행(木) 보충 → 매우 좋음 [SNAP]
+  const rJ = ctx.calcSajuOhengGrade(['木'], D, T, {});
+  assertEq(rJ.grade, '매우 좋음', '[J] 특수격 약한오행보충 → 매우 좋음 [SNAP]');
+}
+
+suite('[LOGIC] calcSajuOhengGrade — 불균형형');
+// 庚辰년(2000) 戊申월(金, 金): 年+月 = 庚(金)辰(土)+戊(土)申(金) → 金2 土2 → 木/火/水 결핍 가능
+// 2000-08 이후 범위에서 첫 번째 불균형 날짜 탐색 (결정적: 항상 같은 날짜 발견)
+{
+  let _dateU = null, _timeU = null, _weakU = null;
+  for (let d = 8; d <= 31 && !_weakU; d++) {
+    const dt = `2000-08-${String(d).padStart(2,'0')}`;
+    for (const h of ['02:00','10:00','14:00','22:00']) {
+      if (_weakU) break;
+      try {
+        const r = ctx.calcSaju(dt, h, {});
+        if (!r) continue;
+        const c = {'木':0,'火':0,'土':0,'金':0,'水':0};
+        for (const p of [r.year, r.month, r.day, r.time]) {
+          if (CG[p.gan]) c[CG[p.gan]]++;
+          if (JJ[p.ji])  c[JJ[p.ji]]++;
+        }
+        const w = Object.entries(c).filter(([,v]) => v === 0).map(([o]) => o);
+        if (w.length > 0) { _dateU = dt; _timeU = h; _weakU = w; }
+      } catch(e) {}
+    }
+  }
+  assert(_weakU && _weakU.length > 0, `불균형 날짜 탐색 성공 (발견: ${_dateU} ${_timeU})`);
+  if (_weakU && _weakU.length > 0) {
+    // 부족 오행 전부 보완 → 매우 좋음
+    assertEq(ctx.calcSajuOhengGrade(_weakU, _dateU, _timeU, {}).grade, '매우 좋음', '불균형 — 전부보완 → 매우 좋음');
+    // 부족 오행 일부 보완 (weak 2개 이상일 때) → 좋음
+    if (_weakU.length >= 2) {
+      assertEq(ctx.calcSajuOhengGrade([_weakU[0]], _dateU, _timeU, {}).grade, '좋음', '불균형 — 부분보완 → 좋음');
+    }
+    // 보완 없음 (非weak 오행만 선택) → 나쁨
+    const _nonWeak = ['木','火','土','金','水'].filter(o => !_weakU.includes(o))[0];
+    if (_nonWeak) {
+      assertEq(ctx.calcSajuOhengGrade([_nonWeak], _dateU, _timeU, {}).grade, '나쁨', '불균형 — 보완없음 → 나쁨');
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  4-13. 오행 분류 로직 — 편중/특수격/균형/불균형 직접 검증
+// ════════════════════════════════════════════════════════
+suite('[LOGIC] 오행 분류 — 균형/편중/특수격/불균형');
+{
+  // 분류 헬퍼 (index.html 의 분류 로직과 동일)
+  function classify(cnt) {
+    const vals  = Object.values(cnt);
+    const max   = Math.max(...vals);
+    const hasZero = vals.some(v => v === 0);
+    const isBalanced = !hasZero;
+    const isSkewed   = isBalanced && max === 3;
+    const isSpecial  = isBalanced && max >= 4;
+    if (!isBalanced) return '불균형';
+    if (isSpecial)   return '특수격';
+    if (isSkewed)    return '편중형';
+    return '균형';
+  }
+
+  // [A] {木2,火2,土2,金1,水1} → max=2, 빈오행없음 → 균형
+  assertEq(classify({木:2,火:2,土:2,金:1,水:1}), '균형', '[A] 균형형 ({2,2,2,1,1})');
+
+  // [B] {木1,火2,土3,金1,水1} → max=3, 빈오행없음 → 편중형
+  assertEq(classify({木:1,火:2,土:3,金:1,水:1}), '편중형', '[B] 편중형 ({3,2,1,1,1})');
+
+  // [C] {木1,火1,土4,金1,水1} → max=4, 빈오행없음 → 특수격
+  assertEq(classify({木:1,火:1,土:4,金:1,水:1}), '특수격', '[C] 특수격 ({4,1,1,1,1})');
+
+  // [D] {木0,火2,土3,金1,水2} → 빈오행 있음 → 불균형
+  assertEq(classify({木:0,火:2,土:3,金:1,水:2}), '불균형', '[D] 불균형 (木=0)');
+
+  // [E] {木2,火2,土2,金2,水0} → 빈오행 있음 → 불균형
+  assertEq(classify({木:2,火:2,土:2,金:2,水:0}), '불균형', '[E] 불균형 (水=0)');
 }
 
 // ════════════════════════════════════════════════════════

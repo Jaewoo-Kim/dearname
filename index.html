@@ -9174,10 +9174,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (balanceBadge) {
             const _badgeStyle = 'border-radius: var(--radius-lg);padding:3px 12px;font-size:0.78rem;font-weight:800;';
             if (!isBalanced8) {
+                // 빈 오행 존재 → 불균형
                 balanceBadge.innerHTML = `<span style="background:#fee2e2;color:#dc2626;${_badgeStyle}">불균형</span>`;
+            } else if (maxOhengCount >= 4) {
+                // 빈 오행 없지만 한 오행이 4개 이상 → 강세 (종격 가능성)
+                balanceBadge.innerHTML = `<span style="background:#ffedd5;color:#c2410c;${_badgeStyle}">강세</span>`;
             } else if (isSkewed8) {
+                // 빈 오행 없고 최대 정확히 3개 → 편중
                 balanceBadge.innerHTML = `<span style="background:#fef3c7;color:#b45309;${_badgeStyle}">편중</span>`;
             } else {
+                // 최대 2개 이하 → 균형
                 balanceBadge.innerHTML = `<span style="background:#dcfce7;color:#16a34a;${_badgeStyle}">균형</span>`;
             }
         }
@@ -9211,12 +9217,18 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 const _relWeak  = Object.entries(ohengCount).filter(([,c])=>c < _avg).map(([o])=>o);
                 const _relStrong= Object.entries(ohengCount).filter(([,c])=>c > _avg).map(([o])=>o);  // strict gt — 완전균등 시 빈배열
                 let _balMsg = '', _balBg = 'linear-gradient(135deg,#f0fdf4,#dcfce7)', _balBorder = '#86efac', _balColor = '#15803d', _balTitle = '#16a34a', _balTitleTxt = '✦ 사주 원국 진단';
+                // 강세(특수격 max≥4): 기본 색상을 주황 계열로 오버라이드
+                if (maxOhengCount >= 4) {
+                    _balBg = 'linear-gradient(135deg,#fff7ed,#ffedd5)'; _balBorder = '#fdba74'; _balColor = '#9a3412'; _balTitle = '#c2410c';
+                }
 
                 const _domKr8 = domOhengs8.map(o=>_OHENG_NAME[o]||o).join(', ');
                 if (!hasNameOheng) {
-                    _balMsg = isSkewed8
-                        ? `<b>${_domKr8}</b> 기운이 다소 강한 편이니, 이름에는 상대적으로 약한 기운의 한자를 우선 고려해보세요.`
-                        : '특정 기운에 치우침이 없어 이름의 자원오행 선택 자유도가 높습니다. 아이의 원하는 기질과 성향에 맞추어 이름을 지어주세요.';
+                    _balMsg = maxOhengCount >= 4
+                        ? `<b>${_domKr8}</b> 기운이 매우 강한 사주입니다. 이름에는 상대적으로 약한 기운의 한자를 우선 고려해보세요.`
+                        : isSkewed8
+                            ? `<b>${_domKr8}</b> 기운이 다소 강한 편이니, 이름에는 상대적으로 약한 기운의 한자를 우선 고려해보세요.`
+                            : '특정 기운에 치우침이 없어 이름의 자원오행 선택 자유도가 높습니다. 아이의 원하는 기질과 성향에 맞추어 이름을 지어주세요.';
                 } else {
                     const _ohSimple = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
                     const _nd    = nameOhengItems.map(it=>`${it.hanja}(${_ohSimple[it.ohaeng]||it.ohaeng})`).join(', ');
@@ -9256,9 +9268,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                         _balTitleTxt = '✦ 사주 원국 진단 — 이름과 사주가 조화롭습니다';
                     }
                 }
-                const _balLead = isSkewed8
-                    ? `<b>${domOhengs8.map(o=>_OHENG_NAME[o]||o).join(', ')}</b> 기운이 다소 강한 사주입니다.`
-                    : `오행이 고르게 분포된 <b>균형 잡힌 사주</b>입니다.`;
+                const _balLead = maxOhengCount >= 4
+                    ? `<b>${domOhengs8.map(o=>_OHENG_NAME[o]||o).join(', ')}</b> 기운이 매우 강한 사주입니다.`
+                    : isSkewed8
+                        ? `<b>${domOhengs8.map(o=>_OHENG_NAME[o]||o).join(', ')}</b> 기운이 다소 강한 사주입니다.`
+                        : `오행이 고르게 분포된 <b>균형 잡힌 사주</b>입니다.`;
                 diagHtml = `
                 <div style="background:${_balBg};border:1px solid ${_balBorder};border-radius: var(--radius-md);padding:20px 24px;">
                     <div style="font-size:0.82rem;font-weight:800;color:${_balTitle};letter-spacing:1px;margin-bottom:8px;">${_balTitleTxt}</div>
