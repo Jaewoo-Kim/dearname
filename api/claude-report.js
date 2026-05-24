@@ -177,6 +177,31 @@ async function generatePremiumReport(candidate, state) {
     .map(([o,s])=>`${o}:${s.toFixed(1)}점(${SEORYEOK_KR[getSeoryeokStatus(s)]||''})`)
     .join(' ');
   const _ohengKr = {'木':'목(나무)','火':'화(불)','土':'토(흙)','金':'금(쇠)','水':'수(물)'};
+
+  // 8자 단순 카운트로 사주 분류 (셀프작명 뱃지와 동일 기준)
+  const _CG8 = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+  const _JJ8 = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+  const _cnt8 = {'木':0,'火':0,'土':0,'金':0,'水':0};
+  ['year','month','day','time'].forEach(k => {
+    const p = _saju?.[k]; if (!p) return;
+    [_CG8[p.gan], _JJ8[p.ji]].filter(Boolean).forEach(o => { if (_cnt8[o]!==undefined) _cnt8[o]++; });
+  });
+  const _max8   = Math.max(...Object.values(_cnt8));
+  const _has08  = Object.values(_cnt8).some(v => v === 0);
+  const _dom8   = Object.entries(_cnt8).filter(([,v]) => v===_max8).map(([k]) => k).join('·');
+  const _zero8  = Object.entries(_cnt8).filter(([,v]) => v===0).map(([k]) => k).join('·');
+  let _class8;
+  if (_has08)        _class8 = `불균형 — ${_zero8} 기운 결핍`;
+  else if (_max8>=4) _class8 = `강세 — ${_dom8} 기운 매우 강함 (종격/전왕격 가능성)`;
+  else if (_max8===3) _class8 = `편중형 — ${_dom8} 기운 우세`;
+  else               _class8 = '균형형';
+  // 지장간 가중 점수와 표면 분류가 다를 때 메모 생성
+  const _avgScore8 = Object.values(_scores||{}).reduce((a,b) => a+b, 0) / 5;
+  const _weightedBalanced = !Object.values(_scores||{}).some(s => s < _avgScore8*0.5 || s > _avgScore8*2.2);
+  const _class8Note = (!_has08 && _max8>=3 && _weightedBalanced)
+    ? `※ 지장간 가중치 기준으로는 오행 점수가 비교적 균형에 가깝습니다 (단순 카운트와 다름).`
+    : '';
+  const _cnt8Str = `木${_cnt8['木']} 火${_cnt8['火']} 土${_cnt8['土']} 金${_cnt8['金']} 水${_cnt8['水']}`;
   const parentOheng = state.parentOheng;
   const parentOhengStr = parentOheng
     ? ['father','mother'].map(p => {
@@ -214,6 +239,10 @@ ${ohengStr}
 NameSpec Prefer: [${nameSpec?.prefer?.join(', ')||''}] / Avoid: [${nameSpec?.avoid?.join(', ')||''}]
 전략: ${nameSpec?.strategy||''} (${nameSpec?.gridType||''})
 
+[사주 오행 분류 — 8자 단순 카운트]
+${_cnt8Str} → ${_class8}
+${_class8Note}
+
 [이름 분석]
 한자: ${familyHanja}(${familyKr}) · ${h1.h}(${h1.kr}) · ${h2?h2.h+'('+h2.kr+')':''}
 자원오행: ${h1.o}${h2?'+'+h2.o:''} / 원획법: ${familyHanja} ${s0}획 · ${h1.h} ${s1}획${h2?' · '+h2.h+' '+s2+'획':''}
@@ -229,7 +258,7 @@ ${traitStr}
 아래 JSON 구조로 정확하게 반환해주세요 (각 필드의 분량 지침 준수):
 {
   "tagline": "핵심 한 줄 시그니처 (따옴표로 감싼 시적 표현, 20~40자)",
-  "sajuStory": "사주 원국 서사. 일주를 중심으로 아이의 타고난 기질, 사주 지형의 특징, 부족한 기운과 넘치는 기운의 의미를 3~4문장으로 풍부하게 서술. 부모가 읽으면 고개를 끄덕이게 되는 이야기여야 함.",
+  "sajuStory": "사주 원국 서사. 일주를 중심으로 아이의 타고난 기질, 사주 지형의 특징, 부족한 기운과 넘치는 기운의 의미를 3~4문장으로 풍부하게 서술. 부모가 읽으면 고개를 끄덕이게 되는 이야기여야 함. 【필수】위 [사주 오행 분류]가 불균형·편중형·강세인 경우 결핍/강한 기운을 반드시 언급할 것. 8자 분류와 지장간 점수가 불일치하는 경우(※ 메모가 있을 때)에는 '표면상 ○ 기운이 강해 보이지만, 지장간의 실질 에너지까지 고려하면 균형에 가깝습니다'처럼 한 문장으로 명시할 것.",
   "jawonStory": "자원오행 보완 서사. 선택된 이름의 한자들이 어떻게 사주의 빈자리를 채우는지, 구체적인 오행 흐름과 함께 2~3문장으로 설명.",
   "hanjaDetails": [
     {

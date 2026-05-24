@@ -106,9 +106,15 @@
 | 균형 | 빈 오행 없고 `max <= 2` | relWeak만=매우 좋음 / 혼합=좋음 / relStrong만=나쁨 |
 
 - `_isSkewed = _maxCnt === 3`, `_domSet` = 최댓값 오행. `_nameHitsDom`이면 편중형에서 나쁨 강등.
-- **뱃지 4-state** (index.html `self-oheng-balance-badge`):
+- **뱃지 4-state** (index.html `self-oheng-balance-badge` / `premium-oheng-badge`):
   - 불균형 = 빨강(`#dc2626`)  /  강세 = 주황·진한(`#c2410c`)  /  편중 = 주황·연한(`#b45309`)  /  균형 = 초록(`#16a34a`)
+  - 프리미엄 보고서 Ch1에도 동일 4-state 뱃지(`premium-oheng-badge`) 추가됨.
 - 진단 박스 색상도 동기화: 강세는 오렌지 계열(`#ffedd5`), 편중/균형은 기존과 동일.
+- **프리미엄 보고서 자원오행 grade 수정** (`_applyVerdicts()` 내 `verdict-ch3`):
+  - 기존: 이름 오행 유일값 수만으로 등급 결정 (2개 이상 → 항상 "매우 좋음")
+  - 변경: `calcSajuOhengGrade()` 직접 호출 → 셀프작명과 완전히 동일한 기준 적용
+  - `_currentState._inputRaw.birthDate/birthTime` + `_currentState._sajuOpts` 사용
+  - `_sajuOpts` 저장을 위해 `_buildSearchState()` 반환값에 `_sajuOpts` 필드 추가됨.
 
 ### 내부 함수 (외부 호출 불필요)
 

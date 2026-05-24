@@ -4277,6 +4277,7 @@
                 <div class="oheng-bars" id="report-oheng-bars"></div>
             </div>
             <div class="ai-story-block" id="ai-saju-story"></div>
+            <div id="premium-oheng-badge" style="margin-top:14px;"></div>
             </div><!-- /acc-body-ch1 -->
         </div>
 
@@ -6458,6 +6459,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             searchControl: { maxResults:5, qualityThreshold:60 },
             _saju:       saju,
             _scores:     scores,
+            _sajuOpts:   _premSajuOpts,
             daeun,
             gender,
             parentOheng,
@@ -6865,6 +6867,29 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const sajuStoryEl = document.getElementById('ai-saju-story');
         if (sajuStoryEl) sajuStoryEl.textContent = _ensureHanjaLabel(report.sajuStory || report.sajuAnalysis || '');
 
+        // Ch1: 4-state 오행 분포 뱃지 (셀프작명과 동일 기준)
+        (function _renderPremiumOhengBadge() {
+            const _pb = document.getElementById('premium-oheng-badge');
+            if (!_pb || !_saju) return;
+            const _CG = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+            const _JJ = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+            const _cnt = {'木':0,'火':0,'土':0,'金':0,'水':0};
+            ['year','month','day','time'].forEach(k => {
+                const p = _saju[k]; if (!p) return;
+                [_CG[p.gan], _JJ[p.ji]].filter(Boolean).forEach(o => { if (_cnt[o]!==undefined) _cnt[o]++; });
+            });
+            const _max = Math.max(...Object.values(_cnt));
+            const _has0 = Object.values(_cnt).some(v => v === 0);
+            const _domOs = Object.entries(_cnt).filter(([,v]) => v===_max).map(([k]) => k).join('·');
+            const _zeroOs = Object.entries(_cnt).filter(([,v]) => v===0).map(([k]) => k).join('·');
+            let _bl, _bc, _bb, _bt;
+            if (_has0)        { _bl='불균형'; _bc='#dc2626'; _bb='#fee2e2'; _bt=`${_zeroOs} 기운이 결핍 — 이름으로 보완이 필요합니다.`; }
+            else if (_max>=4) { _bl='강세';   _bc='#c2410c'; _bb='#ffedd5'; _bt=`${_domOs} 기운이 매우 강한 사주입니다 (종격 가능성).`; }
+            else if (_max===3){ _bl='편중';   _bc='#b45309'; _bb='#fef3c7'; _bt=`${_domOs} 기운이 다소 강한 편중 사주입니다.`; }
+            else              { _bl='균형';   _bc='#16a34a'; _bb='#dcfce7'; _bt='오행이 고르게 분포된 균형 사주입니다.'; }
+            _pb.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:${_bb};color:${_bc};font-size:0.8rem;font-weight:700;">오행 분포 <b>${_bl}</b></span><span style="font-size:0.8rem;color:#64748b;margin-left:8px;">${_bt}</span>`;
+        })();
+
         // Ch2: 자원오행 & 레이더
         document.getElementById('report-tagline').textContent = report.tagline || '';
 
@@ -7019,18 +7044,20 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                                ?'각 한자 획수의 음(짝수)과 양(홀수)이 고루 배합되어 균형이 잡혀 있습니다.'
                                :'모든 한자 획수가 홀수 또는 짝수로 치우쳐 음양의 균형이 깨져 있습니다.';
 
-            // 자원오행 (candidate 한자 오행 직접 사용)
-            const _nameOs   = [h1,h2].filter(Boolean).map(x=>(_normOheng?_normOheng(x.o):x.o)).filter(Boolean);
-            const _uniqueOs = [...new Set(_nameOs)];
-            const _OK_S = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            // 자원오행 — calcSajuOhengGrade 활용 (셀프작명과 동일 기준)
+            const _nameOs = [h1,h2].filter(Boolean).map(x=>(_normOheng?_normOheng(x.o):x.o)).filter(Boolean);
+            const _jawonBD   = _currentState?._inputRaw?.birthDate || '';
+            const _jawonBT   = _currentState?._inputRaw?.birthTime || '';
+            const _jawonOpts = _currentState?._sajuOpts || {};
             let jawonGrade, jawonDesc;
-            if(!_uniqueOs.length) { jawonGrade='나쁨'; jawonDesc='한자를 선택하면 자원오행이 표시됩니다.'; }
-            else if(_uniqueOs.length===1) {
-                jawonGrade='좋음';
-                jawonDesc=`이름의 기운이 모두 ${_OK_S[_uniqueOs[0]]||_uniqueOs[0]} 기운으로 구성되어 있습니다. 단일 기운이 집중되어 강한 개성을 나타냅니다.`;
+            if (!_nameOs.length) {
+                jawonGrade = '나쁨'; jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
+            } else if (typeof calcSajuOhengGrade === 'function') {
+                const _gRes = calcSajuOhengGrade(_nameOs, _jawonBD, _jawonBT, _jawonOpts);
+                jawonGrade  = _gRes.grade;
+                jawonDesc   = _gRes.desc;
             } else {
-                jawonGrade='매우 좋음';
-                jawonDesc=`${_nameOs.map(o=>_OK_S[o]||o).join(' · ')} 기운으로 구성된 이름입니다. 다양한 기운이 어우러져 풍부한 기질을 형성합니다.`;
+                jawonGrade = '나쁨'; jawonDesc = '사주 엔진 로딩 중...';
             }
 
             // 사주 보완 (candidate 오행 vs nameSpec.prefer)
