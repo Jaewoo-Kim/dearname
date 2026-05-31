@@ -237,6 +237,31 @@ open tests/test.html
 npm test
 ```
 
+### 파일 구조 (제품 경계별 분리)
+
+테스트는 두 제품의 알고리즘 경계에 따라 디렉터리로 분리됩니다. `runner.js`(Node)와 `test.html`(브라우저)은 **동일한 suite 파일 목록**을 로드하는 로더입니다.
+
+```
+tests/
+├── framework.js                 수집 모델 프레임워크 (suite/assert/assertEq/assertCond) — var/function만 사용 (vm 호환)
+├── helpers.js                   공용 헬퍼 (saju, count8, CG/JJ)
+├── runner.js                    Node 로더 (vm.runInContext → __TEST_SUITES__ 집계)
+├── test.html                    브라우저 로더 (동일 suite → DOM 렌더)
+└── suites/
+    ├── shared/saju.test.js          [공통] calcSaju 만세력 엔진 (입춘·절기·야자시·보정·표준시·서머타임·범위)
+    ├── self/oheng-count.test.js     [셀프] 8자 단순 카운트 + 오행 분류 (지장간 미고려)
+    ├── self/saju-grade.test.js      [셀프] calcSajuOhengGrade default 등급 (8자 기준)
+    ├── premium/oheng-weighted.test.js   [프리미엄] calcOhengScores 지장간 가중 + calcDaeun
+    ├── premium/saju-grade-prem.test.js  [프리미엄] calcSajuOhengGrade premium 통관 분기
+    └── premium/namespec.test.js     [프리미엄] buildNameSpec 종격 + calcYongsin 억부법 용신
+```
+
+> **제품 경계 원칙**: 셀프 분석은 8자 단순 카운트(지장간 미고려), 프리미엄은 지장간 가중 점수.
+> 같은 `calcSajuOhengGrade`라도 `premium` 옵션 유무로 통관 판정이 갈리므로 self/premium 파일로 분리.
+
+> **vm 스코프 규칙**: `framework.js`·`helpers.js`는 `var`/`function`만 사용한다.
+> Node `vm.runInContext`에서 top-level `const`/`let`은 context 프로퍼티로 노출되지 않아 다른 suite 파일에서 접근 불가.
+
 ### 테스트 구성 (총 90개 케이스)
 
 | Suite | 등급 | 케이스 수 | 내용 |
