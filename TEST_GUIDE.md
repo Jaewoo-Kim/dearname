@@ -253,8 +253,13 @@ tests/
     ├── self/saju-grade.test.js      [셀프] calcSajuOhengGrade default 등급 (8자 기준)
     ├── premium/oheng-weighted.test.js   [프리미엄] calcOhengScores 지장간 가중 + calcDaeun
     ├── premium/saju-grade-prem.test.js  [프리미엄] calcSajuOhengGrade premium 통관 분기
-    └── premium/namespec.test.js     [프리미엄] buildNameSpec 종격 + calcYongsin 억부법 용신
+    ├── premium/namespec.test.js     [프리미엄] buildNameSpec 종격 + calcYongsin 억부법 용신
+    └── premium/formula-fields.test.js   [프리미엄] claude-report.js 공식 필드(_calcGuk 81수리 4격, _getSuriData, _genCareerJobs, _genHealthAdvice)
 ```
+
+> **LLM 경계 원칙 (프롬프트 계약 + 폴백)**: 프리미엄 보고서 중 Claude가 생성하는 *서술(prose)* 은 단언하지 않는다.
+> JS가 확정적으로 계산하는 *공식 필드* (`_calcGuk` 등)만 검증 대상. `_genSoundStory`·`_genFormulaFields` 는
+> 브라우저 `window.getCho` 의존이라 Node 단위 테스트에서 제외(브라우저 test.html 에서는 폴백 동작).
 
 > **제품 경계 원칙**: 셀프 분석은 8자 단순 카운트(지장간 미고려), 프리미엄은 지장간 가중 점수.
 > 같은 `calcSajuOhengGrade`라도 `premium` 옵션 유무로 통관 판정이 갈리므로 self/premium 파일로 분리.
@@ -262,7 +267,9 @@ tests/
 > **vm 스코프 규칙**: `framework.js`·`helpers.js`는 `var`/`function`만 사용한다.
 > Node `vm.runInContext`에서 top-level `const`/`let`은 context 프로퍼티로 노출되지 않아 다른 suite 파일에서 접근 불가.
 
-### 테스트 구성 (총 90개 케이스)
+### 테스트 구성 (총 111개 케이스)
+
+> 만세력/등급/종격/통관/용신 90개 + 프리미엄 공식 필드 21개.
 
 | Suite | 등급 | 케이스 수 | 내용 |
 |---|---|---|---|
