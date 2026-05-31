@@ -12,6 +12,18 @@ const SEORYEOK_KR = {
   'strong':'과다', 'extreme_strong':'태과'
 };
 
+// ── 시스템 프롬프트 (정적 — 프롬프트 캐싱 적용) ────────────────────────
+const SYSTEM_PROMPT =
+`당신은 30년 경력의 최고 명리학 대가이자 작명 전문가입니다.
+서버가 계산한 명리학적 팩트를 바탕으로, 부모님의 마음을 따뜻하게 울리는 품격 있는 작명 소견서를 작성합니다.
+규칙:
+- 중학생도 이해할 수 있는 쉬운 언어 사용
+- 어려운 한자 용어는 반드시 () 안에 풀이
+- 자원오행(字源五行)과 원획법(原劃法) 획수를 근거로 구체적으로 설명
+- 수치 데이터(획수, 점수)를 자연스럽게 서술에 녹임
+- 각 필드는 지정된 분량을 지켜 충분히 풍부하게 작성
+- JSON만 반환. 마크다운 코드블록 절대 없이.`;
+
 // ── 공식 생성 함수 (Claude 없이 JS로 확정 생성) ───────────────────────
 
 function _genSoundStory(candidate) {
@@ -148,9 +160,13 @@ function _genFormulaFields(candidate, state) {
   };
 }
 
-// ── Claude API 호출 (8개 서술 필드) ──────────────────────────────────
+// ── 프롬프트 조립 + Claude API 호출 (8개 서술 필드) ──────────────────
 
-async function generatePremiumReport(candidate, state) {
+/**
+ * buildUserPrompt — Claude 에게 보낼 userPrompt 문자열을 결정적으로 조립.
+ * LLM 호출 없이 순수 계산만 수행하므로 단위 테스트(프롬프트 계약) 대상이 된다.
+ */
+function buildUserPrompt(candidate, state) {
   const { h1, h2, s0, score, familyKr, familyHanja } = candidate;
   const { nameSpec, constraints, _saju, _scores } = state;
   const isOija = !h2;
@@ -249,18 +265,6 @@ async function generatePremiumReport(candidate, state) {
     : '';
   const specialRequest = state.specialRequest || '';
 
-  // ── 시스템 프롬프트 (프롬프트 캐싱 적용) ─────────────────────────
-  const systemText =
-`당신은 30년 경력의 최고 명리학 대가이자 작명 전문가입니다.
-서버가 계산한 명리학적 팩트를 바탕으로, 부모님의 마음을 따뜻하게 울리는 품격 있는 작명 소견서를 작성합니다.
-규칙:
-- 중학생도 이해할 수 있는 쉬운 언어 사용
-- 어려운 한자 용어는 반드시 () 안에 풀이
-- 자원오행(字源五行)과 원획법(原劃法) 획수를 근거로 구체적으로 설명
-- 수치 데이터(획수, 점수)를 자연스럽게 서술에 녹임
-- 각 필드는 지정된 분량을 지켜 충분히 풍부하게 작성
-- JSON만 반환. 마크다운 코드블록 절대 없이.`;
-
   // ── 사용자 프롬프트 (8개 서술 필드만 요청) ───────────────────────
   const userPrompt =
 `"${nameKr}(${nameHanja})" 이름의 프리미엄 작명 소견서를 작성해주세요.
@@ -320,6 +324,16 @@ ${traitStr}
   "careerAdvice": "이름의 역할 서사 (반드시 4문장 이상). ①이 아이의 사주 원국에서 드러나는 일간의 타고난 기질과 강한 오행 기운을 1문장으로 설명. ②사주에서 부족했던 오행과 그로 인한 인생의 과제를 1문장으로 설명. ③이 이름이 그 빈자리를 어떻게 채우고, 그 결과 아이의 인생이 어떤 방향으로 펼쳐지는지를 1~2문장으로 서술. ④이 이름과 함께할 아이의 미래에 대한 따뜻한 축원 1문장으로 마무리. 오행·수리 근거를 자연스럽게 녹여 이야기 형식으로."
 }`;
 
+  return userPrompt;
+}
+
+// ── Claude API 호출 (8개 서술 필드) ──────────────────────────────────
+async function generatePremiumReport(candidate, state) {
+  const { h1, h2, familyKr, familyHanja } = candidate;
+  const { _saju } = state;
+  const nameKr = `${familyKr}${h1.kr}${h2?.kr||''}`;
+  const userPrompt = buildUserPrompt(candidate, state);
+
   const PROXY_URL   = '/proxy/claude';
   const DIRECT_URL  = 'https://api.anthropic.com/v1/messages';
   const DIRECT_HEADERS = {
@@ -334,7 +348,7 @@ ${traitStr}
     system: [
       {
         type: 'text',
-        text: systemText,
+        text: SYSTEM_PROMPT,
         cache_control: { type: 'ephemeral' }
       }
     ],

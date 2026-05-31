@@ -46,7 +46,7 @@ loadScript('lib/name-spec.js',   ctx);
 loadScript('api/claude-report.js', ctx);   // 프리미엄 공식 필드(_calcGuk 등) — top-level window 참조 없음
 
 ['calcSaju', 'calcOhengScores', 'calcDaeun', 'calcSajuOhengGrade', 'buildNameSpec', 'calcYongsin',
- '_calcGuk', '_getSuriData', '_genCareerJobs', '_genHealthAdvice'].forEach(name => {
+ '_calcGuk', '_getSuriData', '_genCareerJobs', '_genHealthAdvice', 'buildUserPrompt'].forEach(name => {
   if (!ctx[name]) {
     console.error(`엔진 로드 오류: ${name} 를 찾을 수 없습니다.`);
     process.exit(1);
@@ -66,6 +66,7 @@ const SUITE_FILES = [
   'tests/suites/premium/saju-grade-prem.test.js',
   'tests/suites/premium/namespec.test.js',
   'tests/suites/premium/formula-fields.test.js',
+  'tests/suites/premium/prompt-contract.test.js',
 ];
 SUITE_FILES.forEach(f => loadScript(f, ctx));
 
