@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="Generator" content="Microsoft Word 15">
+<title>DearName 서비스 로직 설명서</title>
+<style>
+  body {
+    font-family: '맑은 고딕', 'Malgun Gothic', sans-serif;
+    font-size: 11pt;
+    line-height: 1.8;
+    color: #1a1a1a;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 40px;
+  }
+  h1 {
+    font-size: 22pt;
+    font-weight: bold;
+    color: #1a1a2e;
+    border-bottom: 3px solid #4a90d9;
+    padding-bottom: 8px;
+    margin-top: 40px;
+  }
+  h2 {
+    font-size: 16pt;
+    font-weight: bold;
+    color: #2c3e6b;
+    border-left: 5px solid #4a90d9;
+    padding-left: 12px;
+    margin-top: 32px;
+  }
+  h3 {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #2c5282;
+    margin-top: 24px;
+  }
+  h4 {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #2d3748;
+    margin-top: 16px;
+  }
+  p { margin: 8px 0 12px 0; }
+  ul, ol { margin: 6px 0 12px 0; padding-left: 24px; }
+  li { margin-bottom: 5px; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 10.5pt;
+  }
+  th {
+    background-color: #2c3e6b;
+    color: #ffffff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: bold;
+  }
+  td {
+    padding: 7px 12px;
+    border: 1px solid #ccc;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background-color: #f4f7fb; }
+  .box {
+    background-color: #eef4ff;
+    border: 1px solid #b3cef0;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .box-warn {
+    background-color: #fff8e1;
+    border: 1px solid #f0c040;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .box-green {
+    background-color: #f0fff4;
+    border: 1px solid #68d391;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .label-self {
+    display: inline-block;
+    background-color: #48bb78;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 9.5pt;
+    font-weight: bold;
+    margin-right: 6px;
+  }
+  .label-premium {
+    display: inline-block;
+    background-color: #7c3aed;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 9.5pt;
+    font-weight: bold;
+    margin-right: 6px;
+  }
+  .label-both {
+    display: inline-block;
+    background-color: #3182ce;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 9.5pt;
+    font-weight: bold;
+    margin-right: 6px;
+  }
+  .score-block {
+    background: #f8f9ff;
+    border: 1px solid #d0d9f0;
+    padding: 10px 16px;
+    margin: 8px 0;
+    border-radius: 4px;
+  }
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .step-num {
+    background: #4a90d9;
+    color: white;
+    font-weight: bold;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11pt;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .sep {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 28px 0;
+  }
+  .cover {
+    text-align: center;
+    padding: 60px 0 40px;
+  }
+  .cover h1 {
+    font-size: 28pt;
+    border: none;
+    margin-bottom: 8px;
+  }
+  .cover .sub {
+    font-size: 14pt;
+    color: #555;
+    margin: 8px 0;
+  }
+  .cover .meta {
+    font-size: 10pt;
+    color: #888;
+    margin-top: 20px;
+  }
+  @media print {
+    body { margin: 20mm; }
+    h2 { page-break-before: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════ 표지 ════════ -->
+<div class="cover">
+  <h1 style="border:none;">DearName 서비스<br>작명 로직 설명서</h1>
+  <p class="sub">셀프 분석 &amp; 프리미엄 작명 로직 상세 안내</p>
+  <p class="sub">작명가 검토용 — 전문 용어 해설 포함</p>
+  <p class="meta">DearName 개발팀 · 2026년 5월 작성</p>
+</div>
+
+<hr class="sep">
+
+<!-- ════════ 목차 ════════ -->
+<h2>목차</h2>
+<ol>
+  <li><strong>이 문서를 읽기 전에</strong> — 두 서비스 개요</li>
+  <li><strong>전문 용어 해설</strong> — 작명 이론 기초 개념 정리</li>
+  <li><strong>공통 기반: 사주 계산 방식</strong></li>
+  <li><strong>셀프 분석 로직</strong> — 사용자가 직접 이름을 분석하는 기능</li>
+  <li><strong>프리미엄 작명 로직</strong> — AI가 이름 후보를 생성·채점하는 기능</li>
+  <li><strong>두 서비스의 핵심 차이점 요약</strong></li>
+  <li><strong>검토 요청 사항</strong></li>
+</ol>
+
+<hr class="sep">
+
+<!-- ════════ 1. 서비스 개요 ════════ -->
+<h1>1. 이 문서를 읽기 전에</h1>
+
+<p>DearName은 사주명리학 이론을 바탕으로 한 온라인 작명 서비스입니다. 현재 두 가지 서비스를 제공합니다.</p>
+
+<table>
+  <tr>
+    <th style="width:22%">구분</th>
+    <th style="width:39%">셀프 분석</th>
+    <th style="width:39%">프리미엄 작명</th>
+  </tr>
+  <tr>
+    <td><strong>목적</strong></td>
+    <td>사용자가 직접 고른 이름의 좋고 나쁨을 확인</td>
+    <td>사주에 맞는 이름 후보를 AI가 자동 생성 및 추천</td>
+  </tr>
+  <tr>
+    <td><strong>입력값</strong></td>
+    <td>이름(한글+한자) + 생년월일시</td>
+    <td>성씨(한자) + 성별 + 생년월일시 + 희망 성향</td>
+  </tr>
+  <tr>
+    <td><strong>출력</strong></td>
+    <td>발음 분석, 자원오행 평가, 81수리 결과</td>
+    <td>상위 이름 후보 목록 + Claude AI 작명 보고서</td>
+  </tr>
+  <tr>
+    <td><strong>사주 분석 깊이</strong></td>
+    <td>8글자 단순 카운트 (직관적 설명 목적)</td>
+    <td>지장간 비율 가중치 포함 (정밀 분석)</td>
+  </tr>
+</table>
+
+<div class="box">
+  <strong>📌 작명가 검토 요청 배경</strong><br>
+  저희 서비스의 각 채점 항목과 가중치가 실제 작명 이론과 부합하는지 전문가 관점에서 검토해 주시기를 요청드립니다.
+  특히 <strong>①각 항목의 채점 기준이 적절한지, ②항목 간 우선순위가 이론과 맞는지, ③빠진 중요 항목이 있는지</strong>를 중심으로 의견 주시면 감사하겠습니다.
+</div>
+
+<hr class="sep">
+
+<!-- ════════ 2. 전문 용어 해설 ════════ -->
+<h1>2. 전문 용어 해설</h1>
+
+<p>이 문서에는 사주명리학 용어가 자주 등장합니다. 비전문가도 이해할 수 있도록 주요 용어를 먼저 정리합니다.</p>
+
+<h2>2-1. 오행(五行) 기본 개념</h2>
+
+<table>
+  <tr>
+    <th>오행</th>
+    <th>상징</th>
+    <th>초성(발음)</th>
+    <th>자연 이미지</th>
+  </tr>
+  <tr>
+    <td><strong>木 (목)</strong></td>
+    <td>나무</td>
+    <td>ㄱ, ㅋ, ㄲ</td>
+    <td>성장, 생명력, 봄</td>
+  </tr>
+  <tr>
+    <td><strong>火 (화)</strong></td>
+    <td>불</td>
+    <td>ㄴ, ㄷ, ㄹ, ㅌ, ㄸ</td>
+    <td>열정, 빛, 여름</td>
+  </tr>
+  <tr>
+    <td><strong>土 (토)</strong></td>
+    <td>흙</td>
+    <td>ㅇ, ㅎ</td>
+    <td>안정, 신뢰, 환절기</td>
+  </tr>
+  <tr>
+    <td><strong>金 (금)</strong></td>
+    <td>쇠</td>
+    <td>ㅅ, ㅈ, ㅊ, ㅆ, ㅉ</td>
+    <td>결단, 의리, 가을</td>
+  </tr>
+  <tr>
+    <td><strong>水 (수)</strong></td>
+    <td>물</td>
+    <td>ㅁ, ㅂ, ㅍ, ㅃ</td>
+    <td>지혜, 유연함, 겨울</td>
+  </tr>
+</table>
+
+<h3>오행의 상생과 상극</h3>
+<ul>
+  <li><strong>상생(相生)</strong> — 서로 도와주는 관계: 木→火→土→金→水→木 (앞의 것이 뒤의 것을 키움)</li>
+  <li><strong>상극(相剋)</strong> — 서로 억누르는 관계: 木→土, 火→金, 土→水, 金→木, 水→火</li>
+  <li><strong>비화(比和)</strong> — 같은 오행끼리: 서로 돕는 관계로 상생과 동일하게 봄</li>
+</ul>
+
+<div class="box">
+  <strong>예시:</strong> "김서연"이라는 이름에서<br>
+  · 김(ㄱ) → 木, 서(ㅅ) → 金, 연(ㅇ) → 土<br>
+  · 木(김)→金(서): 상극 ❌ / 金(서)→土(연): 상극 ❌<br>
+  · 인접 쌍 2개 중 상극 1개 → "좋음" 등급 (상극이 과반 미만)
+</div>
+
+<h2>2-2. 사주(四柱)와 팔자(八字)</h2>
+
+<table>
+  <tr>
+    <th>기둥(柱)</th>
+    <th>내용</th>
+    <th>구성</th>
+  </tr>
+  <tr>
+    <td>연주(年柱)</td>
+    <td>태어난 해</td>
+    <td>천간(干) + 지지(支) = 2글자</td>
+  </tr>
+  <tr>
+    <td>월주(月柱)</td>
+    <td>태어난 달</td>
+    <td>천간 + 지지 = 2글자</td>
+  </tr>
+  <tr>
+    <td>일주(日柱)</td>
+    <td>태어난 날</td>
+    <td>천간 + 지지 = 2글자</td>
+  </tr>
+  <tr>
+    <td>시주(時柱)</td>
+    <td>태어난 시간</td>
+    <td>천간 + 지지 = 2글자</td>
+  </tr>
+</table>
+
+<p>4기둥 × 2글자 = 총 8글자 → <strong>팔자(八字)</strong>. 천간(甲乙丙丁戊己庚辛壬癸)은 10종, 지지(子丑寅卯辰巳午未申酉戌亥)는 12종입니다.</p>
+
+<h2>2-3. 지장간(支藏干)</h2>
+<p>지지(地支) 속에 숨어있는 천간의 기운입니다. 예를 들어 子(자)는 겉으로 水이지만 내부에 壬(40%)·癸(60%)가 들어있습니다.</p>
+
+<div class="box">
+  <strong>셀프 분석 vs 프리미엄의 차이가 여기서 납니다.</strong><br>
+  · <span class="label-self">셀프</span> 겉면 오행(지지 정기)만 1개로 카운트 → 직관적 설명에 적합<br>
+  · <span class="label-premium">프리미엄</span> 지장간 비율 포함 → 보다 정밀한 오행 점수 계산
+</div>
+
+<h2>2-4. 자원오행(字源五行)</h2>
+<p>한자가 가진 오행 속성입니다. 한자의 뜻·부수·형태에서 비롯됩니다.</p>
+<ul>
+  <li>水(수): 洙, 淳, 海, 源 등 水 부수(氵) 한자</li>
+  <li>木(목): 林, 柳, 桂 등 木 부수(木·木旁) 한자</li>
+  <li>예: 서(瑞) = 金 속성, 연(玟) = 土 속성</li>
+</ul>
+
+<h2>2-5. 발음오행(소리오행)</h2>
+<p>한글 이름 글자의 첫소리(초성)가 가진 오행입니다. 한자와 무관하게 <strong>소리 자체</strong>의 오행을 분석합니다.</p>
+
+<h2>2-6. 수리학(數理學) — 81수리</h2>
+<p>이름 각 글자의 획수를 더해 얻은 숫자의 길흉을 판단하는 이론입니다. 1~81까지 각 숫자에 등급이 있습니다.</p>
+
+<table>
+  <tr>
+    <th>4格(격)</th>
+    <th>계산 방식 (두 글자 이름 기준)</th>
+    <th>의미</th>
+  </tr>
+  <tr>
+    <td>원격(元格)</td>
+    <td>이름 첫 글자 + 이름 둘째 글자 획수</td>
+    <td>초년운 (어린 시절)</td>
+  </tr>
+  <tr>
+    <td>형격(亨格)</td>
+    <td>성 획수 + 이름 첫 글자 획수</td>
+    <td>중년운 (사회·직업)</td>
+  </tr>
+  <tr>
+    <td>이격(利格)</td>
+    <td>성 획수 + 이름 둘째 글자 획수</td>
+    <td>장년운 (가정·재물)</td>
+  </tr>
+  <tr>
+    <td>정격(貞格)</td>
+    <td>성 + 이름 모든 글자 획수 합산</td>
+    <td>말년운 (인생 전체)</td>
+  </tr>
+</table>
+
+<div class="box-warn">
+  <strong>⚠️ 81수리 등급 체계</strong><br>
+  대길(大吉) &gt; 길(吉) &gt; 평(平) &gt; 흉(凶) &gt; 대흉(大凶)<br>
+  저희 서비스에서는 <strong>대흉이 하나라도 있거나, 말년격(정격)이 평·흉이면 해당 이름 후보를 자동 탈락</strong>시킵니다.
+</div>
+
+<h2>2-7. 대운(大運)</h2>
+<p>10년 단위로 바뀌는 운의 흐름입니다. 몇 살부터 시작하는지는 성별과 태어난 해의 천간(양간·음간)에 따라 달라집니다. 프리미엄 서비스는 대운이 약한 시기(특히 중년·노년)를 보완하는 이름에 가점을 줍니다.</p>
+
+<h2>2-8. 조후(調候)</h2>
+<p>계절(월지)에 따른 온도 조절 개념입니다.</p>
+<ul>
+  <li>여름(巳·午·未월) 태생인데 水 기운이 부족하면 → 물(水) 기운 이름이 시급</li>
+  <li>겨울(亥·子·丑월) 태생인데 火 기운이 부족하면 → 불(火) 기운 이름이 시급</li>
+</ul>
+
+<h2>2-9. 통관(通關)</h2>
+<p>사주 안에서 두 오행이 서로 강하게 충돌할 때, 두 세력을 중재해 주는 오행이 필요한 상황입니다.</p>
+<ul>
+  <li>木↔土 대립 → 火로 중재 / 火↔金 대립 → 土로 중재 (오행 순환 원리 적용)</li>
+</ul>
+
+<h2>2-10. 억부법(抑扶法)과 용신(用神)</h2>
+<p>일간(태어난 날의 천간)을 기준으로 사주 전체가 강한지(신강) 약한지(신약)를 판단한 뒤, 균형을 잡아 줄 핵심 오행을 용신(用神)으로 선정하는 이론입니다.</p>
+<ul>
+  <li><strong>신강(身强)</strong> — 일간이 너무 강함 → 억제하는 오행(식·재·관)이 용신</li>
+  <li><strong>신약(身弱)</strong> — 일간이 약함 → 돕는 오행(인성·비겁)이 용신</li>
+  <li><strong>중화(中和)</strong> — 균형 상태 → 용신 불필요</li>
+  <li><strong>희신(喜神)</strong>: 용신을 도와주는 오행 / <strong>기신(忌神)</strong>: 용신을 해치는 오행</li>
+</ul>
+
+<h2>2-11. 종격(從格) — 특수격</h2>
+<p>사주 내 한 오행이 압도적으로 강할 때(점수 60점 이상), 그 강한 기운을 억누르려 하지 않고 <strong>순응</strong>하는 특수한 격국입니다. 일반 사주와 용신 선정 원리가 반대입니다.</p>
+
+<table>
+  <tr>
+    <th>종격 유형</th>
+    <th>지배 오행</th>
+    <th>이름에 권장</th>
+    <th>이름에 금지</th>
+  </tr>
+  <tr><td>종왕/종강격</td><td>木 압도</td><td>木·水</td><td>金</td></tr>
+  <tr><td>종아격</td><td>火 압도</td><td>火·木</td><td>水</td></tr>
+  <tr><td>전왕격</td><td>土 압도</td><td>土·火</td><td>木</td></tr>
+  <tr><td>종재격</td><td>金 압도</td><td>金·土</td><td>火</td></tr>
+  <tr><td>종살격</td><td>水 압도</td><td>水·金</td><td>土</td></tr>
+</table>
+
+<h2>2-12. 분파(分破) 한자</h2>
+<p>글자를 좌우 또는 상하로 나누면 구성 요소가 서로 분리·충돌하는 구조의 한자입니다. 이름 전체 글자(성+이름)가 모두 분파 구조이면 이름의 기운이 분산된다고 봅니다.</p>
+<p><em>예시 분파 한자: 朴(박), 林(림), 安(안) 등 약 400자 목록 관리 중</em></p>
+
+<hr class="sep">
+
+<!-- ════════ 3. 공통 기반: 사주 계산 ════════ -->
+<h1>3. 공통 기반: 사주 계산 방식</h1>
+
+<h2>3-1. 만세력 데이터 기반</h2>
+<p>동추원 만세력 데이터를 사용합니다. 1921년~2040년 출생자를 지원하며, 절기 날짜와 시간까지 분 단위로 반영해 월주를 정확하게 계산합니다.</p>
+
+<h2>3-2. 지방시 보정</h2>
+<p>한국 내 도시별로 동경 135도 표준시와의 차이를 초 단위로 보정합니다. 서울은 약 32분 차이가 납니다. 이 보정을 적용하면 실제 태양시 기준으로 시주가 결정됩니다.</p>
+
+<h2>3-3. 야자시(夜子時) 처리</h2>
+<p>밤 11시~12시(23:00~24:00)에 태어난 경우 자시(子時)가 당일에 속하는지 다음날에 속하는지는 학파에 따라 다릅니다. 저희 서비스는 이 옵션을 선택할 수 있게 했습니다.</p>
+
+<h2>3-4. 오행 점수 계산 (프리미엄 전용 정밀 버전)</h2>
+<p>총 100점을 4기둥 8글자에 배분합니다.</p>
+<ul>
+  <li><strong>천간(干)</strong>: 각 기둥의 천간 오행에 <strong>10점</strong></li>
+  <li><strong>지지(支)</strong>: 지장간 비율에 따라 <strong>15점</strong> 분배 (초기 15%·중기 25%·정기 60%)</li>
+</ul>
+<p>예: 午(오)는 丙(15%)=2.25점, 己(25%)=3.75점, 丁(60%)=9점으로 화(火)와 토(土)에 나뉘어 배분</p>
+
+<hr class="sep">
+
+<!-- ════════ 4. 셀프 분석 ════════ -->
+<h1>4. 셀프 분석 로직</h1>
+
+<p>사용자가 직접 이름(한글 + 한자)을 입력하면 세 가지 관점에서 분석합니다.</p>
+
+<h2>4-1. 발음 분석 (소리오행 분석)</h2>
+
+<div class="box">
+  <strong>무엇을 보나요?</strong> 성씨+이름 전체 글자의 초성 오행이 이웃 글자 사이에서 상생인지 상극인지 판단합니다.
+</div>
+
+<h3>계산 방법</h3>
+<ol>
+  <li>각 글자의 첫소리(초성) 추출 → 오행 변환</li>
+  <li>인접한 두 글자 쌍마다 상생/비화(○) 또는 상극(✕) 판정</li>
+  <li><strong>상극 쌍 수(badCount)</strong>와 <strong>전체 인접 쌍 수(total)</strong> 비교</li>
+</ol>
+
+<table>
+  <tr>
+    <th>등급</th>
+    <th>조건</th>
+    <th>설명</th>
+  </tr>
+  <tr>
+    <td><strong>매우 좋음</strong></td>
+    <td>상극 쌍 = 0개</td>
+    <td>모든 인접 글자가 상생 또는 비화</td>
+  </tr>
+  <tr>
+    <td><strong>좋음</strong></td>
+    <td>상극 쌍 × 2 ≤ 전체 쌍</td>
+    <td>상생이 상극보다 많음</td>
+  </tr>
+  <tr>
+    <td><strong>나쁨</strong></td>
+    <td>그 외</td>
+    <td>상극이 과반 이상</td>
+  </tr>
+  <tr>
+    <td><strong>매우 나쁨</strong></td>
+    <td>상극 쌍 = 전체 쌍</td>
+    <td>모든 인접 글자가 상극</td>
+  </tr>
+</table>
+
+<div class="box">
+  <strong>예시: "김서연"</strong><br>
+  김(ㄱ=木) → 서(ㅅ=金) → 연(ㅇ=土)<br>
+  · 木↔金: 상극 ✕ / 金↔土: 상극 ✕<br>
+  · 외자 이름: total=2, badCount=1 → 상극 1×2=2 ≤ 2 → <strong>좋음</strong>
+</div>
+
+<div class="box">
+  <strong>예시: "나라" (성씨 포함하지 않은 경우)</strong><br>
+  나(ㄴ=火) → 라(ㄹ=火)<br>
+  · 火↔火: 비화 ○ / badCount=0 → <strong>매우 좋음</strong>
+</div>
+
+<h2>4-2. 자원오행 평가 (한자오행과 사주 비교)</h2>
+
+<div class="box">
+  <strong>무엇을 보나요?</strong> 사용자가 입력한 한자 이름의 자원오행이 태어난 사람의 사주 오행과 잘 어울리는지 판단합니다.
+</div>
+
+<h3>셀프 분석 전용 사주 해석 방식</h3>
+<p><span class="label-self">셀프 전용</span> 셀프 분석에서는 지장간 비율 없이 <strong>8글자 단순 카운트</strong>로 오행 분포를 파악합니다. 각 글자의 대표 오행에 1점씩 배정해 총 8점 배분.</p>
+
+<h3>판정 로직 (우선순위 순)</h3>
+
+<h4>① 종격(특수격) 판정 — 최우선</h4>
+<p>지장간 가중 점수 기준으로 한 오행이 <strong>60점 이상</strong>이고 그 오행을 극하는 오행이 <strong>5점 미만</strong>이면 종격으로 판정됩니다.</p>
+<ul>
+  <li>이름에 <strong>극오행</strong> 포함 → "나쁨"</li>
+  <li>이름에 <strong>지배오행 또는 지원오행</strong> 포함 → "매우 좋음"</li>
+  <li>중립 → "좋음" (더 좋은 오행 안내)</li>
+</ul>
+
+<h4>② 통관 판정 (프리미엄 모드 전용)</h4>
+<p>사주에서 두 오행이 모두 25점 이상으로 강하게 대립하는 경우에만 적용됩니다. 셀프 분석에서는 이 판정 없이 아래 단계로 넘어갑니다.</p>
+
+<h4>③ 일반 오행 부족/과다 판정</h4>
+<p>단순 8자 카운트를 기준으로 빈 오행(0개)과 과다 오행(가장 많은 오행)을 파악합니다.</p>
+<ul>
+  <li>이름이 <strong>빈 오행을 보완</strong>하면 → "매우 좋음" 또는 "좋음"</li>
+  <li>이름이 <strong>편중된 오행을 더 강화</strong>하면 → "나쁨"</li>
+  <li>균형 사주(빈 오행 없음)는 상대적 강약으로 세분화 평가</li>
+</ul>
+
+<h2>4-3. 81수리 확인</h2>
+<p>사용자가 입력한 이름의 획수를 바탕으로 원격·형격·이격·정격을 계산하고 각 격의 등급(대길/길/평/흉/대흉)을 표시합니다.</p>
+<p>셀프 분석에서는 참고 정보로 표시하며, 등급에 따라 이름 변경을 권장하는 안내가 제공됩니다.</p>
+
+<hr class="sep">
+
+<!-- ════════ 5. 프리미엄 작명 ════════ -->
+<h1>5. 프리미엄 작명 로직</h1>
+
+<p>두 단계로 이루어집니다: <strong>①이름 설계도(NameSpec) 생성</strong> → <strong>②수만 개 후보 채점</strong>.</p>
+
+<h2>5-1. 이름 설계도(NameSpec) 생성</h2>
+
+<div class="box">
+  <strong>무엇인가요?</strong> 사주를 분석해 "이 사람에게는 어떤 오행의 이름이 필요한가"를 결정하는 과정입니다.
+  결과물: <em>prefer(권장 오행 목록)</em> + <em>avoid(금지 오행 목록)</em> + <em>전략(reinforce/balance)</em>
+</div>
+
+<p>아래 4단계 우선순위로 순서대로 적용됩니다. 앞 단계에서 결론이 나면 뒷 단계는 건너뜁니다.</p>
+
+<h3>1순위: 긴급진단</h3>
+<p>아래 세 가지 위급 상황 중 해당하는 것이 있으면 즉시 보완 오행을 결정합니다.</p>
+
+<table>
+  <tr>
+    <th style="width:25%">진단 유형</th>
+    <th>발동 조건</th>
+    <th>처방</th>
+  </tr>
+  <tr>
+    <td><strong>조후(調候)</strong><br>온도 긴급</td>
+    <td>여름 태생(巳·午·未월) + 水 점수 &lt; 15점<br>겨울 태생(亥·子·丑월) + 火 점수 &lt; 15점</td>
+    <td>水(여름) 또는 火(겨울) 즉시 권장</td>
+  </tr>
+  <tr>
+    <td><strong>통관(通關)</strong><br>충돌 중재</td>
+    <td>상극 관계의 두 오행이 각 25점 이상으로 대립</td>
+    <td>두 오행을 중재하는 오행 권장</td>
+  </tr>
+  <tr>
+    <td><strong>고립(孤立)</strong><br>약자 보호</td>
+    <td>오행 점수 5점 미만 + 그 오행을 극하는 오행이 40점 이상</td>
+    <td>고립된 오행을 생해주는 오행 권장</td>
+  </tr>
+</table>
+
+<h3>1.5순위: 억부법(抑扶法) 용신</h3>
+<p>일간(태어난 날 천간)을 기준으로 신강/신약을 판단합니다.</p>
+<ul>
+  <li><strong>신강</strong>: 인비(인성+비겁) 점수 × 1.2 &gt; 식재관(식상+재성+관살) 점수 → 식재관 중 가장 약한 오행이 용신</li>
+  <li><strong>신약</strong>: 식재관 점수 × 1.2 &gt; 인비 점수 → 인성·비겁 중 가장 약한 오행이 용신</li>
+  <li>긴급진단(1순위)이 먼저 적용된 경우에는 용신·희신을 추가로 prefer에 반영하지 않음</li>
+</ul>
+
+<h3>2순위: 종격(從格) — 특수격</h3>
+<p>지장간 가중 점수로 한 오행이 60점 이상 + 그 극오행이 5점 미만이면 종격으로 판정합니다. 이 경우 <strong>강한 기운에 순응</strong>하는 전략(strategy: 'reinforce')으로 이름을 설계합니다.</p>
+
+<div class="box-green">
+  <strong>종격 설계 원칙:</strong><br>
+  · prefer = [지배오행, 지원오행] (예: 水 종살격 → 水·金 권장)<br>
+  · avoid = [극오행] (예: 水 종살격 → 土 금지)<br>
+  · 일반 중화 이론과 반대 방향 — "강한 기운을 억제하지 않고 타고 흐름"
+</div>
+
+<h3>2.5순위: 대운 흐름 보완</h3>
+<p>중년(35~59세)과 노년(60세 이상)의 대운에서 약한 오행(20점 미만)을 파악합니다. 노년 대운의 약오행에는 가중치(2배)를 부여합니다. 세 번 이상 약하게 나오는 오행을 prefer에 추가합니다.</p>
+
+<h3>3순위: 일반격 중화 보완</h3>
+<p>앞 단계에서 결론이 안 난 경우, 전체 오행 점수에서 부족한 오행(극약·약함)을 prefer에, 과다한 오행(강함·태과)을 avoid에 넣어 균형을 맞춥니다.</p>
+
+<h2>5-2. 이름 후보 채점 로직</h2>
+
+<div class="box">
+  <strong>무엇인가요?</strong> 이름 설계도(NameSpec)에 맞춰 수만 개의 한자 조합 후보를 하나씩 채점하는 과정입니다.
+  최고 점수 200점, 탈락 시 -999점. 상위 후보를 사용자에게 제시합니다.
+</div>
+
+<h3>하드 탈락 필터 (먼저 적용 — 어기면 즉시 -999점)</h3>
+<table>
+  <tr>
+    <th>필터</th>
+    <th>조건</th>
+  </tr>
+  <tr>
+    <td><strong>분파 한자</strong></td>
+    <td>성씨 + 이름 전체 글자가 모두 분파 구조 한자이면 탈락</td>
+  </tr>
+  <tr>
+    <td><strong>81수리 대흉</strong></td>
+    <td>4격(원·형·이·정) 중 어느 하나라도 대흉이면 탈락</td>
+  </tr>
+  <tr>
+    <td><strong>말년격(정격) 부족</strong></td>
+    <td>정격(말년)이 평(平) 또는 흉(凶)이면 탈락 — 길 이상이어야 통과</td>
+  </tr>
+</table>
+
+<h3>채점 컴포넌트 A~K</h3>
+<p>하드 탈락을 통과한 후보는 아래 11개 항목으로 점수가 쌓입니다.</p>
+
+<div class="score-block">
+  <strong>[A] 자원오행 가점</strong><br>
+  이름 한자의 오행이 NameSpec의 권장 오행(prefer)과 일치할 때마다 +50점.
+  권장 오행을 <em>모두</em> 충족하면 추가 보너스 +30점.
+</div>
+
+<div class="score-block">
+  <strong>[B] 81수리 4격 점수</strong><br>
+  대흉 탈락 이후 각 격의 등급에 따라 점수를 부여합니다.
+
+  <table style="margin-top:8px;">
+    <tr>
+      <th>등급</th>
+      <th>원·형·이격 점수</th>
+      <th>정격(말년) 점수</th>
+    </tr>
+    <tr><td>대길(大吉)</td><td>+25점</td><td>+35점</td></tr>
+    <tr><td>길(吉)</td><td>+15점</td><td>+20점</td></tr>
+    <tr><td>평(平)</td><td>–15점</td><td>탈락(–999)</td></tr>
+    <tr><td>흉(凶)</td><td>–35점</td><td>탈락(–999)</td></tr>
+  </table>
+
+  4격 전부 대길이면 올클 보너스 +30점 추가.
+</div>
+
+<div class="score-block">
+  <strong>[C] 발음오행 상생/상극</strong><br>
+  성씨+이름 글자의 초성 오행 연쇄를 평가합니다.<br>
+  · 상생 또는 비화(같은 오행): +10점 / 비화: +5점 / 상극: –10점
+</div>
+
+<div class="score-block">
+  <strong>[D] 수리음양</strong><br>
+  성·이름 각 글자의 획수가 홀수(양)·짝수(음)로 고루 섞여 있으면 +10점.
+</div>
+
+<div class="score-block">
+  <strong>[E] 발음음양</strong><br>
+  성·이름 각 글자의 중성(모음)이 양모음(ㅏ,ㅑ,ㅗ,ㅛ 등)과 음모음으로 고루 섞여 있으면 +5점.
+</div>
+
+<div class="score-block">
+  <strong>[F] 성향 보너스</strong><br>
+  사용자가 선택한 희망 성향(예: 리더십, 예술성 등)에 연관된 오행이 이름에 포함되면 +3점/개 (최대 +15점).
+</div>
+
+<div class="score-block">
+  <strong>[G] 대운 보완 가점</strong><br>
+  중년·노년 대운에서 약한 오행을 이름이 포함하면 가점, 강한 오행을 이름이 포함하면 감점. 범위 –20~+30점.
+</div>
+
+<div class="score-block">
+  <strong>[H] 운 중심 수리 가점</strong><br>
+  사용자가 '재물운', '리더십', '지혜', '건강' 중 하나를 선택한 경우,
+  81수리 중 해당 운에 유리한 숫자에 4격이 해당될 때마다 +8점.
+</div>
+
+<div class="score-block">
+  <strong>[I] 부모 사주 조화</strong><br>
+  (선택 입력) 부모의 사주에서 가장 강한 오행이 이름에 있으면 –5점, 가장 약한 오행이 이름에 있으면 +5점.
+</div>
+
+<div class="score-block">
+  <strong>[J] 동음 패널티</strong><br>
+  · 성씨와 이름 첫 글자의 발음이 같으면 (예: 서서○○) –30점<br>
+  · 이름 두 글자의 발음이 같으면 (예: ○○연연) –20점
+</div>
+
+<div class="score-block">
+  <strong>[K] 현대성 보정</strong><br>
+  · 현대에 인기 있는 음절을 이름에 사용하면 소폭 가점<br>
+  · 구식으로 느껴지는 음절을 사용하면 –3점/개
+</div>
+
+<div class="box-warn">
+  <strong>⚠️ 상한 점수 200점</strong><br>
+  A~K를 모두 더한 점수가 200점을 넘더라도 최대 200점으로 제한합니다.
+</div>
+
+<h2>5-3. AI 작명 보고서</h2>
+<p>상위 후보에 대해 Claude AI(앤트로픽 제공)가 다음 내용을 포함한 보고서를 작성합니다.</p>
+<ul>
+  <li>이름의 전반적인 특성 소개(tagline)</li>
+  <li>사주와 이름의 관계 스토리(sajuStory)</li>
+  <li>자원오행 의미 설명(jawonStory)</li>
+  <li>각 한자의 의미·획수 설명(hanjaDetails)</li>
+  <li>이름과 한자에 얽힌 인문학적 스토리(hanjaStory)</li>
+  <li>아이에게 쓰는 편지 형식의 덕담(conclusionLetter)</li>
+  <li>이름에 어울리는 진로·적성 안내(careerAdvice)</li>
+</ul>
+
+<hr class="sep">
+
+<!-- ════════ 6. 차이점 요약 ════════ -->
+<h1>6. 두 서비스의 핵심 차이점 요약</h1>
+
+<table>
+  <tr>
+    <th style="width:30%">항목</th>
+    <th style="width:35%"><span class="label-self">셀프 분석</span></th>
+    <th style="width:35%"><span class="label-premium">프리미엄 작명</span></th>
+  </tr>
+  <tr>
+    <td>오행 점수 계산</td>
+    <td>8글자 단순 카운트 (지장간 미포함)</td>
+    <td>지장간 비율 가중치 포함 (총 100점)</td>
+  </tr>
+  <tr>
+    <td>종격 판정</td>
+    <td>지장간 가중 점수로 판정 → 평가 결과에 반영</td>
+    <td>지장간 가중 점수로 판정 → 이름 설계 전략 전환</td>
+  </tr>
+  <tr>
+    <td>통관 판정</td>
+    <td>미적용 (직관적 설명 우선)</td>
+    <td>적용 (이름 설계 + 평가 모두 반영)</td>
+  </tr>
+  <tr>
+    <td>억부법(용신)</td>
+    <td>미적용</td>
+    <td>적용 (1.5순위로 이름 설계에 반영)</td>
+  </tr>
+  <tr>
+    <td>대운 분석</td>
+    <td>미적용</td>
+    <td>적용 (중·노년 약운 보완 가점)</td>
+  </tr>
+  <tr>
+    <td>81수리</td>
+    <td>결과 표시만</td>
+    <td>하드 탈락 필터 + 차등 채점에 활용</td>
+  </tr>
+  <tr>
+    <td>분파 한자</td>
+    <td>표시 없음</td>
+    <td>전체 분파 시 자동 탈락</td>
+  </tr>
+  <tr>
+    <td>AI 보고서</td>
+    <td>없음</td>
+    <td>Claude AI 작명 보고서 생성</td>
+  </tr>
+</table>
+
+<hr class="sep">
+
+<!-- ════════ 7. 검토 요청 사항 ════════ -->
+<h1>7. 검토 요청 사항</h1>
+
+<p>아래 항목들에 대해 작명가 선생님의 전문적인 의견을 부탁드립니다.</p>
+
+<h2>A. 이름 설계도(NameSpec) — 우선순위 검토</h2>
+<ol>
+  <li>조후 임계값(水·火 점수 15점 이하)이 적절한가요?</li>
+  <li>통관 발동 조건(두 오행 각 25점 이상)이 너무 엄격하거나 느슨하지 않나요?</li>
+  <li>고립 판정 조건(5점 미만 + 극오행 40점 이상)은 어떤가요?</li>
+  <li>억부법과 긴급진단(조후·통관·고립)의 우선순위가 맞나요? 억부법이 더 앞서야 하지 않나요?</li>
+  <li>종격 판정 기준(지배오행 60점 이상 + 극오행 5점 미만)이 타당한가요?</li>
+</ol>
+
+<h2>B. 채점 컴포넌트 A~K — 가중치 검토</h2>
+<ol>
+  <li>[A] 자원오행 가점(+50/오행, 전부충족 보너스 +30)이 너무 크거나 작지 않나요?</li>
+  <li>[B] 81수리 배점 체계 — 정격(말년격)의 비중이 맞나요? 대길 +35점, 길 +20점이 적절한가요?</li>
+  <li>[C] 발음오행 상생 점수(상생 +10, 상극 –10)의 비중이 맞나요?</li>
+  <li>[D] 수리음양 / [E] 발음음양의 반영 여부 — 실제 작명에서도 중요하게 보시나요?</li>
+  <li>현재 구현되지 않은 중요한 채점 기준이 있다면 알려주세요.</li>
+</ol>
+
+<h2>C. 하드 탈락 기준 검토</h2>
+<ol>
+  <li>분파 한자 목록(현재 약 400자)에서 빠진 글자나 잘못 포함된 글자가 있나요?</li>
+  <li>정격(말년격)이 '길' 이상이어야 통과하는 기준이 너무 엄격한가요? (현재: 평·흉이면 탈락)</li>
+</ol>
+
+<h2>D. 기타 의견</h2>
+<p>서비스 전반의 로직에 대해 자유롭게 의견 주시면 감사합니다. 특히 실제 작명 현장에서 중요하게 보시는 기준이 저희 서비스에 빠져 있다면 꼭 알려주세요.</p>
+
+<hr class="sep">
+
+<div class="box" style="text-align:center; margin-top:40px;">
+  <p style="margin:0; font-size:10pt; color:#555;">
+    본 문서는 DearName 서비스 로직 검토를 위해 작성되었습니다.<br>
+    문의: david754589@gmail.com
+  </p>
+</div>
+
+</body>
+</html>
