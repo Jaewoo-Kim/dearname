@@ -267,9 +267,10 @@ tests/
 > **vm 스코프 규칙**: `framework.js`·`helpers.js`는 `var`/`function`만 사용한다.
 > Node `vm.runInContext`에서 top-level `const`/`let`은 context 프로퍼티로 노출되지 않아 다른 suite 파일에서 접근 불가.
 
-### 테스트 구성 (총 178개 케이스)
+### 테스트 구성 (총 193개 케이스)
 
-> 만세력/등급/종격/통관/용신 90개 + 프리미엄 공식 필드 21개 + 프롬프트 계약 22개 + 발음(소리) 순수 모듈 45개.
+> 만세력/등급/종격/통관/용신 90개 + 프리미엄 공식 필드 21개 + 프롬프트 계약 22개
+> + 발음(소리) 순수 모듈 45개 + 이름 채점(NameScore) 15개.
 
 | Suite | 등급 | 케이스 수 | 내용 |
 |---|---|---|---|
@@ -292,6 +293,7 @@ tests/
 | **4-17 프리미엄 공식 필드** | **LOGIC** | **21** | **_calcGuk·_getSuriData·_genCareerJobs·_genHealthAdvice** |
 | **4-18 프롬프트 계약** | **LOGIC** | **22** | **buildUserPrompt 필수 팩트 + JSON 응답 스키마 + 외자 처리** |
 | **4-19 발음(소리) 순수 모듈** | **LOGIC** | **45** | **NameFormula 초성→오행·중성→음양·상생·발음오행 등급** |
+| **4-20 이름 채점(NameScore)** | **LOGIC** | **15** | **scoreCombo A~K 컴포넌트 + 하드필터(분파·대흉·정격) deps 주입 검증** |
 
 ### 4-12 고정 테스트 날짜 레퍼런스
 
@@ -333,6 +335,26 @@ Suite 4-16은 실제 사주 날짜 대신 합성 `scores` 객체를 직접 주�
 | [D] 신약 용신 | 甲(木) | 동상 | `yongsinOheng='水'` (인비 동점시 인성 우선) |
 | [E] 중화 | 甲(木) | 木10 水15 火10 土10 金5 (인비 25 ≈ 식재관 25) | `yongsinOheng=null` |
 | [F] buildNameSpec | — | 1990-02-16 실사주 | 반환값에 `yongsin` 필드 존재 |
+
+---
+
+### 4-20 이름 채점(NameScore) 테스트 — deps 주입 결정화
+
+Suite 4-20은 `name-search-worker.js`에서 추출한 `NameScore.scoreCombo`(컴포넌트 A~K + 하드필터)를 검증합니다.
+워커의 모듈 레벨 상태(`SURI_DATA`/`MODERN_SYLLABLE_SCORE`/`OLDFASHIONED_SET`)를 **`deps` 인자로 주입**해 결정화합니다.
+
+- `SURI_DATA`를 `Proxy`로 주입해 4격 등급을 고정(전부 '길' → suri +65)하고, 각 컴포넌트를 **baseline 대비 delta**로 검증.
+- 상한(200)·하한(-999)에 닿지 않도록 획수 홀짝·음절 음양을 통제해 정확 산출을 단언.
+- 하드필터: 분파(성+이름 전부 분파 한자), 대흉 포함, 정격(말년) 평·흉 → 모두 `-999`.
+
+> **Worker importScripts 검증(브라우저 전용):** Node `vm`은 `importScripts`/Web Worker를 실행하지 않으므로,
+> 워커가 `name-score.js`를 실제로 로드해 이름을 생성하는지는 브라우저에서 확인한다.
+> `node tests/static-server.js`(의존성 0)로 루트를 http 서빙 → `index.html` 로드 후
+> `new Worker('lib/name-search-worker.js')` 에 INIT→SEARCH 메시지를 보내 `SEARCH_RESULT` 수신 확인.
+> (importScripts 실패 시 INIT_OK가 오지 않으므로, 결과 수신 자체가 위임 성공의 증거.)
+
+> **Node 실행 주의:** 이 환경엔 `node`가 PATH에 없어 `npm test`가 실패할 수 있다.
+> 시스템 Node 설치 전까지는 번들 node 바이너리로 `<node> tests/runner.js` 직접 실행.
 
 ---
 

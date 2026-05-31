@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["server.py"],
       "port": 3000
+    },
+    {
+      "name": "dearname-node",
+      "runtimeExecutable": "C:/Users/david/AppData/Local/ms-playwright-go/1.50.1/node.exe",
+      "runtimeArgs": ["tests/static-server.js"],
+      "port": 3000
     }
   ]
 }

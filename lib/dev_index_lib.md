@@ -12,6 +12,7 @@
 3. [name-search.js — 탐색 엔진 (Worker 어댑터)](#3-name-searchjs--탐색-엔진-worker-어댑터)
 4. [name-search-worker.js — Web Worker 탐색 로직](#4-name-search-workerjs--web-worker-탐색-로직)
 5. [name-formula.js — 발음(소리) 분석 순수 모듈](#5-name-formulajs--발음소리-분석-순수-모듈)
+6. [name-score.js — 이름 후보 채점 순수 모듈](#6-name-scorejs--이름-후보-채점-순수-모듈)
 
 ---
 
@@ -384,6 +385,12 @@ SearchState를 입력받아 이름 후보 배열 반환. **비동기.**
 `name-search.js`로부터 Worker로 실행되는 실제 탐색 로직.  
 `window` 객체 없음 — `getCho` 등 유틸 함수를 **내부에 재선언**.
 
+> **채점 로직 위임:** 컴포넌트 A~K 채점(`_scoreCombo`)은 `lib/name-score.js`(NameScore)로 추출됨.  
+> 워커 최상단에서 `importScripts('name-score.js')`로 로드 후 `_scoreCombo`는 thin 위임자로 동작:  
+> `NameScore.scoreCombo(combo, nameSpec, familyName, state, { SURI_DATA, MODERN_SYLLABLE_SCORE, OLDFASHIONED_SET })`.  
+> 분파(分破)·운수리(LUCK_SURI)·발음 상수도 NameScore로 이전됨(단일 진실 공급원).  
+> ⚠️ `importScripts` 실패 시 INIT_OK가 발신되지 않아 초기화가 멈추므로 경로(lib/name-score.js) 주의.
+
 ### 메시지 프로토콜
 
 #### 수신 (main → worker)
@@ -474,3 +481,59 @@ IIFE 지역 상수라 `index.html`의 기존 `const CHOSUNG`(5276줄)과 충돌�
 
 > 참고: `index.html` 내 다른 closure(약 5615·7914줄)와 `name-search-worker.js`는 여전히 독립 정의 보유.
 > worker 는 `window` 부재로 모듈 import 불가하므로 점진적 통합 대상.
+
+---
+
+## 6. name-score.js — 이름 후보 채점 순수 모듈
+
+### 역할
+프리미엄 작명 탐색의 **이름 후보 채점 로직**(구 `name-search-worker.js`의 `_scoreCombo`)을
+순수 모듈로 추출 → **single source of truth**. 워커와 (필요 시) 메인스레드가 동일 로직 공유.
+
+`var NameScore = (function(){ ... })()` IIFE 네임스페이스. 공개 멤버:
+- `NameScore.scoreCombo(combo, nameSpec, familyName, state, deps)` — 후보 1건 채점
+- `NameScore.BUNPA_HANJA` — 분파 구조 한자 Set (400개)
+- `NameScore.LUCK_SURI` — 운(運) 중심 길수리 집합
+
+### 충돌 방지
+내부 상수(`OHENG_CYCLE`/`CHOSUNG`/`JUNGSUNG`/`CHO_OHENG`/`YANG_JUNG`/`TRAIT_MAP`)와
+헬퍼(`_getCho`/`_getJung`)는 **IIFE-local** — `index.html`의 기존 전역 `const CHOSUNG`(5276줄) 등과 충돌 없음.
+푸터: `if(typeof window!=='undefined'){ window.NameScore = NameScore; }` — 브라우저/Node 양쪽 안전.
+
+### deps 주입 (결정적 테스트용)
+모듈은 워커 모듈 레벨 상태에 직접 의존하지 않고 `deps` 인자로 주입받아 결정적(deterministic):
+```javascript
+NameScore.scoreCombo(combo, nameSpec, familyName, state, {
+  SURI_DATA,               // 81수리 등급표 — 4격 채점([B])
+  MODERN_SYLLABLE_SCORE,   // 현대 인기음절 점수표 ([K])
+  OLDFASHIONED_SET,        // 구식 음절 Set ([K])
+});
+```
+테스트는 `SURI_DATA`를 Proxy 목으로 주입해 4격 등급을 고정(예: 전부 '길')하고 컴포넌트별 delta 검증.
+
+### 채점 컴포넌트 (A~K) + 하드필터
+- **[A] 자원오행** prefer 충족 +50/오행, 전부충족 보너스 +30
+- **[B] 81수리** 4격(원·형·이·정) 등급 채점 — 하드필터: 어느 격이든 '대흉' → **-999**, 정격(말년) '평/흉' → **-999**; 등급별 차등(대길/길/평/흉)
+- **[C] 발음오행** 상생 +10 / 비화 +5 / 상극 -10
+- **[D] 수리음양** 혼재 +10
+- **[E] 발음음양** 혼재 +5
+- **[F] 성향(traits)** TRAIT_MAP 매칭 +3/개 (최대 15)
+- **[G] 대운 보완 / [H] 운 중심 LUCK_SURI(hits×8) / [I] 부모 사주**
+- **[J] 동음 패널티** 성=이름첫글자 -30, 이름 두글자 동음 -20
+- **[K] 현대성** MODERN_SYLLABLE_SCORE 평균→round(avg/20) 가점 / OLDFASHIONED_SET -3/개
+- **분파 하드필터:** [family, h1, h2] 전부 BUNPA_HANJA → **-999** (한 글자라도 非분파면 통과)
+- 상한 200 / 하한 -999
+
+### 워커 위임 관계 (single source of truth)
+- `name-search-worker.js` 최상단 `importScripts('name-score.js')` 후
+  `_scoreCombo`는 thin 위임자: `return NameScore.scoreCombo(combo, nameSpec, familyName, state, { SURI_DATA, MODERN_SYLLABLE_SCORE, OLDFASHIONED_SET });`
+- `BUNPA_HANJA`/`LUCK_SURI` 원본 소유권이 NameScore로 이전 — 워커 내 중복 정의 삭제됨
+- ⚠️ `importScripts` 실패 시 INIT_OK 미발신 → 초기화 hang. 경로(lib/name-score.js) 주의.
+
+### 로드 순서
+`<script src="lib/name-score.js">` 는 `lib/name-formula.js` 다음, `lib/name-search.js` 이전.
+
+### 테스트
+`tests/suites/premium/name-score.test.js` (15케이스) — baseline(두글자 160 / 외자 165),
+[A] prefer delta, [B] 하드필터(대흉·정격평/흉→-999, 전부대길→cap200), [분파], [C] 상생/상극 delta20,
+[F] trait +3, [J] 동음 -30, [K] 현대 +4 / 구식 -6. 헬퍼 `_suriAll(grade)`(Proxy) / `_deps(grade, extra)`.
