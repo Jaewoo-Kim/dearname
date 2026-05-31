@@ -11,6 +11,7 @@
 2. [name-spec.js — NameSpec 생성](#2-name-specjs--namespec-생성)
 3. [name-search.js — 탐색 엔진 (Worker 어댑터)](#3-name-searchjs--탐색-엔진-worker-어댑터)
 4. [name-search-worker.js — Web Worker 탐색 로직](#4-name-search-workerjs--web-worker-탐색-로직)
+5. [name-formula.js — 발음(소리) 분석 순수 모듈](#5-name-formulajs--발음소리-분석-순수-모듈)
 
 ---
 
@@ -420,3 +421,56 @@ SearchState를 입력받아 이름 후보 배열 반환. **비동기.**
 | `CHO_OHENG` | 초성→오행 맵 |
 | `YANG_JUNG` | 양성 모음 Set |
 | `TRAIT_MAP` | 성향코드→오행 맵 |
+
+---
+
+## 5. name-formula.js — 발음(소리) 분석 순수 모듈
+
+### 역할
+초성→발음오행, 중성→발음음양, 상생 판별, 발음오행 등급 로직의 **단일 진실 공급원**.
+이전에는 `index.html`(작명 엔진 closure)·worker 가 각자 같은 로직을 중복 정의했으나,
+한 곳(`NameFormula` 네임스페이스)으로 모아 유닛 테스트로 고정한다.
+
+### 충돌 방지
+전역에 `NameFormula` 객체 **하나만** 노출. 내부 상수(CHOSUNG/JUNGSUNG/OHENG_CYCLE/YANG_JUNG)는
+IIFE 지역 상수라 `index.html`의 기존 `const CHOSUNG`(5276줄)과 충돌하지 않음.
+- 브라우저: `window.NameFormula` + 하위호환용 `window.getCho`/`getOhengFromCho`/`getYinYangFromJung` (미정의 시에만 세팅)
+- Node(vm): `var NameFormula` 로 context 프로퍼티 노출
+
+### 공개 함수 (NameFormula.*)
+
+| 함수 | 반환 | 설명 |
+|---|---|---|
+| `getCho(char)` | `string` | 음절 → 초성 (한글 아니면 `''`) |
+| `getOhengFromCho(cho)` | `string` | 초성 → 발음오행 (木火土金水) |
+| `getChoOheng(char)` | `string` | 음절 → 발음오행 (위 둘 결합) |
+| `getYinYangFromJung(char)` | `'양'\|'음'\|''` | 중성 → 발음음양 |
+| `isSangsaeng(e1, e2)` | `boolean` | 두 오행 상생/비화 여부 (순·역방향 + 같은 기운 인정) |
+| `gradePronunciation(nameStr)` | `{grade, desc, badCount, total, ohengs}` | 이름 전체 초성 오행 연쇄 상생/상극 등급 |
+
+### 발음오행 매핑
+
+| 오행 | 초성 |
+|---|---|
+| 木 | ㄱ ㅋ ㄲ |
+| 火 | ㄴ ㄷ ㄹ ㅌ ㄸ |
+| 土 | ㅇ ㅎ |
+| 金 | ㅅ ㅈ ㅊ ㅆ ㅉ |
+| 水 | ㅁ ㅂ ㅍ ㅃ |
+
+### gradePronunciation 등급 기준 (badCount = 인접 상극 쌍 수, total = 음절수-1)
+
+| 조건 | 등급 |
+|---|---|
+| `badCount === 0` | 매우 좋음 |
+| `badCount * 2 <= total` | 좋음 |
+| `badCount === total` | 매우 나쁨 |
+| 그 외 | 나쁨 |
+
+### 소비처 (single source of truth)
+- `index.html` 작명 엔진 closure (5498~) — `getCho`/`getOhengFromCho`/`isSangsaeng`/`gradePronunciation`/`getYinYangFromJung` 위임
+- `<script src="lib/name-formula.js">` 는 `lib/name-spec.js` 다음에 로드
+- 테스트: `tests/suites/self/pronunciation.test.js` (45케이스)
+
+> 참고: `index.html` 내 다른 closure(약 5615·7914줄)와 `name-search-worker.js`는 여전히 독립 정의 보유.
+> worker 는 `window` 부재로 모듈 import 불가하므로 점진적 통합 대상.

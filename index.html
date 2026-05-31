@@ -50,6 +50,7 @@
     <!-- DearName v2: 엔진 파일 -->
     <script src="lib/saju-engine.js"></script>
     <script src="lib/name-spec.js"></script>
+    <script src="lib/name-formula.js"></script>
     <script src="lib/name-search.js"></script>
     <script src="api/claude-report.js"></script>
     <script src="https://js.tosspayments.com/v2/standard"></script>
@@ -5494,52 +5495,24 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         /* ----------------------------------------------------
            ① 발음오행 (초성 기준 상생/상극 판별)
            ---------------------------------------------------- */
-        const getCho = (char) => {
-            const code = char.charCodeAt(0) - 44032;
-            if(code < 0 || code > 11171) return '';
-            return CHOSUNG[Math.floor(code / 588)];
-        };
-        const getOhengFromCho = (cho) => {
-            if(['ㄱ','ㅋ','ㄲ'].includes(cho)) return '木';
-            if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho)) return '火';
-            if(['ㅇ','ㅎ'].includes(cho)) return '土';
-            if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho)) return '金';
-            if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho)) return '水';
-            return '';
-        };
+        // 발음(소리) 분석 — 단일 진실 공급원(lib/name-formula.js)에 위임
+        const getCho = NameFormula.getCho;
+        const getOhengFromCho = NameFormula.getOhengFromCho;
         // v2: 전역 노출 (NameSearchEngine에서 사용)
         window.getCho = getCho;
         window.getOhengFromCho = getOhengFromCho;
-        const OHENG_CYCLE = ['木', '火', '土', '金', '水'];
-        const isSangsaeng = (e1, e2) => {
-            if (e1 === e2) return true; // 비화(같은 기운)는 상생으로 간주
-            const ia = OHENG_CYCLE.indexOf(e1), ib = OHENG_CYCLE.indexOf(e2);
-            return (ia+1)%5 === ib || (ib+1)%5 === ia; // 순방향·역방향 상생 모두 인정
-        };
-        
-        const pronOhengs = fullName.split('').map(c => getOhengFromCho(getCho(c)));
-        let badCount = 0;
-        for(let i=0; i<pronOhengs.length-1; i++) {
-            if(!isSangsaeng(pronOhengs[i], pronOhengs[i+1])) badCount++;
-        }
-        
-        const _pronTotal = pronOhengs.length - 1;
-        let pronGrade, pronDesc;
-        if (badCount === 0)                          { pronGrade = '매우 좋음'; pronDesc = '초성 오행이 상생 관계로 이어져 부드럽고 막힘없는 흐름입니다.'; }
-        else if (badCount * 2 <= _pronTotal)         { pronGrade = '좋음';     pronDesc = '상생과 상극이 혼재하나 상생이 우세해 전반적으로 좋은 흐름입니다.'; }
-        else if (badCount === _pronTotal)            { pronGrade = '매우 나쁨'; pronDesc = '초성 오행이 연이어 상극을 이루어 보완이 시급합니다.'; }
-        else                                         { pronGrade = '나쁨';     pronDesc = '상극이 상생보다 많아 기운의 충돌이 우려됩니다.'; }
+        const isSangsaeng = NameFormula.isSangsaeng;
+
+        const _pronResult = NameFormula.gradePronunciation(fullName);
+        const pronOhengs = _pronResult.ohengs;
+        const badCount   = _pronResult.badCount;
+        const pronGrade  = _pronResult.grade;
+        const pronDesc   = _pronResult.desc;
 
         /* ----------------------------------------------------
            ② 발음음양 (모음 기준 홀짝 밸런스)
            ---------------------------------------------------- */
-        const getYinYangFromJung = (char) => {
-            const code = char.charCodeAt(0) - 44032;
-            if(code < 0 || code > 11171) return '';
-            const jung = JUNGSUNG[Math.floor((code % 588) / 28)];
-            const yang = ['ㅏ','ㅑ','ㅗ','ㅛ','ㅐ','ㅒ','ㅘ','ㅙ','ㅚ'];
-            return yang.includes(jung) ? '양' : '음';
-        };
+        const getYinYangFromJung = NameFormula.getYinYangFromJung;
         // v2: 전역 노출
         window.getYinYangFromJung = getYinYangFromJung;
         const yinYangs = fullName.split('').map(c => getYinYangFromJung(c));
