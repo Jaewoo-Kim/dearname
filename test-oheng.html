@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>자원오행 진단 알고리즘 테스트</title>
+<style>
+  body { font-family: monospace; background:#0f172a; color:#e2e8f0; padding:24px; font-size:13px; }
+  h2   { color:#f1f5f9; border-bottom:1px solid #334155; padding-bottom:8px; }
+  h3   { color:#94a3b8; margin-top:28px; }
+  .pass { color:#4ade80; }
+  .fail { color:#f87171; }
+  .info { color:#60a5fa; }
+  .warn { color:#fbbf24; }
+  .sep  { color:#334155; }
+  .case-block { background:#1e293b; border-radius:6px; padding:12px 16px; margin:8px 0; border-left:3px solid #334155; }
+  .case-block.pass { border-left-color:#4ade80; }
+  .case-block.fail { border-left-color:#f87171; }
+  #summary { background:#1e293b; padding:16px; border-radius:8px; margin-top:24px; font-size:15px; }
+</style>
+</head>
+<body>
+<h2>🧪 DearName — 자원오행 진단 알고리즘 테스트</h2>
+<div id="log"></div>
+<div id="summary"></div>
+
+<script src="lib/saju-engine.js"></script>
+<script>
+// ── 로그 유틸 ──────────────────────────────────────────────────────────────
+const $log  = document.getElementById('log');
+const stats = { pass: 0, fail: 0, total: 0 };
+
+function log(msg, cls = '') {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = msg;
+  $log.appendChild(d);
+}
+function sep(label) {
+  log('');
+  log('── ' + label + ' ' + '─'.repeat(Math.max(0, 60 - label.length)), 'sep');
+}
+
+// ── 오행 카운트 (단순 8자, 지장간 미포함) ──────────────────────────────────
+const _CG = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+const _JJ = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+const _KR = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+
+function countOheng(saju) {
+  const cnt = {'木':0,'火':0,'土':0,'金':0,'水':0};
+  for (const p of [saju.year, saju.month, saju.day, saju.time]) {
+    if (p?.gan && _CG[p.gan]) cnt[_CG[p.gan]]++;
+    if (p?.ji  && _JJ[p.ji])  cnt[_JJ[p.ji]]++;
+  }
+  return cnt;
+}
+
+function sajuStr(s) {
+  return `${s.year.gan}${s.year.ji}·${s.month.gan}${s.month.ji}·${s.day.gan}${s.day.ji}·${s.time.gan}${s.time.ji}`;
+}
+
+function cntStr(cnt) {
+  return Object.entries(cnt).map(([o,c]) => `${_KR[o]}:${c}`).join(' ');
+}
+
+// ── 날짜 스캔으로 목표 분포 찾기 ────────────────────────────────────────────
+function findDate(predicate, opts, label) {
+  const times = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+  for (let y = 1985; y <= 2005; y++) {
+    for (let m = 1; m <= 12; m++) {
+      for (let d = 1; d <= 28; d++) {
+        for (const t of times) {
+          const ds = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          try {
+            const saju = calcSaju(ds, t, opts);
+            if (!saju) continue;
+            const cnt = countOheng(saju);
+            if (predicate(cnt)) return { date: ds, time: t, cnt, saju };
+          } catch(e) {}
+        }
+      }
+    }
+  }
+  return null;
+}
+
+const opts = { yajasi: false, apply30min: false, city: '' };
+
+// ── 테스트 실행 함수 ────────────────────────────────────────────────────────
+function runTest(label, date, time, hanjaOhengs, expectedGrade, expectedDescContains) {
+  stats.total++;
+  const result = calcSajuOhengGrade(hanjaOhengs, date, time, opts);
+  const gradeOk = result.grade === expectedGrade;
+  const descOk  = !expectedDescContains || result.desc.includes(expectedDescContains);
+  const pass    = gradeOk && descOk;
+
+  const div = document.createElement('div');
+  div.className = 'case-block ' + (pass ? 'pass' : 'fail');
+  div.innerHTML = `
+    <span class="${pass ? 'pass' : 'fail'}">${pass ? '✅ PASS' : '❌ FAIL'} — ${label}</span><br>
+    <span class="info">  이름 오행: [${hanjaOhengs.map(o => _KR[o]).join(', ')}]</span><br>
+    <span class="${gradeOk ? 'pass' : 'fail'}">  등급: ${result.grade} (기대: ${expectedGrade}) ${gradeOk ? '✓' : '✗'}</span><br>
+    <span class="${descOk ? 'pass' : 'fail'}">  설명: ${result.desc}</span>
+    ${!descOk ? `<br><span class="fail">  기대 포함: "${expectedDescContains}"</span>` : ''}
+  `.trim();
+  $log.appendChild(div);
+
+  if (pass) stats.pass++; else stats.fail++;
+  return pass;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 1. 균형 사주 — 木1 火1 土2 金2 水2 (avg=1.6, relWeak=[木,火], relStrong=[土,金,水])
+// ─────────────────────────────────────────────────────────────────────────
+sep('1. 균형 사주 (木1 火1 土≥2 金≥2 水≥2) — 날짜 검색 중...');
+
+const balanced = findDate(
+  c => c['木']===1 && c['火']===1 && c['土']>=2 && c['金']>=2 && c['水']>=2,
+  opts, '균형A'
+);
+
+if (balanced) {
+  const { date, time, cnt, saju } = balanced;
+  log(`  ✔ 발견: ${date} ${time} | ${sajuStr(saju)}`, 'info');
+  log(`  분포: ${cntStr(cnt)} | avg=${(Object.values(cnt).reduce((a,b)=>a+b)/5).toFixed(1)}`, 'info');
+  log(`  relWeak=[木,火], relStrong=[土,金,水]`, 'info');
+
+  runTest('[균형] 약한 오행만 → 매우 좋음',  date, time, ['木','火'], '매우 좋음', '균형 잡힌 사주에서 상대적으로 약한');
+  runTest('[균형] 약한+강한 혼합 → 좋음',    date, time, ['金','火'], '좋음',     '이미 강한');
+  runTest('[균형] 강한 오행만 → 나쁨',        date, time, ['金','土'], '나쁨',     '이미 강한');
+  runTest('[균형] 강한 오행 1개 → 나쁨',      date, time, ['金'],      '나쁨',     '이미 강한');
+  runTest('[균형] 약한 오행 1개 → 매우 좋음', date, time, ['木'],      '매우 좋음', '균형 잡힌 사주에서 상대적으로 약한');
+  runTest('[균형] 이름 없음 → 매우 좋음',     date, time, [],         '매우 좋음', '');
+} else {
+  log('  ❌ 균형A 케이스 날짜 미발견 — 범위 확장 필요', 'fail');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 2. 불균형 사주 — 木=0 (나머지 있음)
+// ─────────────────────────────────────────────────────────────────────────
+sep('2. 불균형 사주 (木=0, 나머지 존재)');
+
+const unbalWood = findDate(
+  c => c['木']===0 && c['火']>0 && c['土']>0 && c['金']>0 && c['水']>0,
+  opts, '불균형A'
+);
+
+if (unbalWood) {
+  const { date, time, cnt, saju } = unbalWood;
+  log(`  ✔ 발견: ${date} ${time} | ${sajuStr(saju)}`, 'info');
+  log(`  분포: ${cntStr(cnt)}`, 'info');
+
+  runTest('[불균형木=0] 木 보충 → 매우 좋음',       date, time, ['木'],     '매우 좋음', '나무(木)');
+  runTest('[불균형木=0] 火 보충(木 미보충) → 나쁨',  date, time, ['火'],     '나쁨',     '사주에 없는 나무(木)');
+  runTest('[불균형木=0] 金만 → 나쁨',               date, time, ['金'],     '나쁨',     '사주에 없는 나무(木)');
+} else {
+  log('  ❌ 불균형A 케이스 날짜 미발견', 'fail');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 3. 불균형 사주 — 木=0 火=0 (두 오행 부재)
+// ─────────────────────────────────────────────────────────────────────────
+sep('3. 불균형 사주 (木=0, 火=0, 나머지 존재)');
+
+const unbalWoodFire = findDate(
+  c => c['木']===0 && c['火']===0 && c['土']>0 && c['金']>0 && c['水']>0,
+  opts, '불균형B'
+);
+
+if (unbalWoodFire) {
+  const { date, time, cnt, saju } = unbalWoodFire;
+  log(`  ✔ 발견: ${date} ${time} | ${sajuStr(saju)}`, 'info');
+  log(`  분포: ${cntStr(cnt)}`, 'info');
+
+  runTest('[불균형木火=0] 木火 모두 보충 → 매우 좋음', date, time, ['木','火'], '매우 좋음', '나무(木), 불(火)');
+  runTest('[불균형木火=0] 木만 보충 → 좋음',          date, time, ['木'],     '좋음',     '나무(木)');
+  runTest('[불균형木火=0] 金만 → 나쁨',               date, time, ['金'],     '나쁨',     '나무(木), 불(火)');
+} else {
+  log('  ❌ 불균형B 케이스 날짜 미발견', 'fail');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 4. 엣지케이스: 출생일 없음
+// ─────────────────────────────────────────────────────────────────────────
+sep('4. 엣지 케이스 — 출생일 미입력');
+{
+  const r = calcSajuOhengGrade(['金','水'], null, '12:00', opts);
+  const pass = r.grade === '나쁨' && r.desc.includes('출생일시를 입력');
+  stats.total++;
+  const div = document.createElement('div');
+  div.className = 'case-block ' + (pass ? 'pass' : 'fail');
+  div.innerHTML = `<span class="${pass?'pass':'fail'}">${pass?'✅':'❌'} [엣지] birthDate=null → grade:나쁨 + 출생일시 안내</span><br>
+    <span class="info">  결과: ${r.grade} | ${r.desc}</span>`;
+  $log.appendChild(div);
+  if (pass) stats.pass++; else stats.fail++;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 5. 균형 사주 — 다른 분포 (木1 火2 土2 金2 水1, avg=1.6 relWeak=[木,水])
+// ─────────────────────────────────────────────────────────────────────────
+sep('5. 균형 사주 (木1 火2 土2 金2 水1) — relWeak=[木,水], relStrong=[火,土,金]');
+
+const balanced2 = findDate(
+  c => c['木']===1 && c['火']===2 && c['土']===2 && c['金']===2 && c['水']===1,
+  opts, '균형B'
+);
+
+if (balanced2) {
+  const { date, time, cnt, saju } = balanced2;
+  log(`  ✔ 발견: ${date} ${time} | ${sajuStr(saju)}`, 'info');
+  log(`  분포: ${cntStr(cnt)}`, 'info');
+
+  runTest('[균형2] 水 보충 → 매우 좋음',          date, time, ['水'],     '매우 좋음', '상대적으로 약한');
+  runTest('[균형2] 木+火 혼합(약한+강한) → 좋음', date, time, ['木','火'], '좋음',    '이미 강한');
+  runTest('[균형2] 火+土 강한만 → 나쁨',          date, time, ['火','土'], '나쁨',    '이미 강한');
+} else {
+  log('  ℹ️ 균형B 케이스 미발견 (범위 내 없을 수 있음)', 'warn');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 최종 요약
+// ─────────────────────────────────────────────────────────────────────────
+setTimeout(() => {
+  const all = stats.pass + stats.fail;
+  const pct = all > 0 ? Math.round(stats.pass/all*100) : 0;
+  const color = stats.fail === 0 ? '#4ade80' : '#f87171';
+  document.getElementById('summary').innerHTML = `
+    <span style="color:${color};font-size:16px;font-weight:bold;">
+      🏁 결과: ${stats.pass}/${all} 통과 (${pct}%)
+      ${stats.fail === 0 ? '— 모든 테스트 통과 ✅' : `— ${stats.fail}개 실패 ❌`}
+    </span>
+  `;
+}, 100);
+</script>
+</body>
+</html>

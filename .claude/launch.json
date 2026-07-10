@@ -13,5 +13,29 @@
       "runtimeArgs": ["tests/static-server.js"],
       "port": 3000
     }
+  ,{
+      "name": "dearname-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "7801", "--directory", "C:/dearname"],
+      "port": 7801
+    }
+  ,{
+      "name": "dearname-samples",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "7799", "--directory", "C:/dearname/samples"],
+      "port": 7799
+    }
+  ,{
+      "name": "stock-mockup",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "7788", "--directory", "C:/stock-monitor/mockups"],
+      "port": 7788
+    }
+  ,{
+      "name": "stock-dashboard",
+      "runtimeExecutable": "C:\\Users\\david\\AppData\\Local\\Python\\bin\\python.exe",
+      "runtimeArgs": ["-m", "http.server", "7789", "--directory", "C:\\stock-monitor"],
+      "port": 7789
+    }
   ]
 }

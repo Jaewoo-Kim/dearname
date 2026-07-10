@@ -245,23 +245,24 @@ requestPremiumReport()
 ### 데모 리포트 플로우 (예시 보고서 버튼)
 
 ```
-showReportViewWithoutLock()
+showReportViewWithoutLock()          // 딥링크: index.html#sample 또는 ?sample=1 접속 시 자동 실행
   → _currentState 에 하드코딩 데모 데이터 주입
-      - 사주: 2026-04-20 09:20 서울 여아 → 丙午년 壬辰월 甲子일 戊辰시
-      - 오행 점수: 木14.5 火21.25 土31.75 金0 水32.5
-      - 성씨: 박(朴) s0=6
-      - 이름 3개:
-          ① 박서연 朴棲硏 (棲木12·硏金11) 원격23혁신·형격18발전·이격17용진·정격29성공 전격吉
-          ② 박서현 朴敘絢 (敘金11·絢木12) 원격23혁신·형격17용진·이격18발전·정격29성공 전격吉
-          ③ 박지윤 朴祉玧 (祉木9·玧金9)   원격18발전·형격15통솔·이격15통솔·정격24출세 전격吉
-  → _renderReportTabs([_demo1, _demo2, _demo3])
+      - 사주: 2026-07-02 08:50 여아 → 丙午년 甲午월 丁丑일 甲辰시 (실제 엔진 산출값)
+      - 오행 점수: 木22.2 火42.5 土25.5 金3.8 水6.0 (火 태과 / 金·水 극약)
+      - 일간 丁火 · 용신 金 · 희신 土 · 기신 火 / prefer 水·土, avoid 火
+      - 성씨: 최(崔) s0=11
+      - 이름 2개 (사용자 지정 한자 '평가' 보고서 — 오행/발음 우수하나 수리 대흉으로 부적합):
+          ① 최하은 崔河銀 (河水9·銀金14) 원격23혁신·형격20허망(대흉)·이격25안강·정격34변란(대흉) · 58점 · 부적합
+          ② 최지윤 崔池潤 (池水7·潤水16) 원격23혁신·형격18발전·이격27대인(흉)·정격34변란(대흉) · 55점 · 부적합
+  → _renderReportTabs([_demo1, _demo2])
   → _renderReportContent(_demo1, _report1, 0)
   → _updateRadarChart(_demoScores, _demo1)
   → report-view 표시 + 차트 렌더
 ```
 
-> **주의:** 데모 데이터는 하드코딩. 실제 Claude API 호출 없음.
-> 데모 수정 시 `showReportViewWithoutLock()` 내 `_demo1`/`_demo2`/`_demo3` 및 `_report1`/`_report2`/`_report3` 객체 직접 편집.
+> **주의:** 데모 데이터는 하드코딩. 실제 Claude API 호출 없음(사주·용신·수리·발음은 실제 엔진 계산값).
+> 데모 수정 시 `showReportViewWithoutLock()` 내 `_demo1`/`_demo2` 및 `_report1`/`_report2` 객체 직접 편집.
+> 재계산 도구: `scripts/gen_sample_reports.js`(엔진 vm→JSON), `scripts/eval_user_names.js`(특정 한자 평가), `scripts/replace_demo_v7.js`(index.html 데모 블록 치환).
 
 ---
 
@@ -613,6 +614,29 @@ if (ohengScores8) {
 - `.ct-good { color:#1d4ed8 }` (파랑, 기존 ct-good 변경)
 - `.ct-bad { color:#b45309 }` (갈색, 나쁨)
 - `.ct-very-bad { color:#dc2626 }` (빨강, 매우 나쁨)
+
+---
+
+### 자원오행 등급 오표시 버그 수정 (2026-07-10 세션)
+
+**증상:** 프리미엄/예시 보고서에서 金·水 등 부족 오행을 정확히 채운 이름인데도 자원오행 등급이 "나쁨"으로 표시됨.
+
+**원인 (동일한 잘못된 로직이 3곳에 존재):**
+1. `showReportViewWithoutLock()` 데모의 `_currentState`에 `_inputRaw`(생년월일) 미주입 → `calcSajuOhengGrade`가 빈 날짜 분기(saju-engine.js:434)로 무조건 `'나쁨'` 반환.
+2. Chapter 2 사주보완 등급(구 ~7027): `prefer` 부분매칭 시 `_compCount>0 ? '나쁨'` — **일부 보완을 '나쁨'으로 오판**. 용신 金은 `prefer`(水·土)에 없어 크레딧을 못 받음.
+3. `_buildReportItems()` 비교표 등급(구 ~7746): 위 ②와 **동일 로직 복제**.
+
+**수정:** 세 곳 모두 실제 엔진 `calcSajuOhengGrade(nameOs, birthDate, birthTime, { ..._sajuOpts, premium:true })` 결과를 쓰도록 통일. 데모 `_currentState`에 `_inputRaw:{birthDate:'2026-07-02', birthTime:'08:50', calType:'solar', gender:'F', city:''}` + `_sajuOpts:{}` 주입. (날짜 없을 때 fallback도 부분보완 → `'좋음'`으로 교정)
+
+```js
+// _buildReportItems / Chapter 2 (After)
+const _jbBD = _currentState?._inputRaw?.birthDate || '';
+const sajuGrade = (typeof calcSajuOhengGrade === 'function' && _jbBD)
+    ? calcSajuOhengGrade(nameOs, _jbBD, _jbBT, { ...(_currentState?._sajuOpts||{}), premium:true }).grade
+    : (prefer.length===0 ? '매우 좋음' : compCount===prefer.length ? '매우 좋음' : compCount>0 ? '좋음' : '나쁨');
+```
+
+**검증:** 崔河銀(水+金)→**매우 좋음**, 崔池潤(水+水)→**좋음** (기존 둘 다 '나쁨'). 사격수리는 정상적으로 '매우 나쁨' 유지(실제 대흉 존재). 데모/실제 프리미엄 보고서 공통 적용.
 
 ---
 

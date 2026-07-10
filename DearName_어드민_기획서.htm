@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="Generator" content="Microsoft Word 15">
+<title>DearName 운영 어드민 기획서</title>
+<style>
+  body { font-family: '맑은 고딕','Malgun Gothic',sans-serif; font-size: 11pt; line-height: 1.75; color: #1a1a1a; }
+  h1 { font-size: 19pt; font-weight: bold; color: #1a1a2e; border-bottom: 3px solid #4a90d9; padding-bottom: 6px; margin-top: 34px; }
+  h2 { font-size: 14.5pt; font-weight: bold; color: #2c3e6b; border-left: 5px solid #4a90d9; padding-left: 11px; margin-top: 26px; }
+  h3 { font-size: 12pt; font-weight: bold; color: #2c5282; margin-top: 18px; }
+  p { margin: 7px 0 11px 0; }
+  ul, ol { margin: 5px 0 11px 0; padding-left: 22px; }
+  li { margin-bottom: 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 10.5pt; }
+  th { background-color: #2c3e6b; color: #fff; padding: 7px 10px; text-align: left; font-weight: bold; }
+  td { padding: 6px 10px; border: 1px solid #ccc; vertical-align: top; }
+  tr:nth-child(even) td { background-color: #f4f7fb; }
+  .box { background-color: #eef4ff; border: 1px solid #b3cef0; border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+  .box-warn { background-color: #fff8e1; border: 1px solid #f0c040; border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+  .box-green { background-color: #f0fff4; border: 1px solid #68d391; border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+  .p1 { display:inline-block; background:#e53e3e; color:#fff; padding:1px 8px; border-radius:10px; font-size:9pt; font-weight:bold; }
+  .p2 { display:inline-block; background:#dd9b1f; color:#fff; padding:1px 8px; border-radius:10px; font-size:9pt; font-weight:bold; }
+  .p3 { display:inline-block; background:#718096; color:#fff; padding:1px 8px; border-radius:10px; font-size:9pt; font-weight:bold; }
+  .cover { text-align: center; padding: 70px 0 40px; }
+  .cover h1 { font-size: 30pt; border: none; margin-bottom: 6px; }
+  .cover .sub { font-size: 13pt; color: #555; margin: 6px 0; }
+  .cover .meta { font-size: 10pt; color: #888; margin-top: 26px; line-height: 1.9; }
+  .wf { background:#fafafa; border:1px solid #ddd; border-radius:6px; padding:14px 16px; font-family:'Consolas','D2Coding',monospace; font-size:9.5pt; white-space:pre; line-height:1.5; color:#333; overflow-x:auto; }
+  hr.sep { border: none; border-top: 2px solid #e2e8f0; margin: 24px 0; }
+</style>
+</head>
+<body>
+
+<!-- 표지 -->
+<div class="cover">
+  <h1 style="border:none;">DearName<br>운영 어드민 기획서</h1>
+  <p class="sub">Operations Admin — Product Requirements</p>
+  <p class="sub">1차 범위: 주문·결제 관리 / 매출·이용 통계 / 보고서 조회·재발급 / 회원 관리</p>
+  <p class="meta">
+    프로젝트: DearName (한자 작명 서비스)<br>
+    문서 버전: v1.1 — 회원 관리 탭 + 통합 상세(360°) 보강<br>
+    작성일: 2026-06-06<br>
+    운영사: Crazystudio Co.
+  </p>
+</div>
+
+<p style="page-break-before:always;">&nbsp;</p>
+
+<!-- 목차 (Word가 자동 생성) -->
+<h2 style="border-left:none; color:#1a1a2e; font-size:16pt;">목차</h2>
+<p id="toc-placeholder">TOC_PLACEHOLDER</p>
+
+<p style="page-break-before:always;">&nbsp;</p>
+
+<!-- ───────────────── 1. 문서 개요 ───────────────── -->
+<h1>1. 문서 개요</h1>
+
+<h2>1.1 목적</h2>
+<p>본 문서는 DearName 서비스를 안정적으로 운영하기 위한 <strong>운영자 전용 어드민(관리자) 사이트</strong>의 기능과 화면을 정의한다. 개발 착수 전 "무엇을, 왜, 어떤 화면으로 만들 것인가"에 대한 기준을 공유하는 것이 목적이다.</p>
+
+<h2>1.2 작성 배경</h2>
+<p>현재 DearName은 사용자용 서비스(작명/분석)는 동작하나, 운영자가 <strong>주문·매출·보고서를 확인하거나 관리할 수단이 전혀 없다.</strong> 유료 서비스를 지속 운영하려면 결제 내역 추적, 고객 응대(보고서 재발급), 매출 파악이 필수적이며 이를 위한 어드민이 필요하다.</p>
+
+<h2>1.3 문서 범위</h2>
+<p>본 기획서는 어드민의 <strong>1차 버전(MVP)</strong>을 다룬다. 기술 스택·아키텍처 등 구현 상세는 별도 문서 <em>「어드민 사이트 구축 계획(admin_site_plan.md)」</em>을 따른다.</p>
+
+<h2>1.4 용어 정의</h2>
+<table>
+  <tr><th style="width:22%">용어</th><th>의미</th></tr>
+  <tr><td>프리미엄 작명</td><td>AI(Claude)가 사주 기반으로 이름을 생성·보고서를 작성하는 <strong>유료</strong> 상품</td></tr>
+  <tr><td>셀프 분석</td><td>사용자가 직접 이름을 입력해 분석하는 <strong>무료/저가</strong> 상품</td></tr>
+  <tr><td>보고서(report)</td><td>프리미엄 작명 결과로 생성되는 작명 소견서 (재발급 대상)</td></tr>
+  <tr><td>주문(order)</td><td>결제 1건 단위의 거래 기록</td></tr>
+  <tr><td>회원(member)</td><td>서비스를 이용·결제한 고객 단위. 이름·연락처·로그인수단·구매이력을 가진다</td></tr>
+  <tr><td>통합 상세(360°)</td><td>회원·결제·보고서·환불을 <strong>한 화면</strong>에서 함께 다루는 상세 뷰</td></tr>
+  <tr><td>운영자</td><td>어드민에 로그인해 서비스를 운영·관리하는 내부 사용자</td></tr>
+  <tr><td>전환율</td><td>셀프 분석 이용자가 프리미엄 작명 결제로 이어진 비율</td></tr>
+</table>
+
+<hr class="sep">
+
+<!-- ───────────────── 2. 배경 및 문제 정의 ───────────────── -->
+<h1>2. 추진 배경 및 문제 정의</h1>
+
+<h2>2.1 현재 운영 현황</h2>
+<p>현재 백엔드 서버는 <strong>데이터베이스가 없는 프록시 구조</strong>이다.</p>
+<ul>
+  <li>AI(Claude/Gemini) 호출 중계, 정적 파일 서빙, 토스 결제검증 <strong>스텁</strong>만 존재</li>
+  <li>결제 검증 코드에 "실서비스에서는 여기서 DB에 결제 기록 저장"이라는 <strong>주석만</strong> 있고 실제 저장은 없음</li>
+  <li>결과적으로 주문·보고서·매출이 <strong>어디에도 기록되지 않음</strong></li>
+</ul>
+
+<h2>2.2 핵심 문제</h2>
+<div class="box-warn">
+  <strong>문제:</strong> 운영 데이터가 적재되지 않아 ①누가 결제했는지 ②얼마를 벌었는지 ③어떤 보고서를 발급했는지 <strong>전혀 추적할 수 없다.</strong><br>
+  <strong>영향:</strong> 고객이 "보고서를 다시 받고 싶다"고 해도 대응 불가, 환불·정산 근거 부재, 매출/마진 파악 불가.
+</div>
+<div class="box">
+  <strong>📌 전제:</strong> 어드민 화면을 만들기 전에, 본 서비스가 주문·보고서·AI사용을 <strong>저장하기 시작</strong>하는 선행 작업(로드맵 Phase 0)이 반드시 필요하다. 데이터가 없으면 어드민은 빈 화면이다.
+</div>
+
+<h2>2.3 어드민 도입 효과</h2>
+<ul>
+  <li>결제·환불 내역을 한눈에 추적 → 고객 응대·정산 가능</li>
+  <li>보고서 보관·재발급으로 <strong>CS(고객 문의) 대응</strong> 확보</li>
+  <li>일/월 매출과 전환율, AI 비용 파악 → <strong>데이터 기반 운영</strong></li>
+</ul>
+
+<hr class="sep">
+
+<!-- ───────────────── 3. 목표 및 범위 ───────────────── -->
+<h1>3. 어드민 목표 및 범위</h1>
+
+<h2>3.1 목표</h2>
+<ol>
+  <li>모든 결제 건을 빠짐없이 기록하고 조회·환불할 수 있다.</li>
+  <li>발급된 모든 보고서를 보관하고 언제든 다시 조회·재발급할 수 있다.</li>
+  <li>매출과 이용 현황을 대시보드 한 화면에서 파악할 수 있다.</li>
+</ol>
+
+<h2>3.2 1차 범위 (In Scope)</h2>
+<table>
+  <tr><th style="width:30%">영역</th><th>포함 내용</th></tr>
+  <tr><td><span class="p1">1차</span> 주문·결제 관리</td><td>주문 목록/검색, <strong>통합 상세(360°)</strong>, 결제 상태, 환불 처리</td></tr>
+  <tr><td><span class="p1">1차</span> 매출·이용 통계</td><td>오늘/이번 달 매출, 주문 건수, 기본 대시보드</td></tr>
+  <tr><td><span class="p1">1차</span> 보고서 조회·재발급</td><td>보고서 목록/상세보기, 재발급(재발송), 환불</td></tr>
+  <tr><td><span class="p1">1차</span> 회원 관리 <strong>(신규)</strong></td><td>회원 목록, 회원 상세(회원 정보 + 구매 이력 + 보고서 + 환불)</td></tr>
+  <tr><td><span class="p1">1차</span> 운영자 로그인</td><td>허용된 운영자만 접근(인증)</td></tr>
+</table>
+
+<h2>3.3 범위 외 (Out of Scope — 후순위)</h2>
+<table>
+  <tr><th style="width:30%">영역</th><th>사유</th></tr>
+  <tr><td><span class="p3">후순위</span> 콘텐츠 관리</td><td>한자 DB 수정·금기 한자·현대명 DB 편집 — 데이터 안정화 후 이관</td></tr>
+  <tr><td><span class="p3">후순위</span> 운영 설정</td><td>가격 변경·점검(maintenance) 모드 — 빈도 낮음</td></tr>
+  <tr><td><span class="p3">후순위</span> 회원 등급/포인트</td><td>회원 정보 조회는 1차 포함. 등급제·포인트·CRM은 후순위</td></tr>
+  <tr><td><span class="p2">2차</span> 고급 통계</td><td>전환율 퍼널·AI 비용 대시보드 — Phase 2로 분리</td></tr>
+</table>
+
+<h2>3.4 성공 지표 (KPI)</h2>
+<ul>
+  <li>결제 누락률 0% (모든 결제가 주문으로 기록)</li>
+  <li>보고서 재발급 요청 100% 대응 가능</li>
+  <li>운영자가 5분 내 당일 매출·주문을 확인 가능</li>
+</ul>
+
+<hr class="sep">
+
+<!-- ───────────────── 4. 사용자 및 권한 ───────────────── -->
+<h1>4. 사용자 및 권한 정의</h1>
+
+<h2>4.1 사용자 유형</h2>
+<table>
+  <tr><th style="width:22%">유형</th><th>설명</th><th style="width:30%">1차 적용</th></tr>
+  <tr><td><strong>최고 관리자</strong></td><td>모든 기능 접근, 환불·민감작업 수행</td><td>✅ (운영자 본인)</td></tr>
+  <tr><td>일반 운영자</td><td>조회 중심, 환불 등 일부 제한 (향후)</td><td>❌ (2차)</td></tr>
+</table>
+<p>1차에서는 <strong>최고 관리자 단일 역할</strong>만 둔다. 추후 팀 확장 시 역할을 분리한다.</p>
+
+<h2>4.2 권한 체계</h2>
+<ul>
+  <li>어드민은 <strong>허용된 운영자 이메일만</strong> 로그인 가능 (그 외 접근 차단)</li>
+  <li>일반 방문자는 어떤 운영 데이터도 조회 불가 (접근권한 정책으로 차단)</li>
+  <li>환불·삭제 등 민감 작업은 <strong>로그(누가·언제) 기록</strong></li>
+</ul>
+
+<hr class="sep">
+
+<!-- ───────────────── 5. 정보 구조 ───────────────── -->
+<h1>5. 정보 구조 (메뉴 트리)</h1>
+
+<div class="wf">DearName 어드민
+│
+├─ 🔐 로그인                (비로그인 시 진입점)
+│
+├─ 📊 대시보드 (홈)          ← 로그인 후 첫 화면
+│     · 오늘/이번달 매출, 주문 건수, 최근 주문
+│
+├─ 🧾 주문·결제 관리
+│     ├─ 주문 목록 (검색·필터)
+│     └─ ★ 통합 상세(360°)  → 회원 + 결제 + 보고서 + 환불 (한 화면)
+│
+├─ 📄 보고서
+│     ├─ 보고서 목록 (검색)
+│     └─ 보고서 상세 (+ 재발급 · 환불)
+│
+├─ 👤 회원  (신규)
+│     ├─ 회원 목록 (검색)
+│     └─ 회원 상세 → 회원 정보 + 구매 이력 + 보고서 + 환불
+│
+└─ ⚙️ 설정              (후순위 / 2차)</div>
+
+<p style="margin-top:10px;">★ <strong>통합(360°) 원칙:</strong> 주문·보고서·회원 어느 탭으로 들어오든 <strong>회원·결제·보고서·환불</strong>을 함께 본다.
+"환불은 주문 탭, 재발급은 보고서 탭"처럼 흩어지지 않도록, 상세 화면을 하나의 통합 뷰로 설계한다.</p>
+
+<hr class="sep">
+
+<!-- ───────────────── 6. 기능 요구사항 목록 ───────────────── -->
+<h1>6. 기능 요구사항 목록</h1>
+
+<table>
+  <tr><th style="width:9%">ID</th><th style="width:20%">기능</th><th>설명</th><th style="width:13%">우선순위</th></tr>
+  <tr><td>F-01</td><td>운영자 로그인</td><td>허용된 운영자만 인증 후 접근</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-02</td><td>대시보드(시각화)</td><td>일/월/연 전환 + 구간별 매출·주문 금액 + 매출 추이 그래프</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-03</td><td>주문 목록</td><td>전체 주문 조회, 기간·상태·상품 필터, 검색</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-04</td><td>통합 상세(360°)</td><td>회원 요약 + 결제 정보 + 연결 보고서 + 환불을 한 화면에서</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-05</td><td>환불 처리</td><td>주문·보고서·회원 상세 어디서든 토스 환불 (운영자 직접 실행)</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-06</td><td>보고서 목록</td><td>발급된 보고서 조회·검색(이름/날짜)</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-07</td><td>보고서 상세보기</td><td>저장된 보고서 내용을 다시 렌더링 + 환불</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-08</td><td>보고서 재발급</td><td>고객에게 보고서 링크/파일 재발송</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-15</td><td>디어네임에서 열기 <strong>(신규)</strong></td><td>보고서 상세에서 본 서비스의 전체 보고서 화면으로 이동</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-13</td><td>회원 목록 <strong>(신규)</strong></td><td>회원 조회·검색(이름/연락처), 가입일·구매횟수·누적결제</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-14</td><td>회원 상세 <strong>(신규)</strong></td><td>회원 정보 + 구매 이력 + 보고서 + 환불</td><td><span class="p1">1차</span></td></tr>
+  <tr><td>F-09</td><td>전환율 퍼널</td><td>셀프→프리미엄 전환 단계별 통계</td><td><span class="p2">2차</span></td></tr>
+  <tr><td>F-10</td><td>AI 비용 모니터링</td><td>Claude/Gemini 일별 토큰·비용</td><td><span class="p2">2차</span></td></tr>
+  <tr><td>F-11</td><td>매출 추이 차트</td><td>일/월 매출 그래프</td><td><span class="p2">2차</span></td></tr>
+  <tr><td>F-12</td><td>콘텐츠/설정 관리</td><td>한자 DB·가격·점검 모드</td><td><span class="p3">후순위</span></td></tr>
+</table>
+
+<hr class="sep">
+
+<!-- ───────────────── 7. 화면별 상세 기획 ───────────────── -->
+<h1>7. 화면별 상세 기획</h1>
+
+<!-- 7.1 로그인 -->
+<h2>7.1 로그인 (F-01)</h2>
+<table>
+  <tr><td style="width:18%;background:#f4f7fb;"><strong>화면 목적</strong></td><td>허용된 운영자만 어드민에 진입하도록 인증</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>구성 요소</strong></td><td>서비스 로고, 로그인 버튼(이메일 인증), 안내 문구</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>주요 동작</strong></td><td>로그인 성공 → 대시보드 이동 / 허용목록 외 → 접근 거부 안내</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>예외·검증</strong></td><td>미인증 상태로 내부 URL 직접 접근 시 로그인 화면으로 강제 이동</td></tr>
+</table>
+
+<!-- 7.2 대시보드 -->
+<h2>7.2 대시보드 / 홈 (F-02) — 시각화 강화</h2>
+<table>
+  <tr><td style="width:18%;background:#f4f7fb;"><strong>화면 목적</strong></td><td>전체 서비스 현황(매출·주문·환불)을 <strong>한눈에</strong> 파악. 추이를 그래프로 본다</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>구간 전환</strong></td><td><strong>일 / 월 / 연</strong> 세그먼트 — 선택에 따라 카드 금액과 그래프가 모두 바뀜</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>지표 카드</strong></td><td>선택 구간의 <strong>매출 · 주문 건수 · 객단가(ARPU) · 환불액</strong>을 금액으로 표시</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>매출 추이 그래프</strong></td><td>막대/라인 그래프로 기간별 매출 추이 시각화 (예: 최근 6개월)</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>보조 영역</strong></td><td>상품 비중(프리미엄/셀프), 최근 주문 리스트</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>집계 방식</strong></td><td>주문(orders)을 <strong>date_trunc(일/월/연, 결제시각)</strong>으로 그룹·합산</td></tr>
+</table>
+
+<div class="wf">┌──────────────────────────────────────────────┐
+│  매출 현황               [ 일 ][ 월 ][ 연 ]    │
+│  ┌────────┐┌────────┐┌────────┐┌────────┐    │
+│  │이번달매출││ 주문   ││ 객단가 ││ 환불액 │    │
+│  │₩1.24M  ││ 42건   ││₩29,500 ││ ₩29K   │    │
+│  └────────┘└────────┘└────────┘└────────┘    │
+│  월별 매출 추이                                │
+│   ▁  ▃  ▄  ▆  ▇  █   (1월 → 6월 막대그래프)   │
+└──────────────────────────────────────────────┘</div>
+
+<!-- 7.3 주문 관리 -->
+<h2>7.3 주문·결제 관리 (F-03 · F-04 · F-05)</h2>
+
+<h3>7.3.1 주문 목록</h3>
+<table>
+  <tr><td style="width:18%;background:#f4f7fb;"><strong>화면 목적</strong></td><td>전체 결제 내역을 조회·검색·필터</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>구성 요소</strong></td><td>기간 필터, 상태 필터(결제완료/환불/실패), 상품 필터, 검색창, 주문 테이블, 페이지네이션</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>테이블 컬럼</strong></td><td>주문일시 · 상품 · 금액 · 상태 · 회원 · (상세 링크)</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>주요 동작</strong></td><td>행 클릭 → <strong>통합 상세</strong> / 필터·검색 시 즉시 갱신</td></tr>
+</table>
+
+<h3>7.3.2 ★ 통합 상세 (360° 뷰) — 핵심</h3>
+<p>흩어진 정보를 한 화면에 모은 핵심 화면. 주문·보고서·회원 어느 탭에서 진입하든 동일한 통합 뷰를 본다.</p>
+<table>
+  <tr><td style="width:18%;background:#f4f7fb;"><strong>화면 목적</strong></td><td>한 화면에서 회원·결제·보고서 확인 + 환불·재발급까지 처리</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>구성 요소</strong></td><td>
+    ① <strong>회원 요약</strong> (이름·연락처·로그인수단·가입일) — 회원 상세로 이동 링크<br>
+    ② <strong>결제·주문 정보</strong> (금액·결제수단·토스 주문번호·시각) + 상태 배지<br>
+    ③ <strong>연결 보고서</strong> (이름·한자·점수, [보기]·[재발급])<br>
+    ④ <strong>액션</strong> [환불 처리] · [보고서 재발급]
+  </td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>주요 동작</strong></td><td>[환불] → 확인 모달 → 토스 환불 API → 상태 '환불' 갱신·시각 기록 / [재발급] → 보고서 재발송</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>예외·검증</strong></td><td>이미 환불된 주문은 [환불] 비활성화 / 환불 실패 시 사유 노출, 상태 변경 없음</td></tr>
+</table>
+<div class="box-warn">
+  <strong>⚠️ 보안:</strong> 환불은 실제 송금이 발생하는 작업이다. 토스 시크릿키는 브라우저에 두지 않고 <strong>서버 함수에서만</strong> 호출하며, 환불 실행은 항상 <strong>운영자가 직접 클릭</strong>하여 수행한다(자동 환불 금지). 모든 환불은 로그로 남긴다.
+</div>
+
+<!-- 7.4 보고서 -->
+<h2>7.4 보고서 조회·재발급 (F-06 · F-07 · F-08)</h2>
+
+<h3>7.4.1 보고서 목록</h3>
+<table>
+  <tr><td style="width:18%;background:#f4f7fb;"><strong>화면 목적</strong></td><td>발급된 작명 보고서를 조회·검색</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>구성 요소</strong></td><td>검색창(이름/날짜), 보고서 테이블, 페이지네이션</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>테이블 컬럼</strong></td><td>발급일시 · 이름(한글/한자) · 점수 · 연결 주문 · (상세 링크)</td></tr>
+</table>
+
+<h3>7.4.2 보고서 상세 + 재발급 + 환불 + 디어네임 열기</h3>
+<table>
+  <tr><td style="width:18%;background:#f4f7fb;"><strong>화면 목적</strong></td><td>보고서의 <strong>핵심 일부</strong>를 빠르게 확인하고 재발송·환불. 전체는 본 서비스에서 확인</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>표시 내용</strong></td><td>저장된 report_json에서 <strong>핵심만 발췌</strong>(이름·점수·핵심 메시지·요약). 어드민에 전체 본문을 다 그리지 않음</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>구성 요소</strong></td><td>핵심 일부 패널, 연결 주문·회원 정보, [재발급] · [환불] · <strong>[디어네임에서 열기]</strong> 버튼</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>디어네임 열기</strong></td><td><strong>[디어네임에서 열기 ↗]</strong> → 본 서비스의 실제 보고서 화면을 새 탭으로 열어 전체 내용을 그대로 확인</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>주요 동작</strong></td><td>[재발급] 재발송 / [환불] 연결 주문 환불 / [디어네임에서 열기] 본 서비스 이동</td></tr>
+</table>
+<div class="box-green">
+  <strong>핵심 설계:</strong> 보고서는 생성 시점에 <strong>전체 내용을 그대로 저장</strong>해 둔다. 어드민에는 <strong>핵심 일부만</strong> 보여 가볍게 응대하고, 전체 열람·재현은 <strong>[디어네임에서 열기]</strong>로 본 서비스 화면을 재사용한다 → 어드민에 보고서 렌더링을 중복 구현할 필요 없음.
+</div>
+
+<!-- 7.5 회원 관리 (신규) -->
+<h2>7.5 회원 관리 (F-13 · F-14) <span style="font-size:11pt;color:#7c3aed;">신규</span></h2>
+
+<h3>7.5.1 회원 목록</h3>
+<table>
+  <tr><td style="width:18%;background:#f4f7fb;"><strong>화면 목적</strong></td><td>가입·결제한 회원을 조회·검색하고 핵심 지표를 파악</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>구성 요소</strong></td><td>검색창(이름/연락처), 회원 테이블, 페이지네이션</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>테이블 컬럼</strong></td><td>가입일 · 이름 · 연락처 · 로그인수단 · 구매횟수 · 누적결제 · (상세 링크)</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>주요 동작</strong></td><td>행 클릭 → 회원 상세 / 이름·연락처는 목록에서 일부 마스킹</td></tr>
+</table>
+
+<h3>7.5.2 회원 상세 (회원 정보 + 구매 이력)</h3>
+<table>
+  <tr><td style="width:18%;background:#f4f7fb;"><strong>화면 목적</strong></td><td>한 회원의 정보와 모든 거래·보고서를 한눈에 보고 응대</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>구성 요소</strong></td><td>
+    ① <strong>회원 정보</strong> (이름·연락처·로그인수단·가입일·구매횟수·누적결제·최근주문)<br>
+    ② <strong>구매 이력</strong> 테이블 (주문일시·상품·금액·상태) — 각 주문에서 <strong>[환불]</strong> 가능<br>
+    ③ <strong>보고서</strong> 목록 (해당 회원이 발급받은 보고서, [보기]·[재발급])
+  </td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>주요 동작</strong></td><td>구매 이력 행 → 통합 상세로 이동 / [환불]·[재발급] 직접 실행</td></tr>
+  <tr><td style="background:#f4f7fb;"><strong>예외·검증</strong></td><td>게스트(비회원) 결제는 임시 회원으로 묶어 표시 / 개인정보 접근 로그 기록</td></tr>
+</table>
+<div class="box">
+  <strong>📌 통합 관점:</strong> 회원 상세는 "이 고객이 무엇을 사고, 어떤 보고서를 받았고, 환불이 있었는지"를 한 곳에서 보여준다.
+  주문·보고서 탭과 <strong>같은 통합 상세로 연결</strong>되어, 어디서 진입하든 동일한 정보를 본다.
+</div>
+
+<hr class="sep">
+
+<!-- ───────────────── 8. 데이터 정의 ───────────────── -->
+<h1>8. 데이터 정의 (기획 관점)</h1>
+
+<p>1차 기능을 위해 다음 5종의 데이터를 적재한다. <strong>회원을 중심으로 주문·보고서가 연결</strong>된다. (상세 스키마는 구축 계획 문서 참조)</p>
+
+<table>
+  <tr><th style="width:20%">데이터</th><th>핵심 항목</th><th style="width:20%">용도</th></tr>
+  <tr><td><strong>회원(member)</strong> <span style="color:#7c3aed;">신규</span></td><td>가입일, 이름, 연락처, 로그인수단, 구매횟수, 누적결제, 최근주문</td><td>회원 관리</td></tr>
+  <tr><td><strong>주문(order)</strong></td><td>주문일시, <strong>회원(member_id)</strong>, 상품, 금액, 상태, 토스 결제정보</td><td>주문·환불 관리</td></tr>
+  <tr><td><strong>보고서(report)</strong></td><td>연결 주문, 이름(한글/한자), 생년월일시, 점수, <strong>보고서 전체 내용</strong></td><td>조회·재발급·디어네임 열기</td></tr>
+  <tr><td><strong>AI 사용(ai_usage)</strong></td><td>호출 시각, 종류, 모델, 토큰, 추정 비용</td><td>비용 모니터링(2차)</td></tr>
+  <tr><td><strong>감사 로그(audit_log)</strong> <span style="color:#7c3aed;">신규</span></td><td>작업 시각, 운영자, 작업종류, 대상, 부가정보</td><td>환불 등 민감작업 추적</td></tr>
+  <tr><td><strong>이벤트(event)</strong></td><td>단계명, 익명 세션 ID, 시각</td><td>전환율 통계(2차)</td></tr>
+</table>
+<p style="margin-top:6px;color:#475569;">연결 구조: <strong>회원 1 — N 주문 1 — 1 보고서</strong>. 통합 상세는 이 연결을 따라 한 화면에 묶어 보여준다.</p>
+
+<h2>8.1 주요 테이블 필드 (구체화)</h2>
+<table>
+  <tr><th style="width:16%">테이블</th><th>필드 (타입)</th><th style="width:22%">키·인덱스</th></tr>
+  <tr><td><strong>members</strong></td><td>id(uuid) · created_at · name · contact · login_provider(google/apple/guest) · order_count(int) · total_spent(int) · last_order_at</td><td>PK id / idx(contact)</td></tr>
+  <tr><td><strong>orders</strong></td><td>id(uuid) · created_at · <strong>member_id(FK)</strong> · product(premium/self) · amount(int) · status(paid/refunded/failed) · toss_order_id · toss_payment_key · refunded_at</td><td>PK id / FK member_id / idx(created_at, status, member_id)</td></tr>
+  <tr><td><strong>reports</strong></td><td>id(uuid) · <strong>order_id(FK)</strong> · created_at · baby_name_kr · baby_name_hanja · birth_dt · gender · score(int) · report_json(jsonb)</td><td>PK id / FK order_id / idx(order_id)</td></tr>
+  <tr><td><strong>ai_usage</strong></td><td>id · created_at · kind(report/chat) · model · input_tokens · output_tokens · est_cost_usd(numeric)</td><td>PK id / idx(created_at)</td></tr>
+  <tr><td><strong>audit_logs</strong></td><td>id · created_at · actor(운영자) · action(refund/view_member/resend) · target_type · target_id · detail(jsonb)</td><td>PK id / idx(created_at)</td></tr>
+</table>
+<p style="margin-top:4px;color:#475569;"><strong>대시보드 집계:</strong> 매출 추이·구간 금액은 <strong>orders를 date_trunc('day'|'month'|'year', created_at)로 그룹·합산</strong>해 산출(별도 집계 테이블 불필요).</p>
+
+<div class="box-warn">
+  <strong>⚠️ 개인정보 주의:</strong> <strong>회원 이름·연락처</strong>와 보고서의 <strong>생년월일시 + 아이 이름</strong>은 민감 개인정보다. 최소 수집·운영자 한정 접근·목록 마스킹·보관기간 정책이 필요하다(상세는 9.2).
+</div>
+
+<hr class="sep">
+
+<!-- ───────────────── 9. 비기능 요구사항 ───────────────── -->
+<h1>9. 비기능 요구사항</h1>
+
+<h2>9.1 보안</h2>
+<ul>
+  <li>운영자 인증 후에만 접근, 허용 이메일 목록 기반</li>
+  <li>모든 데이터에 행 수준 접근권한(RLS) 적용 — 일반 사용자 조회 불가</li>
+  <li>토스 시크릿키·서버 전용 키는 <strong>환경변수에만</strong> 보관, 코드/깃허브 노출 금지</li>
+  <li>환불·삭제 등 민감 작업은 감사 로그 기록</li>
+</ul>
+
+<h2>9.2 개인정보보호 (개인정보보호법 준수)</h2>
+<ul>
+  <li>회원 이름·연락처, 아이 이름·생년월일시는 <strong>최소 수집</strong>, 서비스 제공 목적 외 사용 금지</li>
+  <li>접근 권한을 운영자로 한정, <strong>목록 화면에서는 이름·연락처 일부 마스킹</strong>(예: 김O연, 010-****-1234)</li>
+  <li>회원 상세 등 민감 개인정보 <strong>조회 시 접근 로그</strong> 기록</li>
+  <li>보관기간 정책 수립 및 만료 데이터 파기 절차 마련</li>
+</ul>
+
+<h2>9.3 성능 · 가용성</h2>
+<ul>
+  <li>주문/보고서 목록은 페이지네이션으로 대량 데이터에도 빠른 응답</li>
+  <li>무료 인프라 한도 내 시작, 트래픽 증가 시 유료 플랜으로 단계적 승급</li>
+</ul>
+
+<h2>9.4 환불·민감작업 기술 적용 <span style="font-size:11pt;color:#7c3aed;">중요</span></h2>
+<p>환불은 <strong>실제 송금</strong>이 발생한다. 어드민 화면(브라우저)에서 토스 API를 직접 부르지 않고, 반드시 <strong>서버 함수</strong>를 거친다.</p>
+
+<div class="wf">[어드민 화면]              [서버 함수]                  [외부]
+ Next.js(브라우저)          Supabase Edge Function /       토스페이먼츠 API
+   │                        기존 Flask 서버                  │
+   │ ① 운영자 토큰 +         │                                │
+   │   환불요청(order_id) ──▶│ ② 운영자 권한 검증             │
+   │                        │ ③ 멱등키 확인(중복 환불 차단)  │
+   │                        │ ④ 토스 환불 confirm ──────────▶│ (TOSS_SECRET)
+   │                        │ ⑤ orders.status='refunded'     │
+   │                        │   refunded_at 기록             │
+   │                        │ ⑥ audit_logs INSERT(누가·언제·금액)
+   │ ◀── ⑦ 결과 반환 ───────│                                │
+   ▼
+ 화면 상태 갱신(환불 배지)</div>
+
+<table>
+  <tr><th style="width:24%">원칙</th><th>적용 방법</th></tr>
+  <tr><td><strong>시크릿키 보호</strong></td><td>TOSS_SECRET·service_role 키는 <strong>서버 함수 환경변수에만</strong>. 브라우저/깃허브 노출 금지</td></tr>
+  <tr><td><strong>권한 검증</strong></td><td>서버 함수가 요청자의 운영자 인증 토큰을 먼저 검증(비운영자 차단)</td></tr>
+  <tr><td><strong>멱등성</strong></td><td>order_id + 멱등키로 <strong>중복 환불 방지</strong>. 이미 환불됨이면 재실행 차단</td></tr>
+  <tr><td><strong>운영자 직접 실행</strong></td><td>자동 환불 금지 — 항상 운영자 버튼 클릭 → 확인 모달</td></tr>
+  <tr><td><strong>감사 로그</strong></td><td>모든 환불·민감조회를 audit_logs에 기록(누가·언제·대상·금액)</td></tr>
+  <tr><td><strong>실패 처리</strong></td><td>토스 환불 실패 시 상태 변경 없이 사유 노출(부분 성공 방지)</td></tr>
+</table>
+<p style="color:#475569;">같은 패턴을 <strong>보고서 재발송·회원정보 export</strong> 등 다른 민감작업에도 동일 적용한다.</p>
+
+<hr class="sep">
+
+<!-- ───────────────── 10. 출시 로드맵 ───────────────── -->
+<h1>10. 출시 로드맵</h1>
+
+<table>
+  <tr><th style="width:14%">단계</th><th style="width:28%">내용</th><th>산출물</th></tr>
+  <tr><td><strong>Phase 0</strong><br><span class="p1">선행 필수</span></td><td>본 서비스 데이터 적재 시작 (결제·보고서·AI사용 기록)</td><td>오늘부터 주문/보고서가 DB에 쌓임</td></tr>
+  <tr><td><strong>Phase 1</strong><br><span class="p1">어드민 MVP</span></td><td>로그인 + 주문관리 + <strong>통합 상세(360°)</strong> + 보고서 재발급 + <strong>회원 관리</strong> + 대시보드 + 환불</td><td>운영 가능한 어드민 1차</td></tr>
+  <tr><td><strong>Phase 2</strong><br><span class="p2">통계 강화</span></td><td>전환율 퍼널 · 매출 추이 차트 · AI 비용 모니터링</td><td>데이터 기반 의사결정 도구</td></tr>
+  <tr><td><strong>Phase 3</strong><br><span class="p3">후순위</span></td><td>콘텐츠(한자 DB)·가격·점검 모드 등 운영 설정 화면</td><td>코드 수정 없는 운영 설정</td></tr>
+</table>
+
+<h2>10.1 개발 구현 순서 (개발자 가이드 — 헷갈리지 않게)</h2>
+<p><strong>필수(STEP 1~5)를 먼저 끝내야 운영이 가능</strong>하다. 각 STEP의 "완료 기준(DoD)"을 만족해야 다음 단계로 넘어간다. <strong>읽기(조회) 먼저, 쓰기(환불) 나중</strong> — 환불이 가장 위험하므로 읽기 화면이 안정된 뒤 착수한다.</p>
+<table>
+  <tr><th style="width:7%">STEP</th><th style="width:12%">구분</th><th>작업</th><th style="width:30%">완료 기준(DoD)</th></tr>
+  <tr><td><strong>1</strong></td><td><span class="p1">필수</span></td><td>Supabase 프로젝트 + 6개 테이블 + RLS + 인덱스 생성</td><td>테이블 편집기에서 수동 INSERT·조회·차단(RLS) 확인</td></tr>
+  <tr><td><strong>2</strong></td><td><span class="p1">필수</span></td><td>본 서비스 적재: 회원 upsert → 주문 → 보고서 → ai_usage</td><td>실제 결제 1건이 members/orders/reports 행으로 쌓임</td></tr>
+  <tr><td><strong>3</strong></td><td><span class="p1">필수</span></td><td>어드민 뼈대: Next.js + Auth 로그인 + 사이드바 레이아웃</td><td>허용 운영자만 로그인, 5개 메뉴 표시</td></tr>
+  <tr><td><strong>4</strong></td><td><span class="p1">필수</span></td><td><strong>읽기 화면</strong>: 주문목록·통합상세·보고서·회원(조회 전용)</td><td>쌓인 데이터가 화면에 정확히 보임</td></tr>
+  <tr><td><strong>5</strong></td><td><span class="p1">필수</span></td><td><strong>환불(민감)</strong>: 서버 함수 + 토스 환불 + 멱등성 + audit_log</td><td>테스트 환불 성공 → 상태 'refunded' + 로그 1건</td></tr>
+  <tr><td><strong>6</strong></td><td><span class="p1">1차</span></td><td>보고서 재발급 + [디어네임에서 열기] 버튼</td><td>재발송 동작 / 버튼이 본 서비스 보고서로 이동</td></tr>
+  <tr><td><strong>7</strong></td><td><span class="p1">1차</span></td><td>대시보드: 일/월/연 전환 + 매출 추이 그래프 + 구간 금액</td><td>구간 전환 시 숫자·그래프가 DB 집계와 일치</td></tr>
+  <tr><td><strong>8</strong></td><td><span class="p2">2차</span></td><td>전환율 퍼널 · AI 비용 · 차트 고도화</td><td>—</td></tr>
+  <tr><td><strong>9</strong></td><td><span class="p3">후순위</span></td><td>콘텐츠/가격/점검 설정 화면</td><td>—</td></tr>
+</table>
+
+<hr class="sep">
+
+<!-- ───────────────── 11. 향후 확장 ───────────────── -->
+<h1>11. 향후 확장 계획</h1>
+<ul>
+  <li><strong>회원제 전환 시:</strong> 회원 관리·구매 이력·재구매 분석 추가</li>
+  <li><strong>팀 확장 시:</strong> 운영자 역할 분리(최고관리자/일반운영자) 및 권한별 메뉴</li>
+  <li><strong>마케팅 고도화:</strong> 쿠폰·프로모션 코드 관리, 채널별 유입 분석</li>
+  <li><strong>품질 관리:</strong> 보고서 만족도/문의 데이터를 작명 로직 개선에 환류</li>
+</ul>
+
+<hr class="sep">
+
+<!-- ───────────────── 부록 ───────────────── -->
+<h1>부록 A. 핵심 화면 흐름</h1>
+<div class="wf">[로그인] → [대시보드]
+                │
+   ┌────────────┼────────────┐
+   ▼            ▼            ▼
+[주문 목록]  [보고서 목록]  [회원 목록]
+   │            │            │
+   └────────────┼────────────┘
+                ▼
+      ★ [통합 상세 (360°)]
+      회원 + 결제 + 보고서
+                │
+        ┌───────┴───────┐
+        ▼               ▼
+     [환불]          [재발급]</div>
+<p style="margin-top:8px;color:#475569;">세 목록(주문·보고서·회원) 어디서 진입하든 <strong>같은 통합 상세</strong>로 모여, 환불·재발급을 한 곳에서 처리한다.</p>
+
+<div class="box" style="text-align:center; margin-top:34px;">
+  <p style="margin:0; font-size:10pt; color:#555;">
+    본 문서는 DearName 운영 어드민 1차 기획을 위해 작성되었습니다.<br>
+    구현 상세는 「어드민 사이트 구축 계획」 문서를 참조하세요. · 문의: david754589@gmail.com
+  </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DearName · 최OO 심층 작명 보고서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2a2320;--sub:#6f6459;--paper:#faf7f2;--card:#fffdf9;--line:#e7ded0;--gold:#b08d4c;--gold-d:#8c6d34;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--paper);line-height:1.7;-webkit-font-smoothing:antialiased}
+.serif{font-family:'Noto Serif KR',serif}
+.wrap{max-width:860px;margin:0 auto;padding:0 22px 90px}
+a{color:inherit}
+.topbar{position:sticky;top:0;z-index:5;background:rgba(250,247,242,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center}
+.topbar .brand{font-weight:700;letter-spacing:.02em}.topbar .brand b{color:var(--gold-d)}
+.topbar a.back{font-size:.86rem;color:var(--sub);text-decoration:none}
+.hero{background:linear-gradient(160deg,#241f1b,#3a3128 60%,#4a3d2c);color:#f6efe2;border-radius:24px;padding:42px 40px;margin:26px 0;position:relative;overflow:hidden}
+.hero:after{content:'';position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,#b08d4c55,transparent 70%)}
+.hero .kicker{letter-spacing:.28em;font-size:.72rem;color:#d9c39a;text-transform:uppercase}
+.hero .kr{font-size:2.9rem;font-weight:900;margin-top:8px}
+.hero .hj{font-size:1.5rem;color:#e7d4ad;letter-spacing:.34em;margin-top:2px}
+.hero .meta{margin-top:14px;font-size:.92rem;color:#cfc3ad}
+.gauge{position:absolute;right:38px;bottom:34px;text-align:center}
+.gauge .num{font-size:3.2rem;font-weight:900;line-height:1;color:#fff}
+.gauge .num small{font-size:1rem;font-weight:400;color:#cbb98f}
+.gauge .grade{margin-top:4px;font-size:.82rem;color:#0e0c0a;background:#e7c987;border-radius:20px;padding:3px 12px;display:inline-block;font-weight:700}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 28px;margin:16px 0;box-shadow:0 1px 0 #fff inset}
+.sec h2{font-size:.82rem;letter-spacing:.16em;color:var(--gold-d);font-weight:700;text-transform:uppercase;margin-bottom:4px}
+.sec h3{font-size:1.28rem;font-weight:700;margin-bottom:14px}
+.sec p{color:#453d34}
+.saju{display:grid;grid-template-columns:70px repeat(4,1fr);gap:8px;text-align:center;margin-top:6px}
+.saju .lbl{color:var(--sub);font-size:.8rem;align-self:center}
+.saju .cell{border-radius:12px;padding:10px 4px;color:#fff;font-family:'Noto Serif KR',serif}
+.saju .cell .c{font-size:1.6rem;font-weight:700;line-height:1.15}
+.saju .cell .o{font-size:.7rem;opacity:.9}
+.saju .pos{color:var(--sub);font-size:.78rem}
+.bars{margin-top:6px}
+.bar{display:grid;grid-template-columns:76px 1fr 84px;align-items:center;gap:12px;margin:9px 0}
+.bar .nm{font-weight:600}.bar .nm b{font-family:'Noto Serif KR',serif;margin-right:5px}
+.bar .track{height:16px;background:#efe7d8;border-radius:9px;overflow:hidden}
+.bar .fill{height:100%;border-radius:9px}
+.bar .val{font-size:.82rem;color:var(--sub);text-align:right}
+.tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:20px;margin-left:6px;vertical-align:middle}
+.diag{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.diag .d{flex:1 1 220px;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:12px 14px;background:#fffaf0}
+.diag .d .t{font-size:.74rem;color:var(--gold-d);font-weight:700;letter-spacing:.08em}
+.yong{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.yong .y{flex:1 1 30%;text-align:center;border-radius:12px;padding:12px;border:1px solid var(--line)}
+.yong .y .lab{font-size:.74rem;color:var(--sub)}.yong .y .big{font-family:'Noto Serif KR',serif;font-size:1.5rem;font-weight:700}
+.name-tbl{width:100%;border-collapse:collapse;margin-top:8px}
+.name-tbl th,.name-tbl td{border-bottom:1px solid var(--line);padding:11px 8px;text-align:left;font-size:.94rem}
+.name-tbl th{color:var(--sub);font-weight:500;font-size:.8rem}
+.name-tbl .hj{font-family:'Noto Serif KR',serif;font-size:1.5rem;font-weight:700}
+.match{font-size:.74rem;font-weight:700;padding:2px 9px;border-radius:20px}
+.suri{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+.suri .g{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fffdf8}
+.suri .g .pos{font-size:.74rem;color:var(--sub)}
+.suri .g .n{font-family:'Noto Serif KR',serif;font-size:1.6rem;font-weight:700;margin:2px 0}
+.suri .g .gr{font-size:.72rem;font-weight:700;color:#fff;border-radius:20px;padding:2px 10px;display:inline-block}
+.suri .g .dc{font-size:.78rem;color:var(--sub);margin-top:8px;line-height:1.5}
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 4px;font-family:'Noto Serif KR',serif}
+.flow .o{width:44px;height:44px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:700}
+.flow .ar{color:var(--gold);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chips .c{background:#f3ece0;border:1px solid var(--line);border-radius:20px;padding:5px 13px;font-size:.86rem}
+.story p{margin-top:10px}
+.alts{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.alts .a{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fffdf8}
+.alts .a .h{font-family:'Noto Serif KR',serif;font-size:1.25rem;font-weight:700}
+.alts .a .s{font-size:.76rem;color:var(--sub)}
+.verdict{background:linear-gradient(160deg,#2c2620,#3c3227);color:#f3ead9;border-radius:18px;padding:24px 28px;margin-top:16px}
+.verdict h3{color:#e7c987}
+.foot{text-align:center;color:var(--sub);font-size:.78rem;margin-top:30px;line-height:1.8}
+.note{font-size:.82rem;color:var(--sub);background:#f6efe3;border-radius:10px;padding:10px 14px;margin-top:10px}
+/* index */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}
+@media(max-width:640px){.cards{grid-template-columns:1fr}.suri{grid-template-columns:1fr 1fr}.hero .kr{font-size:2.2rem}.gauge{position:static;text-align:left;margin-top:18px}}
+.card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px;transition:.15s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px #2a231010;border-color:var(--gold)}
+.card .kr{font-size:1.9rem;font-weight:900;font-family:'Noto Serif KR',serif}
+.card .hj{color:var(--gold-d);letter-spacing:.3em;font-family:'Noto Serif KR',serif;margin-top:2px}
+.card .sc{position:absolute;right:22px;top:20px;font-size:2rem;font-weight:900;color:var(--gold-d)}
+.card .go{margin-top:16px;font-size:.85rem;color:var(--gold-d);font-weight:700}
+</style></head><body>
+<div class="topbar"><div class="brand">Dear<b>Name</b> · 프리미엄 작명 보고서</div><span class="back">2026.07.02 여아 · 최(崔)</span></div>
+<div class="wrap">
+  <div class="hero">
+    <div class="kicker">Premium Naming Report</div>
+    <div class="kr serif">최○○ 심층 작명 보고서</div>
+    <div class="hj serif" style="letter-spacing:.06em;font-size:1.1rem">여아 · 2026년 7월 2일 08:50 · 두 이름 비교</div>
+    <div class="meta">사주 丙午 甲午 丁丑 甲辰 · 정화(丁火) 일간 · 용신 金 / 희신 土 / 기신 火</div>
+  </div>
+  <p style="color:#6f6459">아래 두 이름의 심층 보고서를 각각 확인하세요. 실제 사주·용신·81수리·발음오행 계산 결과입니다.</p>
+  <div class="cards">
+    <a class="card" href="report-haeun.html"><div class="sc">95</div><div class="kr">최하은</div><div class="hj">崔嘏殷</div>
+      <div style="margin-top:10px;color:#6f6459;font-size:.9rem">물(水)·쇠(金)를 채워 사주 궁합 <b style="color:#1f8a52">매우 좋음</b> · 수리 4격 모두 길(吉) 이상</div>
+      <div class="go">심층 보고서 열기 →</div></a>
+    <a class="card" href="report-jiyun.html"><div class="sc">88</div><div class="kr">최지윤</div><div class="hj">崔阯鈗</div>
+      <div style="margin-top:10px;color:#6f6459;font-size:.9rem">흙(土)을 보강해 용신을 뒷받침 · 사주 궁합 <b style="color:#3b6fb5">좋음</b> · 수리 4격 모두 길(吉) 이상</div>
+      <div class="go">심층 보고서 열기 →</div></a>
+  </div>
+  <div class="foot">DearName · 실제 계산 엔진 기반 샘플 · 만세력 1921~2040 · 인명용 한자 7,017자 · 81수리</div>
+</div></body></html>

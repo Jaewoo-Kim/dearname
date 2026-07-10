@@ -1,0 +1,5006 @@
+
+    // ================================================================
+    // 용어 툴팁 시스템
+    // ================================================================
+    const _TIPS = {
+        '대운':     '인생을 10년 단위로 나눈 운세 흐름입니다. 사주팔자가 평생의 그릇이라면, 대운은 그 그릇이 놓이는 계절과 같습니다.',
+        '원격':     '성 획수 + 이름 첫째 자 획수의 합. 유년~20세 초반까지의 학업운·성격 형성을 주관합니다.',
+        '형격':     '성 획수 + 이름 첫째 자 획수의 합. 20~40대 사회 진출·결혼 등 가장 왕성한 시기의 운세를 주관합니다.',
+        '이격':     '성 획수 + 이름 둘째 자 획수의 합. 40~60대 중년의 재물·명예·가정 안정을 반영합니다.',
+        '정격':     '성 + 이름 전체 획수의 총합. 60대 이후 말년운과 평생 종합운을 결정합니다.',
+        '사격수리': '원격·형격·이격·정격 네 가지 수리의 총칭. 획수의 합으로 인생 각 시기의 운세를 분석합니다.',
+        '자원오행': '한자가 품고 있는 고유한 오행 기운. 이름의 한 글자 한 글자가 매일 불릴 때마다 그 기운이 아이에게 스며듭니다.',
+        '오행':     '목(木)·화(火)·토(土)·금(金)·수(水). 세상 만물과 인간의 기질을 이루는 다섯 가지 기운입니다.',
+        '음양':     '획수의 홀짝 균형. 홀수=양(陽), 짝수=음(陰). 이름에서 음과 양이 고르게 섞일수록 기운이 균형 있게 순환합니다.',
+        '상생':     '오행이 서로 도와주는 관계. 목→화→토→금→수→목 순서로 앞 기운이 다음 기운을 키워줍니다.',
+        '상극':     '오행이 서로 억제하는 관계. 목→토, 토→수, 수→화, 화→금, 금→목 순서로 앞 기운이 다음 기운을 누릅니다.',
+        '조후':     '사주의 계절적 온도 균형. 태어난 계절에 따라 차갑거나 뜨거운 기운을 이름으로 보완해야 합니다.',
+        '용신':     '사주에서 가장 필요한 핵심 오행. 이 기운을 이름에 담으면 사주의 약점을 보완할 수 있습니다.',
+        '일간':     '태어난 날의 천간(天干). 사주에서 자기 자신을 나타내는 기준이 됩니다.',
+        '사주':     '태어난 연·월·일·시 네 기둥(四柱)에 담긴 여덟 글자(八字). 한 사람의 타고난 기운 설계도입니다.',
+        '발음오행': '이름을 소리 낼 때 입술·혀·이·목구멍의 움직임에 따라 발생하는 오행 기운입니다.',
+        '수리오행': '사격수리의 획수 합이 어떤 오행 기운을 띠는지 나타냅니다.',
+    };
+
+    // 용어를 <span class="term-tip"> 로 감싸는 헬퍼
+    function _tip(term, tipClass) {
+        const desc = _TIPS[term] || '';
+        if (!desc) return term;
+        const cls = tipClass ? `term-tip ${tipClass}` : 'term-tip';
+        return `<span class="${cls}" data-tip="${desc}">${term}</span>`;
+    }
+
+    // 모바일: 탭으로 토글 (터치 디바이스에서 hover 불가)
+    document.addEventListener('click', function(e) {
+        const tip = e.target.closest('.term-tip');
+        if (tip) {
+            e.stopPropagation();
+            const isOpen = tip.classList.contains('tip-open');
+            document.querySelectorAll('.term-tip.tip-open').forEach(t => t.classList.remove('tip-open'));
+            if (!isOpen) tip.classList.add('tip-open');
+        } else {
+            document.querySelectorAll('.term-tip.tip-open').forEach(t => t.classList.remove('tip-open'));
+        }
+    });
+
+    // 뷰 전환 로직
+    function showMainView() {
+        document.getElementById('report-view').style.display        = 'none';
+        document.getElementById('self-report-view').style.display   = 'none';
+        document.getElementById('theory-detail-view').style.display = 'none';
+        document.getElementById('mypage-view').style.display        = 'none';
+        document.getElementById('main-view').style.display          = 'block';
+        document.getElementById('report-nav').style.display         = 'none';
+        document.getElementById('main-nav').style.display           = 'flex';
+    }
+
+    function showReportViewWithoutLock() {
+        // ═══════════════════════════════════════════════════════════
+        // 데모 사주: 2026-04-20 09:20 서울 여아
+        // 丙午년 壬辰월 甲子일 戊辰시 (지방시 서울 08:47 → 辰시)
+        // 오행 점수: 木14.5 火21.25 土31.75 金0 水32.5
+        // prefer: 金(없음), 木(약함) → 이름에 金+木 자원오행 보완
+        // ═══════════════════════════════════════════════════════════
+        const _demoSaju = {
+            year:  { gan: '丙', ji: '午' },
+            month: { gan: '壬', ji: '辰' },
+            day:   { gan: '甲', ji: '子' },
+            time:  { gan: '戊', ji: '辰' }
+        };
+        // 오행 점수: 丙(火10) 午(火11.25 土3.75) 壬(水10) 辰(木2.25 水3.75 土9) 甲(木10) 子(水15) 戊(土10) 辰(木2.25 水3.75 土9)
+        const _demoScores = { '木': 14.5, '火': 21.25, '土': 31.75, '金': 0, '水': 32.5 };
+
+        // ── 이름 1: 김서윤 (金抒玧) ─────────────────────────────────
+        // 抒(서,木,8획) + 玧(윤,金,9획)
+        // 수리: 원격17(강신격,길) / 형격16(덕망격,길) / 이격17(강신격,길) / 정격25(안강격,길) 전격 길
+        // 발음: 木(김)→金(서)→土(윤)  /  2025 여아 이름 1위 '서윤' 음절 조합
+        const _demo1 = {
+            familyKr: '김', familyHanja: '金',
+            h1: { kr: '서', h: '抒', m: '펼칠', s: 8, o: '木' },
+            h2: { kr: '윤', h: '玧', m: '옥빛', s: 9, o: '金' },
+            s0: 8, isOija: false, score: 98
+        };
+        const _report1 = {
+            tagline: '"활짝 펼쳐지는 꿈처럼, 영롱하게 빛나는 옥처럼 자라나는 아이"',
+            sajuStory: '갑자(甲子) 일주의 아이는 하늘을 향해 곧게 자라는 나무(갑목·甲木)가 깊은 물(자수·子水) 위에 뿌리를 내린 형상입니다. 일간 갑목(甲木)은 자수(子水)의 장생지에 앉아 탁월한 학습 능력과 창의적 기질을 타고났습니다. 병오(丙午)년의 환한 태양 기운과 임진(壬辰)·무진(戊辰)의 넉넉한 土·水 기운이 더해져 총명하고 적응력 뛰어난 성품이 형성됩니다. 그러나 이 사주에서 金 기운이 전혀 없어 결단력·추진력을 담당하는 쇠(金)의 에너지가 크게 부족합니다. 이름의 자원오행으로 金과 木을 함께 보완해야 하는 작명 과제가 있습니다.',
+            jawonStory: '抒(서)의 木 기운이 일간 갑목(甲木)과 같은 방향으로 창의적 성장 에너지를 북돋고, 玧(윤)의 金 기운이 사주에 전혀 없는 쇠(金)의 결단력을 정확히 채워줍니다. 두 글자의 자원오행(木·金)이 나란히 놓이면서 사주의 풍부한 수(水)·화(火)·토(土) 기운과 자연스럽게 어우러지는 균형 잡힌 오행의 흐름이 완성됩니다.',
+            hanjaDetails: [
+                { hanja:'抒', kr:'서', meaning:'펼칠 서(抒). 감추어진 것을 세상에 펼쳐 보이다, 뜻과 마음을 자유롭게 표현하다는 의미입니다. 木 기운을 지녀 성장·창조·자유로운 표현의 에너지를 담고 있습니다.', strokes:8, oheng:'木', synergyWithSaju:'일간 갑목(甲木)과 같은 木 기운으로 창의적 재능과 자기표현력을 강화하며, 어떤 환경에서도 자신만의 이야기를 펼쳐나가는 힘을 더합니다.' },
+                { hanja:'玧', kr:'윤', meaning:'옥빛 윤(玧). 아름답고 영롱하게 빛나는 옥의 색깔을 뜻합니다. 金 기운을 품어 맑고 순수한 빛과 단단한 결단력의 에너지를 상징합니다.', strokes:9, oheng:'金', synergyWithSaju:'사주에 전혀 없는 金 기운을 직접 보완하여, 타고난 유연한 기질 위에 영롱하게 빛나는 결단력과 집중력을 심어줍니다.' }
+            ],
+            hanjaStory: '抒(서)는 세상을 향해 마음껏 펼쳐지는 자유로운 표현의 기운이고, 玧(윤)은 영롱하게 빛나는 옥처럼 맑고 순수한 빛의 기운입니다. "서윤"이라는 두 글자는 자신의 꿈과 재능을 거침없이 펼치면서도 옥처럼 맑고 단단한 품성을 지닌 아이의 이야기를 담습니다. 木의 뻗어나가는 생명력과 金의 영롱한 빛이 하나로 어우러져, 세상 어디에서도 빛을 잃지 않는 아이의 이름이 됩니다.',
+            soundStory: '김·서·윤의 초성 기운(木→金→土)을 살펴보면, 서(ㅅ=金)와 윤(ㅇ=土)의 흐름에서 金生土 상생의 에너지가 흐릅니다. 세 음절이 부드럽고 또렷하게 연결되어 발음하기 쉽고, 듣는 이에게 세련되고 맑은 인상을 줍니다. 2025년 여아 이름 1위 음절 조합으로, 시대의 감성을 담으면서도 격조 있는 발음이 돋보입니다.',
+            suriStory: '초년(원격 17수·강신격)에 강한 의지와 독립심으로 또래보다 일찍 자신만의 재능을 발견하고 빛냅니다. 청장년(형격 16수·덕망격)에는 인품과 능력을 겸비해 주변의 신뢰를 한 몸에 받으며 사회적 기반을 다집니다. 이격(17수·강신격)은 원만하고 진솔한 대인관계와 가정의 안정을 뒷받침하며, 말년(정격 25수·안강격)에는 오랜 노력이 쌓여 풍요롭고 안정된 삶을 완성합니다.',
+            conclusionLetter: '김서윤(金抒玧)은 이 아이의 사주에서 가장 부족한 金 기운을 玧으로, 성장의 원동력인 木 기운을 抒로 동시에 채운 이름입니다.\n\n抒(서)의 목(木) 기운은 일간 갑목(甲木)을 뒷받침해 창의적 재능과 표현력을 끊임없이 키워주고, 玧(윤)의 금(金) 기운은 사주에 없던 결단력과 집중력을 매일 이름이 불릴 때마다 심어줍니다. 사격수리 전격 길운(17·16·17·25)이 초년의 강한 의지를 청장년의 덕망으로, 말년의 풍요로운 안정으로 자연스럽게 이어줍니다. 2025년 가장 사랑받는 이름 음절 "서윤"에 깊은 한자의 의미를 담아, 서윤이가 자신만의 빛을 세상에 활짝 펼치기를 진심으로 축원합니다.',
+            lifeFlow: {
+                early:  '원격 17수(강신격)의 강한 의지로 또래보다 일찍 재능을 발견하고 독립심을 키우는 시기',
+                middle: '형격 16수(덕망격)로 인품과 능력을 겸비해 주변의 깊은 신뢰를 얻는 시기',
+                late:   '정격 25수(안강격)로 오랜 노력이 풍요롭고 안정된 결실로 이어지는 시기'
+            },
+            careerAdvice: '木의 창의력과 金의 실행력이 조화를 이룹니다. 예술·디자인·미디어·교육·컨설팅·기획 분야에서 특히 두각을 나타낼 것입니다.',
+            healthAdvice: '木 기운의 창의적 활동(글쓰기·예술·산책)과 金 기운의 집중 활동(명상·음악)을 균형 있게 가져가는 것이 좋습니다.'
+        };
+
+        // ── 이름 2: 김리서 (金璃序) ─────────────────────────────────
+        // 璃(리,金,16획) + 序(서,木,7획)
+        // 수리: 원격23(공명격,길) / 형격24(입신격,길) / 이격15(통달격,길) / 정격31(영달격,길) 전격 길
+        // 발음: 木(김)→火(리)→金(서): 木生火 상생 포함
+        const _demo2 = {
+            familyKr: '김', familyHanja: '金',
+            h1: { kr: '리', h: '璃', m: '유리,맑을', s: 16, o: '金' },
+            h2: { kr: '서', h: '序', m: '차례,펼칠', s: 7, o: '木' },
+            s0: 8, isOija: false, score: 96
+        };
+        const _report2 = {
+            tagline: '"맑은 유리처럼 투명하게, 차례차례 빛나는 이야기를 써가는 아이"',
+            sajuStory: '갑자(甲子) 일주의 아이는 하늘을 향해 자라는 나무(갑목·甲木)가 깊은 물(자수·子水)을 품은 형상으로, 병오(丙午)의 태양이 환하게 비추고 무진(戊辰)·임진(壬辰)의 대지와 물이 뒷받침하는 풍요로운 사주 원국을 타고났습니다. 총명하고 직관력이 뛰어나며 배움에 대한 의지가 강합니다. 이 사주의 가장 큰 과제는 金 기운이 전혀 없다는 점입니다. 맑고 단단한 金의 에너지를 이름으로 보완하고, 일간 갑목(甲木)의 성장 동력도 함께 강화해야 합니다.',
+            jawonStory: '璃(리)의 金 기운이 사주에 전무한 쇠(金)의 결단력과 맑은 통찰을 직접 채워줍니다. 序(서)의 木 기운은 일간 갑목(甲木)과 같은 방향으로 창의적 성장 에너지를 더해, 사주의 풍부한 수(水)·화(火)·토(土) 기운이 이름의 金·木과 자연스럽게 어우러집니다. 수생목(水生木)·목생화(木生火)의 상생 흐름이 사주와 이름 전체를 하나의 조화로운 흐름으로 연결합니다.',
+            hanjaDetails: [
+                { hanja:'璃', kr:'리', meaning:'유리 리(璃). 맑고 투명하게 빛나는 아름다운 옥을 뜻합니다. 한 점 흐림도 없이 맑은 金 기운을 품어, 순수하고 영롱한 지성과 투명한 기품을 상징합니다.', strokes:16, oheng:'金', synergyWithSaju:'사주에 전혀 없는 金 기운을 보완하여, 타고난 유연한 기질 위에 맑고 투명한 결단력과 집중력을 더해줍니다.' },
+                { hanja:'序', kr:'서', meaning:'차례 서(序). 사물의 질서와 차례, 이야기의 실마리를 여는 글자입니다. 木 기운을 품어 조화롭게 성장하고 자신만의 이야기를 펼쳐나가는 에너지를 담고 있습니다.', strokes:7, oheng:'木', synergyWithSaju:'일간 갑목(甲木)과 같은 木 기운으로 창의적 성장과 자기만의 스토리를 써나가는 힘을 강화합니다.' }
+            ],
+            hanjaStory: '璃(리)는 맑고 투명하게 빛나는 유리옥의 영롱함이고, 序(서)는 자신만의 이야기를 한 장 한 장 써나가는 차례와 시작의 기운입니다. "리서"라는 이름은 맑고 투명한 눈으로 세상을 바라보며 자신만의 빛나는 이야기를 차근차근 완성해나가는 아이의 모습을 담습니다. 金의 영롱한 맑음과 木의 성장하는 생명력이 하나로 어우러져 독보적인 존재감을 만들어냅니다.',
+            soundStory: '김·리·서의 초성 기운(木→火→金)을 살펴보면, 김(ㄱ=木)이 리(ㄹ=火)를 낳는 木生火 상생 흐름이 이름의 시작부터 긍정적인 에너지를 만들어냅니다. 세 음절이 경쾌하고 또렷하게 이어져 발음하기 편안하고, 듣는 이에게 세련되고 신선한 인상을 줍니다. 2025년 트렌드를 반영한 "리서" 조합은 독창적이면서도 시대의 감성을 담은 이름입니다.',
+            suriStory: '초년(원격 23수·공명격)에 또래 사이에서 독보적인 재능과 존재감을 드러내며 자신만의 길을 열어갑니다. 청장년(형격 24수·입신격)에는 탁월한 역량으로 사회에서 빠르게 두각을 나타내고 리더십을 발휘합니다. 이격(15수·통달격)은 인간관계와 가정에서 두루 통달한 지혜로 주변을 이끌며, 말년(정격 31수·영달격)에는 오랜 노력과 인덕이 어우러진 빛나는 완성의 시기를 맞이합니다.',
+            conclusionLetter: '김리서(金璃序)는 사주에 전무한 金 기운을 璃로 채우고, 일간 갑목(甲木)의 성장 동력을 序로 강화한 균형 잡힌 이름입니다.\n\n璃(리)의 맑고 투명한 金 기운은 매일 이름이 불릴 때마다 결단력과 순수한 통찰을 심어주고, 序(서)의 木 기운은 창의적 성장과 자기만의 이야기를 써나가는 힘을 끊임없이 공급합니다. 사격수리 전격 길운(23·24·15·31)이 초년의 빛나는 재능을 청장년의 사회적 리더십으로, 말년의 풍요로운 완성으로 자연스럽게 이어줍니다. 맑고 영롱한 璃의 빛과 자신만의 序를 써나가는 리서가 세상에서 가장 빛나는 이야기의 주인공이 되기를 진심으로 응원합니다.',
+            lifeFlow: {
+                early:  '원격 23수(공명격)로 또래 사이에서 독보적인 재능과 존재감을 드러내는 시기',
+                middle: '형격 24수(입신격)로 탁월한 역량과 리더십으로 사회적 두각을 나타내는 시기',
+                late:   '정격 31수(영달격)로 오랜 노력과 인덕이 어우러진 빛나는 완성의 시기'
+            },
+            careerAdvice: '金의 맑은 통찰력과 木의 창의적 성장이 어우러집니다. 미디어·예술·기획·연구·교육·의료 분야에서 탁월한 역량을 발휘할 것입니다.',
+            healthAdvice: '金 기운으로 폐·호흡기를 챙기고, 木 기운을 위해 자연 속 걷기와 창의적 활동을 즐기는 것이 심신의 균형에 좋습니다.'
+        };
+
+        // ── 이름 3: 김채서 (金琗抒) ─────────────────────────────────
+        // 琗(채,金,13획) + 抒(서,木,8획)
+        // 수리: 원격21(두령격,길) / 형격21(두령격,길) / 이격16(덕망격,길) / 정격29(길) 전격 길
+        // 발음: 木(김)→金(채)→金(서): 비화(比和)
+        const _demo3 = {
+            familyKr: '김', familyHanja: '金',
+            h1: { kr: '채', h: '琗', m: '옥빛,광채', s: 13, o: '金' },
+            h2: { kr: '서', h: '抒', m: '펼칠', s: 8, o: '木' },
+            s0: 8, isOija: false, score: 94
+        };
+        const _report3 = {
+            tagline: '"광채처럼 빛나고, 자유롭게 펼쳐지는 아이"',
+            sajuStory: '갑자(甲子) 일주의 아이는 하늘을 향해 자라는 나무(갑목·甲木)가 깊은 물(자수·子水)을 품은 형상입니다. 병오(丙午)의 뜨거운 태양 기운과 무진(戊辰)·임진(壬辰)의 대지·물 기운이 두텁게 쌓인 풍요로운 사주 원국을 타고났습니다. 총명하고 감수성이 풍부하며 창의력이 뛰어납니다. 이 사주에서 金 기운이 전혀 없는 것이 핵심 과제입니다. 맑고 단단한 金의 결단력을 이름으로 보완하고, 일간 갑목(甲木)의 창의적 성장 에너지도 함께 강화해야 합니다.',
+            jawonStory: '琗(채)의 金 기운이 사주에 없는 쇠(金)의 광채와 결단력을 직접 채워주고, 抒(서)의 木 기운이 일간 갑목(甲木)과 같은 방향으로 창의적 표현의 에너지를 북돋습니다. 두 글자의 자원오행(金·木)이 나란히 놓이면서 사주의 수(水)·화(火)·토(土) 기운이 이름과 자연스럽게 어우러지는 균형 잡힌 오행의 흐름이 만들어집니다.',
+            hanjaDetails: [
+                { hanja:'琗', kr:'채', meaning:'옥빛 채(琗). 옥이 발산하는 아름다운 광채와 빛을 뜻합니다. 金 기운을 품어 맑고 찬란하게 빛나는 에너지를 상징하며, 주변을 밝히는 강렬한 존재감을 나타냅니다.', strokes:13, oheng:'金', synergyWithSaju:'사주에 전혀 없는 金 기운을 보완하여, 타고난 풍부한 감수성과 창의력 위에 찬란하게 빛나는 결단력과 실행력을 더합니다.' },
+                { hanja:'抒', kr:'서', meaning:'펼칠 서(抒). 감추어진 것을 자유롭게 펼쳐 보이고, 마음과 뜻을 세상에 표현한다는 의미입니다. 木 기운을 지녀 성장·창조·자유로운 표현의 에너지를 담고 있습니다.', strokes:8, oheng:'木', synergyWithSaju:'일간 갑목(甲木)과 같은 木 기운으로 창의적 표현력과 성장 에너지를 강화하며, 자신만의 색깔로 세상을 펼쳐나가는 힘을 더합니다.' }
+            ],
+            hanjaStory: '琗(채)는 옥에서 발산하는 찬란한 광채의 기운이고, 抒(서)는 마음속 꿈과 재능을 세상에 자유롭게 펼쳐 보이는 기운입니다. "채서"라는 이름은 눈부신 광채로 세상을 밝히면서도 자신만의 이야기를 거침없이 펼쳐나가는 아이의 빛나는 모습을 담습니다. 金의 찬란한 빛과 木의 자유로운 성장이 하나로 어우러져, 어느 곳에 있어도 존재감이 빛나는 이름이 됩니다.',
+            soundStory: '김·채·서의 초성 기운(木→金→金)을 살펴보면, 채(ㅊ=金)와 서(ㅅ=金)가 나란히 같은 기운으로 이어져 강렬한 金 기운의 비화(比和) 흐름이 형성됩니다. 세 음절이 힘 있고 또렷하게 이어져 발음하기 시원하고, 듣는 이에게 세련되고 당당한 인상을 줍니다. 2025년 트렌드를 선도하는 "채서" 조합은 독창적이면서도 시대의 감성을 담은 이름입니다.',
+            suriStory: '초년(원격 21수·두령격)에 이미 또래 사이에서 리더십을 발휘하며 자신의 꿈을 향해 당당히 나아갑니다. 청장년(형격 21수·두령격)에도 연속된 두령격의 기운으로 사회에서 중심적 역할을 맡으며 탁월한 성취를 이룹니다. 이격(16수·덕망격)은 가정과 인간관계에서 신뢰와 덕망으로 사랑받으며, 말년(정격 29수·길)에는 오랜 노력과 인덕이 풍요로운 완성으로 이어집니다.',
+            conclusionLetter: '김채서(金琗抒)는 사주에 전무한 金 기운을 琗의 찬란한 광채로 채우고, 일간 갑목(甲木)의 창의적 성장을 抒의 자유로운 표현력으로 뒷받침한 이름입니다.\n\n琗(채)의 금(金) 기운은 매일 이름이 불릴 때마다 찬란한 결단력과 실행력을 심어주고, 抒(서)의 목(木) 기운은 창의적 표현과 자유로운 성장 에너지를 끊임없이 공급합니다. 사격수리 전격 길운(21·21·16·29)이 초년부터 말년까지 리더십과 덕망으로 빛나는 인생의 길을 그립니다. 찬란한 빛(琗)으로 세상을 밝히고 자유롭게(抒) 꿈을 펼쳐나갈 채서가 가는 곳마다 새로운 빛을 만들어가기를 진심으로 응원합니다.',
+            lifeFlow: {
+                early:  '원격 21수(두령격)로 또래 사이에서 일찍부터 리더십과 존재감을 빛내는 시기',
+                middle: '형격 21수(두령격) 연속으로 사회의 중심 역할을 맡으며 탁월한 성취를 이루는 시기',
+                late:   '정격 29수(길)로 오랜 노력과 인덕이 풍요로운 완성으로 이어지는 시기'
+            },
+            careerAdvice: '金의 강렬한 실행력과 木의 창의적 표현이 어우러집니다. 예술·디자인·엔터테인먼트·경영·기획·마케팅 분야에서 두각을 나타낼 것입니다.',
+            healthAdvice: '金 기운의 실행 에너지와 木 기운의 창의적 이완을 번갈아 충전하는 것이 좋습니다. 야외 활동과 예술적 취미를 균형 있게 즐기세요.'
+        };
+
+        _currentState = {
+            nameSpec: { prefer: ['金', '木'], avoid: [], strategy: 'balance', gridType: 'general' },
+            familyName: { kr: '김', hanja: '金', strokes: 8 },
+            constraints: { gender: 'F', dolrim: null, hangryul: null, traits: [1, 4], nameType: 2 },
+            searchControl: { maxResults: 3, qualityThreshold: 70 },
+            _saju: _demoSaju,
+            _scores: _demoScores
+        };
+        _allCandidates = [_demo1, _demo2, _demo3];
+        _allReports    = [_report1, _report2, _report3];
+        _chatDemoMode  = true;   // 데모 모드: API 없이 미리 준비된 답변 사용
+
+        _renderReportTabs([_demo1, _demo2, _demo3]);
+        _renderReportContent(_demo1, _report1, 0);
+
+        document.getElementById('main-view').style.display = 'none';
+        document.getElementById('self-report-view').style.display = 'none';
+        document.getElementById('theory-detail-view').style.display = 'none';
+        document.getElementById('report-view').style.display = 'block';
+        document.getElementById('main-nav').style.display = 'none';
+        document.getElementById('report-nav').style.display = 'block';
+        document.getElementById('load-more-btn').style.display = 'none';
+        window.scrollTo(0, 0);
+        setTimeout(() => {
+            renderCharts();
+            _updateRadarChart(_demoScores, _demoCandidate);
+            if (window._daeunData) _updateLifeFlowChart(window._daeunData);
+        }, 100);
+    }
+
+    function showTheoryDetailView() {
+        document.getElementById('main-view').style.display = 'none';
+        document.getElementById('report-view').style.display = 'none';
+        document.getElementById('self-report-view').style.display = 'none';
+        document.getElementById('theory-detail-view').style.display = 'block';
+        document.getElementById('main-nav').style.display = 'none';
+        document.getElementById('report-nav').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    // 로그인 및 결제 팝업 로직
+    function openLoginModal() { document.getElementById('login-modal').style.display = 'flex'; }
+    function closeLoginModal() { document.getElementById('login-modal').style.display = 'none'; }
+  // 팝업을 열 때 항상 '1개(3만 원)' 옵션이 기본으로 선택되도록 세팅
+    // ── 프리미엄 폼 위저드 ─────────────────────────────────────────────
+    function wizardNext(step) {
+        if (step === 1) {
+            const bd = document.getElementById('prem-birth-date')?.value;
+            if (!bd) { alert('생년월일을 입력해주세요.'); return; }
+        }
+        const cur  = document.getElementById(`wstep-${step}`);
+        const next = document.getElementById(`wstep-${step + 1}`);
+        const curTab  = document.getElementById(`wtab-${step}`);
+        const nextTab = document.getElementById(`wtab-${step + 1}`);
+        cur.classList.remove('ws-active');
+        next.classList.add('ws-active');
+        curTab.classList.remove('wt-active');
+        curTab.classList.add('wt-done');
+        nextTab.classList.add('wt-active');
+        document.getElementById('premium').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function wizardPrev(step) {
+        const cur  = document.getElementById(`wstep-${step}`);
+        const prev = document.getElementById(`wstep-${step - 1}`);
+        const curTab  = document.getElementById(`wtab-${step}`);
+        const prevTab = document.getElementById(`wtab-${step - 1}`);
+        cur.classList.remove('ws-active');
+        prev.classList.add('ws-active');
+        curTab.classList.remove('wt-active');
+        prevTab.classList.remove('wt-done');
+        prevTab.classList.add('wt-active');
+        document.getElementById('premium').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function requestPremiumReport() {
+        if (!validatePremiumForm()) return;
+
+        // 비로그인 시 로그인 모달 먼저 → 로그인 후 자동 재개
+        if (!_dnUser) {
+            _pendingAction = requestPremiumReport;
+            openLoginModal();
+            return;
+        }
+
+        // 결제 모달 표시
+        const defaultOption = document.querySelector('input[name="report_count"][value="30000"]');
+        if(defaultOption) defaultOption.checked = true;
+        updatePrice({value: "30000"});
+        document.getElementById('payment-modal').style.display = 'flex';
+    }
+
+    
+    // 선택한 옵션에 따라 하단 결제 금액 텍스트를 바꿔주는 함수
+    function updatePrice(element) {
+        const price = parseInt(element.value);
+        document.getElementById('total-price-display').innerText = '₩ ' + price.toLocaleString('ko-KR');
+    }
+function cancelPayment() { document.getElementById('payment-modal').style.display = 'none'; }
+    async function processPayment() {
+        document.getElementById('payment-modal').style.display = 'none';
+
+        const amount = parseInt(document.querySelector('[name="report_count"]:checked')?.value || '30000');
+        const countMap = {30000:1, 50000:2, 70000:3, 100000:5};
+        const reportCount = countMap[amount] || 1;
+
+        // 토스페이먼츠 결제 (클라이언트키 설정 필요)
+        const CLIENT_KEY = window.TOSS_CLIENT_KEY || null;
+
+        if (!CLIENT_KEY) {
+            // 개발/테스트 모드: 결제 없이 바로 보고서 생성
+            console.info('[DearName] 토스페이먼츠 CLIENT_KEY 미설정 → 테스트 모드');
+            await startPremiumReportGeneration(reportCount);
+            return;
+        }
+
+        try {
+            const tossPayments = TossPayments(CLIENT_KEY);
+            const payment = tossPayments.payment({ customerKey: _getUserKey() });
+
+            await payment.requestPayment({
+                method: 'CARD',
+                amount: { currency: 'KRW', value: amount },
+                orderId: 'dn_' + Date.now(),
+                orderName: `AI 프리미엄 작명 소견서 ${reportCount}개`,
+                successUrl: location.href + '?dn_payment=success&count=' + reportCount,
+                failUrl:    location.href + '?dn_payment=fail',
+            });
+        } catch(err) {
+            if (err?.code !== 'USER_CANCEL') {
+                console.error('결제 오류:', err);
+                alert('결제 처리 중 오류가 발생했습니다: ' + (err?.message || ''));
+            }
+        }
+    }
+
+    function _getUserKey() {
+        // 비로그인 상태에서 임시 키 생성
+        let key = localStorage.getItem('dn_user_key');
+        if (!key) { key = 'guest_' + Date.now(); localStorage.setItem('dn_user_key', key); }
+        return key;
+    }
+
+    window.onclick = function(event) {
+        const loginModal = document.getElementById('login-modal');
+        if (event.target == loginModal) { loginModal.style.display = "none"; }
+    };
+
+    // 토스페이먼츠 결제 완료 URL 파라미터 처리
+    ;(function() {
+        const params = new URLSearchParams(location.search);
+        const payStatus = params.get('dn_payment');
+        if (payStatus === 'success') {
+            const count = parseInt(params.get('count') || '1');
+            history.replaceState(null, '', location.pathname);
+            window.addEventListener('load', () => startPremiumReportGeneration(count));
+        } else if (payStatus === 'fail') {
+            history.replaceState(null, '', location.pathname);
+            alert('결제가 취소되었거나 실패했습니다.');
+        }
+    })();
+
+    /* ========================================================
+       [핵심 작명 엔진] 성명학 6대 지표 분석 로직
+       ======================================================== */
+       
+    // 1. 한글 분해 상수 (초성, 중성)
+    const CHOSUNG = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    const JUNGSUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+
+    // 2. 81수리 정밀 데이터 (현대적 UX 해석)
+    // SURI_DATA는 data/suri-data.js 에서 로드됩니다.
+
+    // hanjaDB → HANJA_DB_FULL + BULYONG_HANJA (data/hanja-db.js 에서 로드)
+    // generateHanjaSelectors()에서 HANJA_DB_FULL을 사용
+
+    function updateHanjaSelect(inputElId, selectElId) {
+        const inputVal = document.getElementById(inputElId).value.trim();
+        const selectEl = document.getElementById(selectElId);
+        if (inputVal.length === 0) { selectEl.innerHTML = '<option value="">한자 선택</option>'; return; }
+        const char = inputVal.charAt(inputVal.length - 1);
+        const hanjaList = (HANJA_DB_FULL||{})[char] || [{h:char, m:'기본', s:10, o:'水'}]; // 없으면 임시값
+        let optionsHTML = '<option value="">한자 선택</option>';
+        optionsHTML += hanjaList.map(h => `<option value="${h.h}">${h.h} (${h.m})</option>`).join('');
+        selectEl.innerHTML = optionsHTML;
+    }
+
+    // 성씨별 표준 한자 우선순위 (1순위 한자가 맨 앞)
+    const SURNAME_PRIORITY = {
+        '김':['金'],'이':['李'],'박':['朴'],'최':['崔'],'정':['鄭','丁','程'],
+        '강':['姜','康'],'조':['趙','曺'],'윤':['尹'],'장':['張','蔣'],'임':['林','任'],
+        '한':['韓'],'오':['吳'],'서':['徐'],'신':['申','辛','愼'],'권':['權'],
+        '황':['黃'],'안':['安'],'송':['宋'],'류':['柳','劉'],'유':['劉','兪','柳'],
+        '전':['全','田','錢'],'홍':['洪'],'고':['高'],'문':['文'],'양':['梁','楊'],
+        '손':['孫'],'배':['裵','裴'],'백':['白'],'허':['許'],'남':['南'],
+        '심':['沈'],'노':['盧','魯'],'하':['河','夏'],'곽':['郭'],'성':['成','盛'],
+        '차':['車'],'주':['朱','周'],'우':['禹','宇'],'구':['具','丘'],'민':['閔'],
+        '나':['羅'],'라':['羅'],'진':['陳','晉'],'엄':['嚴'],'채':['蔡'],
+        '원':['元','袁'],'천':['千'],'방':['方','房'],'공':['孔'],'현':['玄'],
+        '함':['咸'],'변':['卞','邊'],'염':['廉'],'석':['石','昔'],'길':['吉'],
+        '소':['蘇'],'설':['薛'],'여':['呂','余'],'추':['秋','鄒'],'도':['都'],
+        '마':['馬'],'어':['魚'],'위':['魏'],'표':['表'],'반':['潘'],'왕':['王'],
+        '금':['琴'],'옥':['玉'],'육':['陸'],'지':['池'],'탁':['卓'],'봉':['奉'],
+        '국':['鞠'],'선':['宣'],'기':['奇','箕'],'복':['卜'],'피':['皮'],
+        '모':['牟'],'명':['明'],'인':['印'],'사':['史'],'팽':['彭']
+    };
+
+    // 자주 쓰는 이름 한자 목록
+    const NAME_POPULAR_HANJA = new Set([
+        '俊','準','濬','竣','埈','晙',
+        '民','珉','敏','旼','玟','忞',
+        '瑞','西','棲','曙','署',
+        '賢','鉉','玄','炫','顯',
+        '宇','祐','佑','禹','雨','羽',
+        '智','知','志','地','芝',
+        '允','侖','崙','倫','潤','胤','尹',
+        '秀','洙','秀','璲','琇',
+        '恩','銀','殷','垠','誾',
+        '載','在','才','材','財','栽',
+        '浚','峻','焌','儁',
+        '雅','芽','亞','娥','雅',
+        '林','琳','臨','霖',
+        '妍','娟','姸','涓','淵','燕','蓮','連','鍊',
+        '璟','景','京','炅','耿','勁',
+        '泰','太','兌',
+        '昊','灝','皓','澔','顥',
+        '仁','寅','忍','認',
+        '哲','澈','喆',
+        '誠','星','晟','成','珹',
+        '婉','姿','紫','慈',
+        '河','夏','霞','荷',
+        '芸','雲','耘','芸',
+        '亮','諒','良','樑',
+        '明','銘','鳴','冥',
+        '宣','璿','旋',
+        '彩','采','菜',
+        '娜','那','羅',
+        '一','逸','日','溢',
+        '昇','承','丞','陞',
+        '修','修','秀','守','壽','壽',
+        '炯','泂','逈',
+        '澤','擇','宅',
+        '弘','紅','虹',
+        '國','菊','鞠',
+        '成','盛','城','晟',
+        '建','健','乾','謇',
+        '煥','桓','歡','環',
+        '用','勇','鏞','湧',
+        '俱','龜','究','具',
+        '도','導','到','度',
+        '葉','燁','曄','爗',
+        '永','泳','映','瑛','煐',
+        '熙','希','姬','喜','禧',
+        '恒','恒','恒',
+        '雄','熊',
+        '鍾','鐘','宗','種','鍾',
+        '憲','軒','赫','爀'
+    ]);
+
+    function _sortHanjaList(hanjaList, isSurname, surnameChar) {
+        if (isSurname && SURNAME_PRIORITY[surnameChar]) {
+            const order = SURNAME_PRIORITY[surnameChar];
+            return [...hanjaList].sort((a, b) => {
+                const ia = order.indexOf(a.h), ib = order.indexOf(b.h);
+                if (ia !== -1 && ib !== -1) return ia - ib;
+                if (ia !== -1) return -1;
+                if (ib !== -1) return 1;
+                return 0;
+            });
+        }
+        // 이름: 자주 쓰는 한자 우선
+        return [...hanjaList].sort((a, b) => {
+            const pa = NAME_POPULAR_HANJA.has(a.h) ? 0 : 1;
+            const pb = NAME_POPULAR_HANJA.has(b.h) ? 0 : 1;
+            return pa - pb;
+        });
+    }
+
+    function _buildHanjaOptions(hanjaList, isSurname, surnameChar) {
+        const sorted = _sortHanjaList(hanjaList, isSurname, surnameChar);
+        const toOpt = h => `<option value="${h.s}|${h.o}|${h.h}">${h.h} (${h.m}) - ${h.s}획 / ${h.o}</option>`;
+
+        if (isSurname) {
+            const priority = SURNAME_PRIORITY[surnameChar] || [];
+            const top = sorted.filter(h => priority.includes(h.h));
+            const rest = sorted.filter(h => !priority.includes(h.h));
+            if (top.length === 0) return sorted.map(toOpt).join('');
+            return [...top, ...rest].map(toOpt).join('');
+        }
+
+        // 이름: 자주 쓰는 우선 → 이어서 나머지 (구분선 없음)
+        const popular = sorted.filter(h => NAME_POPULAR_HANJA.has(h.h));
+        const others  = sorted.filter(h => !NAME_POPULAR_HANJA.has(h.h));
+        return [...popular, ...others].map(toOpt).join('');
+    }
+
+    function generateHanjaSelectors() {
+        const lastName = document.getElementById('kr-last-name').value.trim();
+        const firstName = document.getElementById('kr-first-name').value.trim();
+        const fullName = lastName + firstName;
+        const selectionArea = document.getElementById('hanja-selection-area');
+        const dropdownContainer = document.getElementById('hanja-dropdowns');
+        if (fullName.length === 0) { selectionArea.style.display = 'none'; return; }
+
+        selectionArea.style.display = 'block';
+        dropdownContainer.innerHTML = '';
+
+        for (let i = 0; i < fullName.length; i++) {
+            const char = fullName[i];
+            const isSurname = (i < lastName.length);
+            const hanjaList = (HANJA_DB_FULL||{})[char] || [{h: char, m: '기본(DB없음)', s: 10, o: '水'}];
+            const optionsHTML = _buildHanjaOptions(hanjaList, isSurname, char);
+
+            const block = document.createElement('div');
+            block.className = 'hanja-block';
+            block.innerHTML = `<span>${char}</span><select id="hanja-sel-${i}">${optionsHTML}</select>`;
+            dropdownContainer.appendChild(block);
+        }
+    }
+
+    // 뱃지 적용 함수
+    const _GRADE4 = {'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'};
+    const _toG4 = g => _GRADE4[g] || g;  // 구 등급 → 4단계 변환
+    function applyBadge(elementId, grade) {
+        const el = document.getElementById(elementId);
+        if(!el) return;
+        el.className = 'grade-badge'; // reset
+        const ng = _toG4(grade);
+        if(ng === '매우 좋음') { el.classList.add('grade-very-good'); el.innerText = '매우 좋음'; }
+        else if(ng === '좋음') { el.classList.add('grade-high');      el.innerText = '좋음'; }
+        else if(ng === '나쁨') { el.classList.add('grade-mid');       el.innerText = '나쁨'; }
+        else                   { el.classList.add('grade-low');       el.innerText = '매우 나쁨'; }
+    }
+
+    // 이름 데이터를 기반으로 6가지 성명학 지표 분석 알고리즘
+    function getAnalysisData(lastName, firstName) {
+        const fullName = lastName + firstName;
+        const isOija = fullName.length === 2; // 성1+이름1 (외자) 여부
+        
+        let strokes = [];
+        let hanjaOhengs = [];
+        
+        // 1. UI에서 선택된 한자 정보 파싱 (획수, 오행 추출)
+        for(let i=0; i<fullName.length; i++) {
+            const sel = document.getElementById(`hanja-sel-${i}`);
+            if(sel && sel.value) {
+                const parts = sel.value.split('|');
+                strokes.push(parseInt(parts[0]));
+                hanjaOhengs.push(parts[1]);
+            } else {
+                strokes.push(10); // 미선택시 기본 10획
+                hanjaOhengs.push('水');
+            }
+        }
+
+        /* ----------------------------------------------------
+           ① 발음오행 (초성 기준 상생/상극 판별)
+           ---------------------------------------------------- */
+        const getCho = (char) => {
+            const code = char.charCodeAt(0) - 44032;
+            if(code < 0 || code > 11171) return '';
+            return CHOSUNG[Math.floor(code / 588)];
+        };
+        const getOhengFromCho = (cho) => {
+            if(['ㄱ','ㅋ','ㄲ'].includes(cho)) return '木';
+            if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho)) return '火';
+            if(['ㅇ','ㅎ'].includes(cho)) return '土';
+            if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho)) return '金';
+            if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho)) return '水';
+            return '';
+        };
+        // v2: 전역 노출 (NameSearchEngine에서 사용)
+        window.getCho = getCho;
+        window.getOhengFromCho = getOhengFromCho;
+        const OHENG_CYCLE = ['木', '火', '土', '金', '水'];
+        const isSangsaeng = (e1, e2) => {
+            if (e1 === e2) return true; // 비화(같은 기운)는 상생으로 간주
+            const ia = OHENG_CYCLE.indexOf(e1), ib = OHENG_CYCLE.indexOf(e2);
+            return (ia+1)%5 === ib || (ib+1)%5 === ia; // 순방향·역방향 상생 모두 인정
+        };
+        
+        const pronOhengs = fullName.split('').map(c => getOhengFromCho(getCho(c)));
+        let badCount = 0;
+        for(let i=0; i<pronOhengs.length-1; i++) {
+            if(!isSangsaeng(pronOhengs[i], pronOhengs[i+1])) badCount++;
+        }
+        
+        const _pronTotal = pronOhengs.length - 1;
+        let pronGrade, pronDesc;
+        if (badCount === 0)                          { pronGrade = '매우 좋음'; pronDesc = '초성 오행이 상생 관계로 이어져 부드럽고 막힘없는 흐름입니다.'; }
+        else if (badCount * 2 <= _pronTotal)         { pronGrade = '좋음';     pronDesc = '상생과 상극이 혼재하나 상생이 우세해 전반적으로 좋은 흐름입니다.'; }
+        else if (badCount === _pronTotal)            { pronGrade = '매우 나쁨'; pronDesc = '초성 오행이 연이어 상극을 이루어 보완이 시급합니다.'; }
+        else                                         { pronGrade = '나쁨';     pronDesc = '상극이 상생보다 많아 기운의 충돌이 우려됩니다.'; }
+
+        /* ----------------------------------------------------
+           ② 발음음양 (모음 기준 홀짝 밸런스)
+           ---------------------------------------------------- */
+        const getYinYangFromJung = (char) => {
+            const code = char.charCodeAt(0) - 44032;
+            if(code < 0 || code > 11171) return '';
+            const jung = JUNGSUNG[Math.floor((code % 588) / 28)];
+            const yang = ['ㅏ','ㅑ','ㅗ','ㅛ','ㅐ','ㅒ','ㅘ','ㅙ','ㅚ'];
+            return yang.includes(jung) ? '양' : '음';
+        };
+        // v2: 전역 노출
+        window.getYinYangFromJung = getYinYangFromJung;
+        const yinYangs = fullName.split('').map(c => getYinYangFromJung(c));
+        const allYang = yinYangs.every(y => y === '양');
+        const allYin = yinYangs.every(y => y === '음');
+        
+        let pyGrade, pyDesc;
+        if(allYang || allYin) {
+            pyGrade = '매우 나쁨'; pyDesc = '모음의 음양이 한쪽으로 완전히 치우쳐 있어 기운의 편향이 발생합니다.';
+        } else {
+            pyGrade = '매우 좋음'; pyDesc = '양성과 음성 모음이 함께 어우러져 음양의 조화를 이루고 있습니다.';
+        }
+
+        /* ----------------------------------------------------
+           ③ 사격수리 (81수리 원·형·이·정격 도출)
+           ---------------------------------------------------- */
+        const s1 = strokes[0], s2 = strokes[1], s3 = strokes[2] || 0;
+        // 외자일 경우 가성(1)을 더하여 계산
+        const g1_num = isOija ? s2 + 1 : s2 + s3; // 원격(초년)
+        const g2_num = s1 + s2;                   // 형격(청년)
+        const g3_num = isOija ? s1 + 1 : s1 + s3; // 이격(장년)
+        const g4_num = isOija ? s1 + s2 : s1 + s2 + s3; // 정격(말년)
+        
+        const getSuriData = (n) => {
+            let num = n > 81 ? n % 81 : n;
+            if (num === 0) num = 81;
+            return SURI_DATA[num] || { name: '알수없음', grade: '평', desc: '데이터가 없습니다.' };
+        };
+
+        const s1_data = getSuriData(g1_num);
+        const s2_data = getSuriData(g2_num);
+        const s3_data = getSuriData(g3_num);
+        const s4_data = getSuriData(g4_num);
+        
+        const goodCount = [s1_data, s2_data, s3_data, s4_data].filter(d => ['대길','길'].includes(d.grade)).length;
+        let math4Grade, math4Desc;
+        if(goodCount === 4)      { math4Grade = '매우 좋음'; math4Desc = '4격의 획수 합이 모두 길수에 해당합니다.'; }
+        else if(goodCount === 3) { math4Grade = '좋음';     math4Desc = '대부분의 시기에서 길한 수리가 배치되어 있습니다.'; }
+        else if(goodCount === 2) { math4Grade = '좋음';     math4Desc = '길수와 흉수가 균형을 이루고 있습니다. 자원오행과 발음으로 보완하면 좋습니다.'; }
+        else if(goodCount === 1) { math4Grade = '나쁨';     math4Desc = '흉수가 많아 삶의 굴곡이 예상되므로 보완이 필요합니다.'; }
+        else                     { math4Grade = '매우 나쁨'; math4Desc = '4격이 모두 흉수입니다. 작명을 새로 하시는 것을 강력히 권장합니다.'; }
+
+        /* ----------------------------------------------------
+           ④ 수리오행 (형격과 정격의 끝자리 오행 상생)
+           ---------------------------------------------------- */
+        const getNumOheng = (n) => {
+            const lastDigit = n % 10;
+            if(lastDigit===1||lastDigit===2) return '木';
+            if(lastDigit===3||lastDigit===4) return '火';
+            if(lastDigit===5||lastDigit===6) return '土';
+            if(lastDigit===7||lastDigit===8) return '金';
+            if(lastDigit===9||lastDigit===0) return '水';
+        }
+        // 4격 인접 쌍(원↔형, 형↔이, 이↔정) 상극 개수로 3단계 판정
+        const moNums = [g1_num, g2_num, g3_num, g4_num];
+        const moOhengs = moNums.map(getNumOheng);
+        let moBadCount = 0;
+        for(let i = 0; i < moOhengs.length - 1; i++) {
+            if(!isSangsaeng(moOhengs[i], moOhengs[i + 1])) moBadCount++;
+        }
+        let moGrade, moDesc;
+        if(moBadCount === 0)      { moGrade = '매우 좋음'; moDesc = '수리의 4격 오행이 모두 상생으로 이어져 기운이 막힘없이 흐릅니다.'; }
+        else if(moBadCount === 1) { moGrade = '좋음';     moDesc = '수리오행 흐름에 상극이 일부 포함되어 있으나 상생이 우세합니다.'; }
+        else if(moBadCount === 2) { moGrade = '나쁨';     moDesc = '수리오행 간 상극이 여러 곳에서 발생하여 기운 충돌이 우려됩니다.'; }
+        else                      { moGrade = '매우 나쁨'; moDesc = '수리오행 전 구간에서 상극이 발생합니다.'; }
+
+        /* ----------------------------------------------------
+           ⑤ 수리음양 (획수의 홀/짝 밸런스)
+           ---------------------------------------------------- */
+        // 수리음양: 각 한자 획수가 아닌 4격 수리(원·형·이·정격)의 홀짝 기준
+        const isYang = (s) => s % 2 !== 0;
+        const myYangs = [g1_num, g2_num, g3_num, g4_num].map(n => isYang(n) ? '양' : '음');
+        const mAllYang = myYangs.every(y => y === '양');
+        const mAllYin  = myYangs.every(y => y === '음');
+
+        let myGrade = '매우 좋음', myDesc = '4격 수리의 음(짝수)과 양(홀수)이 고루 배합되어 균형이 잘 잡혀 있습니다.';
+        if(mAllYang || mAllYin) {
+            myGrade = '매우 나쁨'; myDesc = '4격 수리가 모두 홀수 또는 짝수로 치우쳐 음양 균형이 깨져 있습니다.';
+        }
+
+        /* ----------------------------------------------------
+           ⑥ 사주오행 (자원오행 보완 시뮬레이션)
+        /* ----------------------------------------------------
+           ⑥ 사주오행 — 실제 만세력 기반 계산
+           ---------------------------------------------------- */
+        const _birthDateRaw = document.getElementById('birth-date')?.value || '';
+        const birthTimeVal  = document.getElementById('birth-time')?.value || '12:00';
+        const _selfCalType  = _getCalType('self');
+        const birthDateVal  = (_selfCalType !== 'solar' && typeof normalizeToSolar === 'function')
+            ? (normalizeToSolar(_birthDateRaw, _selfCalType) || _birthDateRaw)
+            : _birthDateRaw;
+        const _sajuOpts0 = {
+            yajasi:     true,
+            apply30min: true,
+            city:       document.getElementById('birth-location')?.value || ''
+        };
+        const _sajuResult = (typeof calcSajuOhengGrade === 'function')
+            ? calcSajuOhengGrade(hanjaOhengs, birthDateVal, birthTimeVal, _sajuOpts0)
+            : { grade: '평', desc: '사주 엔진 로딩 중...' };
+        const sajuGrade = _sajuResult.grade;
+        const sajuDesc  = _sajuResult.desc;
+        /* ----------------------------------------------------
+           ⑦ 자원오행 — 선택 한자의 오행 구성 요약
+           ---------------------------------------------------- */
+        const _OHENG_KR_SHORT = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+        const _OHENG_C_DIAG   = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#e8ecf0','水':'#0f172a'};
+        let jawonGrade = '나쁨', jawonDesc = '한자를 선택하면 자원오행이 표시됩니다.';
+        if (hanjaOhengs.length > 0) {
+            const uniqueOhengs = [...new Set(hanjaOhengs)];
+            const ohengLabels  = hanjaOhengs.map(o => _OHENG_KR_SHORT[o] || o).join(' · ');
+            if (uniqueOhengs.length === 1) {
+                jawonGrade = '좋음';
+                jawonDesc  = `이름의 기운이 모두 ${_OHENG_KR_SHORT[uniqueOhengs[0]]} 기운으로 구성되어 있습니다. 단일 기운이 집중되어 강한 개성을 나타냅니다.`;
+            } else if (uniqueOhengs.length >= 2) {
+                jawonGrade = '매우 좋음';
+                jawonDesc  = `${ohengLabels} 기운으로 구성된 이름입니다. 다양한 기운이 어우러져 풍부한 기질을 형성합니다.`;
+            }
+        }
+
+        // 통합 결과 리턴
+        return {
+            pronounceOheng: { grade: pronGrade, desc: pronDesc },
+            pronounceYin: { grade: pyGrade, desc: pyDesc },
+            math4: { grade: math4Grade, desc: math4Desc },
+            mathOheng: { grade: moGrade, desc: moDesc },
+            mathYin: { grade: myGrade, desc: myDesc },
+            sajuOheng: { grade: sajuGrade, desc: sajuDesc },
+            jawonohaeng: { grade: jawonGrade, desc: jawonDesc },
+            suriGrades: [
+                { name: s1_data.name, num: g1_num, grade: s1_data.grade, desc: s1_data.desc },
+                { name: s2_data.name, num: g2_num, grade: s2_data.grade, desc: s2_data.desc },
+                { name: s3_data.name, num: g3_num, grade: s3_data.grade, desc: s3_data.desc },
+                { name: s4_data.name, num: g4_num, grade: s4_data.grade, desc: s4_data.desc }
+            ]
+        };
+    }
+
+    // 진단하기 버튼 클릭 시 이벤트
+    function runAnalysis() {
+        const lastName = document.getElementById('kr-last-name').value.trim();
+        const firstName = document.getElementById('kr-first-name').value.trim();
+        
+        // 출생일시 검사를 제외하고 이름만 입력해도 넘어가도록 수정
+        if(!lastName || !firstName) { 
+            alert('한글 성과 이름을 정확히 입력해주세요.'); 
+            return; 
+        }
+        
+        const data = getAnalysisData(lastName, firstName);
+        
+        // 입력 폼 내의 "진단 결과 요약" 업데이트
+        applyBadge('res-pronounce-oheng', data.pronounceOheng.grade);
+        document.getElementById('res-desc-pronounce-oheng').innerText = data.pronounceOheng.desc;
+        
+        applyBadge('res-pronounce-yin', data.pronounceYin.grade);
+        document.getElementById('res-desc-pronounce-yin').innerText = data.pronounceYin.desc;
+        
+        applyBadge('res-math-4', data.math4.grade);
+        document.getElementById('res-desc-math-4').innerText = data.math4.desc;
+        
+        applyBadge('res-math-oheng', data.mathOheng.grade);
+        document.getElementById('res-desc-math-oheng').innerText = data.mathOheng.desc;
+        
+        applyBadge('res-math-yin', data.mathYin.grade);
+        document.getElementById('res-desc-math-yin').innerText = data.mathYin.desc;
+        
+        if (document.getElementById('res-saju-oheng')) applyBadge('res-saju-oheng', data.sajuOheng.grade);
+        const _saohEl = document.getElementById('res-desc-saju-oheng');
+        if (_saohEl) _saohEl.innerText = data.sajuOheng.desc;
+
+        applyBadge('res-jawonohaeng', data.jawonohaeng.grade);
+        document.getElementById('res-desc-jawonohaeng').innerText = data.jawonohaeng.desc;
+
+        const resultArea = document.getElementById('analysis-result-area');
+        resultArea.style.display = 'block';
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // 셀프 리포트 뷰 오픈 이벤트
+    function showSelfReportView() {
+        if (!_isSubscribed()) { openSubscribeModal(); return; }
+        const lastName  = document.getElementById('kr-last-name').value.trim()  || '홍';
+        const firstName = document.getElementById('kr-first-name').value.trim() || '길동';
+        const gender    = (document.querySelector('[name="self_gender"]:checked')?.value || 'M') === 'M' ? '남자' : '여자';
+        const bDate     = document.getElementById('birth-date').value || '2026-03-07';
+        const bTime     = document.getElementById('birth-time').value || '12:00';
+        const selects   = document.querySelectorAll('#hanja-dropdowns select');
+        let hanjaStr = '';
+        selects.forEach(s => { const p = s.value.split('|'); if (p.length === 3) hanjaStr += p[2]; });
+        if (!hanjaStr) hanjaStr = '洪吉童';
+
+        ['main-view','report-view','theory-detail-view'].forEach(id => document.getElementById(id).style.display = 'none');
+        document.getElementById('self-report-view').style.display = 'block';
+        document.getElementById('main-nav').style.display   = 'none';
+        document.getElementById('report-nav').style.display = 'block';
+        window.scrollTo(0, 0);
+
+        // 헤더
+        document.getElementById('self-report-title').innerHTML = `${lastName}${firstName} <span>${hanjaStr}</span>`;
+        document.getElementById('self-report-meta').innerHTML  = `${bDate} ${bTime} 출생 &nbsp;|&nbsp; ${gender}`;
+        window._selfReportName = `${lastName}${firstName}`; // 공유 모달에서 사용
+
+        // 사주 원국 렌더링 (return: {nameOhengItems, weakList8, ohengCount})
+        const sajuData = _renderSelfSajuSection(bDate, bTime, gender, lastName);
+        const { nameOhengItems, weakList8 } = sajuData || { nameOhengItems: [], weakList8: [] };
+
+        // 분석 데이터
+        const data    = getAnalysisData(lastName, firstName);
+        const sGrades = data.suriGrades;
+
+        // ── 총점 계산 ─────────────────────────────────────────────────
+        const _g2s = { '매우 좋음':100,'좋음':75,'나쁨':35,'매우 나쁨':10,
+                       '대길':100,'길':75,'평':35,'흉':10,'대흉':10 }; // SURI_DATA 내부값 호환
+        const _scored = [
+            { g: sGrades[0].grade, w:2 }, { g: sGrades[1].grade, w:2 },
+            { g: sGrades[2].grade, w:2 }, { g: sGrades[3].grade, w:2 },
+            { g: data.pronounceOheng.grade, w:1.5 }, { g: data.pronounceYin.grade, w:1 },
+            { g: data.mathOheng.grade, w:2 },        { g: data.mathYin.grade, w:1 },
+            { g: data.sajuOheng.grade, w:1.5 },
+        ];
+        const totalW     = _scored.reduce((s,x) => s+x.w, 0);
+        const finalScore = Math.round(_scored.reduce((s,x) => s+(_g2s[x.g]??50)*x.w, 0) / totalW);
+
+        // ── Executive Summary 렌더링 (_buildReportItems 단일 출처) ──────
+        const _selfExecEl = document.getElementById('self-exec-summary');
+        if (_selfExecEl && typeof _buildExecSummaryHtml === 'function') {
+            const _execItems = _buildReportItems(lastName, firstName);
+            _selfExecEl.innerHTML = _buildExecSummaryHtml(
+                `${lastName}${firstName}`, hanjaStr, finalScore,
+                _execItems.map(x => ({ label: x.label, g: x.grade }))
+            );
+        }
+
+        // ── 공통 헬퍼 ─────────────────────────────────────────────────
+        const _OHENG_COLOR_R = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+        const _OHENG_KR_R    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+        const _normG      = g => _GRADE4[g] || g; // 구 등급 → 4단계 (applyBadge와 동일 맵 사용)
+        const _gradeColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'}[_normG(g)]||'#64748b');
+        const _gradeBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'}[_normG(g)]||'#f1f5f9');
+        const _badgeHtml  = (g,label) => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gradeBg(ng)};color:${_gradeColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${label||ng}</span>`; };
+        const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
+        const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
+
+        // ── ③ 자원오행 섹션 ───────────────────────────────────────────
+        const nameSet = [...new Set(nameOhengItems.map(it=>it.ohaeng))];
+        const compensated   = weakList8.filter(o => nameSet.includes(o));
+        const uncompensated = weakList8.filter(o => !nameSet.includes(o));
+        const _normOR = o => ({'나무':'木','불':'火','흙':'土','쇠':'金','물':'水','\uF90A':'金'}[o] || o);
+        const _b = (o) => { const n=_normOR(o); return `<b style="color:${_OHENG_COLOR_R[n]||'#64748b'};">${_OHENG_KR_R[n]||n}</b>`; };
+
+        // ── 챕터 0 연결 서사 (동적) ──────────────────────────────────
+        (function _updateStoryIntro() {
+            const el = document.getElementById('self-story-intro');
+            if (!el) return;
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _bw = (o) => { const n=_normOR(o); return `<b style="color:${_OC[n]||'#64748b'};">${_OK[n]||n}</b>`; };
+            const fullName = `${lastName}${firstName}`;
+            let intro = '';
+
+            if (!nameOhengItems.length) {
+                // 한자 미선택 — 사주만 확인된 상태
+                if (weakList8.length) {
+                    const wk = weakList8.map(_bw).join(', ');
+                    intro = `<b>${fullName}</b>의 사주에는 ${wk} 기운이 비어 있습니다.`
+                          + ` 한자를 선택하시면, 이름이 그 빈자리를 얼마나 채워주는지 바로 확인할 수 있습니다.`
+                          + `<br>사주가 아이가 태어난 <b>'토양'</b>이라면, 이름은 그 위에 뿌리내릴 <b>'씨앗'</b>입니다.`
+                          + ` 어떤 씨앗을 심느냐에 따라 아이가 자라는 방향이 달라집니다.`;
+                } else {
+                    intro = `<b>${fullName}</b>의 사주는 다섯 기운이 고르게 갖춰진 균형형입니다.`
+                          + ` 이름으로 어떤 기질을 더 강화할지 자유롭게 설계할 수 있는 행운의 사주입니다.`
+                          + `<br>한자를 선택하시면 이름에 담긴 기운이 어떤 방향으로 작용하는지 확인하실 수 있습니다.`;
+                }
+            } else if (!weakList8.length) {
+                // 균형 사주 + 이름 있음
+                const nameOhengStr = [...new Set(nameOhengItems.map(i=>i.ohaeng))].map(_bw).join(', ');
+                intro = `<b>${fullName}</b>의 사주는 다섯 기운이 고르게 자리잡은 보기 드문 균형형입니다.`
+                      + ` 이름 <b>${fullName}</b>은 ${nameOhengStr} 기운을 담아, 아이가 지닌 풍요로운 기질을 더욱 뚜렷하게 빛내줄 것입니다.`
+                      + `<br>균형 사주는 이름으로 원하는 기질을 자유롭게 설계할 수 있는 특별한 출발점입니다.`;
+            } else if (compensated.length === weakList8.length) {
+                // 완전 보완
+                const wk = weakList8.map(_bw).join(', ');
+                intro = `<b>${fullName}</b>의 사주에는 ${wk} 기운이 비어 있습니다.`
+                      + ` 선택하신 이름 <b>${fullName}</b>은 바로 그 ${wk} 기운을 담아, 사주의 빈자리를 정확히 채워주고 있습니다.`
+                      + `<br>마른 땅에 내린 단비처럼, 이름을 부를 때마다 부족했던 기운이 아이에게 자연스럽게 스며들 것입니다.`
+                      + ` 이름과 사주가 서로 완벽하게 돕는 이상적인 구성입니다.`;
+            } else if (compensated.length > 0) {
+                // 부분 보완
+                const wk   = weakList8.map(_bw).join(', ');
+                const comp = compensated.map(_bw).join(', ');
+                const unc  = uncompensated.map(_bw).join(', ');
+                intro = `<b>${fullName}</b>의 사주에는 ${wk} 기운이 비어 있습니다.`
+                      + ` 선택하신 이름이 ${comp} 기운은 채워주고 있지만, ${unc} 기운은 아직 보완이 필요합니다.`
+                      + `<br>${unc} 기운을 담은 한자를 추가하면 이름이 사주를 더욱 완성도 있게 뒷받침할 수 있습니다.`;
+            } else {
+                // 미보완
+                const wk = weakList8.map(_bw).join(', ');
+                intro = `<b>${fullName}</b>의 사주에는 ${wk} 기운이 비어 있습니다.`
+                      + ` 현재 선택하신 이름의 자원오행은 이 빈자리를 채워주지 못하고 있습니다.`
+                      + `<br>${wk} 기운을 담은 한자로 교체하시면, 이름이 사주의 가장 큰 약점을 보완하는 강력한 도구가 됩니다.`;
+            }
+            el.innerHTML = intro;
+        })();
+
+        let jawonStoryMsg = '';
+        if (!nameOhengItems.length) {
+            // 이름 미선택
+            jawonStoryMsg = `한자를 선택하시면 이 자리에 분석이 채워집니다.<br><br>
+                사주의 부족한 기운을 이름의 자원오행으로 보완하는 것이 성명학의 핵심입니다.
+                위 사주 진단에서 확인된 부족한 오행을 담은 한자를 우선적으로 선택해보세요.
+                이름 한 글자 한 글자에 담긴 뜻(자원오행)이 아이에게 평생 영향을 미칩니다.`;
+        } else if (!weakList8.length) {
+            // 균형 사주 + 이름 있음
+            const nameOhengDesc = nameSet.map(_b).join(', ');
+            jawonStoryMsg = `이 아이의 사주는 다섯 기운이 고루 갖춰진 보기 드문 균형형입니다.
+                이름이 어떤 오행을 담아도 사주의 균형을 크게 해치지 않습니다.<br><br>
+                현재 선택하신 한자는 ${nameOhengDesc} 기운을 담고 있습니다.
+                이는 곧 이름으로 아이의 <b>'원하는 기질'</b>을 자유롭게 설계할 수 있다는 의미입니다.
+                창의적이고 활발한 성격을 원한다면 나무(木)·불(火) 기운의 한자를,
+                침착하고 신중한 성품을 원한다면 물(水)·쇠(金) 기운의 한자를 선택하세요.`;
+        } else if (compensated.length === weakList8.length) {
+            // 완전 보완
+            const kr = compensated.map(_b).join(', ');
+            jawonStoryMsg = `탁월한 선택입니다. 선택하신 한자의 자원오행이 사주에서 비어있던
+                ${kr} 기운의 자리를 정확히 채우고 있습니다.<br><br>
+                마른 땅에 단비가 내린 격으로, 이름이 아이의 사주를 완성해주는 역할을 합니다.
+                이름을 부를 때마다 부족했던 기운이 꾸준히 보충되어,
+                아이가 살아가면서 그 기운의 혜택을 자연스럽게 받게 됩니다.
+                이름과 사주가 서로 돕는 이상적인 구성입니다.`;
+        } else if (compensated.length > 0) {
+            // 부분 보완
+            const compKr   = compensated.map(_b).join(', ');
+            const uncompKr = uncompensated.map(_b).join(', ');
+            jawonStoryMsg = `좋은 출발입니다. 선택하신 한자가 부족한 기운 중
+                ${compKr} 기운을 채워주고 있습니다.<br><br>
+                다만 ${uncompKr} 기운은 아직 보완되지 않아, 이름이 완전한 균형에 도달하지는 못했습니다.
+                나머지 부족한 기운을 담은 한자를 추가로 검토해보세요.
+                조금만 더 다듬으면 사주와 이름이 완벽하게 조화를 이루는 성명이 됩니다.`;
+        } else {
+            // 미보완
+            const weakKr = weakList8.map(_b).join(', ');
+            jawonStoryMsg = `현재 선택하신 한자의 자원오행은 사주에서 부족한
+                ${weakKr} 기운을 채워주지 못하고 있습니다.
+                이름이 사주의 빈자리를 외면한 채, 이미 강한 기운을 더욱 강화하는 방향으로
+                구성되어 있어 불균형이 심화될 수 있습니다.<br><br>
+                아이가 평생 사용할 이름인 만큼, 위 사주 진단에서 확인된 부족한 오행을 담은
+                한자로 교체하시는 것을 권장합니다.`;
+        }
+
+        const chipsHtml = nameOhengItems.map(it => {
+            const c = _OHENG_COLOR_R[it.ohaeng]||'#64748b';
+            return `<div class="jawon-chip" style="border-color:${c};color:${c};">
+                <span class="jawon-chip-hanja">${it.hanja}</span>
+                <span class="jawon-chip-label">${_OHENG_KR_R[it.ohaeng]||it.ohaeng}</span>
+            </div>`;
+        }).join('');
+
+        const jawonInlineEl = document.getElementById('self-jawon-inline');
+        if (jawonInlineEl) jawonInlineEl.innerHTML = `
+            <div style="background:#f8fafc;border:1px solid var(--border-light);border-radius:16px;padding:20px 24px;margin-top:4px;">
+                <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:10px;">✦ 자원오행 보완 분석</div>
+                ${nameOhengItems.length ? `<div class="jawon-chips" style="margin-bottom:12px;">${chipsHtml}</div>` : ''}
+                <p style="font-size:0.92rem;line-height:1.65;color:var(--text-secondary);margin:0;">${jawonStoryMsg}</p>
+            </div>`;
+
+        // ── ④ 발음 섹션 — 프리미엄 보고서와 동일 디자인으로 렌더링 ─────
+        const _selfSoundCandidate = {
+            familyKr: lastName,
+            h1: { kr: firstName.charAt(0) || '' },
+            h2: firstName.length > 1 ? { kr: firstName.charAt(1) } : null,
+        };
+        if (typeof _renderSoundSection === 'function') {
+            _renderSoundSection(_selfSoundCandidate, null, 'self-sound-body');
+        }
+
+        // ── ⑤ 81수리 사계절 섹션 ─────────────────────────────────────
+        const seasons = [
+            { emoji:'🌱', period:'봄 · 초년 (0~20대)', label:'원격',  data: sGrades[0] },
+            { emoji:'☀️', period:'여름 · 청년 (20~40대)', label:'형격', data: sGrades[1] },
+            { emoji:'🍂', period:'가을 · 장년 (40~60대)', label:'이격', data: sGrades[2] },
+            { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:'정격', data: sGrades[3] },
+        ];
+        const seasonsHtml = seasons.map(s => {
+            const cls = _isGood(s.data.grade) ? 'season-good' : _isBad(s.data.grade) ? 'season-bad' : '';
+            return `<div class="season-card ${cls}">
+                <div class="season-top">
+                    <div class="season-meta">
+                        <span class="season-emoji">${s.emoji}</span>
+                        <div>
+                            <div class="season-period">${s.period}</div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);">${s.label}</div>
+                        </div>
+                    </div>
+                    ${_badgeHtml(s.data.grade)}
+                </div>
+                <div class="season-num">${s.data.num}</div>
+                <div class="season-suri-name">${s.data.name}</div>
+                <div class="season-desc">${s.data.desc}</div>
+            </div>`;
+        }).join('');
+
+        document.getElementById('self-suri-body').innerHTML = `
+            <div class="suri-seasons-grid">${seasonsHtml}</div>`;
+
+        const selfSuriOhengYinEl = document.getElementById('self-suri-oheng-yin');
+        if (selfSuriOhengYinEl) {
+            selfSuriOhengYinEl.innerHTML = _buildSuriSubHtml(data.mathYin, data.mathOheng);
+        }
+
+        // ── ⑥ 종합 결론 섹션 ─────────────────────────────────────────
+        const scoreMsgs = {
+            high: {
+                text: `이 이름은 사주 원국과의 조화, 소리의 기운, 수리의 흐름이 모두 높은 수준으로 맞아떨어지는 <b>길(吉)</b>의 성명입니다.
+                    성명학적으로 아이가 타고난 운명을 거스르지 않고 오히려 든든하게 뒷받침해주는 이름입니다.
+                    이 이름으로 자라는 아이는 이름이 주는 긍정적 에너지를 평생의 동반자로 삼게 됩니다.`,
+                border:'#86efac', bg:'#f0fdf4', color:'#15803d'
+            },
+            mid: {
+                text: `전반적으로 균형 잡힌 구성이나, 일부 항목에서 아쉬움이 있습니다.
+                    위 강점 항목들이 약점을 상당 부분 상쇄해주고 있어 크게 걱정할 수준은 아닙니다.
+                    다만 약점으로 표시된 항목을 개선하신다면 한층 더 완성도 높은 이름이 됩니다.
+                    한 가지 요소만 바꿔도 점수가 크게 올라갈 수 있으니 검토해보세요.`,
+                border:'#fcd34d', bg:'#fffbeb', color:'#92400e'
+            },
+            low: {
+                text: `현재 이름은 여러 성명학 지표에서 불균형이 발견됩니다.
+                    각각의 요소들이 아이에게 부담을 줄 수 있는 구성으로, 전체적인 재검토가 필요합니다.
+                    한두 가지 요소의 수정보다는 처음부터 다시 조화로운 이름을 구성하는 것이 더 효과적입니다.
+                    AI 프리미엄 작명 의뢰를 통해 사주와 성명학을 종합한 전문 분석으로 더 좋은 이름을 찾아드릴 수 있습니다.`,
+                border:'#fca5a5', bg:'#fff5f5', color:'#b91c1c'
+            },
+        };
+        const scoreMsg = finalScore >= 80 ? scoreMsgs.high : finalScore >= 50 ? scoreMsgs.mid : scoreMsgs.low;
+
+        // _buildReportItems 단일 출처 — Exec Summary 와 완전히 동일한 항목·순서·등급
+        const allItems  = _buildReportItems(lastName, firstName);
+        const goodItems = allItems.filter(x => _isGood(x.grade));
+        const badItems  = allItems.filter(x => _isBad(x.grade));
+        const midItems  = allItems.filter(x => !_isGood(x.grade) && !_isBad(x.grade));
+
+        const pointsHtml = [
+            ...goodItems.map(x => `<div class="conclusion-point" style="background:#f0fdf4;">
+                <span class="conclusion-point-icon" style="color:#16a34a;">✦</span>
+                <span><b style="color:#15803d;">${x.label}</b>&nbsp;<small style="color:var(--text-muted);font-weight:500;">${x.sub}</small>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
+            ...midItems.map(x => `<div class="conclusion-point" style="background:#f8fafc;">
+                <span class="conclusion-point-icon" style="color:#64748b;">–</span>
+                <span><b style="color:#475569;">${x.label}</b>&nbsp;<small style="color:var(--text-muted);font-weight:500;">${x.sub}</small>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
+            ...badItems.map(x => `<div class="conclusion-point" style="background:#fff5f5;">
+                <span class="conclusion-point-icon" style="color:#dc2626;">⚠</span>
+                <span><b style="color:#b91c1c;">${x.label}</b>&nbsp;<small style="color:var(--text-muted);font-weight:500;">${x.sub}</small>&nbsp;${_badgeHtml(x.grade)}</span></div>`),
+        ].join('');
+
+        document.getElementById('self-conclusion-body').innerHTML = `
+            <div class="story-score-wrap">
+                <div><span class="story-score-num">${finalScore}</span><span class="story-score-unit">/ 100</span></div>
+                <div class="story-score-sub">스마트 셀프 진단 종합 점수</div>
+            </div>
+            <div class="conclusion-msg" style="border-color:${scoreMsg.border};background:${scoreMsg.bg};color:${scoreMsg.color};font-size:0.95rem;line-height:1.9;">${scoreMsg.text}</div>
+            <div class="conclusion-points">${pointsHtml}</div>`;
+
+        // ── 실천 가이드 ───────────────────────────────────────────────
+        _renderPracticeGuide(null, _currentState, 'self-practice-guide');
+
+        // ── 저장 ──────────────────────────────────────────────────────
+        _saveSelfReport({ nameKr:`${lastName}${firstName}`, nameHanja:hanjaStr, gender, birthDate:bDate, birthTime:bTime });
+    }
+
+    // ── Chart.js 커스텀 플러그인: 대운 배경 음영 ─────────────────
+    const _lifeFlowZonePlugin = {
+        id: 'lifeFlowZones',
+        beforeDraw(chart) {
+            if (chart.canvas.id !== 'lifeFlowChart') return;
+            const syns = chart._synergies;
+            if (!syns || !syns.length) return;
+            const { ctx, chartArea, scales } = chart;
+            if (!chartArea || !scales.x) return;
+            const n = syns.length;
+            const half = (scales.x.getPixelForValue(1) - scales.x.getPixelForValue(0)) * 0.5;
+            ctx.save();
+            syns.forEach((syn, i) => {
+                if (syn === 'mid') return;
+                const cx = scales.x.getPixelForValue(i);
+                ctx.fillStyle = syn === 'good'
+                    ? 'rgba(34,197,94,0.10)'
+                    : 'rgba(239,68,68,0.10)';
+                ctx.fillRect(cx - half, chartArea.top, half * 2, chartArea.bottom - chartArea.top);
+            });
+            ctx.restore();
+        }
+    };
+    Chart.register(_lifeFlowZonePlugin);
+
+    // Chart.js 렌더링
+    let radarChartInstance = null;
+    let lifeFlowChartInstance = null;
+    window._getRadarChart = () => radarChartInstance;
+
+    function renderCharts() {
+        const ctxRadar = document.getElementById('sajuRadar');
+        if (ctxRadar && !radarChartInstance) {
+            radarChartInstance = new Chart(ctxRadar.getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: ['재물/결과', '명예/직업', '학업/문서', '건강/체력', '인복/도움', '창의/표현'],
+                    datasets: [
+                        {
+                            label: '사주 원국 (작명 전)',
+                            data: [50, 50, 50, 50, 50, 50],
+                            order: 2,
+                            backgroundColor: 'rgba(100,116,139,0.15)',
+                            borderColor: 'rgba(100,116,139,0.6)',
+                            borderWidth: 1.5,
+                            pointBackgroundColor: 'rgba(100,116,139,0.8)',
+                            pointBorderColor: 'white',
+                            pointBorderWidth: 1.5,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        },
+                        {
+                            label: '이름 후 잠재력',
+                            data: [98, 92, 88, 85, 95, 99],
+                            order: 1,
+                            backgroundColor: 'rgba(212, 175, 55, 0.25)',
+                            borderColor: '#d4af37',
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#d4af37',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            angleLines: { color: 'rgba(0,0,0,0.05)' },
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            pointLabels: { color: '#0f172a', font: { size: 12, family: 'Pretendard', weight: '700' } },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: { font: { family: 'Pretendard', size: 11 }, boxWidth: 14, padding: 10,
+                                      color: '#475569' }
+                        }
+                    }
+                }
+            });
+        }
+
+        const ctxFlow = document.getElementById('lifeFlowChart');
+        if (ctxFlow && !lifeFlowChartInstance) {
+            lifeFlowChartInstance = new Chart(ctxFlow.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['1운','2운','3운','4운','5운','6운','7운','8운'],
+                    datasets: [{
+                        label: '종합 운세 지수',
+                        data: [70, 75, 70, 80, 75, 85, 80, 88],
+                        borderColor: '#d4af37',
+                        backgroundColor: 'rgba(212,175,55,0.08)',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#d4af37',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        fill: true,
+                        tension: 0.45
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 600, easing: 'easeInOutQuart' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: 'Pretendard', size: 12, weight: '700' },
+                            bodyFont: { family: 'Pretendard', size: 13, weight: '600' },
+                            padding: 14,
+                            displayColors: false,
+                            callbacks: {
+                                label: (item) => {
+                                    const syn = lifeFlowChartInstance?._synergies?.[item.dataIndex];
+                                    const synLabel = syn === 'good'
+                                        ? '★ 길운 · 이름과 상생하는 시기'
+                                        : syn === 'warn'
+                                        ? '⚡ 주의 · 에너지 점검이 필요한 시기'
+                                        : '● 중화 · 안정적인 흐름의 시기';
+                                    return [`운세지수 ${item.raw}점`, synLabel];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 40,
+                            max: 100,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                font: { family: 'Pretendard', size: 11 },
+                                callback: v => v + '점'
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Pretendard', size: 11, weight: '700' }, color: '#475569' }
+                        }
+                    }
+                }
+            });
+            // 초기 데이터가 이미 있으면 즉시 업데이트
+            if (window._daeunData) _updateLifeFlowChart(window._daeunData);
+        }
+    }
+/* 👇👇👇 여기에 카드형 탭 전환 로직을 추가하세요 👇👇👇 */
+    function switchReportV2(btnElement, krName, hanjaName, score) {
+        // 1. 모든 카드에서 active 클래스(골드 테두리/배경) 제거
+        const tabs = document.querySelectorAll('.name-card-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        
+        // 2. 클릭한 카드에만 active 클래스 추가
+        btnElement.classList.add('active');
+        
+        // 3. 바뀔 영역의 요소들 가져오기
+        const titleArea = document.getElementById('premium-report-title');
+        const scoreBadge = document.getElementById('main-score-badge');
+        
+        // 4. 부드러운 전환을 위해 투명도를 0으로 만듦
+        titleArea.style.opacity = 0; 
+        if(scoreBadge) {
+            scoreBadge.style.transition = 'opacity 0.3s ease';
+            scoreBadge.style.opacity = 0;
+        }
+        
+        // 5. 0.2초 뒤에 텍스트와 점수를 바꾸고 다시 나타나게 함 (페이드인 효과)
+        setTimeout(() => {
+            titleArea.innerHTML = `${krName} <span>${hanjaName}</span>`;
+            if(scoreBadge) {
+                scoreBadge.innerText = `프리미엄 작명 종합 점수 : ${score} / 100 점`;
+            }
+            
+            titleArea.style.opacity = 1; 
+            if(scoreBadge) scoreBadge.style.opacity = 1;
+        }, 200);
+    }
+    /* 👆👆👆 여기까지 👆👆👆 */
+
+
+    // ================================================================
+    // DearName v2: 프리미엄 작명 시스템
+    // ================================================================
+
+    const _searchEngine = new NameSearchEngine();
+    let _currentState   = null;
+    let _allCandidates  = [];
+    let _allReports     = [];
+    let _currentIdx     = 0;
+
+    // ── 전역 로딩 오버레이 ──────────────────────────────────────────
+    function showLoadingOverlay(msg) {
+        let el = document.getElementById('dn-loading');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'dn-loading';
+            el.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.88);z-index:550;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;';
+            el.innerHTML = `
+                <div style="width:56px;height:56px;border:4px solid rgba(255,255,255,0.2);border-top-color:#d4a843;border-radius:50%;animation:dn-spin 0.8s linear infinite;"></div>
+                <p id="dn-loading-msg" style="color:white;font-size:1.1rem;font-weight:700;letter-spacing:0.02em;text-align:center;max-width:320px;line-height:1.6;"></p>
+                <style>@keyframes dn-spin{to{transform:rotate(360deg)}}</style>`;
+            document.body.appendChild(el);
+        }
+        document.getElementById('dn-loading-msg').textContent = msg;
+        el.style.display = 'flex';
+    }
+    function hideLoadingOverlay() {
+        const el = document.getElementById('dn-loading');
+        if (el) el.style.display = 'none';
+    }
+
+    // ── 성씨 한자 획수 조회 ─────────────────────────────────────────
+    function getHanjaStrokes(hanja) {
+        if (!hanja || typeof HANJA_DB_FULL === 'undefined') return 10;
+        for (const list of Object.values(HANJA_DB_FULL)) {
+            const found = list.find(item => item.h === hanja);
+            if (found) return found.s;
+        }
+        return 10;
+    }
+
+    // ── 폼 데이터 수집 → SearchState ────────────────────────────────
+    function _buildSearchState() {
+        const birthDateRaw = document.getElementById('prem-birth-date')?.value || '';
+        const birthTime    = document.getElementById('prem-birth-time')?.value || '12:00';
+        const calType      = _getCalType('prem');
+
+        // 음력/윤달이면 양력으로 변환
+        const birthDate = (calType !== 'solar' && typeof normalizeToSolar === 'function')
+            ? (normalizeToSolar(birthDateRaw, calType) || birthDateRaw)
+            : birthDateRaw;
+
+        const _premSajuOpts = {
+            yajasi:     document.getElementById('prem-opt-yajasi')?.checked !== false,
+            apply30min: document.getElementById('prem-opt-30min')?.checked !== false,
+            city:       document.getElementById('prem-city')?.value || ''
+        };
+        const saju = (typeof calcSaju === 'function' && birthDate)
+            ? calcSaju(birthDate, birthTime, _premSajuOpts) : null;
+        const scores    = (saju && typeof calcOhengScores === 'function') ? calcOhengScores(saju) : {'木':20,'火':20,'土':20,'金':20,'水':20};
+
+        // 대운 계산 (성별 필요)
+        const gender = document.querySelector('[name="premium_gender"]:checked')?.value || 'M';
+        const daeun  = (saju && typeof calcDaeun === 'function')
+            ? calcDaeun(saju, birthDate, birthTime, gender) : null;
+
+        const nameSpec  = (typeof buildNameSpec === 'function') ? buildNameSpec(saju, scores, daeun) : {prefer:[],avoid:[],minCount:{},strategy:'balance',gridType:'general'};
+
+        const familyKr    = document.getElementById('prem-last-name')?.value.trim() || '';
+        const familyHanja = document.getElementById('prem-last-name-hanja')?.value || familyKr;
+        // 복성(두글자 성씨) 처리: 획수 합산
+        const _familyHanjaArr = familyHanja.split('');
+        const _familyStrokes = _familyHanjaArr.reduce((sum, ch) => sum + getHanjaStrokes(ch), 0) || getHanjaStrokes(familyHanja);
+        const dolrimHanja = document.getElementById('prem-dolrim-hanja')?.value || '';
+        const hangryulHanja = document.getElementById('prem-hangryul-hanja')?.value || '';
+        const traits = [...document.querySelectorAll('[name="traits"]:checked')].map(el => parseInt(el.value));
+        const dolrimPos = parseInt(document.querySelector('[name="dolrim_pos"]:checked')?.value || '3');
+        const hangryulPos = parseInt(document.querySelector('[name="hangryul_pos"]:checked')?.value || '2');
+
+        // ── 운 중심 설정 ─────────────────────────────────
+        const luckFocus = document.querySelector('[name="luck_focus"]:checked')?.value || 'balanced';
+
+        // ── 친인척 이름 → 한글 음절 Set 추출 ────────────
+        const avoidRaw = document.getElementById('prem-avoid')?.value || '';
+        const avoidKrSyllables = [...new Set(
+            avoidRaw.replace(/[,\s·\/]+/g, ' ').trim().split(/\s+/)
+                .flatMap(name => [...name])                // 각 글자로 분리
+                .filter(ch => ch >= '가' && ch <= '힣') // 한글 완성형만
+        )];
+
+        // ── 부모 사주 계산 (양력/음력 반영) ─────────────────
+        const _calcParentOheng = (person) => {
+            const y = document.getElementById(`parent-${person}-year`)?.value;
+            const m = document.getElementById(`parent-${person}-month`)?.value;
+            const d = document.getElementById(`parent-${person}-day`)?.value;
+            if (!y || !m || !d) return null;
+            // 오전/오후 + 시 + 분 → 24시간
+            const ampm   = document.querySelector(`[name="parent_${person}_ampm"]:checked`)?.value || 'am';
+            const hRaw   = parseInt(document.getElementById(`parent-${person}-time-hour`)?.value || '0');
+            const minRaw = document.getElementById(`parent-${person}-time-min`)?.value || '00';
+            let h24 = hRaw;
+            if (ampm === 'am' && hRaw === 12) h24 = 0;
+            else if (ampm === 'pm' && hRaw !== 12) h24 = hRaw + 12;
+            const isLunar = document.querySelector(`[name="parent_${person}_cal"]:checked`)?.value === 'lunar';
+            let dateStr = `${y}-${m}-${d}`;
+            // 음력 → 양력 변환
+            if (isLunar && typeof lunarToSolar === 'function') {
+                try {
+                    const sol = lunarToSolar(parseInt(y), parseInt(m), parseInt(d));
+                    if (sol) dateStr = `${sol.year}-${String(sol.month).padStart(2,'0')}-${String(sol.day).padStart(2,'0')}`;
+                } catch(e) {}
+            }
+            const timeStr = hRaw ? `${String(h24).padStart(2,'0')}:${String(minRaw).padStart(2,'0')}` : '12:00';
+            try {
+                const pSaju   = (typeof calcSaju === 'function') ? calcSaju(dateStr, timeStr, {}) : null;
+                const pScores = (pSaju && typeof calcOhengScores === 'function') ? calcOhengScores(pSaju) : null;
+                if (!pScores) return null;
+                const sorted   = Object.entries(pScores).sort((a,b) => b[1]-a[1]);
+                return { scores: pScores, dominant: sorted[0]?.[0], weakest: sorted[4]?.[0], dateStr, isLunar };
+            } catch(e) { return null; }
+        };
+        const parentOheng = {
+            father: _calcParentOheng('father'),
+            mother: _calcParentOheng('mother')
+        };
+
+        // ── 특별 요청사항 ─────────────────────────────────
+        const specialRequest = document.getElementById('prem-request')?.value?.trim() || '';
+
+        // nameSpec에 avoidKrSyllables 포함
+        const extendedNameSpec = { ...nameSpec, avoidKrSyllables };
+
+        return {
+            nameSpec: extendedNameSpec,
+            familyName: {
+                kr:      familyKr,
+                hanja:   familyHanja,
+                strokes: _familyStrokes
+            },
+            constraints: {
+                gender,
+                dolrim:   dolrimHanja ? { kr: document.getElementById('prem-dolrim')?.value||'', hanja:dolrimHanja, strokes:getHanjaStrokes(dolrimHanja), pos:dolrimPos } : null,
+                hangryul: hangryulHanja ? { kr: document.getElementById('prem-hangryul')?.value||'', hanja:hangryulHanja, strokes:getHanjaStrokes(hangryulHanja), pos:hangryulPos } : null,
+                traits,
+                nameType:  parseInt(document.querySelector('[name="self_name_type"]:checked')?.value || '2'),
+                luckFocus
+            },
+            searchControl: { maxResults:5, qualityThreshold:60 },
+            _saju:       saju,
+            _scores:     scores,
+            daeun,
+            gender,
+            parentOheng,
+            specialRequest
+        };
+    }
+
+    // ── 메인 생성 플로우 ─────────────────────────────────────────────
+    async function startPremiumReportGeneration(maxReports) {
+        showLoadingOverlay('사주를 분석하고 이름 후보를 탐색 중입니다...');
+
+        try {
+            _currentState = _buildSearchState();
+
+            // Worker 탐색 (비동기 — UI 블로킹 없음)
+            const onProgress = (p) => {
+                showLoadingOverlay(
+                    `이름 후보 탐색 중... ${p.progress}% (${p.found}개 발견)`
+                );
+            };
+
+            _allCandidates = await _searchEngine.search(_currentState, onProgress);
+
+            // 후보 없으면 품질 기준 완화 (자동 더보기)
+            if (_allCandidates.length === 0) {
+                showLoadingOverlay('조건을 완화하여 재탐색 중...');
+                const relaxed = await _searchEngine.searchRelaxed(_currentState, onProgress);
+                _allCandidates = relaxed.results;
+                if (relaxed.relaxedState) _currentState = relaxed.relaxedState;
+            }
+            if (_allCandidates.length === 0) {
+                hideLoadingOverlay();
+                alert('조건에 맞는 이름 후보를 찾지 못했습니다. 입력 정보를 확인하거나 조건을 완화해 주세요.');
+                return;
+            }
+
+            // familyKr/Hanja 후보에 추가
+            _allCandidates = _allCandidates.map(c => ({
+                ...c,
+                familyKr:    _currentState.familyName.kr,
+                familyHanja: _currentState.familyName.hanja
+            }));
+
+            const top3 = _allCandidates.slice(0, Math.min(maxReports || 3, 5, _allCandidates.length));
+
+            showLoadingOverlay('AI 명리학 대가의 소견서를 작성 중입니다... (약 20~30초)');
+
+            // parentOheng은 _buildSearchState()에서 이미 계산됨 (구조화된 데이터)
+            _allReports = await generateAllReports(top3, _currentState);
+            _currentIdx = 0;
+
+            hideLoadingOverlay();
+            _chatDemoMode = false; // 실제 보고서: 실제 API 사용
+            _renderReportTabs(top3);
+            _renderReportContent(top3[0], _allReports[0], 0);
+
+            // 보고서 저장 (로그인 회원만)
+            if (_dnUser && _dnUser.provider !== 'guest') {
+                _saveReport(top3, _allReports, _currentState);
+            }
+
+            // 히스토리 저장
+            _saveHistory({
+                ts:         Date.now(),
+                familyKr:   _currentState.familyName.kr,
+                familyHanja:_currentState.familyName.hanja,
+                names:      top3.map(c => ({
+                    kr:    `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`,
+                    hanja: `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`,
+                    score: c.score
+                })),
+                birthDate:  _currentState._saju ? 'set' : 'none'
+            });
+
+            // 더보기 버튼 표시 조건
+            document.getElementById('load-more-btn').style.display =
+                _allCandidates.length >= _currentState.searchControl.maxResults ? 'inline-block' : 'none';
+
+            showReportViewWithoutLock();
+
+        } catch(err) {
+            hideLoadingOverlay();
+            console.error('소견서 생성 오류:', err);
+            alert('소견서 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        }
+    }
+
+    // ── 더보기 (인풋 기반 페이징 — 품질 완화) ───────────────────────
+    async function loadMoreCandidates() {
+        if (!_currentState) return;
+        showLoadingOverlay('추가 후보를 탐색 중입니다...');
+        try {
+            const relaxed = await _searchEngine.searchRelaxed(_currentState,
+                p => showLoadingOverlay(`추가 탐색 중... ${p.progress}%`)
+            );
+            _currentState = relaxed.relaxedState || _searchEngine.getRelaxedState(_currentState);
+            const newCands = (relaxed.results || []).map(c => ({
+                ...c,
+                familyKr:    _currentState.familyName.kr,
+                familyHanja: _currentState.familyName.hanja
+            }));
+
+            // 중복 제거 후 추가
+            const existingKeys = new Set(_allCandidates.map(c => c.h1.h + (c.h2?.h||'')));
+            const unique = newCands.filter(c => !existingKeys.has(c.h1.h + (c.h2?.h||'')));
+
+            const newTop = unique.slice(0, 3);
+            const newReports = await generateAllReports(newTop, _currentState);
+
+            _allCandidates.push(...unique);
+            _allReports.push(...newReports);
+
+            hideLoadingOverlay();
+            _renderReportTabs(_allCandidates);
+
+            if (unique.length === 0) {
+                document.getElementById('load-more-btn').style.display = 'none';
+                alert('더 이상 조건에 맞는 후보가 없습니다.');
+            }
+        } catch(err) {
+            hideLoadingOverlay();
+            console.error('더보기 오류:', err);
+        }
+    }
+
+    // ── 후보 비교 테이블 ─────────────────────────────────────────────
+    function _renderCompareTable(currentIdx) {
+        const el = document.getElementById('report-compare-section');
+        if (!el) return;
+        const candidates = (_allCandidates || []).slice(0, Math.min(3, (_allCandidates||[]).length));
+        if (candidates.length < 2) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+
+        // 등수: 점수 내림차순 정렬 후 rank 매핑
+        const ranked = [...candidates].map((c,i) => ({score:c.score,origIdx:i}))
+            .sort((a,b) => b.score - a.score);
+        const rankOf = (i) => ranked.findIndex(r => r.origIdx === i) + 1;
+
+        // 각 후보 지표 빌드
+        const allItems = candidates.map(c =>
+            _buildReportItems(c.familyKr, `${c.h1.kr}${c.h2?.kr||''}`, c)
+        );
+        const rowDefs = allItems[0].map(x => ({ label: x.label, sub: x.sub }));
+
+        const gradeHtml = (g) => {
+            if (_isGood && _isGood(g))  return `<span class="ct-good">✦ 길</span>`;
+            if (_isBad  && _isBad(g))   return `<span class="ct-bad">▼ 흉</span>`;
+            return `<span class="ct-mid">– 평</span>`;
+        };
+
+        const rankBadge = (i) => {
+            const r = rankOf(i);
+            const cls = r === 1 ? '' : r === 2 ? ' r2' : ' r3';
+            const label = r === 1 ? '1위 ★' : r === 2 ? '2위' : '3위';
+            return `<span class="ct-rank${cls}">${label}</span>`;
+        };
+
+        el.innerHTML = `
+            <div style="margin-bottom:10px;">
+                <h3 style="font-size:0.88rem;font-weight:800;color:var(--text-secondary);letter-spacing:1.5px;text-transform:uppercase;margin:0 0 2px;">이름 후보 비교</h3>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">이름을 클릭하면 해당 보고서로 전환됩니다.</p>
+            </div>
+            <div class="compare-table-wrap">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th class="ct-label-col">항목</th>
+                            ${candidates.map((c,i) => {
+                                const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
+                                const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
+                                return `<th class="ct-name-col${i===currentIdx?' ct-active':''}"
+                                    onclick="document.querySelectorAll('.name-card-tab')[${i}]&&_selectReportTab(document.querySelectorAll('.name-card-tab')[${i}],${i})">
+                                    <div class="ct-name-kr">${kr}</div>
+                                    <div class="ct-name-hj">${hj}</div>
+                                    ${i===currentIdx?'<div class="ct-now-badge">현재 보고서</div>':''}
+                                </th>`;
+                            }).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="ct-score-row">
+                            <td class="ct-label-col">
+                                <div class="ct-row-label">종합 점수</div>
+                                <div class="ct-row-sub">성명학 종합</div>
+                            </td>
+                            ${candidates.map((c,i) => `
+                                <td class="ct-val-col${i===currentIdx?' ct-active':''}">
+                                    <span class="ct-score-num">${c.score}점</span>${rankBadge(i)}
+                                </td>`).join('')}
+                        </tr>
+                        ${rowDefs.map((row, ri) => `
+                            <tr>
+                                <td class="ct-label-col">
+                                    <div class="ct-row-label">${row.label}</div>
+                                    <div class="ct-row-sub">${row.sub}</div>
+                                </td>
+                                ${allItems.map((items, ci) => `
+                                    <td class="ct-val-col${ci===currentIdx?' ct-active':''}">
+                                        ${gradeHtml(items[ri]?.grade)}
+                                    </td>`).join('')}
+                            </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+
+    // ── 이름 탭 렌더링 ──────────────────────────────────────────────
+    function _renderReportTabs(candidates) {
+        const area = document.getElementById('report-selector-area');
+        if (!area) return;
+        area.innerHTML = candidates.map((c, i) => {
+            const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
+            const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
+            const rpt = _allReports[i];
+            return `<div class="name-card-tab${i===_currentIdx?' active':''}"
+                onclick="_selectReportTab(this, ${i})" data-idx="${i}">
+                <div class="card-score-badge">${c.score}점</div>
+                <div class="card-names">
+                    <span class="card-kr">${kr}</span>
+                    <span class="card-hanja">${hj}</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function _selectReportTab(el, idx) {
+        document.querySelectorAll('.name-card-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        _currentIdx = idx;
+        const c   = _allCandidates[idx];
+        const rpt = _allReports[idx];
+        if (c && rpt) _renderReportContent(c, rpt, idx);
+        const kr = `${c.familyKr}${c.h1.kr}${c.h2?.kr||''}`;
+        const hj = `${c.familyHanja}${c.h1.h}${c.h2?.h||''}`;
+        const scoreBadge = document.getElementById('main-score-badge');
+        if(scoreBadge) scoreBadge.textContent = `프리미엄 작명 종합 점수 : ${c.score} / 100 점`;
+        const titleArea = document.getElementById('premium-report-title');
+        if(titleArea) titleArea.innerHTML = `${kr} <span>${hj}</span>`;
+        // 비교 테이블 활성 열 갱신
+        _renderCompareTable(idx);
+    }
+
+    // ── 보고서 본문 렌더링 ───────────────────────────────────────────
+    function _renderReportContent(candidate, report, idx) {
+        const { h1, h2, s0, score, familyKr, familyHanja, isOija } = candidate;
+        const { _saju, _scores } = _currentState;
+        const kr = `${familyKr}${h1.kr}${h2?.kr||''}`;
+        const hj = `${familyHanja}${h1.h}${h2?.h||''}`;
+        const s1 = h1.s, s2 = h2 ? h2.s : 0;
+
+        // 후보 비교 테이블
+        _renderCompareTable(idx);
+
+        // 헤더
+        document.getElementById('main-score-badge').textContent = `프리미엄 작명 종합 점수 : ${score} / 100 점`;
+        document.getElementById('premium-report-title').innerHTML = `${kr} <span>${hj}</span>`;
+        const aiScoreNum = document.getElementById('ai-score-num');
+        if (aiScoreNum) aiScoreNum.textContent = score;
+
+        // 헤더 태그라인
+        const headerTaglineEl = document.getElementById('report-header-tagline');
+        if (headerTaglineEl) headerTaglineEl.textContent = report.tagline || '';
+
+        // 클로징 메시지
+        const closingEl = document.getElementById('report-closing-message');
+        if (closingEl) {
+            closingEl.style.display = 'block';
+            const closingNameEl = document.getElementById('report-closing-name');
+            if (closingNameEl) closingNameEl.textContent = `${kr} (${hj})`;
+            const closingTaglineEl = document.getElementById('report-closing-tagline');
+            if (closingTaglineEl) closingTaglineEl.textContent = report.tagline || '';
+        }
+
+        // 메타 정보
+        const metaEl = document.getElementById('premium-report-meta');
+        if (metaEl && _saju) {
+            const gender = _currentState.constraints.gender === 'F' ? '여성' : '남성';
+            metaEl.textContent = `${_currentState.familyName.kr} ${h1.kr}${h2?.kr||''} · ${gender} · ${_toHangul(_saju.day.gan)}${_toHangul(_saju.day.ji)}(${_saju.day.gan}${_saju.day.ji}) 일주`;
+        }
+
+        // ── 챕터 0 연결 서사 (프리미엄 보고서 동적) ───────────────────
+        (function _updateReportStoryIntro() {
+            const el = document.getElementById('report-story-intro');
+            if (!el) return;
+            const _OC  = {'木':'#22c55e','Fire':'#ef4444','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK  = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _bw  = (o) => `<b style="color:${_OC[o]||'#64748b'};">${_OK[o]||o}</b>`;
+            // 부족한 오행 = nameSpec.prefer (사주 엔진이 이미 계산)
+            const prefList = (_currentState.nameSpec?.prefer || []);
+            // 이름의 오행
+            const nameOhengSet = [h1, h2].filter(Boolean).map(x => _normOheng(x.o)).filter(Boolean);
+            const compPrem  = prefList.filter(o => nameOhengSet.includes(o));
+            const uncompPrem = prefList.filter(o => !nameOhengSet.includes(o));
+            let intro = '';
+
+            if (!prefList.length) {
+                // 균형 사주
+                const nameOhengStr = [...new Set(nameOhengSet)].map(_bw).join(', ');
+                intro = `<b>${kr}</b>의 사주는 다섯 기운이 고르게 자리잡은 보기 드문 균형형입니다.`
+                      + (nameOhengStr ? ` 이름 <b>${kr}</b>은 ${nameOhengStr} 기운을 담아 아이가 지닌 풍요로운 기질을 더욱 뚜렷하게 빛내줄 것입니다.` : '')
+                      + `<br>이 보고서는 사주 원국부터 한자의 의미, 소리의 기운, 수리의 흐름까지 — 이 이름이 탄생하기까지의 모든 이야기를 담고 있습니다.`;
+            } else if (compPrem.length === prefList.length) {
+                // 완전 보완
+                const wk = prefList.map(_bw).join(', ');
+                intro = `<b>${kr}</b>의 사주에는 ${wk} 기운이 비어 있습니다.`
+                      + ` 이름 <b>${kr}</b>은 바로 그 ${wk} 기운을 담아 사주의 빈자리를 정확히 채워주고 있습니다.`
+                      + `<br>마른 땅에 내린 단비처럼, 이름을 부를 때마다 부족했던 기운이 아이에게 자연스럽게 스며들 것입니다.`
+                      + ` 이름과 사주가 서로 돕는 이상적인 구성입니다.`;
+            } else if (compPrem.length > 0) {
+                // 부분 보완
+                const wk   = prefList.map(_bw).join(', ');
+                const comp = compPrem.map(_bw).join(', ');
+                const unc  = uncompPrem.map(_bw).join(', ');
+                intro = `<b>${kr}</b>의 사주에는 ${wk} 기운이 비어 있습니다.`
+                      + ` 이름이 ${comp} 기운을 채워주고 있어 좋은 출발이지만, ${unc} 기운은 추가 검토의 여지가 있습니다.`
+                      + `<br>이 보고서는 사주 원국부터 한자의 의미, 소리의 기운, 수리의 흐름까지 — 이 이름의 가능성과 보완점을 상세히 안내합니다.`;
+            } else {
+                // 미보완
+                const wk = prefList.map(_bw).join(', ');
+                intro = `<b>${kr}</b>의 사주에는 ${wk} 기운이 비어 있습니다.`
+                      + ` 이 보고서는 사주 원국부터 한자의 의미, 소리의 기운, 수리의 흐름까지 — 이 이름이 사주를 어떻게 뒷받침하는지 상세히 분석합니다.`;
+            }
+            el.innerHTML = intro;
+        })();
+
+        // ── Chapter 1 theory box 동적 업데이트 ────────────────────────
+        (function _updateCh1Theory() {
+            const footEl = document.getElementById('ch1-theory-footer');
+            if (!footEl) return;
+            const prefList = (_currentState.nameSpec?.prefer || []);
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _bw = o => `<b style="color:${_OC[o]||'#64748b'};">${_OK[o]||o}</b>`;
+            if (prefList.length) {
+                const wkStr = prefList.map(_bw).join(', ');
+                footEl.innerHTML = `★ 이 아이의 사주 원국에서 ${wkStr} 기운이 부족합니다. 이름이 이 빈자리를 어떻게 채우는지, 챕터 2에서 바로 확인합니다.`;
+            } else {
+                footEl.innerHTML = `★ 이 아이의 사주는 다섯 기운이 고르게 분포된 균형형입니다. 이름이 그 풍요로운 기질을 어떻게 더욱 빛내는지 챕터 2에서 확인합니다.`;
+            }
+        })();
+
+        // ── Chapter 2 theory box 동적 업데이트 ────────────────────────
+        (function _updateCh2Theory() {
+            const bodyEl = document.getElementById('ch2-theory-body');
+            if (!bodyEl) return;
+            const prefList = (_currentState.nameSpec?.prefer || []);
+            const nameOhengSet = [h1, h2].filter(Boolean).map(x => _normOheng(x.o)).filter(Boolean);
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _bw = o => `<b style="color:${_OC[o]||'#64748b'};">${_OK[o]||o}</b>`;
+            const _OHENG_KR2 = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+
+            // 한자별 기운 설명 생성
+            const hanjaDesc = [h1, h2].filter(Boolean).filter(x => x.h && x.o).map(x => {
+                const no = _normOheng(x.o);
+                const meaning = (x.m || x.meaning || '').split(',')[0].trim();
+                return `'${x.kr||x.h}'(${x.h})는 <b style="color:${_OC[no]||'#64748b'};">${_OK[no]||no}</b>의 기운을 담으며, '${meaning}'을 뜻합니다`;
+            }).join('; ');
+
+            let bodyText = '';
+            if (prefList.length) {
+                const wkStr = prefList.map(_bw).join(', ');
+                const compOs = prefList.filter(o => nameOhengSet.includes(o));
+                const compStr = compOs.map(_bw).join(', ');
+                bodyText = `챕터 1에서 확인한 대로, 이 아이의 사주에는 ${wkStr} 기운이 비어 있습니다. `
+                    + (compOs.length
+                        ? `이름 <b>${kr}</b>은 바로 그 ${compStr} 기운을 담은 한자로 구성해, 매일 이름이 불릴 때마다 부족한 기운이 자연스럽게 채워집니다. `
+                        : `이름 <b>${kr}</b>의 한자가 담은 기운이 아래 오행 그래프를 어떻게 채우는지 확인하세요. `)
+                    + (hanjaDesc ? `${hanjaDesc}. ` : '')
+                    + `오른쪽 레이더 차트의 <b>금색 면적</b>이 넓을수록 보완 효과가 큽니다.`;
+            } else {
+                bodyText = `이 아이의 사주는 균형형입니다. 이름 <b>${kr}</b>은 `
+                    + (hanjaDesc ? `${hanjaDesc}으로, ` : '')
+                    + `아이의 풍요로운 기질을 한층 더 뚜렷하게 빛내줍니다. 오른쪽 레이더 차트에서 변화를 확인하세요.`;
+            }
+            bodyEl.innerHTML = bodyText;
+        })();
+
+        // Ch1: 사주 원국
+        _renderSajuGrid(_saju);
+        _renderOhengBars(_scores, candidate);
+        const sajuStoryEl = document.getElementById('ai-saju-story');
+        if (sajuStoryEl) sajuStoryEl.textContent = report.sajuStory || report.sajuAnalysis || '';
+
+        // Ch2: 자원오행 & 레이더
+        document.getElementById('report-tagline').textContent = report.tagline || '';
+
+        // Ch2: 자원오행 칩 렌더링
+        const jawonChipsEl = document.getElementById('report-jawon-chips');
+        if (jawonChipsEl) {
+            const OHENG_C = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const OHENG_KR = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const hanjaItems = [h1, h2].filter(Boolean).filter(x => x.h && x.o);
+            if (hanjaItems.length) {
+                const chipsHtml = hanjaItems.map(x => {
+                    const normO = _normOheng(x.o);
+                    const c = OHENG_C[normO] || '#64748b';
+                    return `<div class="jawon-chip" style="border-color:${c};color:${c};">
+                        <span class="jawon-chip-hanja">${x.h}</span>
+                        <div class="jawon-chip-label">
+                            <div style="font-weight:800;font-size:0.78rem;">${x.kr||''}</div>
+                            <div>${OHENG_KR[normO]||normO} 기운</div>
+                        </div>
+                    </div>`;
+                }).join('');
+                jawonChipsEl.innerHTML = `<div class="jawon-chips" style="margin:12px 0 20px;">${chipsHtml}</div>`;
+            } else {
+                jawonChipsEl.innerHTML = '';
+            }
+        }
+
+        const jawonStoryEl = document.getElementById('ai-jawon-story');
+        if (jawonStoryEl) jawonStoryEl.textContent = report.jawonStory || report.namingLogic || '';
+
+        // ── Chapter 3 theory box 동적 업데이트 ────────────────────────
+        (function _updateCh3Theory() {
+            const bodyEl = document.getElementById('ch3-theory-box');
+            if (!bodyEl) return;
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _OHENG_DESC_SHORT = {
+                '木':'생명력과 성장의 에너지를 상징합니다',
+                '火':'지혜와 열정, 밝은 빛을 상징합니다',
+                '土':'안정과 포용, 든든한 대지를 상징합니다',
+                '金':'결단력과 청명함, 단단한 순수함을 상징합니다',
+                '水':'지혜와 유연함, 깊은 내면의 힘을 상징합니다'
+            };
+            const hanjaList = [h1, h2].filter(Boolean).filter(x => x.h && x.o);
+            const hanjaDescParts = hanjaList.map(x => {
+                const no = _normOheng(x.o);
+                const c = _OC[no] || '#64748b';
+                const meanings = (x.m || x.meaning || '').split(',').slice(0,2).join('·');
+                const desc = _OHENG_DESC_SHORT[no] || '';
+                return `<b style="color:${c};">'${x.kr||x.h}'(${x.h})</b>은 '${meanings}'을 뜻하며, <b style="color:${c};">${_OK[no]}</b>으로 ${desc}`;
+            });
+            const titleEl = bodyEl.querySelector('.chapter-theory-title');
+            const existingBody = bodyEl.querySelector('#ch3-theory-body-dyn');
+            const dynSpan = existingBody || document.createElement('span');
+            dynSpan.id = 'ch3-theory-body-dyn';
+            if (hanjaDescParts.length) {
+                dynSpan.innerHTML = ' ' + hanjaDescParts.join('. ') + `. 한자의 오행이 사주를 보완하면서도, 뜻 자체가 아이의 인생에 좋은 에너지를 더하도록 선별했습니다.`;
+            }
+            if (!existingBody && titleEl) titleEl.after(dynSpan);
+        })();
+
+        // Ch3: 한자 의미
+        _renderHanjaDetails(report.hanjaDetails || [], h1, h2);
+        const hanjaStoryEl = document.getElementById('ai-hanja-story');
+        if (hanjaStoryEl) hanjaStoryEl.textContent = report.hanjaStory || '';
+        // Section 1: 한자이야기
+        _renderHanjaStoryS1(candidate);
+
+        // Ch4: 발음
+        _renderSoundSection(candidate, report);
+        const soundStoryEl = document.getElementById('ai-sound-story');
+        if (soundStoryEl) soundStoryEl.textContent = report.soundStory || '';
+
+        // Ch5: 수리 + 라이프플로우
+        _renderSuriCards(s0, s1, s2, isOija);
+
+        // ── 챕터 판정 배너 — candidate 직접 계산 (DOM 독립) ──────────
+        // getAnalysisData()는 셀프진단 DOM 드롭다운 기반이라 리포트 뷰에서
+        // 획수가 모두 기본값(10)으로 잘못 계산됨. 반드시 candidate 직접 사용.
+        (function _applyVerdicts() {
+            const _ng  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'평');
+            const _CYCLE = ['木','火','土','金','水'];
+            const _isSS  = (a,b) => a===b || (_CYCLE.indexOf(a)+1)%5===_CYCLE.indexOf(b)
+                                          || (_CYCLE.indexOf(b)+1)%5===_CYCLE.indexOf(a);
+            const _numO  = n => { const d=n%10; if(d===1||d===2)return'木'; if(d===3||d===4)return'火';
+                                  if(d===5||d===6)return'土'; if(d===7||d===8)return'金'; return'水'; };
+            const _CHO_O = c => {
+                const code=c.charCodeAt(0)-44032; if(code<0||code>11171)return'';
+                const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+                const cho=CHO[Math.floor(code/588)]||'';
+                if(['ㄱ','ㅋ','ㄲ'].includes(cho))return'木'; if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho))return'火';
+                if(['ㅇ','ㅎ'].includes(cho))return'土'; if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho))return'金';
+                if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho))return'水'; return'';
+            };
+            const _YY = c => {
+                const code=c.charCodeAt(0)-44032; if(code<0||code>11171)return'음';
+                const JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+                const YANG=new Set(['ㅏ','ㅐ','ㅑ','ㅒ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ']);
+                return YANG.has(JUNG[Math.floor((code%588)/28)])?'양':'음';
+            };
+            const _getSG = n => {
+                let num=n>81?n%81:n; if(!num)num=81;
+                if(typeof SURI_DATA==='undefined'||!SURI_DATA[num])return'평';
+                return _ng(SURI_DATA[num].grade);
+            };
+
+            // 사격수리 4격 (candidate 획수 직접 사용)
+            const _g1 = isOija ? s1+1   : s1+s2;
+            const _g2 = s0+s1;
+            const _g3 = isOija ? s0+1   : s0+s2;
+            const _g4 = isOija ? s0+s1  : s0+s1+s2;
+            const _g4Ns = [_g1,_g2,_g3,_g4];
+
+            const _sg4     = _g4Ns.map(_getSG);
+            const _sg4Good = _sg4.filter(g=>g==='매우 좋음'||g==='좋음').length;
+            const math4Grade = _sg4Good===4?'매우 좋음':_sg4Good>=2?'좋음':_sg4Good===1?'나쁨':'매우 나쁨';
+            const math4Desc  = _sg4Good===4?'4격의 획수 합이 모두 길수에 해당합니다.'
+                             : _sg4Good>=2?'길수와 흉수가 혼재합니다. 다른 지표로 보완하세요.'
+                             : _sg4Good===1?'흉수가 많아 보완이 필요합니다.'
+                             :'4격이 모두 흉수입니다. 작명을 새로 하시는 것을 권장합니다.';
+
+            // 수리오행 (4격 인접 쌍 상생 여부)
+            const _moOs  = _g4Ns.map(_numO);
+            const _moBad = _moOs.filter((o,i)=>i<3&&!_isSS(o,_moOs[i+1])).length;
+            const mathOhengGrade = _moBad===0?'매우 좋음':_moBad===1?'좋음':_moBad===2?'나쁨':'매우 나쁨';
+            const mathOhengDesc  = _moBad===0?'수리의 4격 오행이 모두 상생으로 이어져 기운이 막힘없이 흐릅니다.'
+                                 : _moBad===1?'수리오행 흐름에 상극이 일부 포함되어 있으나 상생이 우세합니다.'
+                                 : _moBad===2?'수리오행 간 상극이 여러 곳에서 발생합니다.'
+                                 :'수리오행 전 구간에서 상극이 발생합니다.';
+
+            // 수리음양 (4격 홀짝 균형)
+            const _myYs       = _g4Ns.map(n=>n%2!==0?'양':'음');
+            const mathYinGrade = (_myYs.every(y=>y==='양')||_myYs.every(y=>y==='음'))?'매우 나쁨':'매우 좋음';
+            const mathYinDesc  = mathYinGrade==='매우 좋음'
+                               ?'4격 수리의 음과 양이 고루 배합되어 균형이 잡혀 있습니다.'
+                               :'4격 수리가 모두 홀수 또는 짝수로 치우쳐 음양 균형이 깨져 있습니다.';
+
+            // 자원오행 (candidate 한자 오행 직접 사용)
+            const _nameOs   = [h1,h2].filter(Boolean).map(x=>(_normOheng?_normOheng(x.o):x.o)).filter(Boolean);
+            const _uniqueOs = [...new Set(_nameOs)];
+            const _OK_S = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            let jawonGrade, jawonDesc;
+            if(!_uniqueOs.length) { jawonGrade='나쁨'; jawonDesc='한자를 선택하면 자원오행이 표시됩니다.'; }
+            else if(_uniqueOs.length===1) {
+                jawonGrade='좋음';
+                jawonDesc=`이름의 기운이 모두 ${_OK_S[_uniqueOs[0]]||_uniqueOs[0]} 기운으로 구성되어 있습니다. 단일 기운이 집중되어 강한 개성을 나타냅니다.`;
+            } else {
+                jawonGrade='매우 좋음';
+                jawonDesc=`${_nameOs.map(o=>_OK_S[o]||o).join(' · ')} 기운으로 구성된 이름입니다. 다양한 기운이 어우러져 풍부한 기질을 형성합니다.`;
+            }
+
+            // 사주 보완 (candidate 오행 vs nameSpec.prefer)
+            const _prefer    = _currentState?.nameSpec?.prefer || [];
+            const _compCount = _prefer.filter(p=>_nameOs.includes(p)).length;
+            const sajuGrade  = _prefer.length===0?'매우 좋음':_compCount===_prefer.length?'매우 좋음':_compCount>0?'나쁨':'매우 나쁨';
+            const sajuDesc   = _prefer.length===0?'사주 오행이 균형을 이루고 있습니다.'
+                             : _compCount===_prefer.length?'이름이 사주의 부족한 기운을 모두 채워줍니다.'
+                             : _compCount>0?'이름이 일부 부족한 오행을 채워줍니다.'
+                             :'이름이 부족한 오행을 채우지 못하고 있습니다.';
+
+            // 발음오행 / 발음음양
+            const _fullKr = familyKr+(h1.kr||'')+(h2?.kr||'');
+            const _pOs    = _fullKr.split('').map(_CHO_O);
+            const _pBad   = _pOs.filter((o,i)=>i<_pOs.length-1&&o&&!_isSS(o,_pOs[i+1])).length;
+            const _pTotal = _pOs.length-1;
+            const pronGrade = _pBad===0?'매우 좋음':_pBad===_pTotal?'매우 나쁨':_pBad*2<=_pTotal?'좋음':'나쁨';
+            const _yys = _fullKr.split('').map(_YY);
+            const yinGrade = (_yys.every(y=>y==='양')||_yys.every(y=>y==='음'))?'매우 나쁨':'매우 좋음';
+
+            // 판정 배너 적용
+            _renderVerdict('verdict-ch2', sajuGrade, sajuDesc);
+            _renderVerdict('verdict-ch3', jawonGrade, jawonDesc);
+            const _ch4g = (pronGrade==='매우 나쁨'||yinGrade==='매우 나쁨')?'매우 나쁨'
+                        : (pronGrade==='나쁨'&&yinGrade==='나쁨')?'나쁨'
+                        : (pronGrade==='매우 좋음'&&yinGrade==='매우 좋음')?'매우 좋음':'좋음';
+            _renderVerdict('verdict-ch4', _ch4g, `발음 오행 <b>${pronGrade}</b> · 발음 음양 <b>${yinGrade}</b>`);
+            _renderVerdict('verdict-ch5a', math4Grade, math4Desc);
+            const _ch5bg = (mathOhengGrade==='매우 나쁨'||mathYinGrade==='매우 나쁨')?'매우 나쁨'
+                         : (mathOhengGrade==='나쁨'||mathYinGrade==='나쁨')?'나쁨'
+                         : (mathOhengGrade==='매우 좋음'&&mathYinGrade==='매우 좋음')?'매우 좋음':'좋음';
+            _renderVerdict('verdict-ch5b', _ch5bg, `수리 오행 <b>${mathOhengGrade}</b> · 수리 음양 <b>${mathYinGrade}</b>`);
+
+            // 수리오행·음양 섹션 콘텐츠
+            const suriOhengYinEl = document.getElementById('report-suri-oheng-yin');
+            if (suriOhengYinEl) {
+                suriOhengYinEl.innerHTML = _buildSuriSubHtml(
+                    { grade: mathYinGrade, desc: mathYinDesc, seq: _g4Ns.map((v,i)=>({val:v,yin:_myYs[i]})) },
+                    { grade: mathOhengGrade, desc: mathOhengDesc }
+                );
+            }
+        })();
+        const suriStoryEl = document.getElementById('ai-suri-story');
+        if (suriStoryEl) {
+            suriStoryEl.textContent = report.suriStory || '';
+        }
+
+        // ── Chapter 대운 theory box 동적 업데이트 ─────────────────────
+        (function _updateCh6Theory() {
+            const bodyEl = document.getElementById('ch6-theory-body');
+            if (!bodyEl) return;
+            const prefList = (_currentState.nameSpec?.prefer || []);
+            const nameOhengSet = [h1, h2].filter(Boolean).map(x => _normOheng(x.o)).filter(Boolean);
+            const _OC = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+            const _OK = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+            const _bw = o => `<b style="color:${_OC[o]||'#64748b'};">${_OK[o]||o}</b>`;
+            const compOs = prefList.filter(o => nameOhengSet.includes(o));
+            let bodyText = `사주·자원오행·발음·수리 모든 분석이 완성됐습니다. 이제 <b>이름 <b>${kr}</b>이 아이의 인생 흐름 속에서 실제로 어떤 힘이 되는지</b>를 확인합니다. 대운(大運)은 10년 단위로 바뀌는 인생의 큰 계절입니다.`;
+            if (compOs.length) {
+                const compStr = compOs.map(_bw).join(', ');
+                bodyText += ` 이름이 담은 ${compStr} 기운이 힘든 대운 시기에 든든한 버팀목이 되어줍니다.`;
+            }
+            bodyText += ` 아래 차트의 각 대운 칩을 클릭해 시기별 기운과 이름의 역할을 확인하세요.`;
+            bodyEl.innerHTML = bodyText;
+        })();
+
+        _renderDaeunSection(candidate, _currentState, report);
+
+        // Ch6: 미래 직업 탐색
+        _renderCareerSection(candidate, _currentState, report);
+
+        // 종합 결론 (상단 카드)
+        _renderConclusionGrid(candidate, _currentState);
+        const conclusionEl       = document.getElementById('ai-conclusion-letter');
+        const conclusionTextEl   = document.getElementById('ai-conclusion-letter-text');
+        const conclusionGreetEl  = document.getElementById('ai-conclusion-letter-greeting');
+        if (conclusionEl && conclusionTextEl && report.conclusionLetter) {
+            conclusionTextEl.textContent = report.conclusionLetter;
+            if (conclusionGreetEl) conclusionGreetEl.textContent = `${kr} 부모님께 드리는 작명 서신`;
+            conclusionEl.style.display = 'block';
+        }
+        // 차트 + 첫 대운 자동 오픈
+        setTimeout(() => {
+            renderCharts();
+            _updateRadarChart(_scores, candidate);
+            // 대운 데이터로 lifeFlow 차트 업데이트
+            if (window._daeunData) _updateLifeFlowChart(window._daeunData);
+            if (window._showDaeunDetail && !document.getElementById('daeun-detail-panel')?.dataset.openIdx) {
+                window._showDaeunDetail(0);
+            }
+        }, 100);
+
+        // 채팅 컨텍스트 초기화
+        _initChatContext(candidate, report, _scores);
+    }
+
+    // ── 오행 밸런스 바 ───────────────────────────────────────────────
+    const OHENG_COLORS = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+    const SEORYEOK_KR_MAP = {'extreme_weak':'부족','weak':'약함','balanced':'보통','strong':'강함','extreme_strong':'과다'};
+
+    // 오행 한자 → 한글 변환 (U+F90A 등 이형자 포함)
+    const _OHENG_KR_MAP = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물','\uF90A':'쇠'};
+    const _normOheng = o => {
+        if (!o) return o;
+        return _OHENG_KR_MAP[o] ? o : // 이미 한자 키이면 그대로
+               ({'나무':'木','불':'火','흙':'土','쇠':'金','물':'水'}[o] || o); // 한글→한자 정규화
+    };
+    const _ohengToKr = o => _OHENG_KR_MAP[o] || _OHENG_KR_MAP[_normOheng(o)] || o;
+
+    function _renderOhengBars(scores, candidate) {
+        if (!scores) return;
+        const el = document.getElementById('report-oheng-bars');
+        if (!el) return;
+
+        // 이름이 채우는 오행 계산 (한자 1글자당 15pt) — 오행값 정규화 적용
+        const nameContrib = {};
+        if (candidate) {
+            [candidate.h1, candidate.h2].forEach(h => {
+                if (h?.o) {
+                    const normO = _normOheng(h.o);
+                    nameContrib[normO] = (nameContrib[normO] || 0) + 15;
+                }
+            });
+        }
+        const nameOhengs = Object.keys(nameContrib);
+        const hanjaLabel = candidate
+            ? nameOhengs.map(o => {
+                const h = [candidate.h1, candidate.h2].find(x => x?.o === o || _normOheng(x?.o) === o);
+                return `${_ohengToKr(o)}(${h?.h||''})`;
+              }).join(' · ')
+            : '';
+
+        // 오행 한글+한자 통일 표기 헬퍼
+        const _OHKR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const _ohengFull = o => { const k = _ohengToKr(o); const h = {'나무':'木','불':'火','흙':'土','쇠':'金','물':'水'}[k]||o; return `${h}(${k})`; };
+
+        // 이름 기여 카드 (개선된 시각화)
+        const badgeHtml = nameOhengs.length
+            ? `<div class="oheng-contrib-card">
+                <div class="oheng-contrib-title">✦ 이름이 채워주는 기운</div>
+                <div class="oheng-contrib-pills">
+                    ${nameOhengs.map(o => {
+                        const oc = OHENG_COLORS[o] || '#888';
+                        return `<div class="oheng-contrib-pill" style="border:1.5px solid ${oc}40;">
+                            <div class="oheng-contrib-dot" style="background:${oc};"></div>
+                            <span style="color:${oc};">${_ohengFull(o)}</span>
+                            <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;">+15점</span>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <p class="oheng-contrib-hint">이름이 매일 불릴 때마다 위 기운이 아이에게 스며듭니다. 아래 막대의 <b>연한 색 부분</b>이 이름이 더해주는 기운입니다.</p>
+               </div>`
+            : '';
+
+        const maxScore = Math.max(...Object.entries(scores).map(([o,s]) => s + (nameContrib[o]||0)), 1);
+        const bars = Object.entries(scores).map(([o, s]) => {
+            const contrib = nameContrib[o] || 0;
+            const basePct  = Math.round(s / maxScore * 100);
+            const totalPct = Math.round((s + contrib) / maxScore * 100);
+            const st  = (typeof getSeoryeokStatus === 'function') ? getSeoryeokStatus(s) : 'balanced';
+            const lbl = SEORYEOK_KR_MAP[st] || '보통';
+            const isWeak = (st === 'extreme_weak');
+            const contribBar = contrib > 0
+                ? `<div class="oheng-bar-fill" style="width:${totalPct - basePct}%;background:${OHENG_COLORS[o]};opacity:0.45;"></div>`
+                : '';
+            return `<div class="oheng-item">
+                <span class="oheng-label" style="width:76px;">${_ohengFull(o)} <span style="font-size:0.72rem;font-weight:600;color:var(--text-secondary);">${Math.round(s)}${contrib>0?`<span style="color:${OHENG_COLORS[o]};">+${contrib}</span>`:''}</span></span>
+                <div class="oheng-bar-bg" style="position:relative;display:flex;">
+                    <div class="oheng-bar-fill" style="width:${basePct}%;background:${OHENG_COLORS[o]||'#888'};"></div>
+                    ${contribBar}
+                </div>
+                <span class="oheng-count"${isWeak?' style="color:#ef4444;"':''}>${lbl}</span>
+            </div>`;
+        }).join('');
+
+        el.innerHTML = badgeHtml + bars;
+    }
+
+    // ── 사주 그리드 렌더링 ──────────────────────────────────────────
+    const CHEONGAN_OHENG_KR = {'甲':'나무','乙':'나무','丙':'불','丁':'불','戊':'흙','己':'흙','庚':'쇠','辛':'쇠','壬':'물','癸':'물'};
+    const JIJI_OHENG_KR     = {'子':'물','丑':'흙','寅':'나무','卯':'나무','辰':'흙','巳':'불','午':'불','未':'흙','申':'쇠','酉':'쇠','戌':'흙','亥':'물'};
+    const JIJI_KR = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
+    const CHEONGAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
+
+    // 순서: 시주, 일주(★), 월주, 연주
+    const PILLAR_META = [
+        { key: 'time',  label: '시주(時柱)', period: '말년운 · 자식궁',    isPoint: false },
+        { key: 'day',   label: '일주(日柱)', period: '나의 본질 · 배우자궁', isPoint: true  },
+        { key: 'month', label: '월주(月柱)', period: '청장년운 · 부모형제궁', isPoint: false },
+        { key: 'year',  label: '연주(年柱)', period: '초년운 · 조상궁',    isPoint: false },
+    ];
+
+    const _GAN_STORY = {
+        '甲':'하늘을 향해 곧게 뻗는 큰 나무(甲木)',   '乙':'바람에도 꺾이지 않는 유연한 풀(乙木)',
+        '丙':'온 세상을 환히 비추는 태양(丙火)',       '丁':'어둠 속을 따스히 밝히는 등불(丁火)',
+        '戊':'만물을 품어 안는 너른 산(戊土)',         '己':'씨앗을 키워내는 비옥한 대지(己土)',
+        '庚':'흔들림 없이 날카로운 칼날(庚金)',        '辛':'빛을 품은 귀한 보석(辛金)',
+        '壬':'막힘없이 흘러가는 큰 강(壬水)',          '癸':'대지를 촉촉이 적시는 봄비(癸水)',
+    };
+    const _JI_STORY = {
+        '子':'지칠 줄 모르는 자수(子水)의 지혜',  '丑':'묵묵히 쌓아가는 축토(丑土)의 성실함',
+        '寅':'거침없이 나아가는 인목(寅木)의 용기','卯':'사람을 끌어당기는 묘목(卯木)의 온화함',
+        '辰':'신비롭고 창의적인 진토(辰土)의 상상력','巳':'뜨거운 열정으로 지식을 태우는 사화(巳火)',
+        '午':'화려한 무대를 즐기는 오화(午火)의 끼','未':'예술적 감성이 넘치는 미토(未土)의 섬세함',
+        '申':'빠르고 정확하게 파고드는 신금(申金)의 추진력','酉':'완벽을 추구하는 유금(酉金)의 날카로움',
+        '戌':'끝까지 해내고야 마는 술토(戌土)의 뚝심','亥':'자유롭게 상상하는 해수(亥水)의 지혜',
+    };
+    const _OHENG_KR = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+    // 오행 → 상징 색상 (OHENG_COLORS와 동일하게 유지)
+    const _PILLAR_OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+
+    function _getPillarStory(p, type) {
+        const gan = _GAN_STORY[p.gan] || p.gan;
+        const ji  = _JI_STORY[p.ji]  || p.ji;
+        const ganO = CHEONGAN_OHENG_KR[p.gan] || '';
+        const jiO  = JIJI_OHENG_KR[p.ji]  || '';
+        const sameOheng = ganO === jiO;
+        const _KR2FULL = {'나무':'나무(木)','불':'불(火)','흙':'흙(土)','쇠':'쇠(金)','물':'물(水)'};
+        const ganOF = _KR2FULL[ganO] || ganO;
+        const jiOF  = _KR2FULL[jiO]  || jiO;
+
+        const combDesc = sameOheng
+            ? `천간과 지지 모두 ${ganOF} 기운으로 가득해, 이 힘이 두 배로 응축되어 있습니다.`
+            : `천간의 ${ganOF} 기운과 지지의 ${jiOF} 기운이 서로 어우러져 복합적인 매력을 만들어냅니다.`;
+
+        if (type === 'year') return `${gan}이(가) 삶의 출발점을 열어줍니다. 초년(0~20세), ${ji}이 더해져 어린 시절부터 또래와 다른 개성으로 빛납니다. ${combDesc} 조상의 든든한 기반 위에서 세상을 향한 첫 발을 힘차게 내딛습니다.`;
+
+        if (type === 'month') return `${gan}이(가) 사회로 나아가는 힘이 됩니다. 20~40대 청장년기, ${ji}이 함께하며 직업과 인간관계에서 특유의 능력을 펼칩니다. ${combDesc} 이 시기가 인생의 황금기이자 핵심 무대입니다.`;
+
+        if (type === 'day') return `${gan}이(가) 바로 '나'입니다. 평생 나를 이끄는 본질의 기운이죠. 배우자 자리(일지)엔 ${ji}이 자리해 나의 인연과 가정에 깊이 작용합니다. ${combDesc} 겉으로 보이는 모습과 내면의 감성이 독특하게 공존하는 개성 있는 사람입니다.`;
+
+        if (type === 'time') return `${gan}이(가) 인생의 마지막 장을 장식합니다. 말년(40세~), ${ji}이 더해져 오랜 세월이 빚어낸 깊이와 여유가 넘쳐흐릅니다. ${combDesc} 자녀에게도 이 기운이 전해져 가문의 이야기를 다음 세대로 이어갑니다.`;
+
+        return '';
+    }
+
+    function _toHangul(char) {
+        return CHEONGAN_KR[char] || JIJI_KR[char] || char;
+    }
+
+    function _renderSajuGrid(saju) {
+        if (!saju) return;
+        const el = document.getElementById('report-saju-grid');
+        if (!el) return;
+        const _KR_COLOR = {'나무':'#22c55e','불':'#ef4444','흙':'#eab308','쇠':'#94a3b8','물':'#0f172a'};
+        el.innerHTML = PILLAR_META.map(({ key, label, period, isPoint }) => {
+            const p    = saju[key];
+            const ganO = CHEONGAN_OHENG_KR[p.gan] || '';
+            const jiO  = JIJI_OHENG_KR[p.ji]  || '';
+            const pillColor = _KR_COLOR[ganO] || '#888';
+            const jiColor   = _KR_COLOR[jiO]  || '#888';
+            const story = _getPillarStory(p, key);
+            // 천간/지지 오행 — 같더라도 항상 두 개 표시 (예: 쇠쇠)
+            const ohengPills = `
+                <span class="saju-oheng-pill" style="background:${pillColor};" title="천간(天干) — 하늘의 기운">${ganO}</span>
+                <span class="saju-oheng-pill" style="background:${jiColor};margin-left:4px;" title="지지(地支) — 땅의 기운">${jiO}</span>`;
+            return `<div class="saju-box${isPoint ? ' point' : ''}">
+                <div class="saju-box-bar" style="${isPoint ? '' : `background:${pillColor}33;`}">
+                    ${isPoint ? `<div class="saju-me-badge">👤 나 · 이 아이</div>` : ''}
+                </div>
+                <div class="saju-box-inner">
+                    <div class="saju-label">${label}</div>
+                    <div class="saju-hanja"><span style="color:${pillColor};">${p.gan}</span> <span style="color:${jiColor};">${p.ji}</span></div>
+                    <div class="saju-kor">${_toHangul(p.gan)}${_toHangul(p.ji)}</div>
+                    <div style="margin-top:4px;">${ohengPills}</div>
+                    <div class="saju-story">${story}</div>
+                    <div class="saju-gungwi">${period}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── 한자이야기 Section 1 렌더링 ─────────────────────────────────
+    function _renderHanjaStoryS1(candidate) {
+        const el   = document.getElementById('report-hanja-story-s1');
+        const body = document.getElementById('report-hanja-story-s1-body');
+        if (!el || !body || !candidate) return;
+
+        const OHENG_C  = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+        const OHENG_KR = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        const OHENG_DESC = {
+            '木':'나무처럼 곧게 자라나는 기운. 생명력과 창의성, 성장의 에너지를 담고 있습니다.',
+            '火':'빛과 온기를 전하는 기운. 열정, 지혜, 밝은 에너지로 주변을 따뜻하게 합니다.',
+            '土':'대지처럼 포근하게 품어주는 기운. 안정, 신뢰, 든든한 터전의 에너지입니다.',
+            '金':'단단하고 빛나는 기운. 결단력, 순수함, 세상을 밝히는 청명한 에너지를 품고 있습니다.',
+            '水':'물처럼 유연하게 흐르는 기운. 지혜, 적응력, 깊은 내면의 힘을 나타냅니다.'
+        };
+        const _no = o => ({'Wood':'木','Fire':'火','Earth':'土','Metal':'金','Water':'水'}[o] || o);
+
+        const hanjas = [candidate.h1, candidate.h2].filter(Boolean);
+        const cardsHtml = hanjas.map(h => {
+            const o = _no(h.o || '');
+            const c = OHENG_C[o] || '#888';
+            const meanings = (h.m || h.meaning || '').split(',').slice(0, 2).join(', ');
+            return `<div class="hanja-s1-card">
+                <div class="hanja-s1-char" style="color:${c};">${h.h}</div>
+                <div class="hanja-s1-kr">${h.kr || ''} (${h.h})</div>
+                <div class="hanja-s1-meaning">${meanings}</div>
+                <span class="hanja-s1-badge" style="background:${c}20;color:${c};">${OHENG_KR[o] || o}(${o}) 기운</span>
+            </div>`;
+        }).join('');
+
+        const uniqueOs = [...new Set(hanjas.map(h => _no(h.o || '')).filter(Boolean))];
+        const storyHtml = uniqueOs.map(o => {
+            const d = OHENG_DESC[o];
+            return d ? `<span style="color:${OHENG_C[o]};font-weight:800;">${OHENG_KR[o]}(${o})</span> — ${d}` : '';
+        }).filter(Boolean).join('<br>');
+
+        body.innerHTML = `<div class="hanja-s1-grid">${cardsHtml}</div>`
+                       + (storyHtml ? `<div class="hanja-s1-story">${storyHtml}</div>` : '');
+        el.style.display = '';
+    }
+
+    // ── 한자 풀이 렌더링 ────────────────────────────────────────────
+    function _renderHanjaDetails(details, h1, h2) {
+        const el = document.getElementById('report-hanja-details');
+        if (!el) return;
+        const src = details.length ? details : [
+            { hanja:h1.h, kr:h1.kr, meaning:h1.m, strokes:h1.s, oheng:h1.o, synergyWithSaju:'' },
+            ...(h2 ? [{ hanja:h2.h, kr:h2.kr, meaning:h2.m, strokes:h2.s, oheng:h2.o, synergyWithSaju:'' }] : [])
+        ];
+        const OHENG_COLOR_MAP = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#1e3a5f'};
+        const OHENG_KR_MAP2   = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        el.innerHTML = src.map(d => {
+            const oc  = OHENG_COLOR_MAP[d.oheng] || '#888';
+            const okr = OHENG_KR_MAP2[d.oheng]  || d.oheng || '';
+            const ohengLabel = d.oheng ? `${d.oheng}(${okr})` : '';
+            return `
+            <div class="ai-hanja-card">
+                <div class="ai-hanja-char" style="color:${oc};background:${oc}14;border:2.5px solid ${oc}55;">${d.hanja}</div>
+                <div class="ai-hanja-body" style="flex:1;">
+                    <div class="ai-hanja-meta">
+                        <span style="font-weight:800;">${d.kr||''} (${d.hanja})</span>
+                        <span style="color:${oc};font-weight:800;">${ohengLabel} 기운</span>
+                        <span>${d.strokes||''}획</span>
+                    </div>
+                    <p style="font-size:0.95rem;color:var(--text-primary);line-height:1.7;margin:6px 0;">${d.meaning||''}</p>
+                    ${d.synergyWithSaju ? `<div class="ai-hanja-synergy">✦ 사주 시너지 &nbsp;${d.synergyWithSaju}</div>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── 수리음양/수리오행 서브 섹션 HTML 빌더 (셀프/프리미엄 공통) ──
+    function _buildSuriSubHtml(mathYin, mathOheng) {
+        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const badge   = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
+
+        // 수리오행 — 오행 흐름 시각화용
+        const O_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
+        const O_KR    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+        const CYCLE   = ['木','火','土','金','水'];
+        const isSS    = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
+
+        // 형격·정격 오행 파싱 (desc에서 추출 or grade로 추론)
+        const moG = mathOheng?.grade || '평';
+        const myG = mathYin?.grade   || '평';
+
+        // 수리음양 — 획수 배열 시각화
+        const yinSeq  = mathYin?.seq  || [];   // e.g. [{val:획수, yin:'양'/'음'}, ...]
+        const yyChips = yinSeq.length
+            ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">${
+                yinSeq.map(s => {
+                    const isYang = s.yin === '양';
+                    return `<div style="text-align:center;">
+                        <div style="font-size:1rem;font-weight:800;color:var(--bg-dark);">${s.val}</div>
+                        <div style="margin-top:3px;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:20px;
+                            background:${isYang?'#fff7ed':'#eff6ff'};color:${isYang?'#c2410c':'#1d4ed8'};display:inline-block;">${s.yin||'?'}</div>
+                    </div>`;
+                }).join(`<div style="font-size:0.9rem;color:var(--text-muted);align-self:flex-start;padding-top:4px;">·</div>`)
+              }</div>`
+            : '';
+
+        const moDesc = mathOheng?.desc ? ` ${mathOheng.desc}` : '';
+        const myDesc = mathYin?.desc   ? ` ${mathYin.desc}`   : '';
+
+        const ohengTexts = {
+            '매우 좋음': `수리의 핵심인 형격(청년운)과 정격(전체운)의 오행이 서로를 북돋는 <b>상생(相生)</b> 관계를 이루고 있습니다.
+                상생이란 나무가 불을 키우고 불이 흙을 만들 듯, 앞선 기운이 다음 기운으로 자연스럽게 이어지는 것입니다.
+                청년기에 쌓은 에너지가 인생 전체의 흐름으로 막힘없이 연결되어, 노력이 결실로 이어지는 구조가 탄탄합니다.${moDesc}`,
+            '나쁨': `형격(청년운)과 정격(전체운)의 오행이 상생도 상극도 아닌 <b>중화(中和)</b>적 관계를 맺고 있습니다.
+                기운의 충돌은 없으나 서로 적극적으로 돕지도 않아, 인생 흐름이 큰 기복 없이 평탄하게 이어집니다.
+                자원오행·발음오행 등 다른 요소들이 보완 역할을 해준다면 전체적인 균형을 충분히 유지할 수 있습니다.${moDesc}`,
+            '매우 나쁨': `형격(청년운)과 정격(전체운)의 오행 사이에 <b>상극(相剋)</b>이 발생합니다.
+                상극이란 쇠가 나무를 자르고 물이 불을 끄듯, 앞선 기운이 다음 기운을 억누르는 관계입니다.
+                청년기에 쌓은 기운이 인생 전체 흐름과 충돌하면 노력 대비 결실이 더디게 느껴질 수 있으므로,
+                자원오행과 발음오행에서 보완 기운을 강화해 균형을 잡는 것이 중요합니다.${moDesc}`,
+        };
+        const yinTexts = {
+            '매우 좋음': `이름을 이루는 한자들의 획수가 홀수(양·陽)와 짝수(음·陰)로 고르게 배합되어 있습니다.
+                동양 철학에서 음양의 조화는 만물이 생성되는 근본 원리로, 이름에서 뿜어내는 기운이 한쪽으로 치우치지 않고 균형 있게 순환함을 의미합니다.
+                평생 수만 번 불릴 이름에서 이 균형이 유지된다는 것은, 아이의 기질이 편향되지 않고 유연하고 안정적으로 형성되도록 돕는다는 뜻입니다.${myDesc}`,
+            '나쁨': `이름 획수의 음양 배합이 무난한 수준으로, 기운의 흐름이 크게 치우치지 않는 상태입니다.
+                완전한 홀짝 교차는 아니지만 극단적인 편향도 없어, 다른 수리 요소 및 자원오행과 함께 전체적인 조화를 이루어 나갑니다.
+                발음오행·자원오행이 균형을 뒷받침해준다면 이 부분은 충분히 보완될 수 있습니다.${myDesc}`,
+            '매우 나쁨': `이름 획수가 홀수 또는 짝수 한쪽으로만 쏠려 있어 <b>음양의 균형이 깨진</b> 상태입니다.
+                음양의 불균형은 이름이 방출하는 기운이 한 방향으로만 지속적으로 편중됨을 뜻하며, 장기적으로 아이의 기질 형성에 영향을 줄 수 있습니다.
+                획수 홀짝이 고루 섞인 한자로 재조합하거나, 자원오행과 발음오행에서 균형을 충분히 보완하는 방향을 권합니다.${myDesc}`,
+        };
+
+        return `
+            <!-- 수리 오행 카드 -->
+            <div class="sound-unified" style="margin-bottom:16px;">
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">${_tip('수리오행','tip-left')}</span>
+                    ${badge(moG)}
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${ohengTexts[_normG(moG)]}</p>
+            </div>
+            <!-- 수리 음양 카드 -->
+            <div class="sound-unified">
+                ${yyChips}
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">${_tip('음양','tip-left')}</span>
+                    ${badge(myG)}
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(myG)]}</p>
+            </div>`;
+    }
+
+    // ── 사격수리 카드 렌더링 (시즌 카드 디자인) ─────────────────────
+    function _renderSuriCards(s0, s1, s2, isOija) {
+        const el = document.getElementById('report-suri-cards');
+        if (!el) return;
+        const g1 = isOija ? s1+1 : s1+s2;
+        const g2 = s0+s1;
+        const g3 = isOija ? s0+1 : s0+s2;
+        const g4 = isOija ? s0+s1 : s0+s1+s2;
+        const rawNums = [g1, g2, g3, g4];
+
+        const _normG  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const _gColor = g => ({'매우 좋음':'#14532d','좋음':'#15803d','나쁨':'#92400e','매우 나쁨':'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({'매우 좋음':'#f0fdf4','좋음':'#dcfce7','나쁨':'#fef3c7','매우 나쁨':'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
+        const _isGood = g => { const ng=_normG(g); return ng==='매우 좋음'||ng==='좋음'; };
+        const _isBad  = g => { const ng=_normG(g); return ng==='매우 나쁨'||ng==='나쁨'; };
+
+        const seasons = [
+            { emoji:'🌱', period:'봄 · 초년 (0~20대)',    label:_tip('원격'), rawNum: rawNums[0] },
+            { emoji:'☀️', period:'여름 · 청년 (20~40대)', label:_tip('형격'), rawNum: rawNums[1] },
+            { emoji:'🍂', period:'가을 · 장년 (40~60대)', label:_tip('이격'), rawNum: rawNums[2] },
+            { emoji:'❄️', period:'겨울 · 말년 (60대~)',   label:_tip('정격'), rawNum: rawNums[3] },
+        ];
+
+        const cardsHtml = seasons.map(s => {
+            let num = s.rawNum > 81 ? s.rawNum % 81 : s.rawNum;
+            if (num === 0) num = 81;
+            const d = (typeof SURI_DATA !== 'undefined' && SURI_DATA[num])
+                ? SURI_DATA[num] : { name:'', grade:'평', desc:'' };
+            const cls = _isGood(d.grade) ? 'season-good' : _isBad(d.grade) ? 'season-bad' : '';
+            return `<div class="season-card ${cls}">
+                <div class="season-top">
+                    <div class="season-meta">
+                        <span class="season-emoji">${s.emoji}</span>
+                        <div>
+                            <div class="season-period">${s.period}</div>
+                            <div style="font-size:0.72rem;color:var(--text-muted);">${s.label}</div>
+                        </div>
+                    </div>
+                    ${_badge(d.grade)}
+                </div>
+                <div class="season-num">${s.rawNum}</div>
+                <div class="season-suri-name">${d.name}</div>
+                <div class="season-desc">${d.desc}</div>
+            </div>`;
+        }).join('');
+
+        el.innerHTML = `<div class="suri-seasons-grid">${cardsHtml}</div>`;
+    }
+
+    // ── 보고서 항목 공통 데이터 빌더 (단일 출처) ────────────────────
+    // candidate 객체가 있으면 DOM-독립 직접 계산 (프리미엄/예시 보고서)
+    // candidate 없으면 getAnalysisData DOM 기반 (셀프 보고서)
+    function _buildReportItems(familyKr, firstName, candidate) {
+        const _ng = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+
+        // ── 공통 발음 계산 헬퍼 ────────────────────────────────────
+        const _CHO_O = c => {
+            const code = c.charCodeAt(0) - 44032;
+            if (code < 0 || code > 11171) return '';
+            const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+            const cho = CHO[Math.floor(code / 588)] || '';
+            if(['ㄱ','ㅋ','ㄲ'].includes(cho)) return '木';
+            if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho)) return '火';
+            if(['ㅇ','ㅎ'].includes(cho)) return '土';
+            if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho)) return '金';
+            if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho)) return '水';
+            return '';
+        };
+        const _YY = c => {
+            const code = c.charCodeAt(0) - 44032;
+            if (code < 0 || code > 11171) return '음';
+            const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+            const YANG = new Set(['ㅏ','ㅐ','ㅑ','ㅒ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ']);
+            return YANG.has(JUNG[Math.floor((code % 588) / 28)]) ? '양' : '음';
+        };
+        const _CYCLE = ['木','火','土','金','水'];
+        const _isSS  = (a,b) => {
+            if(a===b) return true;
+            const ia=_CYCLE.indexOf(a),ib=_CYCLE.indexOf(b);
+            return (ia+1)%5===ib||(ib+1)%5===ia; // 순방향·역방향 상생 모두 인정
+        };
+
+        const _pronGrade = (fullKr) => {
+            const os = fullKr.split('').map(_CHO_O);
+            const bad = os.filter((o,i) => i < os.length-1 && o && !_isSS(o, os[i+1])).length;
+            const total = os.length - 1;
+            if (bad === 0) return '매우 좋음';
+            if (bad === total) return '매우 나쁨';
+            if (bad * 2 <= total) return '좋음';
+            return '나쁨';
+        };
+        const _yinGrade = (fullKr) => {
+            const ys = fullKr.split('').map(_YY);
+            if (ys.every(y=>y==='양') || ys.every(y=>y==='음')) return '매우 나쁨';
+            return '매우 좋음'; // 양·음이 모두 있으면 음양 조화로 판정
+        };
+        const _numOheng = n => {
+            const d = n % 10;
+            if(d===1||d===2) return '木'; if(d===3||d===4) return '火';
+            if(d===5||d===6) return '土'; if(d===7||d===8) return '金';
+            return '水';
+        };
+        const _getSuriGrade = n => {
+            let num = n > 81 ? n % 81 : n; if (!num) num = 81;
+            if (typeof SURI_DATA==='undefined' || !SURI_DATA[num]) return '평';
+            return _ng(SURI_DATA[num].grade);
+        };
+
+        // ── candidate 직접 계산 경로 (프리미엄 / 예시 보고서) ─────
+        if (candidate) {
+            const { h1, h2, s0, isOija } = candidate;
+            const s1 = h1.s || 10, s2 = h2 ? (h2.s || 10) : 0;
+            const g1 = isOija ? s1+1 : s1+s2;
+            const g2 = s0+s1;
+            const g3 = isOija ? s0+1 : s0+s2;
+            const g4 = isOija ? s0+s1 : s0+s1+s2;
+
+            const fullKr = familyKr + firstName;
+
+            // 수리 오행 (4격 인접 쌍 상극 개수)
+            const moNums4   = [g1,g2,g3,g4];
+            const moOs4     = moNums4.map(_numOheng);
+            const moBad4    = moOs4.filter((o,i)=>i<3&&!_isSS(o,moOs4[i+1])).length;
+            const mathOhengGrade = moBad4===0?'매우 좋음':moBad4===1?'좋음':moBad4===2?'나쁨':'매우 나쁨';
+            // 수리 음양 (4격 수리의 홀짝)
+            const g4Nums = [g1,g2,g3,g4];
+            const mathYinGrade = g4Nums.every(n=>n%2===0)||g4Nums.every(n=>n%2!==0) ? '매우 나쁨' : '매우 좋음';
+
+            // 사주 보완 (자원오행이 saju prefer 를 얼마나 채우는가)
+            const prefer    = _currentState?.nameSpec?.prefer || [];
+            const nameOs    = [h1.o, h2?.o].filter(Boolean).map(o => _normOheng ? _normOheng(o) : o);
+            const compCount = prefer.filter(p => nameOs.includes(p)).length;
+            const sajuGrade = prefer.length === 0 ? '매우 좋음'
+                            : compCount === prefer.length ? '매우 좋음'
+                            : compCount > 0 ? '나쁨' : '매우 나쁨';
+
+            const _sg4 = [g1,g2,g3,g4].map(_getSuriGrade);
+            const _sg4Good = _sg4.filter(g=>g==='매우 좋음'||g==='좋음').length;
+            const _sg4Grade = _sg4Good===4?'매우 좋음':_sg4Good>=2?'좋음':_sg4Good===1?'나쁨':'매우 나쁨';
+            return [
+                { label:'사주 보완',  sub:'자원오행 매칭',  grade: sajuGrade },
+                { label:'발음 오행',  sub:'초성 상생 흐름', grade: _pronGrade(fullKr) },
+                { label:'발음 음양',  sub:'모음 음양 균형', grade: _yinGrade(fullKr) },
+                { label:'사격수리',   sub:'원·형·이·정격',  grade: _sg4Grade },
+                { label:'수리 오행',  sub:'획수 오행 상생', grade: mathOhengGrade },
+                { label:'수리 음양',  sub:'획수 홀짝 균형', grade: mathYinGrade },
+            ];
+        }
+
+        // ── getAnalysisData DOM 기반 (셀프 보고서 — 드롭다운 선택 후) ─
+        if (typeof getAnalysisData !== 'function') return [];
+        const ad = getAnalysisData(familyKr, firstName);
+        if (!ad) return [];
+        const sg = ad.suriGrades || [];
+        const _sgG = [sg[0],sg[1],sg[2],sg[3]].map(s=>_ng(s?.grade));
+        const _sgGood = _sgG.filter(g=>g==='매우 좋음'||g==='좋음').length;
+        const _sgGrade = _sgGood===4?'매우 좋음':_sgGood>=2?'좋음':_sgGood===1?'나쁨':'매우 나쁨';
+        return [
+            { label:'사주 보완',  sub:'자원오행 매칭',  grade: _ng(ad.sajuOheng?.grade)     },
+            { label:'발음 오행',  sub:'초성 상생 흐름', grade: _ng(ad.pronounceOheng?.grade) },
+            { label:'발음 음양',  sub:'모음 음양 균형', grade: _ng(ad.pronounceYin?.grade)   },
+            { label:'사격수리',   sub:'원·형·이·정격',  grade: _sgGrade },
+            { label:'수리 오행',  sub:'획수 오행 상생', grade: _ng(ad.mathOheng?.grade)  },
+            { label:'수리 음양',  sub:'획수 홀짝 균형', grade: _ng(ad.mathYin?.grade)    },
+        ];
+    }
+
+    // ── Executive Summary 카드 빌더 ────────────────────────────────
+    function _buildExecSummaryHtml(nameKr, nameHj, score, labeledItems) {
+        const _ng  = g => ({'대길':'매우 좋음','길':'좋음','평':'좋음','흉':'나쁨','대흉':'매우 나쁨'}[g]||g||'나쁨');
+        const stars = score>=90?'★★★★★':score>=75?'★★★★☆':score>=55?'★★★☆☆':score>=35?'★★☆☆☆':'★☆☆☆☆';
+        const msg   = score>=90 ? '천운과 이름이 완벽하게 어우러진 성명입니다' :
+                      score>=80 ? '사주와 조화롭고 풍요로운 기운의 이름입니다' :
+                      score>=70 ? '탄탄한 기반 위에 밝은 기운을 담은 이름입니다' :
+                      score>=55 ? '균형 잡힌 구성으로 무난한 흐름을 갖춘 이름입니다' :
+                      score>=35 ? '일부 항목의 보완이 필요한 이름입니다' :
+                                  '전반적인 재검토가 권장되는 이름입니다';
+
+        const scoreColor = score>=75?'#d4af37':score>=55?'#64748b':'#ef4444';
+        const C = 2*Math.PI*42; // circumference r=42
+        const filled = ((score/100)*C).toFixed(1);
+
+        const goodItems = labeledItems.filter(it=>{ const ng=_ng(it.g); return ng==='매우 좋음'||ng==='좋음'; });
+        const badItems  = labeledItems.filter(it=>_ng(it.g)==='매우 나쁨');
+        const midItems  = labeledItems.filter(it=>_ng(it.g)==='나쁨');
+
+        const itemsHtml = [
+            ...goodItems.map(it=>`<span class="exec-item good">✓ ${it.label}</span>`),
+            ...badItems.map(it =>`<span class="exec-item bad">⚠ ${it.label}</span>`),
+            ...midItems.slice(0,2).map(it=>`<span class="exec-item mid">· ${it.label}</span>`),
+        ].join('');
+
+        return `<div class="exec-summary">
+            <div class="exec-score-ring">
+                <svg viewBox="0 0 100 100" width="110" height="110">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" stroke-width="9"/>
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="${scoreColor}" stroke-width="9"
+                        stroke-dasharray="${filled} ${C.toFixed(1)}"
+                        stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                    <text x="50" y="45" text-anchor="middle" font-size="22" font-weight="900"
+                        fill="#0f172a" font-family="Pretendard,sans-serif">${score}</text>
+                    <text x="50" y="61" text-anchor="middle" font-size="9" fill="#94a3b8"
+                        font-family="Pretendard,sans-serif">/ 100점</text>
+                </svg>
+            </div>
+            <div class="exec-score-body">
+                <div class="exec-name">${nameKr}<span>${nameHj}</span></div>
+                <div class="exec-stars">${stars}</div>
+                <div class="exec-msg">"${msg}"</div>
+                <div class="exec-items">${itemsHtml}</div>
+            </div>
+        </div>`;
+    }
+
+    // ── 발음 섹션 렌더링 (프리미엄 풍부화 ver.) ─────────────────────
+    function _renderSoundSection(candidate, report, targetId) {
+        const elBody  = document.getElementById(targetId || 'ai-sound-body');
+        // 구버전 개별 컨테이너도 호환
+        const elOheng = elBody || document.getElementById('ai-sound-oheng');
+        const elYin   = elBody ? null : document.getElementById('ai-sound-yin');
+        if (!elOheng && !elYin && !elBody) return;
+        const { familyKr, h1, h2 } = candidate;
+        const fullKr = `${familyKr}${h1.kr}${h2?.kr||''}`;
+
+        // ── 공통 헬퍼 ────────────────────────────────────────────────
+        const OHENG_FROM_CHO = (cho) => {
+            if(['ㄱ','ㅋ','ㄲ'].includes(cho)) return '木';
+            if(['ㄴ','ㄷ','ㄹ','ㅌ','ㄸ'].includes(cho)) return '火';
+            if(['ㅇ','ㅎ'].includes(cho)) return '土';
+            if(['ㅅ','ㅈ','ㅊ','ㅆ','ㅉ'].includes(cho)) return '金';
+            if(['ㅁ','ㅂ','ㅍ','ㅃ'].includes(cho)) return '水';
+            return '?';
+        };
+        const OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+        const OHENG_KR    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+        const CYCLE = ['木','火','土','金','水'];
+        const isSangsaeng = (a,b) => {
+            if(a===b) return true;
+            const ia=CYCLE.indexOf(a),ib=CYCLE.indexOf(b);
+            return (ia+1)%5===ib||(ib+1)%5===ia; // 순방향·역방향 상생 모두 인정
+        };
+
+        const getChoByChr = (c) => {
+            const code = c.charCodeAt(0) - 0xAC00;
+            if (code < 0 || code > 11171) return '';
+            const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+            return CHO[Math.floor(code / 588)] || '';
+        };
+        const getYYByChr = (c) => {
+            const code = c.charCodeAt(0) - 0xAC00;
+            if (code < 0 || code > 11171) return '';
+            const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+            const YANG = new Set(['ㅏ','ㅐ','ㅑ','ㅒ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ']);
+            const j = JUNG[Math.floor((code % 588) / 28)];
+            return YANG.has(j) ? '양' : '음';
+        };
+
+        const chars  = fullKr.split('');
+        const ohengs = chars.map(c => {
+            if(typeof window.getCho === 'function' && typeof window.getOhengFromCho === 'function') {
+                const cho = window.getCho(c);
+                return window.getOhengFromCho(cho) || OHENG_FROM_CHO(getChoByChr(c));
+            }
+            return OHENG_FROM_CHO(getChoByChr(c));
+        });
+        const yinYangs = chars.map(c =>
+            typeof window.getYinYangFromJung === 'function'
+                ? window.getYinYangFromJung(c) || getYYByChr(c)
+                : getYYByChr(c)
+        );
+
+        // ── 등급 계산 ────────────────────────────────────────────────
+        const analysisData = (typeof getAnalysisData === 'function')
+            ? getAnalysisData(familyKr, `${h1.kr}${h2?.kr||''}`) : null;
+        const pronGrade = analysisData?.pronounceOheng?.grade || '평';
+        const yinGrade  = analysisData?.pronounceYin?.grade  || '평';
+
+        const _normG  = g => g==='대길'?'길':g==='대흉'?'흉':g;
+        const _gColor = g => ({길:'#15803d',평:'#64748b',흉:'#dc2626'})[_normG(g)]||'#64748b';
+        const _gBg    = g => ({길:'#f0fdf4',평:'#f1f5f9',흉:'#fee2e2'})[_normG(g)]||'#f1f5f9';
+        const _badge  = g => { const ng=_normG(g); return `<span style="display:inline-block;background:${_gBg(ng)};color:${_gColor(ng)};border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">${ng}</span>`; };
+
+        // ── 글자별 오행 흐름 시각화 ──────────────────────────────────
+        const goodCount = ohengs.reduce((cnt, o, i) =>
+            i < ohengs.length-1 ? cnt + (isSangsaeng(o, ohengs[i+1]) ? 1 : 0) : cnt, 0);
+        const totalPairs = Math.max(ohengs.length - 1, 1);
+        const flowHtml = chars.map((c, i) => {
+            const oheng = ohengs[i];
+            const arrowHtml = i < chars.length - 1 ? (() => {
+                const next = ohengs[i+1];
+                const good = isSangsaeng(oheng, next);
+                return `<div class="ai-sound-arrow ${good?'good':'bad'}">${good?'→':'⚡'}</div>`;
+            })() : '';
+            return `<div class="ai-sound-char">
+                <span class="char-kr">${c}</span>
+                <span class="char-oheng" style="background:${OHENG_COLOR[oheng]||'#94a3b8'};">${OHENG_KR[oheng]||oheng||'?'}</span>
+            </div>${arrowHtml}`;
+        }).join('');
+
+        // ── 음양 글자별 시각화 ───────────────────────────────────────
+        const yyCharsHtml = chars.map((c, i) => {
+            const yy = yinYangs[i];
+            const isYang = yy === '양';
+            return `<div style="text-align:center;">
+                <div style="font-size:1.2rem;font-weight:800;color:var(--bg-dark);">${c}</div>
+                <div style="margin-top:4px;font-size:0.7rem;font-weight:800;padding:2px 9px;border-radius:20px;
+                    background:${isYang?'#fff7ed':'#eff6ff'};color:${isYang?'#c2410c':'#1d4ed8'};
+                    display:inline-block;">${yy||'?'}</div>
+            </div>`;
+        }).join(`<div style="font-size:1rem;color:var(--text-muted);align-self:flex-start;padding-top:6px;">·</div>`);
+
+        // ── 설명 텍스트 ──────────────────────────────────────────────
+        const pronTexts = {
+            '매우 좋음': `초성의 기운이 <b>상생(相生)</b>으로 이어져 이름이 불릴 때마다 막힘없는 에너지 흐름이 형성됩니다. 나무가 불을 키우듯, 각 음절의 기운이 다음 음절을 자연스럽게 북돋아줍니다.`,
+            '나쁨':      `상생과 상극이 혼재하나 치명적 수준은 아닙니다. 자원오행·수리 등 다른 항목들이 보완해주면 전체 균형을 유지할 수 있으며, 종합 점수를 함께 참고해주세요.`,
+            '매우 나쁨': `초성 간 연속 <b>상극(相剋)</b>이 발생합니다. 쇠가 나무를 자르듯 기운이 충돌하는 흐름으로, 상생 구성의 이름으로 재검토를 권장합니다.`,
+        };
+        const yinTexts = {
+            '매우 좋음': `양성(ㅏ·ㅗ) 모음과 음성(ㅣ·ㅜ) 모음이 함께 어우러져 음양의 조화를 이루고 있습니다. 이름을 부를 때 밝은 기운과 차분한 기운이 균형 있게 전달됩니다.`,
+            '매우 나쁨': `모음이 양성 또는 음성 한쪽으로만 쏠려 에너지 편향이 발생합니다. 다양한 모음이 섞인 이름 구성을 검토해보세요.`,
+        };
+
+        // ── 상극 쌍 설명 생성 ────────────────────────────────────────
+        const conflictPairs = [];
+        const goodPairs = [];
+        const _ohengShort = {'木':'나무','火':'불','土':'흙','金':'쇠','水':'물'};
+        for (let i = 0; i < ohengs.length - 1; i++) {
+            const pair = `${_ohengShort[ohengs[i]]||ohengs[i]}(${chars[i]}) → ${_ohengShort[ohengs[i+1]]||ohengs[i+1]}(${chars[i+1]})`;
+            isSangsaeng(ohengs[i], ohengs[i+1]) ? goodPairs.push(pair) : conflictPairs.push(pair);
+        }
+        const pairNoteHtml = (conflictPairs.length || goodPairs.length) ? `
+            <div style="margin-top:14px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid var(--border-light);font-size:0.82rem;line-height:1.8;">
+                ${goodPairs.length ? `<div>✦ <b style="color:#15803d;">상생</b> : ${goodPairs.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>` : ''}
+                ${conflictPairs.length ? `<div>⚡ <b style="color:#dc2626;">상극</b> : ${conflictPairs.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>` : ''}
+            </div>` : '';
+
+        // ── 통합 카드 렌더링 (오행 + 음양 한 박스) ──────────────────
+        const combinedHtml = `
+            <!-- 발음 오행 카드 -->
+            <div class="sound-unified" style="margin-bottom:16px;">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 초성 오행 흐름</div>
+                    <div class="ai-sound-flow">${flowHtml}</div>
+                    ${pairNoteHtml}
+                </div>
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">${_tip('발음오행','tip-left')}</span>
+                    ${_badge(pronGrade)}
+                    <span style="font-size:0.8rem;color:var(--text-muted);margin-left:6px;">${_tip('상생','tip-left')} ${goodCount}/${totalPairs}쌍</span>
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${pronTexts[_normG(pronGrade)]||pronTexts['평']}</p>
+            </div>
+            <!-- 발음 음양 카드 -->
+            <div class="sound-unified">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:0.78rem;font-weight:800;color:var(--text-secondary);letter-spacing:1px;margin-bottom:12px;">✦ 모음 음양 배합</div>
+                    <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">${yyCharsHtml}</div>
+                </div>
+                <div class="sound-grade-row" style="margin-bottom:8px;">
+                    <span class="sound-grade-label">${_tip('음양','tip-left')}</span>
+                    ${_badge(yinGrade)}
+                </div>
+                <p style="margin:0;font-size:0.95rem;line-height:1.9;color:var(--text-primary);">${yinTexts[_normG(yinGrade)]||yinTexts['평']}</p>
+            </div>`;
+
+        if (elBody) {
+            elBody.innerHTML = combinedHtml;
+        } else {
+            if (elOheng) elOheng.innerHTML = combinedHtml;
+        }
+    }
+
+    // ── 미래 직업 탐색 섹션 ────────────────────────────────────────
+    function _renderCareerSection(candidate, state, report) {
+        const el = document.getElementById('report-career-body');
+        if (!el) return;
+
+        const { _saju, _scores } = state;
+        const h1 = candidate.h1, h2 = candidate.h2;
+
+        // ── 오행 컬러 맵 ─────────────────────────────────────────
+        const OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
+        const OHENG_ICON  = {'木':'🌱','火':'🔥','土':'🏔️','金':'⚔️','水':'💧'};
+        const OHENG_KR    = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+
+        // ── 이름의 오행 기운 ──────────────────────────────────────
+        const nameOhengs = [h1, h2].filter(Boolean)
+            .map(x => x.o?.trim()).filter(Boolean);
+        const uniqueNameOhengs = [...new Set(nameOhengs)];
+
+        // ── 사주 주도 오행 (1순위) ────────────────────────────────
+        const scoresObj = _scores || {};
+        const ohengOrder = ['木','火','土','金','水'];
+        const sorted = ohengOrder
+            .map(o => [o, scoresObj[o] || 0])
+            .sort((a,b) => b[1] - a[1]);
+        const primaryOheng = sorted[0]?.[0] || '木';
+        const primaryColor = OHENG_COLOR[primaryOheng] || '#64748b';
+
+        // ── 일간 기반 성향 ────────────────────────────────────────
+        const ILGAN_TRAIT = {
+            '甲':'독립적이고 진취적인', '乙':'유연하고 섬세한', '丙':'밝고 활발한',
+            '丁':'꼼꼼하고 집중력 강한', '戊':'안정적이고 신중한', '己':'세심하고 배려 깊은',
+            '庚':'강직하고 결단력 있는', '辛':'정밀하고 완벽을 추구하는', '壬':'자유롭고 창의적인',
+            '癸':'직관적이고 감성 풍부한'
+        };
+        const ilgan = _saju?.day?.gan || '';
+        const traitWord = ILGAN_TRAIT[ilgan] || '다재다능한';
+
+        // ── AI 서사 (careerAdvice) + 직업 배열 (careerJobs) ───────
+        const careerStory = report?.careerAdvice || '';
+        const careerJobs  = Array.isArray(report?.careerJobs) ? report.careerJobs : [];
+
+        // ── 폴백 직업 (AI 없을 때) ───────────────────────────────
+        const FALLBACK_JOBS = {
+            '木': ['교사 / 교수', '작가 / 크리에이터', '디자이너', '상담사', '환경 전문가'],
+            '火': ['마케터 / 기획자', '강사 / MC', '연기자', '정치인', '운동선수'],
+            '土': ['의사 / 한의사', '경영인 / CEO', '공무원', '사회복지사', '농식품 전문가'],
+            '金': ['판사 / 변호사', '엔지니어', '회계사 / 금융전문가', '군인 / 경찰', '외과의사'],
+            '水': ['IT 개발자', '과학자 / 연구원', '기자 / 언론인', '심리학자', '데이터 분석가']
+        };
+        const jobList = careerJobs.length
+            ? careerJobs
+            : (FALLBACK_JOBS[primaryOheng] || []);
+
+        // ── 인생 흐름 단계 ────────────────────────────────────────
+        const LIFE_STEPS = {
+            '木': [
+                { age:'초년 (0~20대)', desc:'타고난 감수성과 창의력이 씨앗처럼 움트는 시기. 다양한 경험이 미래의 자양분이 됩니다.' },
+                { age:'청장년 (20~50대)', desc:'이름의 기운이 사회 무대에서 빛나며, 아이디어와 성장 에너지로 커리어의 꽃을 피웁니다.' },
+                { age:'말년 (50대~)', desc:'쌓아온 지혜와 경험이 후배를 이끄는 멘토의 자리로 이어집니다.' }
+            ],
+            '火': [
+                { age:'초년 (0~20대)', desc:'밝고 활발한 에너지가 인맥과 무대를 넓히는 토대를 만드는 시기.' },
+                { age:'청장년 (20~50대)', desc:'리더십과 카리스마가 정점을 이루며 사회적 영향력이 확장됩니다.' },
+                { age:'말년 (50대~)', desc:'삶의 무게만큼 깊어진 통찰로 존경받는 인생을 완성합니다.' }
+            ],
+            '土': [
+                { age:'초년 (0~20대)', desc:'성실함과 책임감이 몸에 배며 신뢰라는 자산을 차곡차곡 쌓는 시기.' },
+                { age:'청장년 (20~50대)', desc:'조직·사업의 든든한 중심 기둥으로 자리 잡으며 안정적 성장을 이룹니다.' },
+                { age:'말년 (50대~)', desc:'평생의 신뢰가 열매를 맺어 풍요롭고 든든한 인생을 마무리합니다.' }
+            ],
+            '金': [
+                { age:'초년 (0~20대)', desc:'날카로운 집중력과 원칙 의식이 전문성의 기초를 다지는 시기.' },
+                { age:'청장년 (20~50대)', desc:'전문 분야에서 뚜렷한 두각을 나타내며 권위 있는 자리로 도약합니다.' },
+                { age:'말년 (50대~)', desc:'한 분야 최고 전문가로서의 명성과 품격이 인생을 빛냅니다.' }
+            ],
+            '水': [
+                { age:'초년 (0~20대)', desc:'탐구심과 지적 호기심이 남다르게 발달하며 깊이 있는 학습의 씨앗을 심는 시기.' },
+                { age:'청장년 (20~50대)', desc:'연구와 분석 능력이 현장에서 인정받으며 업계를 이끄는 전문가로 성장합니다.' },
+                { age:'말년 (50대~)', desc:'지혜와 통찰이 응축되어 사회에 귀한 가르침을 남기는 시기.' }
+            ]
+        };
+        const lifeSteps = LIFE_STEPS[primaryOheng] || LIFE_STEPS['木'];
+
+        // ── HTML 빌드 ─────────────────────────────────────────────
+        let html = '';
+
+        // ① 이름의 역할 서사 (AI 중심)
+        html += `
+        <div style="background:linear-gradient(135deg,#fffbeb 0%,#fff8e6 100%);border:1.5px solid var(--gold-light);border-radius:16px;padding:22px 24px;margin-bottom:20px;">
+            <div style="font-size:0.68rem;font-weight:800;color:var(--gold-dark);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">✦ 이름이 이 아이에게 하는 일</div>
+            <p style="font-size:0.92rem;color:#374151;line-height:1.85;margin:0;">
+                ${careerStory
+                    ? careerStory
+                    : (() => {
+                        const suppStr = uniqueNameOhengs.length
+                            ? `이 이름에 담긴 <b style="color:var(--gold-dark);">${uniqueNameOhengs.map(o=>OHENG_KR[o]||o).join(' · ')}</b> 기운은 사주에서 부족했던 영역을 정확히 채워줍니다.`
+                            : '이 이름은 사주의 균형을 맞추는 데 중요한 역할을 합니다.';
+                        return `일간 <b style="color:var(--gold-dark);">${_toHangul?.(ilgan)||ilgan}(${ilgan})</b>의 기운을 가진 이 아이는 <b>${traitWord}</b> 성향을 타고났습니다.
+                            사주에서 <b style="color:${primaryColor};">${OHENG_KR[primaryOheng]||primaryOheng}</b> 기운이 가장 강하게 흐르며,
+                            이 기운이 인생 전반의 방향성과 기질의 핵심 동력이 됩니다.
+                            ${suppStr}
+                            그 보완된 기운은 단순히 적성을 넓히는 것을 넘어,
+                            아이가 사회에 나아갈 때 더 유연하게 적응하고 다양한 환경에서 자신의 능력을 발휘하도록 든든히 뒷받침합니다.
+                            이름은 평생 불리는 주문(呪文)과 같습니다 — 매일 이름이 불릴 때마다 이 기운이 아이에게 스며들어
+                            원하는 방향으로 인생의 항로를 열어주는 나침반이 되어줄 것입니다.`;
+                      })()
+                }
+            </p>
+        </div>`;
+
+        // ② 추천 직업 카드들
+        if (jobList.length) {
+            html += `
+        <div style="margin-bottom:20px;">
+            <div style="font-size:0.68rem;font-weight:800;color:#64748b;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px;">추천 진로 · 직업군</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                ${jobList.map((job, i) => {
+                    const isMain = i < 2;
+                    const bg  = isMain ? primaryColor : '#64748b';
+                    const icon = i === 0 ? '⭐' : i === 1 ? '✦' : '·';
+                    return `<div style="display:flex;align-items:center;gap:8px;background:${bg}${isMain ? '18' : '10'};border:1.5px solid ${bg}${isMain ? '40' : '25'};border-radius:12px;padding:10px 16px;">
+                        <span style="font-size:0.9rem;">${icon}</span>
+                        <span style="font-size:0.88rem;font-weight:${isMain ? '800' : '700'};color:${isMain ? bg : '#475569'};">${job}</span>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+        }
+
+        // ③ 인생 시기별 흐름
+        html += `
+        <div style="background:#fff;border:1px solid var(--border-light);border-radius:16px;padding:20px 22px;">
+            <div style="font-size:0.68rem;font-weight:800;color:#94a3b8;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:16px;">인생 시기별 흐름</div>
+            <div style="display:flex;flex-direction:column;gap:0;">
+                ${lifeSteps.map((step, i) => `
+                <div style="display:flex;gap:16px;${i < lifeSteps.length-1 ? 'padding-bottom:20px;' : ''}">
+                    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+                        <div style="width:36px;height:36px;border-radius:50%;background:${i===0 ? primaryColor+'22' : i===1 ? primaryColor+'14' : '#f1f5f9'};border:2px solid ${i===0 ? primaryColor : i===1 ? primaryColor+'88' : '#e2e8f0'};display:flex;align-items:center;justify-content:center;font-size:1rem;">
+                            ${i===0 ? OHENG_ICON[primaryOheng]||'🌱' : i===1 ? '🌟' : '🏆'}
+                        </div>
+                        ${i < lifeSteps.length-1 ? `<div style="width:2px;flex:1;background:linear-gradient(180deg,${primaryColor}40,transparent);margin-top:4px;min-height:16px;"></div>` : ''}
+                    </div>
+                    <div style="padding-top:6px;padding-bottom:${i < lifeSteps.length-1 ? '0' : '0'};">
+                        <div style="font-size:0.75rem;font-weight:800;color:${i===0 ? primaryColor : '#94a3b8'};margin-bottom:4px;">${step.age}</div>
+                        <p style="font-size:0.85rem;color:#475569;line-height:1.7;margin:0;">${step.desc}</p>
+                    </div>
+                </div>`).join('')}
+            </div>
+        </div>`;
+
+        el.innerHTML = html;
+    }
+
+    // ── 챕터 아코디언 토글 ────────────────────────────────────────
+    function _toggleChapter(id) {
+        const body = document.getElementById('acc-body-' + id);
+        const btn  = document.getElementById('toggle-btn-' + id);
+        if (!body) return;
+        const opening = !body.classList.contains('open');
+        body.classList.toggle('open', opening);
+        if (btn) btn.innerHTML = opening ? '접기 ↑' : '자세히 보기 ↓';
+        // 대운 차트가 숨겨진 상태에서 렌더되면 크기가 0이 됨 → 열릴 때 재렌더
+        if (opening && id === 'ch5c') {
+            setTimeout(() => {
+                if (typeof renderCharts === 'function') renderCharts();
+                if (window._daeunData && typeof _updateLifeFlowChart === 'function')
+                    _updateLifeFlowChart(window._daeunData);
+            }, 100);
+        }
+        // 레이더 차트도 동일
+        if (opening && id === 'ch2') {
+            setTimeout(() => {
+                if (typeof _updateRadarChart === 'function' && window._currentScores)
+                    _updateRadarChart(window._currentScores, window._currentCandidate);
+            }, 100);
+        }
+    }
+    // 전역 노출 (onclick에서 호출)
+    window._toggleChapter = _toggleChapter;
+
+    function _toggleExpertSection() {
+        const body = document.getElementById('expert-master-body');
+        const btn  = document.getElementById('expert-toggle-btn');
+        if (!body) return;
+        const opening = !body.classList.contains('open');
+        body.classList.toggle('open', opening);
+        if (btn) btn.innerHTML = opening ? '접기 ↑' : '전문 분석 열기 ↓';
+        if (opening) {
+            setTimeout(() => {
+                if (typeof _updateRadarChart === 'function' && window._currentScores)
+                    _updateRadarChart(window._currentScores, window._currentCandidate);
+                if (typeof renderCharts === 'function') renderCharts();
+                if (window._daeunData && typeof _updateLifeFlowChart === 'function')
+                    _updateLifeFlowChart(window._daeunData);
+            }, 100);
+        }
+    }
+    window._toggleExpertSection = _toggleExpertSection;
+
+    // ── 챕터 판정 배너 헬퍼 ────────────────────────────────────────
+    function _renderVerdict(elId, grade, text) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const G4_COLOR = {
+            '매우 좋음': '#15803d', '좋음': '#1d4ed8',
+            '나쁨': '#d97706', '매우 나쁨': '#dc2626'
+        };
+        const G4_BG = {
+            '매우 좋음': '#f0fdf4', '좋음': '#eff6ff',
+            '나쁨': '#fffbeb', '매우 나쁨': '#fee2e2'
+        };
+        const color = G4_COLOR[grade] || '#64748b';
+        const bg    = G4_BG[grade]    || '#f8fafc';
+        el.style.background   = bg;
+        el.style.borderColor  = color + '40';
+        el.innerHTML = `<span class="cvs-badge" style="background:${color}22;color:${color};">${grade}</span><span class="cvs-text">${text}</span>`;
+    }
+
+    // ── 종합 결론 그리드 ────────────────────────────────────────────
+    // _buildReportItems 와 동일한 단일 출처를 사용하여 Exec Summary 와 완전 동일한 데이터 표시
+    function _renderConclusionGrid(candidate, state) {
+        const el = document.getElementById('ai-conclusion-grid');
+        if (!el) return;
+
+        const familyKr  = candidate.familyKr;
+        const firstName = `${candidate.h1.kr}${candidate.h2?.kr||''}`;
+        const items = _buildReportItems(familyKr, firstName, candidate);
+        if (!items.length) return;
+
+        // 4단계: Section 1 전용어 순화 맵
+        const CONSUMER_LABEL = {
+            '사주 보완': '기운 조화',
+            '발음 오행': '소리의 기운',
+            '발음 음양': '소리의 균형',
+            '사격수리':  '이름의 수리',
+            '수리 오행': '수리 기운',
+            '수리 음양': '수리 균형',
+        };
+
+        // 색상 매핑
+        const G4_C  = {'매우 좋음':'#15803d','좋음':'#2563eb','나쁨':'#d97706','매우 나쁨':'#dc2626'};
+        const G4_BG = {'매우 좋음':'#f0fdf4','좋음':'#eff6ff','나쁨':'#fffbeb','매우 나쁨':'#fef2f2'};
+        const G4_ICON = {'매우 좋음':'★','좋음':'✦','나쁨':'△','매우 나쁨':'✗'};
+
+        // 요약 통계 (좋은 항목 개수)
+        const goodCnt = items.filter(x => x.grade==='매우 좋음'||x.grade==='좋음').length;
+        const total   = items.length;
+
+        const summaryHtml = `
+        <div style="display:flex;align-items:center;justify-content:space-between;
+             padding:12px 16px;background:#f8fafc;border-radius:12px;margin-bottom:14px;
+             border:1px solid var(--border-light);">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">
+                ${total}개 평가 기준
+            </span>
+            <span style="font-size:0.85rem;font-weight:800;color:${goodCnt>=Math.ceil(total*0.75)?'#15803d':goodCnt>=Math.ceil(total*0.5)?'#2563eb':'#d97706'};">
+                ${goodCnt}/${total} 좋음 이상
+            </span>
+        </div>`;
+
+        const gridHtml = `<div class="score-criteria-grid">` +
+            items.map(x => {
+                const c  = G4_C[x.grade]  || '#64748b';
+                const bg = G4_BG[x.grade] || '#f8fafc';
+                const ic = G4_ICON[x.grade] || '–';
+                const dispLabel = CONSUMER_LABEL[x.label] || x.label;
+                return `<div class="score-criteria-item" style="border-color:${c}40;background:${bg};">
+                    <div class="sci-dot" style="background:${c};">${ic}</div>
+                    <div class="sci-label">${dispLabel}</div>
+                    <div class="sci-grade-pill" style="background:${c}20;color:${c};">${x.grade}</div>
+                </div>`;
+            }).join('') + `</div>`;
+
+        el.innerHTML = summaryHtml + gridHtml;
+
+        // 현재 스코어와 후보를 전역 저장 (레이더 재렌더용)
+        window._currentScores    = state?._scores;
+        window._currentCandidate = candidate;
+    }
+
+    // ── 대운 계산 & 칩 렌더링 ──────────────────────────────────────
+    function _renderDaeunSection(candidate, state, report) {
+        const elIntro  = document.getElementById('report-daeun-section');
+        const elChips  = document.getElementById('daeun-labels-bar');
+        const elDetail = document.getElementById('daeun-detail-panel');
+        if (!elIntro && !elChips) return;
+
+        const saju   = state._saju || {};
+        const gender = state.constraints?.gender || 'M';
+
+        // ── 공통 데이터 ────────────────────────────────────────────
+        const G60 = ['甲子','乙丑','丙寅','丁卯','戊辰','己巳','庚午','辛未','壬申','癸酉',
+                     '甲戌','乙亥','丙子','丁丑','戊寅','己卯','庚辰','辛巳','壬午','癸未',
+                     '甲申','乙酉','丙戌','丁亥','戊子','己丑','庚寅','辛卯','壬辰','癸巳',
+                     '甲午','乙未','丙申','丁酉','戊戌','己亥','庚子','辛丑','壬寅','癸卯',
+                     '甲辰','乙巳','丙午','丁未','戊申','己酉','庚戌','辛亥','壬子','癸丑',
+                     '甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥'];
+        const GAN_O  = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+        const JI_O   = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+        const GAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
+        const JI_KR  = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
+        const O_COLOR= {'木':'#22c55e','火':'#ef4444','土':'#d97706','金':'#64748b','水':'#3b82f6'};
+        const O_KR2  = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+        const CYCLE  = ['木','火','土','金','水'];
+        const isSS   = (a,b) => a===b || (CYCLE.indexOf(a)+1)%5===CYCLE.indexOf(b);
+        const isSK   = (a,b) => (CYCLE.indexOf(a)+2)%5===CYCLE.indexOf(b);
+
+        // 천간별 특성 설명 (1줄)
+        const GAN_DESC = {
+            '甲':'강한 개척 의지와 리더십이 발동하는 시기로, 새로운 도전이 폭발적으로 시작됩니다.',
+            '乙':'유연한 적응력과 섬세한 감수성이 강점이 되며, 인연과 협력이 풍성해집니다.',
+            '丙':'밝은 에너지와 사교성이 절정에 달해 명예와 인기가 자연스럽게 뒤따르는 황금기입니다.',
+            '丁':'조용한 집중력과 전문성이 깊어지며, 한 분야에서 차별화된 실력을 쌓아가는 내실의 시간입니다.',
+            '戊':'중후한 신뢰감과 안정된 기반이 구축되며, 주변의 믿음과 의지를 한 몸에 받게 됩니다.',
+            '己':'꼼꼼한 실용성과 계획력이 빛을 발해, 현실적이고 견고한 성과를 일궈내는 시기입니다.',
+            '庚':'강한 결단력과 추진력이 앞세워지며, 오랜 노력이 구체적인 결실로 맺혀나는 때입니다.',
+            '辛':'정교한 심미안과 완성도에 대한 추구가 두드러지며, 가치 있는 것을 선별하고 다듬어 나갑니다.',
+            '壬':'탁 트인 시야와 넓은 포용력으로 활동 무대가 확장되며 창의적 아이디어가 넘쳐납니다.',
+            '癸':'내면의 지혜와 통찰력이 무르익는 성숙의 시기로, 삶의 깊은 이치를 터득하게 됩니다.',
+        };
+        // 지지별 뒷받침 (1줄)
+        const JI_DESC = {
+            '子':'지지의 水(子) 기운이 학문적 탐구심과 유연한 사고를 뒷받침합니다.',
+            '丑':'지지의 土(丑) 기운이 견고한 토대와 꾸준한 인내력을 더해줍니다.',
+            '寅':'지지의 木(寅) 기운이 힘찬 시작과 진취적인 도약을 강하게 밀어줍니다.',
+            '卯':'지지의 木(卯) 기운이 부드럽고 지속적인 성장의 에너지를 공급합니다.',
+            '辰':'지지의 土(辰) 기운이 넓은 포용력과 대담한 실행력을 보태줍니다.',
+            '巳':'지지의 火(巳) 기운이 열정과 집중력을 더해 성취 욕구를 고조시킵니다.',
+            '午':'지지의 火(午) 기운이 최고조의 활동 에너지와 카리스마를 발산합니다.',
+            '未':'지지의 土(未) 기운이 풍성한 결실과 따뜻한 인덕(人德)을 예고합니다.',
+            '申':'지지의 金(申) 기운이 날카로운 판단력과 효율적 실행력을 더합니다.',
+            '酉':'지지의 金(酉) 기운이 정밀한 완성도와 깊은 성취감을 강화합니다.',
+            '戌':'지지의 土(戌) 기운이 성실한 마무리와 오랜 노력의 축적을 돕습니다.',
+            '亥':'지지의 水(亥) 기운이 깊은 내공과 내면의 성찰을 무르익게 합니다.',
+        };
+
+        // calcDaeun 결과 우선 사용, 없으면 자체 계산
+        const _daeunData = state.daeun;
+        let forward, startAge;
+        if (_daeunData) {
+            forward   = _daeunData.isForward;
+            startAge  = _daeunData.startAge;
+        } else {
+            const YANG_GAN_SET = new Set(['甲','丙','戊','庚','壬']);
+            const isYang = YANG_GAN_SET.has(saju.year?.gan||'');
+            const isMale = gender === 'M';
+            forward  = (isYang && isMale) || (!isYang && !isMale);
+            startAge = 5;
+        }
+
+        const monthGanji = (saju.month?.gan||'') + (saju.month?.ji||'');
+        let baseIdx = G60.indexOf(monthGanji);
+        if (baseIdx === -1) baseIdx = 0;
+
+        const nameOs = [candidate.h1?.o, candidate.h2?.o].filter(Boolean).map(o => _normOheng(o));
+        const nameKr = `${candidate.familyKr}${candidate.h1.kr}${candidate.h2?.kr||''}`;
+
+        // ── 나이대별 인생 맥락 (2문장) ───────────────────────────
+        const AGE_CTX = [
+            '유년기는 타고난 기질과 성품의 씨앗이 뿌리내리는 시간입니다. 이 시기의 환경과 경험이 평생의 가치관과 정서적 토대를 결정짓습니다.',
+            '학업과 진로의 방향이 구체화되는 청소년·청년기의 핵심 분기점입니다. 자아 정체성이 확립되고 첫 번째 사회적 선택이 이루어지는 중요한 전환점입니다.',
+            '사회에 첫발을 내딛으며 자신만의 영역을 개척하는 도전의 시기입니다. 직업적 기반을 다지고 인간관계의 폭이 가장 빠르게 넓어지는 시기이기도 합니다.',
+            '직업적 역량이 절정에 이르고 가정의 안정이 함께 무르익는 시기입니다. 삶의 중심축이 확고해지며 주도적으로 자신의 인생을 설계해 나갑니다.',
+            '지금까지의 노력과 경험이 가장 크게 결실을 맺는 인생의 황금기입니다. 사회적 영향력과 개인적 성취감이 함께 깊어지며 충만함을 느끼는 시기입니다.',
+            '원숙한 지혜와 균형 감각으로 주변을 이끌어가는 성숙기입니다. 물질적 성취보다 관계의 깊이와 정신적 풍요가 더 큰 의미를 갖게 되는 시기입니다.',
+            '평생의 공이 자연스럽게 인정받고 내면의 평화가 깃드는 시기입니다. 경쟁보다 완성, 확장보다 내실을 추구하며 삶 전체를 온전히 돌아보게 됩니다.',
+            '깊은 지혜와 온화한 덕성으로 주변에 영향을 미치는 완성의 시기입니다. 모든 경험이 하나의 이야기로 엮이며, 삶 자체가 의미 있는 유산이 됩니다.',
+        ];
+        // ── 천간·지지 오행별 대운 에너지 해석 ───────────────────
+        const GAN_O_DESC = {
+            '木': '천간 목(木)의 기운이 이 시기 전반에 성장과 도전의 물결을 만들어냅니다. 새로운 시작을 두려워하지 않는 진취적 에너지가 넘쳐, 변화 앞에서도 유연하게 뻗어나가는 힘이 강해집니다.',
+            '火': '천간 화(火)의 기운이 이 시기 전반에 명예와 표현의 욕구를 드높입니다. 열정적인 추진력이 활성화되어 사교적 능력이 돋보이고, 주변의 인정과 지지를 이끌어내기 좋은 때입니다.',
+            '土': '천간 토(土)의 기운이 이 시기 전반에 안정과 신뢰의 기반을 다져줍니다. 급격한 변동보다 꾸준한 성실함이 빛을 발하며, 주변 사람들로부터 두터운 신망을 얻는 시기입니다.',
+            '金': '천간 금(金)의 기운이 이 시기 전반에 결단과 개혁의 날을 세워줍니다. 집중과 선택으로 승부를 거는 힘이 강해지며, 목표를 향한 추진력이 극대화됩니다.',
+            '水': '천간 수(水)의 기운이 이 시기 전반에 지혜와 통찰을 깊게 해줍니다. 눈앞의 이익보다 큰 그림을 보는 혜안이 발달하고, 유연한 적응력이 어떤 상황에서도 길을 열어줍니다.',
+        };
+        const JI_O_ROLE = {
+            '木': '지지의 목(木) 기운이 뿌리 깊은 생명력과 성장 의지를 뒷받침합니다.',
+            '火': '지지의 화(火) 기운이 활기찬 에너지와 사교적 기질을 더욱 활발하게 합니다.',
+            '土': '지지의 토(土) 기운이 내면의 중심을 잡고 흔들림 없는 안정감을 더해줍니다.',
+            '金': '지지의 금(金) 기운이 집중력과 판단력을 단단히 뒷받침해줍니다.',
+            '水': '지지의 수(水) 기운이 깊은 통찰과 유연한 적응력을 함께 길러줍니다.',
+        };
+        const O_EFFECT = {
+            '木':'성장·창의력', '火':'명예·사교성', '土':'안정·신뢰감', '金':'결단·성취', '水':'지혜·통찰'
+        };
+        const O_SHORT = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+
+        // ── 대운 8개 생성 ─────────────────────────────────────────
+        const daeuns = Array.from({length: 8}, (_, i) => {
+            // calcDaeun cycles가 있으면 우선 사용 (정확한 startAge, 간지)
+            let gan, ji, ganO, jiO, ageS, ageE;
+            if (_daeunData?.cycles?.[i]) {
+                const cy = _daeunData.cycles[i];
+                gan  = cy.gan;  ji  = cy.ji;
+                ganO = cy.ganOheng || GAN_O[gan]||'';
+                jiO  = cy.jiOheng  || JI_O[ji]||'';
+                ageS = cy.startAge; ageE = cy.endAge;
+            } else {
+                const idx = ((baseIdx + (forward ? i+1 : -(i+1))) % 60 + 60) % 60;
+                const gj  = G60[idx];
+                gan  = gj[0]; ji  = gj[1];
+                ganO = GAN_O[gan]||''; jiO = JI_O[ji]||'';
+                ageS = startAge + i * 10; ageE = ageS + 9;
+            }
+            const gj = gan + ji;  // 간지 조합 문자열
+
+            // 천간 / 지지 1줄 설명
+            const line1 = GAN_DESC[gan] || `${gan} 천간의 기운이 인생에 영향을 미칩니다.`;
+            const line2 = JI_DESC[ji]   || `${ji} 지지의 기운이 뒷받침합니다.`;
+
+            // 대운 종합 설명: 나이 맥락 + 천간·지지 에너지 + (상생시만) 이름 효과
+            let daeunSummary = AGE_CTX[i] || '';
+            if (ganO && GAN_O_DESC[ganO]) daeunSummary += ' ' + GAN_O_DESC[ganO];
+            if (jiO  && JI_O_ROLE[jiO])  daeunSummary += ' ' + JI_O_ROLE[jiO];
+            if (nameOs.length && ganO) {
+                const helps = nameOs.filter(no => isSS(no, ganO));
+                if (helps.length) {
+                    const rel = helps[0] === ganO ? '동기상조(同氣相助)' : '상생(相生)';
+                    const eff = O_EFFECT[ganO] || '';
+                    daeunSummary += ` <b>이름 "${nameKr}"에 담긴 ${helps.map(o=>O_SHORT[o]).join('·')} 기운이 대운과 ${rel}하여 ${eff}이 한층 극대화됩니다.</b>`;
+                }
+                // 상극·중화 대운에서는 이름 효과 미표기
+            }
+
+            // 칩 synergy 유형
+            const synergy = nameOs.some(no=>isSS(no,ganO)) ? 'good' : nameOs.some(no=>isSK(no,ganO)) ? 'warn' : 'mid';
+            return { gj, gan, ji, ganO, jiO, ageS, ageE, line1, line2, daeunSummary, synergy };
+        });
+
+        // ── 차트 데이터 전역 저장 (초기화 후 _updateLifeFlowChart 에서 사용) ──
+        window._daeunChartLabels = daeuns.map(d => `${d.ageS}~${d.ageE}세`);
+        window._daeunData = daeuns;
+
+        // ── 인트로 ────────────────────────────────────────────────
+        if (elIntro) {
+            elIntro.innerHTML = `
+                <div style="font-size:0.88rem;line-height:1.8;color:var(--text-secondary);
+                    padding:13px 17px;background:#f8fafc;border-radius:12px;border-left:3px solid var(--gold-dark);margin-bottom:4px;">
+                    대운(大運)은 <b>월주(月柱)</b>에서 출발해 10년 주기로 흐르는 인생의 큰 파도입니다. 이 아이의 사주는
+                    <b>${forward?'순행(順行)':'역행(逆行)'}</b> 대운으로 약 <b>${startAge}세</b>부터 시작됩니다.
+                    아래 그래프의 대운 칩을 클릭하면 각 시기의 해석과 이름의 작용을 확인할 수 있습니다.
+                </div>
+                <div style="font-size:0.78rem;line-height:1.7;color:#92400e;padding:10px 14px;background:#fffbeb;border-radius:10px;border:1px solid #fcd34d;margin-top:8px;margin-bottom:0;">
+                    <b>📊 그래프 읽는 법</b> — 이 그래프는 절대적인 인생의 성공·실패를 예측하는 것이 아닙니다.
+                    추천된 이름은 이미 사주와 잘 어울리는 이름이 선별된 것이므로 전반적으로 높은 수준을 유지합니다.
+                    <b>★ 길운</b> 구간(노란 별)은 이름 기운이 대운과 상생하여 특히 빛나는 시기,
+                    <b>▲ 주의</b> 구간(빨간 삼각)은 상대적으로 에너지 조절이 필요한 시기입니다.
+                    다운된 구간도 충분히 좋은 시기이며, 이 이름은 그 시기에도 아이의 든든한 버팀목이 됩니다.
+                </div>`;
+        }
+
+        // ── 대운 칩 바 렌더링 ─────────────────────────────────────
+        if (elChips) {
+            const SYNERBY_BORDER = { good:'#22c55e', warn:'#f59e0b', mid:'#94a3b8' };
+            elChips.innerHTML = `<div class="daeun-chips-bar">${daeuns.map((d, i) => {
+                const c = O_COLOR[d.ganO] || '#64748b';
+                const b = SYNERBY_BORDER[d.synergy];
+                return `<button class="daeun-chip" data-idx="${i}"
+                    style="border-color:${b}30;background:${c}10;"
+                    onclick="_showDaeunDetail(${i})">
+                    <span class="dc-age">${d.ageS}~${d.ageE}세</span>
+                    <span class="dc-gan" style="color:${c};">${d.gan}</span>
+                    <span class="dc-ji"  style="color:${O_COLOR[d.jiO]||c};">${d.ji}</span>
+                    <span class="dc-read">${GAN_KR[d.gan]||''}${JI_KR[d.ji]||''}</span>
+                </button>`;
+            }).join('')}</div>
+            <div style="font-size:0.72rem;color:#94a3b8;text-align:center;margin-top:2px;">
+                <span style="color:#22c55e;font-weight:700;">●</span> 상생&nbsp;
+                <span style="color:#f59e0b;font-weight:700;">●</span> 보완&nbsp;
+                <span style="color:#94a3b8;font-weight:700;">●</span> 중화&nbsp;&nbsp;— 칩을 클릭하면 대운 해석을 볼 수 있습니다
+            </div>`;
+        }
+
+        // ── 전역 함수: 칩 클릭 시 상세 패널 ──────────────────────
+        window._showDaeunDetail = (idx) => {
+            if (!elDetail) return;
+            const d = daeuns[idx];
+            const c = O_COLOR[d.ganO] || '#64748b';
+            // 칩 active 표시
+            document.querySelectorAll('.daeun-chip').forEach((el,i) => {
+                el.classList.toggle('active', i === idx);
+                el.style.borderColor = i === idx ? c : ({good:'#22c55e',warn:'#f59e0b',mid:'#94a3b8'}[daeuns[i].synergy]+'30');
+            });
+            // 같은 칩 재클릭 시 닫기
+            if (elDetail.style.display !== 'none' && elDetail.dataset.openIdx === String(idx)) {
+                elDetail.style.display = 'none';
+                elDetail.dataset.openIdx = '';
+                document.querySelectorAll('.daeun-chip').forEach(el => el.classList.remove('active'));
+                return;
+            }
+            elDetail.dataset.openIdx = String(idx);
+            elDetail.style.display = 'block';
+            elDetail.innerHTML = `
+                <div class="daeun-panel">
+                    <div class="daeun-panel-head">
+                        <div class="daeun-panel-ganji">
+                            <span style="color:${c};display:block;">${d.gan}</span>
+                            <span style="color:${O_COLOR[d.jiO]||c};display:block;">${d.ji}</span>
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem;font-weight:700;color:#94a3b8;letter-spacing:1px;margin-bottom:4px;">${d.ageS} ~ ${d.ageE}세 대운</div>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <span style="font-size:0.75rem;font-weight:800;padding:3px 11px;border-radius:20px;
+                                    background:${c}18;color:${c};border:1px solid ${c}40;">천간 ${O_KR2[d.ganO]||d.ganO}</span>
+                                <span style="font-size:0.75rem;font-weight:800;padding:3px 11px;border-radius:20px;
+                                    background:${O_COLOR[d.jiO]||'#94a3b8'}18;color:${O_COLOR[d.jiO]||'#64748b'};border:1px solid ${O_COLOR[d.jiO]||'#94a3b8'}40;">
+                                    지지 ${O_KR2[d.jiO]||d.jiO}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="font-size:0.75rem;font-weight:800;color:white;background:${c};border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">천간</span>
+                            <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);">${d.line1}</p>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="font-size:0.75rem;font-weight:800;color:white;background:${O_COLOR[d.jiO]||'#94a3b8'};border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">지지</span>
+                            <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);">${d.line2}</p>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="font-size:0.75rem;font-weight:800;color:white;background:#d4af37;border-radius:20px;padding:2px 8px;flex-shrink:0;margin-top:2px;">대운</span>
+                            <p style="margin:0;font-size:0.9rem;line-height:1.75;color:var(--text-primary);">${d.daeunSummary}</p>
+                        </div>
+                    </div>
+                </div>`;
+        };
+
+        // 첫 번째 칩 자동 선택은 차트 렌더 콜백(100ms) 에서 처리
+    }
+
+    // ── 실천 가이드 (오행 생활 팁 + 시기별 부모 행동 가이드) ─────────────
+    function _renderPracticeGuide(candidate, state, targetId) {
+        const el = document.getElementById(targetId || 'report-practice-guide');
+        if (!el) return;
+
+        // ── 오행 데이터 ──────────────────────────────────────────────
+        const _OC  = { '木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#3b82f6' };
+        const _OBG = { '木':'#f0fdf4','火':'#fff5f5','土':'#fefce8','金':'#f8fafc','水':'#eff6ff' };
+        const _OBD = { '木':'#bbf7d0','火':'#fecaca','土':'#fef08a','金':'#e2e8f0','水':'#bfdbfe' };
+        const _ON  = { '木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)' };
+        const _OEM = { '木':'🌿','火':'🔥','土':'🌍','金':'⚙️','水':'💧' };
+        const _OKW = { '木':'창의·성장','火':'열정·사교','土':'안정·신뢰','金':'집중·원칙','水':'지혜·성찰' };
+
+        const _OHENG_TIPS = {
+            '木': {
+                name: '나무(木) 기운 채우기',
+                tips: [
+                    '주말마다 공원·산·숲에서 자연과 접촉하는 시간 만들기',
+                    '그림 그리기, 만들기, 음악·악기 등 창의 활동 적극 지원',
+                    '식물을 직접 키우며 생명과 성장의 가치 체험',
+                    '초록·파랑 계열 인테리어·소품으로 생활 공간 꾸미기',
+                ]
+            },
+            '火': {
+                name: '불(火) 기운 채우기',
+                tips: [
+                    '친구들과 어울리는 사교 모임·팀 활동 자주 마련',
+                    '발표·토론·공연 기회를 통해 자신감과 표현력 강화',
+                    '따뜻한 스킨십과 긍정적 말로 애정을 자주 표현',
+                    '빨강·주황 계열 소품·의류로 활기찬 에너지 보충',
+                ]
+            },
+            '土': {
+                name: '흙(土) 기운 채우기',
+                tips: [
+                    '매일 같은 시간에 일어나는 규칙적인 생활 리듬 형성',
+                    '가족이 함께 밥 먹는 식사 시간을 일상의 닻으로 삼기',
+                    '요리·텃밭 가꾸기 등 땅과 음식에 친숙해지는 활동',
+                    '노란색·갈색 계열 소품으로 따뜻하고 안정된 공간 조성',
+                ]
+            },
+            '金': {
+                name: '쇠(金) 기운 채우기',
+                tips: [
+                    '하루 한 가지 작은 목표를 완수하는 집중력 훈련 습관화',
+                    '악기 연주·바둑·퍼즐 등 집중이 필요한 취미 적극 권장',
+                    '정리 정돈과 약속 지키기로 원칙 있는 생활 습관 형성',
+                    '흰색·회색·은색 계열 소품으로 깔끔하고 정돈된 환경 유지',
+                ]
+            },
+            '水': {
+                name: '물(水) 기운 채우기',
+                tips: [
+                    '매일 20분 독서 시간·일기 쓰기 등 사색하는 습관 만들기',
+                    '수영·목욕·계곡 활동 등 물과 친숙해지는 경험 자주 제공',
+                    '감정을 말로 표현하는 대화 시간 매일 갖기',
+                    '남색·검정 계열 소품과 조용한 독서 코너로 성찰 공간 마련',
+                ]
+            }
+        };
+
+        // 부족한(보완이 필요한) 오행 목록
+        const prefer = state?.nameSpec?.prefer || [];
+        // 이름이 이미 채운 오행
+        const nameOhengSet = candidate
+            ? [candidate.h1, candidate.h2].filter(Boolean).map(h => _normOheng ? _normOheng(h.o) : h.o).filter(Boolean)
+            : [];
+
+        // 보완 필요 오행 카드 (prefer 순), 없으면 이름 오행 기준으로 표시, 그것도 없으면 전체 5개
+        let targetOhengs = prefer.length > 0 ? prefer : nameOhengSet.length > 0 ? [...new Set(nameOhengSet)] : Object.keys(_OHENG_TIPS);
+        // 최대 5개
+        targetOhengs = targetOhengs.slice(0, 5);
+
+        // ── 오행 팁 카드 ──────────────────────────────────────────
+        const ohengCardsHtml = targetOhengs.length ? `
+            <div style="margin-bottom:8px;">
+                <h3 style="font-size:0.95rem;font-weight:800;color:var(--bg-dark);margin:0 0 4px;">
+                    ${prefer.length > 0 ? '🌟 사주 보완 · 오행 생활 팁' : '🌟 이름 오행 · 생활 팁'}
+                </h3>
+                <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 14px;line-height:1.6;">
+                    ${prefer.length > 0
+                        ? '아이의 사주에 부족한 기운을 일상에서 자연스럽게 채워주는 실천 방법입니다.'
+                        : '이름에 담긴 오행 기운을 생활 속에서 더욱 풍요롭게 키워주는 팁입니다.'}
+                </p>
+            </div>
+            <div class="practice-oheng-cards">
+                ${targetOhengs.map(o => {
+                    const tipData = _OHENG_TIPS[o];
+                    if (!tipData) return '';
+                    const isComp = nameOhengSet.includes(o);
+                    const badgeLabel = prefer.includes(o) ? (isComp ? '이름이 채움' : '보완 필요') : '이름 오행';
+                    const badgeBg = isComp ? '#22c55e' : prefer.includes(o) ? '#f59e0b' : (_OC[o] || '#64748b');
+                    return `<div class="oheng-tip-card" style="border-color:${_OBD[o]||'#e2e8f0'};">
+                        <div class="oheng-tip-left" style="background:${_OBG[o]||'#f8fafc'};">
+                            <div class="oheng-tip-badge" style="background:${_OC[o]||'#64748b'};">${_OEM[o]||'●'}</div>
+                            <div class="oheng-tip-name" style="color:${_OC[o]||'#0f172a'};">${_ON[o]||o}</div>
+                            <div class="oheng-tip-keyword">${_OKW[o]||''}</div>
+                            <span class="oheng-tip-status" style="background:${badgeBg};">${badgeLabel}</span>
+                        </div>
+                        <div class="oheng-tip-right" style="border-left-color:${_OBD[o]||'#e2e8f0'};">
+                            <ul class="oheng-tip-list">
+                                ${tipData.tips.map(t => `<li>${t}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>` : '';
+
+        // ── 시기별 부모 행동 가이드 ──────────────────────────────────
+        // 오행별 특화 메시지 선택
+        const _phaseMsg = (phase, ohngs) => {
+            const o = ohngs[0] || '';
+            const msgs = {
+                infant: {
+                    '木': '초록빛 자연 소품과 식물로 방을 꾸며 생명 에너지를 가득 채워주세요. 이름을 다정하게, 자주 불러줄수록 나무 기운이 무럭무럭 자랍니다.',
+                    '火': '밝고 따뜻한 색감의 환경을 만들어 주세요. 부드러운 스킨십과 노래로 아이 안에 불꽃 같은 활기를 심어줍니다.',
+                    '土': '일정한 수면·식사 루틴을 지켜 안정감을 먼저 쌓아주세요. 흙놀이·모래놀이가 흙 기운을 자연스럽게 길러줍니다.',
+                    '金': '조용하고 정돈된 환경이 아이의 집중력을 일찍부터 키웁니다. 딸랑이·블록 등 손끝을 쓰는 장난감을 적극 활용하세요.',
+                    '水': '목욕 시간을 즐겁고 풍요롭게 만들어 물 친화력을 키워주세요. 자장가와 동화책으로 깊은 사색의 씨앗을 심습니다.',
+                    '': '이름을 자주, 사랑스럽게 불러주세요. 오감을 자극하는 다양한 놀이 경험이 이 시기의 최고 선물입니다.',
+                },
+                child: {
+                    '木': '자연 탐험대·그림 그리기·식물 키우기 등 창의적 활동으로 나무 기운을 쑥쑥 키워주세요. 결과보다 과정을 칭찬해 도전심을 길러주세요.',
+                    '火': '친구를 집에 자주 초대하고 팀 스포츠를 권장해 사교성을 키워주세요. 작은 성공을 크게 칭찬해 자신감의 불씨를 살려주세요.',
+                    '土': '규칙적인 학습·놀이 루틴을 함께 만들어 신뢰의 토대를 쌓아주세요. 텃밭 가꾸기·요리 등 결과가 보이는 활동이 흙 기운을 키웁니다.',
+                    '金': '악기·바둑·퍼즐 등 집중이 필요한 취미를 하나 골라 꾸준히 이어주세요. 약속을 지키는 경험이 쇠 기운의 핵심입니다.',
+                    '水': '독서 시간을 일상에 심어주세요. 수영·물놀이 활동과 함께 "왜?"라는 질문을 함께 탐구하는 대화가 물 기운을 깊게 만듭니다.',
+                    '': '다양한 분야를 체험하는 경험이 가장 중요합니다. 이 이름의 오행 기운이 가장 잘 자라는 시기이니 아이의 관심사를 넓게 지원해 주세요.',
+                },
+                teen: {
+                    '木': '예술·창업·환경 관련 동아리·대회 참여를 적극 권장하세요. 실패를 두려워하지 않는 도전 환경이 나무 기운의 청소년을 빛나게 합니다.',
+                    '火': '리더 역할·발표 기회를 많이 만들어 주세요. 번아웃에 주의하며 열정을 꾸준히 유지할 수 있도록 휴식도 함께 챙겨주세요.',
+                    '土': '안정된 진로 로드맵을 함께 그려주세요. 아르바이트·봉사 등 실질적 사회 경험이 흙 기운 청소년의 자존감을 단단하게 합니다.',
+                    '金': '목표 지향적 학습 환경과 계획 세우기를 함께해 주세요. 정밀한 분야(수학·과학·공학)에서 두각을 나타낼 가능성이 높습니다.',
+                    '水': '독서·철학·심리 등 깊이 있는 탐구를 지원하세요. 수영·명상·일기 등 내면을 고요히 가꾸는 활동이 물 기운 청소년의 힘입니다.',
+                    '': '이 시기 아이의 주요 관심사와 강점을 발견하는 데 집중하세요. 이름의 기운이 정체성 형성에 든든한 뿌리가 되어줄 것입니다.',
+                },
+                adult: {
+                    '木': '창의·예술·교육·환경 분야가 나무 기운과 잘 어울립니다. 새로운 시작을 두려워하지 않는 것이 이 이름의 가장 큰 힘입니다.',
+                    '火': '리더십·영업·미디어·공연 분야에서 빛납니다. 인간관계망이 성공의 열쇠이므로 진심 어린 교류에 지속적으로 투자하세요.',
+                    '土': '경영·부동산·농업·의료 등 안정적 기반이 필요한 분야에서 탁월합니다. 꾸준함과 신뢰가 이 이름의 최고 자산입니다.',
+                    '金': '금융·법·의학·공학 등 전문성이 핵심인 분야에서 두각을 나타냅니다. 원칙과 집중력이 장기적 성공을 만들어줍니다.',
+                    '水': '연구·철학·심리·IT·물 관련 분야와 잘 맞습니다. 깊이 있는 전문성이 쌓일수록 더 크게 빛나는 이름입니다.',
+                    '': '이 이름과 함께 사회에 첫발을 딛는 시기입니다. 수천 년의 지혜가 담긴 이 이름이 어떤 길에서도 든든한 나침반이 되어줄 것입니다.',
+                }
+            };
+            return msgs[phase][o] || msgs[phase][''];
+        };
+
+        const mainO = prefer.length > 0 ? prefer[0] : (nameOhengSet[0] || '');
+
+        const parentSteps = [
+            {
+                icon: '🌱',
+                age: '0~7세',
+                color: '#16a34a',
+                title: '영·유아기 — 이름을 심는 시간',
+                body: _phaseMsg('infant', prefer.length > 0 ? prefer : nameOhengSet),
+                tips: [
+                    `이름을 부를 때마다 눈을 맞추고 미소 지어 주세요 — 이름의 기운이 아이에게 가장 깊이 스밉니다.`,
+                    `${mainO ? (_OEM[mainO]||'●') + ' ' + (_ON[mainO]||mainO) + ' 계열 색상·소품으로 방을 꾸며' : '오행 기운에 맞는 환경을 조성해'} 자연스럽게 기운을 채워주세요.`,
+                    '이 시기의 안정감은 평생 정서의 뿌리가 됩니다. 규칙적인 애착 루틴을 만들어 주세요.',
+                ]
+            },
+            {
+                icon: '📚',
+                age: '7~15세',
+                color: '#2563eb',
+                title: '학령기 — 기운을 키우는 시간',
+                body: _phaseMsg('child', prefer.length > 0 ? prefer : nameOhengSet),
+                tips: [
+                    '부족한 오행을 보충하는 취미·활동을 하나 골라 꾸준히 이어가도록 지원해 주세요.',
+                    '이름의 뜻과 담긴 기원을 직접 이야기해 주면 자존감 형성에 큰 힘이 됩니다.',
+                    '또래 관계에서 어려움이 생기면 이름 속 오행의 성질로 강점을 찾아 격려해 주세요.',
+                ]
+            },
+            {
+                icon: '🚀',
+                age: '15~25세',
+                color: '#7c3aed',
+                title: '청소년·청년기 — 날개를 펼치는 시간',
+                body: _phaseMsg('teen', prefer.length > 0 ? prefer : nameOhengSet),
+                tips: [
+                    '진로 탐색 시 이름의 자원오행과 잘 어울리는 분야를 함께 고민해 보세요.',
+                    '이 시기 이름의 수리 기운이 가장 활발히 발현됩니다. 도전을 응원하되 방향을 잡아주세요.',
+                    '정체성 형성기입니다. 이름의 의미·기원을 다시 나눠 자신만의 서사를 갖도록 도와주세요.',
+                ]
+            },
+            {
+                icon: '🌟',
+                age: '25세~',
+                color: '#d97706',
+                title: '청·중년기 — 꽃피우는 시간',
+                body: _phaseMsg('adult', prefer.length > 0 ? prefer : nameOhengSet),
+                tips: [
+                    '이름의 정격(말년 수리) 기운이 서서히 빛을 발하는 시기입니다. 꾸준한 자기 계발을 응원해 주세요.',
+                    '오행 균형을 유지하는 건강한 생활 습관이 이 시기의 가장 큰 자산입니다.',
+                    '이름과 함께 쌓아온 모든 경험이 아름다운 결실로 맺히는 때입니다.',
+                ]
+            }
+        ];
+
+        const parentGuideHtml = `
+            <div style="margin-bottom:8px;">
+                <h3 style="font-size:0.95rem;font-weight:800;color:var(--bg-dark);margin:0 0 4px;">📅 시기별 부모 행동 가이드</h3>
+                <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 14px;line-height:1.6;">각 성장기에 부모님이 신경 쓸 핵심 포인트를 안내합니다.</p>
+            </div>
+            <div class="parent-guide-steps">
+                ${parentSteps.map(s => `
+                <div class="parent-step">
+                    <div class="parent-step-left" style="background:${s.color}18;">
+                        <span class="parent-step-icon">${s.icon}</span>
+                        <span class="parent-step-age" style="background:${s.color};">${s.age}</span>
+                    </div>
+                    <div class="parent-step-right">
+                        <h4 class="parent-step-title">${s.title}</h4>
+                        <p class="parent-step-body">${s.body}</p>
+                        <ul class="parent-step-tips">
+                            ${s.tips.map(t => `<li>${t}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>`).join('')}
+            </div>`;
+
+        el.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:28px;">
+                <div>${ohengCardsHtml}</div>
+                <div>${parentGuideHtml}</div>
+            </div>`;
+    }
+
+    // ── 양육 가이드 타임라인 ────────────────────────────────────────
+    // ── 대운 차트 실제 데이터로 업데이트 ─────────────────────────────
+    function _updateLifeFlowChart(daeuns) {
+        if (!daeuns || !daeuns.length) return;
+        // 차트가 아직 초기화 전이면 데이터만 저장, 초기화 후 자동 적용
+        window._daeunData = daeuns;
+        const chart = lifeFlowChartInstance;
+        if (!chart) return;
+
+        // synergy → 운세 점수 (결정론적 분산 포함)
+        const BASE = { good: 87, mid: 70, warn: 54 };
+        const scores = daeuns.map((d, i) => {
+            const base = BASE[d.synergy] || 70;
+            const v = ((i * 13 + 7) % 13) - 6; // -6 ~ +6 결정론적 변동
+            return Math.min(97, Math.max(44, base + v));
+        });
+
+        // 포인트 스타일 (synergy별)
+        const PT_COLOR  = { good: '#d4af37', warn: '#ef4444', mid: '#ffffff' };
+        const PT_BORDER = { good: '#d4af37', warn: '#ef4444', mid: '#d4af37' };
+        const PT_STYLE  = { good: 'star',    warn: 'triangle', mid: 'circle' };
+        const PT_RADIUS = { good: 10, warn: 9, mid: 5 };
+
+        const ds = chart.data.datasets[0];
+        chart.data.labels                  = daeuns.map(d => `${d.ageS}~${d.ageE}세`);
+        ds.data                            = scores;
+        ds.pointBackgroundColor            = daeuns.map(d => PT_COLOR[d.synergy]);
+        ds.pointBorderColor                = daeuns.map(d => PT_BORDER[d.synergy]);
+        ds.pointStyle                      = daeuns.map(d => PT_STYLE[d.synergy]);
+        ds.pointRadius                     = daeuns.map(d => PT_RADIUS[d.synergy]);
+        ds.pointHoverRadius                = daeuns.map(d => PT_RADIUS[d.synergy] + 3);
+        chart._synergies                   = daeuns.map(d => d.synergy);
+
+        chart.update('active');
+
+        // 범례 업데이트
+        const legendEl = document.getElementById('life-flow-legend');
+        if (legendEl) {
+            const goodN = daeuns.filter(d => d.synergy === 'good').length;
+            const warnN = daeuns.filter(d => d.synergy === 'warn').length;
+            const midN  = daeuns.length - goodN - warnN;
+            legendEl.innerHTML = [
+                goodN ? `<span style="display:flex;align-items:center;gap:5px;color:#92400e;background:#fefce8;border:1px solid #fcd34d;border-radius:20px;padding:4px 12px;">
+                    <span style="color:#d4af37;font-size:1rem;">★</span> 길운 ${goodN}구간</span>` : '',
+                warnN ? `<span style="display:flex;align-items:center;gap:5px;color:#991b1b;background:#fff5f5;border:1px solid #fca5a5;border-radius:20px;padding:4px 12px;">
+                    <span style="color:#ef4444;font-size:0.85rem;">▲</span> 주의 ${warnN}구간</span>` : '',
+                midN  ? `<span style="display:flex;align-items:center;gap:5px;color:#475569;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:4px 12px;">
+                    <span style="color:#94a3b8;">●</span> 중화 ${midN}구간</span>` : '',
+            ].join('');
+        }
+    }
+
+    function _renderTimeline(report) {
+        const el = document.getElementById('report-timeline');
+        if (!el) return;
+        const lf = report.lifeFlow || {};
+
+        const steps = [
+            {
+                icon: '🌱',
+                title: '초년기 · 성장의 계절',
+                period: '0 ~ 20대',
+                color: '#16a34a',
+                body: lf.early || '이 시기는 이름의 기운이 씨앗처럼 뿌리를 내리는 시간입니다.',
+                extra: [
+                    '이름에 담긴 오행의 기운이 아이의 감수성과 가치관 형성에 깊이 관여합니다.',
+                    '또래 관계에서 이 이름의 소리 오행이 자연스러운 인연을 끌어당깁니다.',
+                    '초년 수리가 안정적인 흐름을 보이므로, 차분하고 꾸준한 학습 환경이 큰 도움이 됩니다.',
+                ]
+            },
+            {
+                icon: '🌿',
+                title: '청중년기 · 도약의 계절',
+                period: '20 ~ 50대',
+                color: '#2563eb',
+                body: lf.middle || '이름의 자원오행이 사회적 활동 무대에서 빛을 발하는 시기입니다.',
+                extra: [
+                    report.careerAdvice ? `진로 방향 : ${report.careerAdvice}` : '자원오행의 기운에 맞는 분야에서 두각을 나타낼 수 있습니다.',
+                    '청년 수리의 흐름이 직업 선택과 인간관계에 긍정적으로 작용합니다.',
+                    '이 시기에 이름의 기운이 가장 활발하게 발현되며, 부족한 오행을 채우는 취미나 환경을 조성해 주세요.',
+                ]
+            },
+            {
+                icon: '🍂',
+                title: '말년기 · 결실의 계절',
+                period: '50대 이후',
+                color: '#d97706',
+                body: lf.late || '수십 년의 노력이 아름다운 결실로 맺히는 인생의 황금기입니다.',
+                extra: [
+                    report.healthAdvice ? `건강 조언 : ${report.healthAdvice}` : '오행 균형을 유지하는 생활 리듬이 건강한 말년을 만들어줍니다.',
+                    '이름의 정격(말년 수리)이 풍요롭고 의미 있는 결실을 예고합니다.',
+                    '후배와 자녀에게 지혜를 전수하며 가문의 기운을 아름답게 이어가는 시기입니다.',
+                ]
+            }
+        ];
+
+        el.innerHTML = steps.map(s => `
+            <div class="time-step" style="position:relative;padding-left:20px;border-left:3px solid ${s.color}22;margin-bottom:28px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                    <span style="font-size:1.4rem;">${s.icon}</span>
+                    <div>
+                        <h4 style="margin:0;font-size:0.95rem;font-weight:800;color:#0f172a;">${s.title}</h4>
+                        <span style="font-size:0.78rem;font-weight:700;color:${s.color};background:${s.color}15;padding:2px 10px;border-radius:20px;">${s.period}</span>
+                    </div>
+                </div>
+                <p style="font-size:0.9rem;line-height:1.75;color:var(--text-primary);margin:0 0 10px;">${s.body}</p>
+                <ul style="margin:0;padding-left:18px;list-style:disc;">
+                    ${s.extra.map(e => `<li style="font-size:0.85rem;line-height:1.65;color:var(--text-secondary);margin-bottom:4px;">${e}</li>`).join('')}
+                </ul>
+            </div>`).join('');
+    }
+
+    // ── 오행 점수 기반 레이더 차트 업데이트 ─────────────────────
+    // 오행 점수 → 레이더 6축 값 변환 (min 25, max 99)
+    function _ohengToRadar(sc) {
+        const clamp = v => Math.min(99, Math.max(25, Math.round(v / 32 * 100)));
+        return [
+            clamp((sc['金']+sc['土'])/2),   // 재물/결과
+            clamp((sc['火']+sc['金'])/2),   // 명예/직업
+            clamp((sc['水']+sc['木'])/2),   // 학업/문서
+            clamp((sc['土']+sc['金'])/2),   // 건강/체력
+            clamp((sc['木']+sc['火'])/2),   // 인복/도움
+            clamp((sc['木']+sc['水'])/2),   // 창의/표현
+        ];
+    }
+
+    function _updateRadarChart(scores, candidate) {
+        const rc = radarChartInstance;
+        if (!rc || !scores) return;
+
+        // dataset[0]: 사주 원국 (이름 전)
+        rc.data.datasets[0].data = _ohengToRadar(scores);
+
+        // dataset[1]: 이름 후 (이름 오행 +15pt씩 추가)
+        const after = Object.assign({}, scores);
+        if (candidate) {
+            [candidate.h1, candidate.h2].forEach(h => {
+                if (h?.o) after[h.o] = (after[h.o] || 0) + 15;
+            });
+        }
+        rc.data.datasets[1].data = _ohengToRadar(after);
+
+        rc.update();
+    }
+
+
+
+
+    // ── 셀프 보고서: 사주명식 + 오행 분포 렌더링 ────────────────────
+    const _CHEONGAN_KR = {'甲':'갑','乙':'을','丙':'병','丁':'정','戊':'무','己':'기','庚':'경','辛':'신','壬':'임','癸':'계'};
+    const _JIJI_KR     = {'子':'자','丑':'축','寅':'인','卯':'묘','辰':'진','巳':'사','午':'오','未':'미','申':'신','酉':'유','戌':'술','亥':'해'};
+    const _OHENG_COLOR = {'木':'#22c55e','火':'#ef4444','土':'#eab308','金':'#94a3b8','水':'#0f172a'};
+    const _OHENG_NAME  = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+    const _CG_OHENG    = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+    const _JJ_OHENG    = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+
+    function _renderSelfSajuSection(birthDate, birthTime, gender, lastName) {
+        const section = document.getElementById('self-saju-section');
+        if (!section) return;
+
+        // 사주 계산
+        if (typeof calcSaju !== 'function' || !birthDate) {
+            section.style.display = 'none';
+            return;
+        }
+        const _selfSajuOpts = {
+            yajasi:     true,
+            apply30min: true,
+            city:       document.getElementById('birth-location')?.value || ''
+        };
+        const saju = calcSaju(birthDate, birthTime || '12:00', _selfSajuOpts);
+        if (!saju || !saju.day.gan) {
+            section.style.display = 'none';
+            return;
+        }
+        section.style.display = 'block';
+
+        // 메타 라벨
+        const calType = _getCalType('self');
+        const calLabel = calType === 'solar' ? '양력' : calType === 'lunar' ? '음력' : '음력(윤달)';
+        const gLabel   = gender === '남자' ? '남' : '여';
+        const metaEl = document.getElementById('self-saju-meta-label');
+        if (metaEl) metaEl.textContent = `생일 : (${calLabel}) ${birthDate.replace(/-/g,'년 ').replace(/-/,'월 ')}일 ${birthTime || ''} · ${gLabel}`;
+
+        // 사주 4주 데이터
+        const pillars = [
+            { label:'시주', gan: saju.time.gan,  ji: saju.time.ji  },
+            { label:'일주', gan: saju.day.gan,   ji: saju.day.ji,  isDay: true },
+            { label:'월주', gan: saju.month.gan, ji: saju.month.ji },
+            { label:'연주', gan: saju.year.gan,  ji: saju.year.ji  }
+        ];
+
+        // 지장간 간단 표시
+        const JIJANGGAN_SHORT = {
+            '子':'壬·癸','丑':'癸·辛·己','寅':'戊·丙·甲','卯':'甲·乙',
+            '辰':'乙·癸·戊','巳':'戊·庚·丙','午':'丙·己·丁','未':'丁·乙·己',
+            '申':'戊·壬·庚','酉':'庚·辛','戌':'辛·丁·戊','亥':'戊·甲·壬'
+        };
+
+        // 오행별 색상 (일간 강조: 빨강, 나머지: 기본)
+        const getGanColor = (gan) => {
+            const o = _CG_OHENG[gan];
+            return _OHENG_COLOR[o] || '#1e293b';
+        };
+        const getJiColor = (ji) => {
+            const o = _JJ_OHENG[ji];
+            return _OHENG_COLOR[o] || '#1e293b';
+        };
+
+        // tbody 렌더링
+        const tbody = document.getElementById('self-saju-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = `
+            <tr>
+                <td class="row-label">천간</td>
+                ${pillars.map(p => `<td><div class="gan-cell" style="color:${getGanColor(p.gan)};">${p.gan}</div><span class="gan-kr">${_CHEONGAN_KR[p.gan]||''}</span></td>`).join('')}
+            </tr>
+            <tr>
+                <td class="row-label">지지</td>
+                ${pillars.map(p => `<td><div class="ji-cell" style="color:${getJiColor(p.ji)};">${p.ji}</div><span class="ji-kr">${_JIJI_KR[p.ji]||''}</span></td>`).join('')}
+            </tr>
+        `;
+
+        // ── 오행 분포 계산 (사주 기반) ──────────────────────────────
+        const ohengCount = {'木':0,'火':0,'土':0,'金':0,'水':0};
+        for (const p of pillars) {
+            const go = _CG_OHENG[p.gan]; if (go) ohengCount[go]++;
+            const jo = _JJ_OHENG[p.ji];  if (jo) ohengCount[jo]++;
+        }
+
+        // ── 오행 균형/불균형 뱃지 (8자 기준) ────────────────────────
+        const weakList8   = Object.entries(ohengCount).filter(([,c]) => c === 0).map(([o]) => o);
+        const strongList8 = Object.entries(ohengCount).filter(([,c]) => c >= 4).map(([o]) => o);
+        const isBalanced8 = weakList8.length === 0 && strongList8.length === 0;
+        const balanceBadge = document.getElementById('self-oheng-balance-badge');
+        if (balanceBadge) {
+            balanceBadge.innerHTML = isBalanced8
+                ? `<span style="background:#dcfce7;color:#16a34a;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">균형</span>`
+                : `<span style="background:#fee2e2;color:#dc2626;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:800;">불균형</span>`;
+        }
+
+        // ── 이름 한자 오행 기여 수집 (성 제외, 이름 한자만) — 진단 앞에서 먼저 수집
+        const nameOhengCount = {'木':0,'火':0,'土':0,'金':0,'水':0};
+        const nameOhengItems = []; // [{hanja, ohaeng}, ...]
+        // 오행 이형자 정규화 (U+F90A 등 CJK 호환 이형자 → 표준 한자)
+        const _normOhengSelf = o => ({'나무':'木','불':'火','흙':'土','쇠':'金','물':'水','\uF90A':'金'}[o] || o);
+        const _allSelects = Array.from(document.querySelectorAll('#hanja-dropdowns select'));
+        _allSelects.slice(1).forEach(sel => { // 첫 번째(성) 제외
+            if (!sel.value) return;
+            const parts = sel.value.split('|'); // [strokes, ohaeng, hanja]
+            if (parts.length < 3) return;
+            const o = _normOhengSelf(parts[1]), hj = parts[2];
+            if (nameOhengCount[o] !== undefined) nameOhengCount[o]++;
+            nameOhengItems.push({ hanja: hj, ohaeng: o });
+        });
+        const hasNameOheng = nameOhengItems.length > 0;
+
+        // ── 사주 원국 진단 멘트 (8자 기준) ──────────────────────────
+        const diagEl = document.getElementById('self-saju-diagnosis');
+        if (diagEl) {
+            const _OHENG_COLOR_D = {'木':'#16a34a','火':'#dc2626','土':'#d97706','金':'#475569','水':'#2563eb'};
+            const _nameSet = [...new Set(nameOhengItems.map(it=>it.ohaeng))];
+            let diagHtml = '';
+
+            if (isBalanced8) {
+                // 균형 사주 — 4 시나리오
+                const _avg      = Object.values(ohengCount).reduce((a,b)=>a+b,0) / 5;
+                const _relWeak  = Object.entries(ohengCount).filter(([,c])=>c < _avg).map(([o])=>o);
+                const _relStrong= Object.entries(ohengCount).filter(([,c])=>c >= _avg).map(([o])=>o);
+                let _balMsg = '', _balBg = 'linear-gradient(135deg,#f0fdf4,#dcfce7)', _balBorder = '#86efac', _balColor = '#15803d', _balTitle = '#16a34a', _balTitleTxt = '✦ 사주 원국 진단';
+
+                if (!hasNameOheng) {
+                    _balMsg = '특정 기운에 치우침이 없어 이름의 자원오행 선택 자유도가 높습니다. 아이의 원하는 기질과 성향에 맞추어 이름을 지어주세요.';
+                } else {
+                    const _ohKr  = o => _OHENG_NAME[o] || _OHENG_NAME[{'나무':'木','불':'火','흙':'土','쇠':'金','물':'水','\uF90A':'金'}[o]] || o;
+                    const _nd    = nameOhengItems.map(it=>`${it.hanja}(${_ohKr(it.ohaeng)})`).join(', ');
+                    const _cw    = _nameSet.some(o=>_relWeak.includes(o));
+                    const _cs    = _nameSet.some(o=>_relStrong.includes(o));
+                    if (_cw && !_cs) {
+                        const _fkr = _nameSet.filter(o=>_relWeak.includes(o)).map(o=>_OHENG_NAME[o]||o).join(', ');
+                        _balMsg = `선택한 이름의 자원오행(${_nd})이 사주에서 상대적으로 약한 <b>${_fkr}</b> 기운을 보충합니다. 균형 잡힌 사주를 더욱 탄탄하게 완성해주는 좋은 선택입니다.`;
+                        _balTitleTxt = '✦ 사주 원국 진단 — 이름이 균형을 강화합니다';
+                    } else if (_cs && !_cw) {
+                        const _dkr = _nameSet.filter(o=>_relStrong.includes(o)).map(o=>_OHENG_NAME[o]||o).join(', ');
+                        _balMsg = `선택한 이름의 자원오행(${_nd})이 사주에서 이미 강한 <b>${_dkr}</b> 기운을 더욱 강화합니다. 다른 오행의 한자도 함께 검토해보세요.`;
+                        _balBg='linear-gradient(135deg,#fffbeb,#fef3c7)';_balBorder='#fcd34d';_balColor='#92400e';_balTitle='#b45309';
+                        _balTitleTxt = '✦ 사주 원국 진단 — 기운 과집중 주의';
+                    } else {
+                        _balMsg = `선택한 이름의 자원오행(${_nd})이 고루 분산되어 있습니다. 균형 잡힌 사주와 조화를 이루며 아이의 다채로운 기질을 이름에 담아줍니다.`;
+                        _balTitleTxt = '✦ 사주 원국 진단 — 이름과 사주가 조화롭습니다';
+                    }
+                }
+                diagHtml = `
+                <div style="background:${_balBg};border:1px solid ${_balBorder};border-radius:16px;padding:20px 24px;">
+                    <div style="font-size:0.82rem;font-weight:800;color:${_balTitle};letter-spacing:1px;margin-bottom:8px;">${_balTitleTxt}</div>
+                    <p style="font-size:0.92rem;color:${_balColor};line-height:1.8;margin:0;">
+                        오행이 고르게 분포된 <b>균형 잡힌 사주</b>입니다. ${_balMsg}
+                    </p>
+                </div>`;
+            } else {
+                // 불균형 — 3문장 확장 진단
+                const _compensated   = weakList8.filter(o => _nameSet.includes(o));
+                const _uncompensated = weakList8.filter(o => !_nameSet.includes(o));
+                const _colorKr = o => `<b style="color:${_OHENG_COLOR_D[o]};">${_OHENG_NAME[o]}</b>`;
+                const _OHENG_MEANING = { '木':'창의력·성장·유연함', '火':'열정·표현력·활력', '土':'안정감·포용력·신뢰', '金':'결단력·실행력·절제', '水':'지혜·총명·유연성' };
+                const parts = [];
+
+                // 문장 1: 어떤 오행이 없고 어떤 오행이 강한지
+                const p1Parts = [];
+                if (weakList8.length) p1Parts.push(`사주팔자에 ${weakList8.map(_colorKr).join(', ')} 기운이 전혀 없습니다.`);
+                if (strongList8.length) p1Parts.push(`반면 ${strongList8.map(_colorKr).join(', ')} 기운은 특히 강하게 자리잡고 있습니다.`);
+                if (p1Parts.length) parts.push(p1Parts.join(' '));
+
+                // 문장 2: 부족한 오행의 의미
+                if (weakList8.length) {
+                    const meaningLines = weakList8.map(o => `${_colorKr(o)}(${_OHENG_MEANING[o]||''})`).join(', ');
+                    parts.push(`부족한 ${meaningLines}의 영역에서 자연스러운 지원이 약할 수 있어, 이름의 자원오행으로 이 빈자리를 채워주는 것이 이 아이의 작명에서 가장 중요한 과제입니다.`);
+                }
+
+                // 문장 3: 이름 보완 현황
+                if (hasNameOheng && weakList8.length) {
+                    if (_compensated.length && _uncompensated.length) {
+                        parts.push(`현재 선택하신 이름의 자원오행으로 ${_compensated.map(_colorKr).join(', ')} 기운은 보완되었으나, ${_uncompensated.map(_colorKr).join(', ')} 기운은 아직 채워지지 않았습니다. 미보완 오행의 한자를 추가 검토해보세요.`);
+                    } else if (_compensated.length === weakList8.length) {
+                        parts.push(`선택하신 이름의 자원오행이 부족한 기운을 모두 채워주고 있습니다. 사주 원국과의 조화라는 측면에서 훌륭한 선택입니다.`);
+                    } else {
+                        parts.push(`현재 선택하신 이름의 자원오행이 부족한 ${weakList8.map(_colorKr).join(', ')} 기운을 보완하지 못하고 있습니다. 해당 오행을 담은 한자로 교체하시면 더욱 균형 잡힌 이름이 됩니다.`);
+                    }
+                } else if (!hasNameOheng && weakList8.length) {
+                    parts.push(`한자를 선택하시면 이름의 자원오행이 부족한 기운을 얼마나 채워주는지 바로 확인하실 수 있습니다. 위 부족한 오행을 담은 한자를 우선적으로 검토해보세요.`);
+                }
+
+                diagHtml = `
+                <div style="background:#f8fafc;border:1px solid var(--border-light);border-radius:16px;padding:20px 24px;">
+                    <div style="font-size:0.82rem;font-weight:800;color:var(--bg-dark);letter-spacing:1px;margin-bottom:10px;">✦ 사주 원국 진단</div>
+                    <p style="font-size:0.92rem;color:var(--text-secondary);line-height:1.65;margin:0;">${parts.join('<br>')}</p>
+                </div>`;
+            }
+            diagEl.innerHTML = diagHtml;
+        }
+
+        // 이름 오행 기여 설명 텍스트 (오행값 한글 정규화)
+        const _ohKrSelf = o => _OHENG_NAME[o] || _OHENG_NAME[{'나무':'木','불':'火','흙':'土','쇠':'金','물':'水','\uF90A':'金'}[o]] || o;
+        const nameContribDesc = hasNameOheng
+            ? nameOhengItems.map(it => `${it.hanja}(${_ohKrSelf(it.ohaeng)})`).join(', ')
+            : '';
+
+        const distEl = document.getElementById('self-oheng-dist');
+        if (distEl) {
+            const items = Object.entries(ohengCount).map(([o, cnt]) => {
+                const nameCnt = nameOhengCount[o] || 0;
+                const isWeak  = cnt === 0 && nameCnt === 0;
+                const countHtml = nameCnt > 0
+                    ? `<span class="oheng-dist-count">${cnt}</span><span class="oheng-dist-plus" style="color:${_OHENG_COLOR[o]};">+${nameCnt}</span>`
+                    : `<span class="oheng-dist-count">${cnt}</span>`;
+                return `<div class="oheng-dist-item${isWeak?' weak':''}">
+                    <div class="oheng-dist-dot" style="background:${_OHENG_COLOR[o]};"></div>
+                    <span class="oheng-dist-hanja" style="color:${_OHENG_COLOR[o]};">${o}</span>
+                    <span class="oheng-dist-label">${_OHENG_NAME[o]}</span>
+                    ${countHtml}
+                </div>`;
+            }).join('');
+
+            const noteHtml = hasNameOheng
+                ? `<p style="margin-top:14px;font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+                    <span style="font-weight:700;color:var(--bg-dark);">+숫자</span>는 이름 한자
+                    <strong style="color:var(--gold-dark);">${nameContribDesc}</strong>의
+                    자원오행이 사주 원국에 더해지는 기운입니다.
+                   </p>`
+                : '';
+
+            distEl.innerHTML = items + noteHtml;
+        }
+        return { nameOhengItems, weakList8, ohengCount };
+    }
+
+    // ================================================================
+    // DearName v2: 이름 생성 히스토리 + 셀프작명 음력
+    // ================================================================
+
+    // ── 히스토리 저장/불러오기 ─────────────────────────────────────
+    // ── 보고서 저장/조회/삭제 (마이페이지용) ────────────────────────
+    const _REPORTS_KEY = 'dn_reports';
+    const _MAX_REPORTS = 30;
+
+    function _saveReport(candidates, reports, state) {
+        try {
+            const raw  = localStorage.getItem(_REPORTS_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            // 후보별로 각각 저장 (최대 first candidate만 대표로)
+            const entry = {
+                id:          'rpt_' + Date.now(),
+                uid:         _dnUser?.uid || '',
+                createdAt:   new Date().toISOString(),
+                familyKr:    state.familyName?.kr    || '',
+                familyHanja: state.familyName?.hanja || '',
+                candidates:  candidates,
+                reports:     reports,
+                saju:        state._saju        || null,
+                ohengScores: state._scores      || null,
+                constraints: state.constraints  || {},
+            };
+            list.unshift(entry);
+            if (list.length > _MAX_REPORTS) list.splice(_MAX_REPORTS);
+            localStorage.setItem(_REPORTS_KEY, JSON.stringify(list));
+        } catch(e) { console.warn('보고서 저장 실패:', e); }
+    }
+
+    function _getReports(uid) {
+        try {
+            const raw = localStorage.getItem(_REPORTS_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            return uid ? list.filter(r => r.uid === uid) : list;
+        } catch(e) { return []; }
+    }
+
+    function _deleteReport(id) {
+        try {
+            const raw  = localStorage.getItem(_REPORTS_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            const next = list.filter(r => r.id !== id);
+            localStorage.setItem(_REPORTS_KEY, JSON.stringify(next));
+        } catch(e) { console.warn('보고서 삭제 실패:', e); }
+    }
+
+    // ================================================================
+    // 구독 상태 관리 (localStorage, UI-only)
+    // ================================================================
+    const _SUB_KEY = 'dn_subscription';
+    const _SELF_REPORTS_KEY = 'dn_self_reports';
+    const _MAX_SELF_REPORTS = 20;
+
+    function _getSubscription() {
+        try { return JSON.parse(localStorage.getItem(_SUB_KEY)) || null; } catch(e) { return null; }
+    }
+    function _isSubscribed() {
+        return true; // 개발 모드: 결제 없이 모든 기능 사용 가능
+    }
+
+    // 셀프작명 보고서 저장
+    function _saveSelfReport(data) {
+        try {
+            const raw  = localStorage.getItem(_SELF_REPORTS_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            list.unshift({ id: 'sr_' + Date.now(), createdAt: Date.now(), ...data });
+            if (list.length > _MAX_SELF_REPORTS) list.splice(_MAX_SELF_REPORTS);
+            localStorage.setItem(_SELF_REPORTS_KEY, JSON.stringify(list));
+        } catch(e) { console.warn('셀프 보고서 저장 실패:', e); }
+    }
+    function _getSelfReports() {
+        try { return JSON.parse(localStorage.getItem(_SELF_REPORTS_KEY)) || []; } catch(e) { return []; }
+    }
+    function _deleteSelfReport(id) {
+        try {
+            const list = _getSelfReports().filter(r => r.id !== id);
+            localStorage.setItem(_SELF_REPORTS_KEY, JSON.stringify(list));
+        } catch(e) {}
+    }
+
+    // ================================================================
+    // 구독 팝업
+    // ================================================================
+    let _selectedPlan = { label: '3개월권', price: 45000 };
+
+    function openSubscribeModal() {
+        document.getElementById('subscribe-modal').style.display = 'flex';
+    }
+    function closeSubscribeModal() {
+        document.getElementById('subscribe-modal').style.display = 'none';
+    }
+    function selectPlan(el, label, price) {
+        document.querySelectorAll('#subscribe-plans .plan-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        _selectedPlan = { label, price };
+    }
+    function _onSubscribePay() {
+        _showToast('결제 기능을 준비 중입니다. 곧 서비스됩니다!');
+    }
+    function _onSubscribePayGuest() {
+        const email = document.getElementById('subscribe-email').value.trim();
+        if (!email || !email.includes('@')) { _showToast('올바른 이메일을 입력해주세요.'); return; }
+        _showToast('결제 기능을 준비 중입니다. 곧 서비스됩니다!');
+    }
+
+    // ================================================================
+    // 이메일 발송 팝업
+    // ================================================================
+    function openEmailModal() {
+        document.getElementById('email-modal').style.display = 'flex';
+        const u = _dnUser;
+        if (u?.email) document.getElementById('email-send-input').value = u.email;
+    }
+    function closeEmailModal() {
+        document.getElementById('email-modal').style.display = 'none';
+    }
+    function sendReportEmail() {
+        const email = document.getElementById('email-send-input').value.trim();
+        if (!email || !email.includes('@')) { _showToast('올바른 이메일을 입력해주세요.'); return; }
+        closeEmailModal();
+        _showToast('이메일 발송 기능은 곧 서비스 예정입니다!');
+    }
+
+    // 토스트 메시지
+    function _showToast(msg) {
+        let t = document.getElementById('dn-toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'dn-toast';
+            t.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#0f172a;color:white;padding:14px 28px;border-radius:50px;font-size:0.9rem;font-weight:600;z-index:700;opacity:0;transition:opacity 0.3s;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.25);';
+            document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.style.opacity = '1';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+    }
+
+    // ================================================================
+    // 마이페이지
+    // ================================================================
+    function showMypageView() {
+        document.getElementById('main-view').style.display         = 'none';
+        document.getElementById('report-view').style.display       = 'none';
+        document.getElementById('self-report-view').style.display  = 'none';
+        document.getElementById('theory-detail-view').style.display= 'none';
+        document.getElementById('mypage-view').style.display       = 'block';
+        document.getElementById('main-nav').style.display          = 'none';
+        document.getElementById('report-nav').style.display        = 'block';
+        window.scrollTo(0, 0);
+
+        const guestWall = document.getElementById('mypage-guest-wall');
+        const content   = document.getElementById('mypage-content');
+
+        if (!_dnUser) {
+            // 비로그인: 안내 화면만 표시
+            if (guestWall) guestWall.style.display = 'block';
+            if (content)   content.style.display   = 'none';
+            return;
+        }
+
+        // 로그인 상태: 콘텐츠 표시
+        if (guestWall) guestWall.style.display = 'none';
+        if (content)   content.style.display   = 'block';
+
+        _renderMypageProfile();
+        _renderMypageSubscription();
+        _renderMypageSelfReports();
+        _renderMypageAIReports();
+        _renderMypagePayments();
+    }
+
+    function _renderMypageProfile() {
+        const u = _dnUser;
+        if (!u) return;
+        const nameEl = document.getElementById('mypage-name');
+        const emailEl = document.getElementById('mypage-email');
+        const badgeEl = document.getElementById('mypage-provider-badge');
+        if (nameEl)  nameEl.textContent  = u.name  || '사용자';
+        if (emailEl) emailEl.textContent = u.email || '';
+        if (badgeEl) {
+            const icons = { google: 'G', apple: '' };
+            const labels = { google: 'Google 계정', apple: 'Apple 계정', guest: '게스트' };
+            const icon  = icons[u.provider]  || '';
+            const label = labels[u.provider] || u.provider || '';
+            badgeEl.innerHTML = `<span class="mp-provider-badge">${icon ? `<b>${icon}</b>` : ''}${label}</span>`;
+        }
+    }
+
+    function _renderMypageSubscription() {
+        const el = document.getElementById('mypage-subscription');
+        if (!el) return;
+        const sub = _getSubscription();
+        if (_isSubscribed() && sub) {
+            const exp = new Date(sub.expiresAt).toLocaleDateString('ko-KR');
+            el.innerHTML = `
+                <div class="mp-sub-card">
+                    <div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">현재 이용권</div>
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--bg-dark);">${sub.label || '이용권'} <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:6px;vertical-align:middle;"></span></div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">만료: ${exp}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <button class="mp-btn mp-btn-gold" onclick="openSubscribeModal()">연장하기</button>
+                        <button class="mp-btn mp-btn-outline" onclick="_cancelSubscription()">구독 취소</button>
+                    </div>
+                </div>`;
+        } else {
+            el.innerHTML = `
+                <div class="mp-sub-card">
+                    <div>
+                        <div style="font-size:1rem;font-weight:700;color:var(--bg-dark);">미구독 상태</div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">이용권 구독 시 셀프작명 보고서를 열람할 수 있습니다</div>
+                    </div>
+                    <button class="mp-btn mp-btn-gold" onclick="openSubscribeModal()">구독 시작하기</button>
+                </div>`;
+        }
+    }
+
+    function _cancelSubscription() {
+        if (!confirm('구독을 취소할까요?')) return;
+        _showToast('구독 취소 기능을 준비 중입니다.');
+    }
+
+    function _renderMypageSelfReports() {
+        const el = document.getElementById('mypage-self-reports');
+        if (!el) return;
+        const list = _getSelfReports();
+        if (!list.length) {
+            el.innerHTML = `<div class="mp-empty">아직 저장된 셀프작명 보고서가 없습니다.<br><span style="font-size:0.82rem;">셀프 작명 분석 후 보고서를 열람하면 자동 저장됩니다.</span></div>`;
+            return;
+        }
+        el.innerHTML = list.map(r => {
+            const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : '';
+            const gender = r.gender || '';
+            return `
+            <div class="mp-report-row">
+                <div class="mp-report-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">${(r.nameHanja||'?')[0]}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:1.05rem;font-weight:800;color:var(--bg-dark);">${r.nameKr||''} <span style="font-weight:500;color:var(--text-secondary);font-size:0.9rem;">${r.nameHanja||''}</span></div>
+                    <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${date}${gender ? ' · ' + gender : ''}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+                    <button class="mp-btn mp-btn-gold" onclick="_openSavedSelfReport('${r.id}')">보고서 보기</button>
+                    <button class="mp-btn mp-btn-outline" onclick="openEmailModal()">이메일로 받기</button>
+                    <button class="mp-btn mp-btn-danger" onclick="_deleteSelfReportConfirm('${r.id}')">삭제</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function _openSavedSelfReport(id) {
+        const entry = _getSelfReports().find(r => r.id === id);
+        if (!entry) { _showToast('보고서를 찾을 수 없습니다.'); return; }
+        if (!_isSubscribed()) { openSubscribeModal(); return; }
+        // 저장된 데이터로 셀프 보고서 복원
+        _showToast('보고서를 불러오는 중...');
+        // 폼 값 복원 후 뷰 전환
+        if (entry.birthDate) _setDateFields('birth-date', entry.birthDate);
+        if (entry.birthTime) _setTimeFields('birth', entry.birthTime);
+        setTimeout(showSelfReportViewDirect, 100);
+    }
+
+    function showSelfReportViewDirect() {
+        // 구독 체크 없이 직접 보고서 뷰로 이동 (마이페이지 복원용)
+        ['main-view','report-view','theory-detail-view','mypage-view'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+        document.getElementById('self-report-view').style.display = 'block';
+        document.getElementById('main-nav').style.display   = 'none';
+        document.getElementById('report-nav').style.display = 'block';
+        window.scrollTo(0,0);
+        showSelfReportView();
+    }
+
+    function _deleteSelfReportConfirm(id) {
+        if (!confirm('이 보고서를 삭제할까요?')) return;
+        _deleteSelfReport(id);
+        _renderMypageSelfReports();
+    }
+
+    function _renderMypageAIReports() {
+        const el = document.getElementById('mypage-ai-reports');
+        if (!el) return;
+        const list = _getReports(_dnUser?.uid);
+        if (!list.length) {
+            el.innerHTML = `<div class="mp-empty">아직 의뢰한 AI 프리미엄 보고서가 없습니다.</div>`;
+            return;
+        }
+        el.innerHTML = list.map(r => {
+            const c0   = r.candidates?.[0];
+            const rep0 = r.reports?.[0];
+            if (!c0) return '';
+            const nameKr    = `${r.familyKr}${c0.h1?.kr||''}${c0.h2?.kr||''}`;
+            const nameHanja = `${r.familyHanja}${c0.h1?.h||''}${c0.h2?.h||''}`;
+            const date      = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : '';
+            return `
+            <div class="mp-report-row">
+                <div class="mp-report-icon" style="background:linear-gradient(135deg,#d4af37,#f0d080);">${c0.h1?.h||'?'}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:1.05rem;font-weight:800;color:var(--bg-dark);">${nameKr} <span style="font-weight:500;color:var(--text-secondary);font-size:0.9rem;">${nameHanja}</span></div>
+                    <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${date} · <span style="color:#22c55e;font-weight:700;">완료</span></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+                    <button class="mp-btn mp-btn-gold" onclick="_openSavedReport('${r.id}')">보고서 보기</button>
+                    <button class="mp-btn mp-btn-outline" onclick="openEmailModal()">이메일로 받기</button>
+                    <button class="mp-btn mp-btn-danger" onclick="_confirmDeleteReport('${r.id}')">삭제</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function _renderMypagePayments() {
+        const el = document.getElementById('mypage-payments');
+        if (!el) return;
+
+        // 결제 내역 데이터: localStorage 또는 서버 연동 시 교체
+        const payments = _getPayments();
+
+        if (!payments.length) {
+            el.innerHTML = `<div class="mp-empty">결제 내역이 없습니다.<br><span style="font-size:0.82rem;">결제 후 자동으로 표시됩니다.</span></div>`;
+            return;
+        }
+
+        el.innerHTML = payments.map(p => {
+            const date   = p.paidAt ? new Date(p.paidAt).toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'}) : '';
+            const amount = Number(p.amount).toLocaleString('ko-KR') + '원';
+            const statusClass = p.status === 'done' ? 'mp-status-done' : p.status === 'cancel' ? 'mp-status-cancel' : 'mp-status-refund';
+            const statusLabel = p.status === 'done' ? '결제 완료' : p.status === 'cancel' ? '취소됨' : '환불';
+            const isAI = p.type === 'ai';
+            return `
+            <div class="mp-payment-row">
+                <div class="mp-payment-icon ${isAI ? 'type-ai' : 'type-sub'}">${isAI ? '✦' : '♾'}</div>
+                <div class="mp-payment-info">
+                    <div class="mp-payment-title">
+                        <span class="mp-payment-type-badge ${isAI ? 'mp-badge-ai' : 'mp-badge-sub'}">${isAI ? 'AI작명' : '멤버십'}</span>${p.label}
+                    </div>
+                    <div class="mp-payment-meta">${date}${p.desc ? ' · ' + p.desc : ''}</div>
+                </div>
+                <div class="mp-payment-right">
+                    <span class="mp-payment-amount">${amount}</span>
+                    <span class="mp-payment-status ${statusClass}">${statusLabel}</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function _getPayments() {
+        // 실 결제 연동 전 데모 데이터 — 연동 후 서버 데이터로 교체
+        try {
+            const stored = localStorage.getItem('dn_payments');
+            if (stored) return JSON.parse(stored);
+        } catch(e) {}
+        // 데모용 샘플 (로그인 상태일 때만 표시)
+        if (!_dnUser) return [];
+        return [
+            { id:'demo1', type:'sub',  label:'셀프작명 이용권 1개월', desc:'월간 구독', amount:9900,  status:'done',   paidAt: Date.now() - 86400000 * 2 },
+            { id:'demo2', type:'ai',   label:'AI 프리미엄 작명 의뢰', desc:'이도윤 외 4후보', amount:49000, status:'done', paidAt: Date.now() - 86400000 * 10 },
+            { id:'demo3', type:'sub',  label:'셀프작명 이용권 1개월', desc:'월간 구독',  amount:9900,  status:'done',   paidAt: Date.now() - 86400000 * 33 },
+        ];
+    }
+
+    function _openSavedReport(id) {
+        const list  = _getReports(_dnUser?.uid);
+        const entry = list.find(r => r.id === id);
+        if (!entry) return _showToast('보고서를 찾을 수 없습니다.');
+        _currentState    = {
+            familyName:  { kr: entry.familyKr, hanja: entry.familyHanja },
+            _saju:       entry.saju,
+            _scores:     entry.ohengScores,
+            constraints: entry.constraints || { gender: 'F' },
+        };
+        _allCandidates   = entry.candidates || [];
+        _allReports      = entry.reports    || [];
+        _currentIdx      = 0;
+        document.getElementById('mypage-view').style.display  = 'none';
+        document.getElementById('report-view').style.display  = 'block';
+        document.getElementById('report-nav').style.display   = 'block';
+        window.scrollTo(0, 0);
+        _renderReportTabs(_allCandidates);
+        _renderReportContent(_allCandidates[0], _allReports[0], 0);
+    }
+
+    function _confirmDeleteReport(id) {
+        if (!confirm('이 보고서를 삭제할까요?')) return;
+        _deleteReport(id);
+        _renderMypageAIReports();
+    }
+
+    const _HISTORY_KEY = 'dn_history';
+    const _MAX_HISTORY = 20;
+
+    function _saveHistory(entry) {
+        try {
+            const raw = localStorage.getItem(_HISTORY_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            list.unshift(entry);
+            if (list.length > _MAX_HISTORY) list.splice(_MAX_HISTORY);
+            localStorage.setItem(_HISTORY_KEY, JSON.stringify(list));
+        } catch(e) { console.warn('히스토리 저장 실패:', e); }
+    }
+
+    function _loadHistory() {
+        try {
+            const raw = localStorage.getItem(_HISTORY_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch(e) { return []; }
+    }
+
+    function _clearHistory() {
+        localStorage.removeItem(_HISTORY_KEY);
+        alert('히스토리가 삭제되었습니다.');
+    }
+
+    // ── 셀프작명 음력 라벨 ─────────────────────────────────────────
+    function toggleLocationOther(sel) {
+        const other = document.getElementById('birth-location-other');
+        if (!other) return;
+        other.style.display = sel.value === '기타' ? 'block' : 'none';
+        if (sel.value !== '기타') other.value = '';
+    }
+
+    function updateNameTypeInput() {
+        const type = parseInt(document.querySelector('[name="self_name_type"]:checked')?.value || '2');
+        const input = document.getElementById('kr-first-name');
+        if (!input) return;
+        if (type === 1) {
+            input.maxLength = 1;
+            input.placeholder = '예: 민';
+            if (input.value.length > 1) {
+                input.value = input.value.charAt(0);
+                generateHanjaSelectors();
+            }
+        } else {
+            input.maxLength = 2;
+            input.placeholder = '예: 민준';
+        }
+    }
+
+    function enforceNameLength(input) {
+        const type = parseInt(document.querySelector('[name="self_name_type"]:checked')?.value || '2');
+        const max = type === 1 ? 1 : 2;
+        if (input.value.length > max) input.value = input.value.slice(0, max);
+    }
+
+    function updateSelfLunarLabel() {
+        const label   = document.getElementById('self-lunar-label');
+        if (!label) return;
+        const dateVal = document.getElementById('birth-date')?.value;
+        const calType = _getCalType('self');
+
+        if (calType === 'solar' || !dateVal) {
+            label.style.display = 'none'; return;
+        }
+        if (typeof normalizeToSolar !== 'function') {
+            label.textContent = '→ 음력 변환 엔진 로딩 중'; label.style.display='inline'; return;
+        }
+        const solar = normalizeToSolar(dateVal, calType);
+        if (solar && solar !== dateVal) {
+            const [y,m,d] = solar.split('-');
+            label.textContent = `→ 양력 ${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
+            label.style.color = 'var(--gold-dark)';
+        } else {
+            if (calType === 'leap') {
+                label.textContent = '윤달 아님';
+                label.style.color = '#ef4444';
+            } else {
+                label.textContent = '→ 변환 실패';
+                label.style.color = '#ef4444';
+            }
+        }
+        label.style.display = 'inline';
+    }
+
+    // ── 모바일 탭 스와이프 제스처 ──────────────────────────────────
+    (function _initSwipe() {
+        let startX = 0;
+        const MIN_SWIPE = 60;
+        document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+        document.addEventListener('touchend', e => {
+            const diff = e.changedTouches[0].clientX - startX;
+            if (Math.abs(diff) < MIN_SWIPE) return;
+            const tabs = document.querySelectorAll('.name-card-tab');
+            if (!tabs.length) return;
+            const active = [...tabs].findIndex(t => t.classList.contains('active'));
+            if (active < 0) return;
+            const next = diff < 0
+                ? Math.min(active + 1, tabs.length - 1)
+                : Math.max(active - 1, 0);
+            if (next !== active) tabs[next].click();
+        }, { passive: true });
+    })();
+
+    // ================================================================
+    // DearName v2: 인증 시스템 (Google OAuth + 게스트)
+    // ================================================================
+
+    let _dnUser = null;        // { uid, name, email, photo, provider }
+    let _pendingAction = null; // 로그인 후 재개할 함수
+
+    // ── 상태 초기화 ─────────────────────────────────────────────────
+    (function _initAuth() {
+        try {
+            const saved = localStorage.getItem('dn_user');
+            if (saved) _dnUser = JSON.parse(saved);
+        } catch(e) {}
+        _updateAuthUI();
+
+        // Google SDK 초기화 (CLIENT_ID 설정 시 자동 활성화)
+        const GID = window.GOOGLE_CLIENT_ID;
+        if (GID && typeof google !== 'undefined') {
+            google.accounts.id.initialize({
+                client_id: GID,
+                callback: _onGoogleCredential,
+                auto_select: false,
+                cancel_on_tap_outside: true
+            });
+        }
+    })();
+
+    // ── Google 로그인 버튼 클릭 ──────────────────────────────────────
+    function googleSignIn() {
+        const GID = window.GOOGLE_CLIENT_ID;
+        if (!GID || typeof google === 'undefined') {
+            // CLIENT_ID 미설정 → 게스트 모드 안내
+            _loginAsGuest();
+            return;
+        }
+        google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                // One Tap 불가 시 팝업 fallback
+                google.accounts.oauth2.initCodeClient({
+                    client_id: GID,
+                    scope: 'email profile',
+                    callback: _onGoogleAuthCode
+                }).requestCode();
+            }
+        });
+    }
+
+    // ── Google ID 토큰 수신 ──────────────────────────────────────────
+    async function _onGoogleCredential(response) {
+        try {
+            // JWT 디코딩 (base64, 서명 검증 생략 - 프론트 전용)
+            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            _saveUser({
+                uid:      payload.sub,
+                name:     payload.name,
+                email:    payload.email,
+                photo:    payload.picture,
+                provider: 'google'
+            });
+            closeLoginModal();
+        } catch(e) {
+            console.error('Google 로그인 오류:', e);
+            alert('Google 로그인 중 오류가 발생했습니다.');
+        }
+    }
+
+    function _onGoogleAuthCode(response) {
+        // Code Flow — 실서비스에서는 서버로 code를 전달해 access_token 교환
+        console.log('Google Auth Code:', response.code);
+    }
+
+    // ── 게스트 로그인 ────────────────────────────────────────────────
+    function _loginAsGuest() {
+        _saveUser({
+            uid:      _getUserKey(),
+            name:     '게스트',
+            email:    '',
+            photo:    '',
+            provider: 'guest'
+        });
+        closeLoginModal();
+    }
+
+    // ── Apple 로그인 (Sign In with Apple JS SDK) ──────────────────────
+    async function appleSignIn() {
+        const AID = window.APPLE_SERVICE_ID;
+        if (!AID || typeof AppleID === 'undefined') {
+            alert('Apple 로그인이 설정되지 않았습니다. Google 로그인을 이용해주세요.');
+            return;
+        }
+        try {
+            AppleID.auth.init({
+                clientId: AID,
+                scope: 'name email',
+                redirectURI: location.origin + location.pathname,
+                usePopup: true
+            });
+            const data = await AppleID.auth.signIn();
+            const id_token = data.authorization?.id_token;
+            if (!id_token) return;
+            const payload = JSON.parse(atob(id_token.split('.')[1]));
+            _saveUser({
+                uid:      payload.sub,
+                name:     data.user?.name ? `${data.user.name.firstName} ${data.user.name.lastName}`.trim() : 'Apple 사용자',
+                email:    payload.email || '',
+                photo:    '',
+                provider: 'apple'
+            });
+            closeLoginModal();
+        } catch(e) {
+            if (e?.error !== 'popup_closed_by_user') console.error('Apple 로그인 오류:', e);
+        }
+    }
+
+    // ── 사용자 저장 및 UI 업데이트 ───────────────────────────────────
+    function _saveUser(user) {
+        _dnUser = user;
+        localStorage.setItem('dn_user', JSON.stringify(user));
+        _updateAuthUI();
+        // 로그인 전 하려던 동작 자동 재개
+        if (_pendingAction) {
+            const fn = _pendingAction;
+            _pendingAction = null;
+            setTimeout(fn, 300);
+        }
+    }
+
+    function _signOut() {
+        _dnUser = null;
+        localStorage.removeItem('dn_user');
+        const GID = window.GOOGLE_CLIENT_ID;
+        if (GID && typeof google !== 'undefined') {
+            google.accounts.id.disableAutoSelect();
+        }
+        _updateAuthUI();
+        showMainView();
+    }
+
+    function _updateAuthUI() {
+        const loginLink = document.querySelector('.login-link');
+        const userBadge = document.getElementById('user-badge');
+        if (_dnUser) {
+            if (loginLink) loginLink.style.display = 'none';
+            if (userBadge) {
+                userBadge.style.display = 'flex';
+                const img = userBadge.querySelector('.user-avatar');
+                const nm  = userBadge.querySelector('.user-name');
+                if (img) img.src = _dnUser.photo || '';
+                if (img) img.style.display = _dnUser.photo ? 'block' : 'none';
+                if (nm) nm.textContent = _dnUser.name || '사용자';
+            }
+        } else {
+            if (loginLink) loginLink.style.display = '';
+            if (userBadge) userBadge.style.display = 'none';
+        }
+    }
+
+    // ── 음력 변환 라벨 업데이트 ──────────────────────────────────────
+    function updateLunarLabel() {
+        const label   = document.getElementById('lunar-label');
+        if (!label) return;
+
+        const dateVal = document.getElementById('prem-birth-date')?.value;
+        const calType = _getCalType('prem');
+
+        if (calType === 'solar' || !dateVal) {
+            label.style.display = 'none';
+            return;
+        }
+
+        if (typeof normalizeToSolar !== 'function') {
+            label.textContent = '→ 음력 변환 엔진 로딩 중';
+            label.style.display = 'inline';
+            return;
+        }
+
+        const solar = normalizeToSolar(dateVal, calType);
+        if (solar && solar !== dateVal) {
+            const [y,m,d] = solar.split('-');
+            label.textContent = `→ 양력 ${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
+            label.style.color = 'var(--gold-dark)';
+        } else {
+            if (calType === 'leap') {
+                label.textContent = '윤달 아님';
+                label.style.color = '#ef4444';
+            } else {
+                label.textContent = '→ 변환 실패 (날짜 확인)';
+                label.style.color = '#ef4444';
+            }
+        }
+        label.style.display = 'inline';
+    }
+
+    // ── 시간 유효성 검사 ──────────────────────────────────────────────
+    function validateBirthTime(prefix) {
+        const isP = prefix === 'prem';
+        const hourEl = document.getElementById(isP ? 'prem-time-hour' : 'birth-time-hour');
+        const minEl  = document.getElementById(isP ? 'prem-time-min'  : 'birth-time-min');
+        const errEl  = document.getElementById(isP ? 'prem-time-err'  : 'self-time-err');
+        if (!hourEl || !minEl || !errEl) return true;
+        const h = hourEl.value === '' ? 0 : parseInt(hourEl.value, 10);
+        const m = minEl.value  === '' ? 0 : parseInt(minEl.value,  10);
+        const invalid = (hourEl.value !== '' && (isNaN(h) || h < 0 || h > 23))
+                     || (minEl.value  !== '' && (isNaN(m) || m < 0 || m > 59));
+        errEl.style.display = invalid ? 'inline' : 'none';
+        if (invalid) {
+            hourEl.parentElement.style.borderColor = '#ef4444';
+            minEl.parentElement.style.borderColor  = '#ef4444';
+        } else {
+            hourEl.parentElement.style.borderColor = '';
+            minEl.parentElement.style.borderColor  = '';
+        }
+        return !invalid;
+    }
+
+    // ── 입력 유효성 검사 ──────────────────────────────────────────────
+    function validatePremiumForm() {
+        const familyKr  = document.getElementById('prem-last-name')?.value.trim();
+        const birthDate = document.getElementById('prem-birth-date')?.value;
+        const calType   = _getCalType('prem');
+
+        if (!familyKr) { alert('성(姓)을 입력해주세요.'); return false; }
+        if (!birthDate) { alert('출생일을 입력해주세요.'); return false; }
+
+        // 양력 연도 범위 검사 (만세력 지원 범위)
+        let solarDate = birthDate;
+        if (calType !== 'solar' && typeof normalizeToSolar === 'function') {
+            solarDate = normalizeToSolar(birthDate, calType);
+            if (!solarDate) {
+                alert('음력 날짜 변환에 실패했습니다.\n지원 범위: 1960~2030년\n날짜를 다시 확인해주세요.');
+                return false;
+            }
+        }
+        const year = parseInt(solarDate?.split('-')[0]);
+        if (year < 1921 || year > 2040) {
+            alert(`출생 연도 ${year}년은 지원 범위(1921~2040년)를 벗어납니다.\n해당 기간 내 날짜를 입력해주세요.`);
+            return false;
+        }
+        return true;
+    }
+
+    // ── 보고서 인쇄/공유 ─────────────────────────────────────────────
+    function printReport() {
+        window.print();
+    }
+
+    // ================================================================
+    // 공유 — 링크 복사 + 토스트
+    // ================================================================
+    function copyShareLink() {
+        const url = location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            _showToast('🔗 링크가 클립보드에 복사되었습니다!');
+        }).catch(() => {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                _showToast('🔗 링크가 복사되었습니다!');
+            } catch(e) { _showToast('링크를 직접 복사해주세요: ' + url); }
+        });
+    }
+
+    function emailReport() {
+        openEmailModal();
+    }
+
+    // ── 이름 후보 PDF/이미지 저장 안내 ──────────────────────────────
+    function downloadReport() {
+        alert('브라우저의 인쇄(Ctrl+P) 기능을 사용해 PDF로 저장하실 수 있습니다.');
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // AI 작명 상담 채팅
+    // ════════════════════════════════════════════════════════════════
+    let _chatHistory = [];    // [{role:'user'|'assistant', content:'...'}]
+    let _chatContext = null;  // 현재 보고서 컨텍스트
+    let _chatSending = false; // 중복 전송 방지
+    let _chatDemoMode = false; // 데모 모드 (API 없이 미리 준비된 답변)
+
+    // ── 데모 모드 미리 준비된 답변 ───────────────────────────────────
+    function _getDemoReply(msg) {
+        const m = msg.toLowerCase().replace(/\s/g, '');
+
+        // 사주에 왜 좋은가
+        if (/사주|좋은|왜좋|잘맞|어울|궁합/.test(m)) {
+            return `김나윤의 사주 원국을 보면 <b>金 기운(26.5pt)이 가장 강하고, 水(13.75pt)와 土(16.75pt)가 상대적으로 부족</b>합니다.\n\n이름 <b>娜(나) — 土 기운</b>은 부족한 土를 직접 채워 안정감과 포용력을 더해주고, <b>奫(윤) — 水 기운</b>은 일간 계수(癸水)를 강화해 깊은 사색력과 직관을 키워줍니다.\n\n특히 金→水→木 상생 흐름이 완성되어 이름이 사주의 빈자리를 정확히 메워주는 이상적인 구성이에요. 오행 균형이 잡히면 대인관계, 학업, 정서 안정 모두에 긍정적 영향을 줍니다.`;
+        }
+        // 한자 의미
+        if (/한자|의미|뜻|자원|글자/.test(m)) {
+            return `이름에 담긴 두 한자를 자세히 풀어드릴게요.\n\n<b>娜 (나) — 아리따울 나, 土 기운</b>\n획수 10획. 여성의 우아한 자태와 인품을 뜻하며, 대지(土)처럼 모든 것을 포용하는 성질을 담고 있어요. 娜 자를 품은 아이는 어디서든 자연스럽게 주변을 따뜻하게 아우르는 힘을 가집니다.\n\n<b>奫 (윤) — 물 깊고 넓을 윤, 水 기운</b>\n획수 15획. 깊고 넓은 물이 고요하게 담긴 형상으로, 겉으로는 차분하지만 내면에 무한한 지혜와 통찰을 품은 글자예요. 계수(癸水) 일간과 오행이 같아 아이의 본래 기질을 더욱 강화해 줍니다.`;
+        }
+        // 성격
+        if (/성격|기질|어떤아이|어떻게될|인성|성품|특징/.test(m)) {
+            return `사주와 이름 기운을 종합해 보면 김나윤 아이는 이런 기질을 보일 가능성이 높아요.\n\n<b>🌊 깊고 고요한 내면</b>\n계수(癸水) 일간 특유의 조용하고 섬세한 감수성을 가져요. 겉으로는 차분해 보이지만 내면에 강한 의지와 풍부한 상상력을 품고 있습니다.\n\n<b>🌱 유연한 적응력</b>\n을목(乙木)의 기운으로 어떤 환경에서도 자연스럽게 녹아드는 사교성을 보여요. 고집보다 배려로 사람들의 마음을 얻는 타입입니다.\n\n<b>✨ 학문·예술 재능</b>\n기묘(己卯) 월의 기운과 水·土 이름 기운이 합쳐져 학습 능력과 예술적 감각이 뛰어날 수 있어요. 글쓰기, 음악, 미술 등 창의 분야에서 두각을 나타낼 가능성이 높습니다.`;
+        }
+        // 오행 보완 원리
+        if (/오행|보완|원리|상생|균형|기운/.test(m)) {
+            return `오행 보완의 원리를 쉽게 설명해 드릴게요!\n\n<b>🔵 사주 원국 = 타고난 땅</b>\n아이가 태어난 시간(년·월·일·시)에서 木火土金水 5가지 기운의 배분이 결정돼요. 김나윤의 경우 金이 26.5pt로 가장 강하고, 水(13.75)와 土(16.75)가 부족합니다.\n\n<b>🌟 이름 = 부족한 기운을 채우는 처방</b>\n娜(土 +15pt)와 奫(水 +15pt)를 이름에 넣어 부족한 두 오행을 보충합니다. 마치 영양제처럼 사주가 필요로 하는 기운을 이름으로 매일 공급하는 것이죠.\n\n<b>♻️ 상생(相生) = 에너지가 막힘없이 흐르는 흐름</b>\n金→水→木으로 이어지는 상생 사이클이 완성되어 이름을 부를 때마다 이 에너지가 순환합니다.`;
+        }
+        // 진로/직업
+        if (/진로|직업|직종|미래|어른|커서|장래/.test(m)) {
+            return `사주와 이름의 오행 배합으로 보면 김나윤 아이에게 잘 맞는 분야가 보여요.\n\n<b>📚 학문·연구 분야</b>\n水 기운의 깊은 사색력 + 金 기운의 집중력이 합쳐져 연구직, 학자, 분석가 계열에서 두각을 나타낼 수 있어요.\n\n<b>🎨 예술·창작 분야</b>\n乙木과 水의 감수성이 풍부해 음악, 미술, 문학, 디자인 등 창의적 표현 분야에서 재능을 꽃피울 가능성이 높습니다.\n\n<b>💬 상담·교육 분야</b>\n娜(나)의 土 기운이 주는 포용력과 배려심으로 교사, 상담사, 사회복지사 등 사람을 돕는 직종과도 잘 맞아요.\n\n물론 이건 기운의 방향성이며, 아이의 의지와 노력이 가장 중요합니다!`;
+        }
+        // 수리
+        if (/수리|획수|81|원격|형격|이격|정격/.test(m)) {
+            return `김나윤의 81수리 사격(四格)을 풀어드릴게요.\n\n<b>원격(元格) 25수 — 안전수</b>\n초년기 기운. 안정 속에 차근차근 기반을 쌓아나가는 수로, 어린 시절 주변의 사랑과 보살핌을 받으며 건강하게 성장합니다.\n\n<b>형격(亨格) 18수 — 발전수</b>\n청년기 기운. 뛰어난 능력으로 사회에서 인정받고 전문 분야에서 두각을 나타내는 발전과 상승의 수입니다.\n\n<b>이격(利格) 9수 — 명예수</b>\n장년기 기운. 쌓아온 실력과 인덕으로 명예를 얻는 시기예요. 리더십이 발휘됩니다.\n\n<b>정격(貞格) 33수 — 대길수 ⭐</b>\n말년 기운. 33수는 81수리 중 최고 길수 중 하나! 풍요롭고 행복한 말년을 예고합니다.`;
+        }
+        // 기본 답변
+        return `좋은 질문이에요! 😊\n\n<b>김나윤</b>이라는 이름은 金(쇠) 기운이 강한 사주에 土(흙)와 水(물) 기운을 더해 오행의 균형을 완성한 이름입니다.\n\n구체적으로 궁금하신 점이 있으시면 더 자세히 답변드릴게요. 예를 들어\n• "사주에 왜 좋은가요?" — 오행 보완 원리\n• "한자 의미" — 娜·奫 글자 해설\n• "아이 성격이나 진로" — 기질·재능 분석\n등을 물어보시면 더 풍부하게 설명해 드릴 수 있어요!`;
+    }
+
+    // 보고서 렌더 시 컨텍스트 초기화
+    function _initChatContext(candidate, report, scores) {
+        _chatHistory = [];
+        _chatSending = false;
+
+        const { h1, h2, s0, score, familyKr, familyHanja, isOija } = candidate;
+        const s1 = h1.s, s2 = h2 ? h2.s : 0;
+        const g1 = isOija ? s1+1   : s1+s2;
+        const g2 = s0+s1;
+        const g3 = isOija ? s0+1   : s0+s2;
+        const g4 = isOija ? s0+s1  : s0+s1+s2;
+
+        const getSuriInfo = (n) => {
+            let num = n > 81 ? n%81 : n;
+            if (num === 0) num = 81;
+            return (typeof SURI_DATA !== 'undefined' && SURI_DATA[num])
+                ? { num: n, name: SURI_DATA[num].name, grade: SURI_DATA[num].grade }
+                : { num: n, name: '', grade: '평' };
+        };
+
+        _chatContext = {
+            nameKr:     `${familyKr}${h1.kr}${h2?.kr||''}`,
+            nameHanja:  `${familyHanja}${h1.h}${h2?.h||''}`,
+            score:      score,
+            tagline:    report.tagline || '',
+            saju:       _currentState?._saju || {},
+            ohengScores: scores || {},
+            hanja: [
+                { char: h1.h, kr: h1.kr, meaning: h1.m || '', oheng: h1.o || '', strokes: h1.s },
+                ...(h2 ? [{ char: h2.h, kr: h2.kr, meaning: h2.m || '', oheng: h2.o || '', strokes: h2.s }] : [])
+            ],
+            suri: {
+                won:    getSuriInfo(g1),
+                hyeong: getSuriInfo(g2),
+                i:      getSuriInfo(g3),
+                jeong:  getSuriInfo(g4)
+            },
+            stories: {
+                conclusion: (report.conclusionLetter || '').slice(0, 300)
+            }
+        };
+
+        // UI 초기화
+        const msgEl = document.getElementById('chat-messages');
+        if (msgEl) msgEl.innerHTML = '';
+        const chips = document.getElementById('chat-example-chips');
+        if (chips) chips.style.display = 'flex';
+        const input = document.getElementById('chat-input');
+        if (input) { input.value = ''; input.style.height = 'auto'; }
+        const btn = document.getElementById('chat-send-btn');
+        if (btn) btn.disabled = false;
+
+        // 웰컴 메시지
+        _appendChatBubble('assistant',
+            `안녕하세요 😊 <b>${_chatContext.nameKr}</b> 이름의 작명 보고서를 분석했습니다.<br>` +
+            `이름에 대해 궁금하신 점을 편하게 물어보세요. 명리학 데이터를 바탕으로 답변드리겠습니다.`
+        );
+    }
+
+    // 예시 chip 클릭
+    function sendChatChip(btn) {
+        const input = document.getElementById('chat-input');
+        if (input) input.value = btn.textContent.trim();
+        const chips = document.getElementById('chat-example-chips');
+        if (chips) chips.style.display = 'none';
+        sendChatMessage();
+    }
+
+    // 메시지 전송
+    async function sendChatMessage() {
+        if (_chatSending) return;
+        const input = document.getElementById('chat-input');
+        const msg = (input?.value || '').trim();
+        if (!msg || !_chatContext) return;
+
+        _chatSending = true;
+        const sendBtn = document.getElementById('chat-send-btn');
+        if (sendBtn) sendBtn.disabled = true;
+        if (input) { input.value = ''; input.style.height = 'auto'; }
+
+        // 예시 chip 숨김 + 이전 후속 칩 제거
+        const chips = document.getElementById('chat-example-chips');
+        if (chips) chips.style.display = 'none';
+        document.querySelectorAll('.chat-followup-chips').forEach(el => el.remove());
+
+        _appendChatBubble('user', msg);
+        _chatHistory.push({ role: 'user', content: msg });
+
+        // 로딩 말풍선
+        const loadingId = _appendChatLoadingBubble();
+
+        try {
+            if (_chatDemoMode) {
+                // 데모 모드: API 없이 미리 준비된 답변 반환 (1~1.5초 딜레이)
+                await new Promise(r => setTimeout(r, 900 + Math.random() * 600));
+                const reply = _getDemoReply(msg);
+                _updateChatBubble(loadingId, reply.replace(/\n/g, '<br>'));
+                _chatHistory.push({ role: 'assistant', content: reply });
+                _appendFollowUpChips(_getFollowUpChips(msg));
+            } else {
+                const res = await fetch('/proxy/gemini-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: msg,
+                        context: _chatContext,
+                        history: _chatHistory.slice(-20)
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok || data.error) {
+                    _updateChatBubble(loadingId, `⚠️ ${data.error || '답변 생성에 실패했습니다. 잠시 후 다시 시도해주세요.'}`);
+                } else {
+                    const reply = data.reply || '';
+                    _updateChatBubble(loadingId, reply.replace(/\n/g, '<br>'));
+                    _chatHistory.push({ role: 'assistant', content: reply });
+                    _appendFollowUpChips(_getFollowUpChips(msg));
+                }
+            }
+        } catch(e) {
+            _updateChatBubble(loadingId, '⚠️ 네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        } finally {
+            _chatSending = false;
+            if (sendBtn) sendBtn.disabled = false;
+        }
+    }
+
+    // 일반 말풍선 추가
+    function _appendChatBubble(role, html) {
+        const id = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+        const wrap = document.getElementById('chat-messages');
+        if (!wrap) return id;
+        const el = document.createElement('div');
+        el.id = id;
+        el.className = `chat-bubble chat-bubble-${role}`;
+        el.innerHTML = html;
+        wrap.appendChild(el);
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return id;
+    }
+
+    // 로딩 말풍선 추가
+    function _appendChatLoadingBubble() {
+        const id = 'cb_loading_' + Date.now();
+        const wrap = document.getElementById('chat-messages');
+        if (!wrap) return id;
+        const el = document.createElement('div');
+        el.id = id;
+        el.className = 'chat-bubble chat-bubble-assistant chat-bubble-loading';
+        el.innerHTML = '<span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot"></span>';
+        wrap.appendChild(el);
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return id;
+    }
+
+    // 말풍선 내용 업데이트 (로딩 → 실제 답변)
+    function _updateChatBubble(id, html) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.remove('chat-bubble-loading');
+            el.innerHTML = html;
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // 맥락별 후속 질문 칩 목록 반환
+    function _getFollowUpChips(lastMsg) {
+        const m = (lastMsg || '').toLowerCase().replace(/\s/g, '');
+        if (/사주|좋은|왜좋|잘맞|어울|궁합/.test(m))
+            return ['한자 의미를 더 자세히 알려줘', '아이 성격이 어떻게 될까요?', '진로는 어떤 게 잘 맞나요?'];
+        if (/한자|의미|뜻|자원|글자|娜|奫/.test(m))
+            return ['사주에 어떻게 도움이 되나요?', '아이 성격이 어떻게 될까요?', '수리 운세도 알려줘'];
+        if (/성격|기질|어떤아이|성품|인성/.test(m))
+            return ['진로는 어떤 게 잘 맞나요?', '오행 보완 원리가 뭔가요?', '이름 수리가 좋은가요?'];
+        if (/오행|보완|원리|상생|균형|기운/.test(m))
+            return ['이 이름이 왜 사주에 좋은가요?', '한자 의미를 더 자세히 알려줘', '아이 성격이 어떻게 될까요?'];
+        if (/진로|직업|직종|장래|커서|미래/.test(m))
+            return ['건강 관리 팁도 알려줘', '아이 성격이 어떻게 될까요?', '수리 운세도 알려줘'];
+        if (/수리|획수|81|원격|형격|이격|정격/.test(m))
+            return ['이 이름이 왜 사주에 좋은가요?', '한자 의미를 더 자세히 알려줘', '아이 성격이 어떻게 될까요?'];
+        if (/건강|체력|음식|생활/.test(m))
+            return ['진로는 어떤 게 잘 맞나요?', '오행 보완 원리가 뭔가요?', '이 이름이 왜 사주에 좋은가요?'];
+        return ['이 이름이 왜 사주에 좋은가요?', '아이 성격이 어떻게 될까요?', '오행 보완 원리가 뭔가요?'];
+    }
+
+    // 후속 질문 칩을 채팅창 안에 추가
+    function _appendFollowUpChips(chips) {
+        const wrap = document.getElementById('chat-messages');
+        if (!wrap || !chips?.length) return;
+        const el = document.createElement('div');
+        el.className = 'chat-followup-chips';
+        el.innerHTML = chips.map(c =>
+            `<button onclick="sendChatFollowUp(this)">${c}</button>`
+        ).join('');
+        wrap.appendChild(el);
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // 후속 칩 클릭 전송
+    function sendChatFollowUp(btn) {
+        btn.closest('.chat-followup-chips')?.remove();
+        const input = document.getElementById('chat-input');
+        if (input) input.value = btn.textContent.trim();
+        sendChatMessage();
+    }
+
+    // 양력/음력/윤달 타입 반환 (윤달은 음력 라디오 + 체크박스 조합)
+    function _getCalType(prefix) {
+        const name = prefix === 'prem' ? 'cal_type' : 'self_cal_type';
+        const base = document.querySelector(`[name="${name}"]:checked`)?.value || 'solar';
+        if (base === 'lunar') {
+            const leapId = prefix === 'prem' ? 'prem-leap-check' : 'self-leap-check';
+            if (document.getElementById(leapId)?.checked) return 'leap';
+        }
+        return base;
+    }
+    // 시간 분리 입력 동기화 (24h hidden input으로 변환)
+    function _syncTimeVal(prefix) {
+        const ampmName = prefix === 'prem' ? 'prem-ampm' : 'birth-ampm';
+        const ampm     = document.querySelector(`[name="${ampmName}"]:checked`)?.value || 'am';
+        const hourEl   = document.getElementById(prefix === 'prem' ? 'prem-time-hour'  : 'birth-time-hour');
+        const minEl    = document.getElementById(prefix === 'prem' ? 'prem-time-min'   : 'birth-time-min');
+        const hidden   = document.getElementById(prefix === 'prem' ? 'prem-birth-time' : 'birth-time');
+        const hourRaw = parseInt(hourEl?.value || '0');
+        const minRaw  = minEl?.value.trim() || '';
+        if (!hidden || !hourRaw || minRaw === '') { if (hidden) hidden.value = ''; return; }
+        let h = hourRaw;
+        if (ampm === 'am' && h === 12) h = 0;
+        if (ampm === 'pm' && h !== 12) h += 12;
+        hidden.value = `${String(h).padStart(2,'0')}:${minRaw.padStart(2,'0')}`;
+    }
+    function _setTimeFields(prefix, timeStr) {
+        if (!timeStr) return;
+        const [hStr, mStr] = timeStr.split(':');
+        let h = parseInt(hStr);
+        const ampm = h < 12 ? 'am' : 'pm';
+        if (h === 0) h = 12; else if (h > 12) h -= 12;
+        const ampmName = prefix === 'prem' ? 'prem-ampm' : 'birth-ampm';
+        const ampmEl   = document.querySelector(`[name="${ampmName}"][value="${ampm}"]`);
+        const hourEl   = document.getElementById(prefix === 'prem' ? 'prem-time-hour'  : 'birth-time-hour');
+        const minEl    = document.getElementById(prefix === 'prem' ? 'prem-time-min'   : 'birth-time-min');
+        const hidden   = document.getElementById(prefix === 'prem' ? 'prem-birth-time' : 'birth-time');
+        if (ampmEl)  ampmEl.checked  = true;
+        if (hourEl)  hourEl.value    = String(h);
+        if (minEl)   minEl.value     = mStr;
+        if (hidden)  hidden.value    = timeStr;
+    }
+
+    // 날짜 분리 입력 동기화
+    function _syncDateVal(baseId, onChangeCb) {
+        const year     = document.getElementById(baseId + '-year')?.value.trim()  || '';
+        const monthRaw = document.getElementById(baseId + '-month')?.value.trim() || '';
+        const dayRaw   = document.getElementById(baseId + '-day')?.value.trim()   || '';
+        const month    = monthRaw ? monthRaw.padStart(2, '0') : '';
+        const day      = dayRaw   ? dayRaw.padStart(2, '0')   : '';
+        const hidden   = document.getElementById(baseId);
+        if (!hidden) return;
+        hidden.value = (year.length === 4 && month && day) ? `${year}-${month}-${day}` : '';
+        if (onChangeCb) onChangeCb();
+    }
+    function _setDateFields(baseId, dateStr) {
+        if (!dateStr) return;
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return;
+        const yearEl  = document.getElementById(baseId + '-year');
+        const monthEl = document.getElementById(baseId + '-month');
+        const dayEl   = document.getElementById(baseId + '-day');
+        const hidden  = document.getElementById(baseId);
+        if (yearEl)  yearEl.value  = parts[0];
+        if (monthEl) monthEl.value = parts[1];
+        if (dayEl)   dayEl.value   = parts[2];
+        if (hidden)  hidden.value  = dateStr;
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const dateConfigs = [
+            { base: 'birth-date',      cb: () => typeof updateSelfLunarLabel === 'function' && updateSelfLunarLabel() },
+            { base: 'prem-birth-date', cb: () => typeof updateLunarLabel      === 'function' && updateLunarLabel()      },
+        ];
+        dateConfigs.forEach(({ base, cb }) => {
+            const yearEl  = document.getElementById(base + '-year');
+            const monthEl = document.getElementById(base + '-month');
+            const dayEl   = document.getElementById(base + '-day');
+            if (yearEl) {
+                const _doSyncYear = () => _syncDateVal(base, cb);
+                yearEl.addEventListener('input',  _doSyncYear);
+                yearEl.addEventListener('change', _doSyncYear);
+            }
+            [monthEl, dayEl].forEach(el => {
+                if (el) { el.addEventListener('input', () => _syncDateVal(base, cb)); el.addEventListener('change', () => _syncDateVal(base, cb)); }
+            });
+        });
+
+        // 시간 피커 이벤트 (self / prem)
+        ['birth', 'prem'].forEach(prefix => {
+            const ampmName = prefix === 'prem' ? 'prem-ampm' : 'birth-ampm';
+            const hourId   = prefix === 'prem' ? 'prem-time-hour' : 'birth-time-hour';
+            const minId    = prefix === 'prem' ? 'prem-time-min'  : 'birth-time-min';
+            document.querySelectorAll(`[name="${ampmName}"]`).forEach(el => {
+                el.addEventListener('change', () => _syncTimeVal(prefix));
+            });
+            [hourId, minId].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.addEventListener('input', () => _syncTimeVal(prefix)); el.addEventListener('change', () => _syncTimeVal(prefix)); }
+            });
+        });
+
+        // 윤달 서브 옵션: 음력 선택 시 표시, 타 선택 시 숨김
+        [{ name: 'self_cal_type', leapLabel: 'self-leap-label', leapCheck: 'self-leap-check' },
+         { name: 'cal_type',      leapLabel: 'prem-leap-label', leapCheck: 'prem-leap-check' }]
+        .forEach(({ name, leapLabel, leapCheck }) => {
+            document.querySelectorAll(`[name="${name}"]`).forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const lbl = document.getElementById(leapLabel);
+                    const chk = document.getElementById(leapCheck);
+                    if (lbl) lbl.style.display = this.value === 'lunar' ? '' : 'none';
+                    if (this.value !== 'lunar' && chk) chk.checked = false;
+                });
+            });
+        });
+    });
+
+    // 부모 연도 선택기 동적 생성 (1940-2005)
+    document.addEventListener('DOMContentLoaded', () => {
+        ['parent-father-year','parent-mother-year'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            for (let y = 2005; y >= 1940; y--) {
+                const opt = document.createElement('option');
+                opt.value = String(y);
+                opt.textContent = y + '년';
+                sel.appendChild(opt);
+            }
+        });
+    });
+
+    // textarea 자동 높이 조절 + Enter 전송
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('chat-input');
+        if (!input) return;
+        input.addEventListener('input', () => {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+    });
+
+
+

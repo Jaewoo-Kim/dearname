@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사격수리 개선 프리뷰</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Pretendard', sans-serif; background: #f8fafc; color: #1e293b; padding: 24px; }
+
+  h1 { font-size: 1.1rem; font-weight: 900; color: #0f172a; margin-bottom: 4px; }
+  .page-sub { font-size: 0.8rem; color: #94a3b8; margin-bottom: 32px; }
+
+  /* ── 섹션 구분 ── */
+  .section { margin-bottom: 48px; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.68rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: #d4af37; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 20px; padding: 4px 14px; margin-bottom: 12px;
+  }
+  .section-title { font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+  .section-desc  { font-size: 0.8rem; color: #64748b; margin-bottom: 20px; line-height: 1.6; }
+  .divider { border: none; border-top: 1px dashed #e2e8f0; margin: 40px 0; }
+
+  /* ── 카드 ── */
+  .card { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  .card-title { font-size: 0.7rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+
+  /* ═══════════════════════════════════
+     1. 흐름 패턴 라벨
+  ════════════════════════════════════ */
+  .pattern-banner {
+    display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(135deg, #fffcf3, #fff8e1);
+    border: 1.5px solid #d4af37; border-radius: 16px;
+    padding: 18px 22px; margin-bottom: 16px;
+  }
+  .pattern-icon { font-size: 2.2rem; flex-shrink: 0; }
+  .pattern-name { font-size: 1.05rem; font-weight: 900; color: #92400e; margin-bottom: 3px; }
+  .pattern-desc { font-size: 0.83rem; color: #78350f; line-height: 1.5; }
+  .pattern-badge {
+    margin-left: auto; flex-shrink: 0;
+    background: #d4af37; color: white;
+    font-size: 0.7rem; font-weight: 800; border-radius: 20px; padding: 4px 12px;
+  }
+
+  /* 정격 하이라이트 */
+  .suri-seasons-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 16px; }
+  .season-card {
+    border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px 12px;
+    text-align: center; background: white;
+  }
+  .season-card.good { background: #f0fdf4; border-color: #bbf7d0; }
+  .season-card.bad  { background: #fef2f2; border-color: #fecaca; }
+  .season-card.highlight { border: 2.5px solid #d4af37; background: #fffcf3; }
+  .season-emoji { font-size: 1.5rem; display: block; margin-bottom: 6px; }
+  .season-period { font-size: 0.68rem; color: #94a3b8; font-weight: 700; margin-bottom: 2px; }
+  .season-num { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin: 6px 0 2px; }
+  .season-name { font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; }
+  .season-grade {
+    display: inline-block; border-radius: 20px; padding: 3px 10px;
+    font-size: 0.72rem; font-weight: 800;
+  }
+  .grade-vg { background:#dcfce7; color:#14532d; }
+  .grade-g  { background:#dbeafe; color:#1d4ed8; }
+  .grade-b  { background:#fef3c7; color:#92400e; }
+  .grade-vb { background:#fee2e2; color:#dc2626; }
+
+  .special-badge {
+    display: inline-block; background: #d4af37; color: white;
+    font-size: 0.6rem; font-weight: 800; border-radius: 10px; padding: 2px 7px;
+    margin-top: 4px; letter-spacing: 0.5px;
+  }
+  .danger-badge {
+    display: inline-block; background: #dc2626; color: white;
+    font-size: 0.6rem; font-weight: 800; border-radius: 10px; padding: 2px 7px;
+    margin-top: 4px;
+  }
+  .total-badge {
+    display: inline-block; font-size: 0.6rem; font-weight: 800;
+    background: rgba(212,175,55,0.15); color: #92400e;
+    border: 1px solid rgba(212,175,55,0.4); border-radius: 10px; padding: 2px 8px; margin-top: 4px;
+  }
+
+  /* ═══════════════════════════════════
+     2. 비교표 미니 도트
+  ════════════════════════════════════ */
+  .compare-table { width: 100%; border-collapse: collapse; }
+  .compare-table thead tr { background: #0f172a; }
+  .compare-table th {
+    color: rgba(255,255,255,0.5); font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.8px; text-transform: uppercase; padding: 12px 14px; text-align: left;
+  }
+  .compare-table th.name-col { text-align: center; min-width: 120px; }
+  .compare-table tbody tr { border-bottom: 1px solid #f1f5f9; }
+  .compare-table tbody tr:hover { background: #fafaf8; }
+  .compare-table td { padding: 10px 14px; font-size: 0.85rem; color: #475569; }
+  .compare-table td.name-col { text-align: center; }
+
+  /* 도트 방식 */
+  .suri-dots { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .suri-dot-row { display: flex; gap: 4px; align-items: center; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot.vg { background: #16a34a; }
+  .dot.g  { background: #3b82f6; }
+  .dot.b  { background: #f59e0b; }
+  .dot.vb { background: #dc2626; }
+  .dot-label { font-size: 0.6rem; color: #94a3b8; white-space: nowrap; }
+  .suri-summary { font-size: 0.75rem; font-weight: 700; margin-top: 3px; }
+  .suri-summary.rising  { color: #16a34a; }
+  .suri-summary.stable  { color: #3b82f6; }
+  .suri-summary.falling { color: #f59e0b; }
+  .suri-summary.mixed   { color: #94a3b8; }
+
+  /* ═══════════════════════════════════
+     3. 타임라인 바
+  ════════════════════════════════════ */
+  .timeline-wrap { margin-top: 20px; }
+  .timeline-bar {
+    display: flex; width: 100%; height: 52px; border-radius: 12px; overflow: hidden;
+    border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .tl-seg {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    font-size: 0.68rem; font-weight: 700; transition: all 0.2s;
+    cursor: pointer; position: relative;
+  }
+  .tl-seg:hover { filter: brightness(0.93); }
+  .tl-seg.vg { background: linear-gradient(180deg,#dcfce7,#bbf7d0); color: #14532d; }
+  .tl-seg.g  { background: linear-gradient(180deg,#dbeafe,#bfdbfe); color: #1d4ed8; }
+  .tl-seg.b  { background: linear-gradient(180deg,#fef3c7,#fde68a); color: #92400e; }
+  .tl-seg.vb { background: linear-gradient(180deg,#fee2e2,#fecaca); color: #dc2626; }
+  .tl-seg + .tl-seg { border-left: 1px solid rgba(255,255,255,0.6); }
+  .tl-num { font-size: 1.1rem; font-weight: 900; line-height: 1; }
+  .tl-label { font-size: 0.6rem; opacity: 0.8; }
+
+  .timeline-ages {
+    display: flex; margin-top: 6px;
+  }
+  .tl-age { flex: 1; text-align: center; font-size: 0.62rem; color: #94a3b8; font-weight: 600; }
+
+  /* 비교용 타임라인 */
+  .timeline-compare { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+  .tc-row { display: flex; align-items: center; gap: 12px; }
+  .tc-name {
+    width: 60px; flex-shrink: 0;
+    font-size: 0.8rem; font-weight: 800; color: #0f172a; text-align: right;
+  }
+  .tc-bar { flex: 1; display: flex; height: 38px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .tc-seg {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 800;
+  }
+  .tc-seg.vg { background: #dcfce7; color: #14532d; }
+  .tc-seg.g  { background: #dbeafe; color: #1d4ed8; }
+  .tc-seg.b  { background: #fef3c7; color: #92400e; }
+  .tc-seg.vb { background: #fee2e2; color: #dc2626; }
+  .tc-seg + .tc-seg { border-left: 1px solid rgba(255,255,255,0.8); }
+  .tc-pattern { font-size: 0.72rem; font-weight: 700; width: 64px; flex-shrink: 0; }
+  .tc-pattern.rising  { color: #16a34a; }
+  .tc-pattern.stable  { color: #3b82f6; }
+  .tc-pattern.falling { color: #f59e0b; }
+  .tc-ages { display: flex; margin-top: 4px; padding-left: 72px; padding-right: 76px; }
+  .tc-age  { flex: 1; text-align: center; font-size: 0.6rem; color: #94a3b8; }
+
+  /* ═══════════════════════════════════
+     선택 탭 UI
+  ════════════════════════════════════ */
+  .tab-row { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab {
+    padding: 7px 18px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+    cursor: pointer; border: 1.5px solid #e2e8f0; background: white; color: #94a3b8;
+    transition: all 0.15s;
+  }
+  .tab.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+  /* ── 레이아웃 ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) {
+    .suri-seasons-grid { grid-template-columns: repeat(2,1fr); }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>📐 사격수리 프리미엄 개선 — 프리뷰</h1>
+<p class="page-sub">아이디어 3가지를 실제 데이터로 시각화한 프리뷰입니다. 클릭·스크롤로 확인하세요.</p>
+
+<!-- ══════════════════════════════════════════
+     IDEA 1: 흐름 패턴 라벨 + 정격 강조
+════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Idea 1</div>
+  <div class="section-title">흐름 패턴 라벨 + 정격(총운) 강조</div>
+  <div class="section-desc">
+    4격의 길흉 배열을 자동 분석해 "이 이름의 인생 흐름 유형"을 한 줄로 표시합니다.<br>
+    정격(말년·총운)에는 유명 대길수·대흉수 특별 배지를 추가합니다.
+  </div>
+
+  <!-- 예시 A: 상승형 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">예시 A — 김민준 (상승형)</div>
+    <div class="pattern-banner">
+      <div class="pattern-icon">🌅</div>
+      <div>
+        <div class="pattern-name">상승형 — 고생 끝에 꽃이 피는 인생</div>
+        <div class="pattern-desc">초·청년기는 평범하지만 장년·말년으로 갈수록 운세가 강해집니다.<br>
+        <b>정격(총운) 31수 — 81수리 최고의 대길수</b>로 인생 전체를 든든하게 받쳐줍니다.</div>
+      </div>
+      <div class="pattern-badge">🌅 상승형</div>
+    </div>
+    <div class="suri-seasons-grid">
+      <div class="season-card">
+        <span class="season-emoji">🌱</span>
+        <div class="season-period">봄 · 초년 (0~20대)</div>
+        <div class="season-num">16</div>
+        <div class="season-name">덕망수</div>
+        <span class="season-grade grade-g">좋음</span>
+      </div>
+      <div class="season-card">
+        <span class="season-emoji">☀️</span>
+        <div class="season-period">여름 · 청년 (20~40대)</div>
+        <div class="season-num">23</div>
+        <div class="season-name">공명수</div>
+        <span class="season-grade grade-vg">매우 좋음</span>
+      </div>
+      <div class="season-card good">
+        <span class="season-emoji">🍂</span>
+        <div class="season-period">가을 · 장년 (40~60대)</div>
+        <div class="season-num">38</div>
+        <div class="season-name">문예수</div>
+        <span class="season-grade grade-vg">매우 좋음</span>
+      </div>
+      <div class="season-card highlight">
+        <span class="season-emoji">❄️</span>
+        <div class="season-period">겨울 · 말년 (60대~)</div>
+        <div class="season-num">31</div>
+        <div class="season-name">융성수</div>
+        <span class="season-grade grade-vg">매우 좋음</span>
+        <div><span class="special-badge">★ 대표 대길수</span></div>
+        <div><span class="total-badge">총운</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 예시 B: 하강형 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">예시 B — 박서윤 (하강형)</div>
+    <div class="pattern-banner" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:#f87171;">
+      <div class="pattern-icon">📉</div>
+      <div>
+        <div class="pattern-name" style="color:#991b1b;">하강형 — 초반의 기세를 잘 지켜야 하는 이름</div>
+        <div class="pattern-desc" style="color:#7f1d1d;">청년기까지의 좋은 기운을 장년·말년까지 이어가려면<br>
+        자원오행·발음오행의 보완이 더욱 중요합니다.</div>
+      </div>
+      <div class="pattern-badge" style="background:#dc2626;">📉 하강형</div>
+    </div>
+    <div class="suri-seasons-grid">
+      <div class="season-card good">
+        <span class="season-emoji">🌱</span>
+        <div class="season-period">봄 · 초년 (0~20대)</div>
+        <div class="season-num">32</div>
+        <div class="season-name">요행수</div>
+        <span class="season-grade grade-vg">매우 좋음</span>
+        <div><span class="special-badge">★ 대길수</span></div>
+      </div>
+      <div class="season-card good">
+        <span class="season-emoji">☀️</span>
+        <div class="season-period">여름 · 청년 (20~40대)</div>
+        <div class="season-num">23</div>
+        <div class="season-name">공명수</div>
+        <span class="season-grade grade-vg">매우 좋음</span>
+      </div>
+      <div class="season-card bad">
+        <span class="season-emoji">🍂</span>
+        <div class="season-period">가을 · 장년 (40~60대)</div>
+        <div class="season-num">10</div>
+        <div class="season-name">공허수</div>
+        <span class="season-grade grade-vb">매우 나쁨</span>
+        <div><span class="danger-badge">⚠ 대표 흉수</span></div>
+      </div>
+      <div class="season-card bad highlight" style="border-color:#f87171;">
+        <span class="season-emoji">❄️</span>
+        <div class="season-period">겨울 · 말년 (60대~)</div>
+        <div class="season-num">19</div>
+        <div class="season-name">고독수</div>
+        <span class="season-grade grade-vb">매우 나쁨</span>
+        <div><span class="danger-badge">⚠ 대표 흉수</span></div>
+        <div><span class="total-badge">총운</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 예시 C: 안정형 -->
+  <div class="card">
+    <div class="card-title">예시 C — 이하은 (안정형)</div>
+    <div class="pattern-banner" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#4ade80;">
+      <div class="pattern-icon">🏆</div>
+      <div>
+        <div class="pattern-name" style="color:#14532d;">안정형 — 전 생애에 걸친 고른 행운의 흐름</div>
+        <div class="pattern-desc" style="color:#166534;">4격 모두 길수로 구성된 최상의 수리 배열입니다.<br>
+        어느 시기에도 흔들리지 않는 든든한 기운이 이름을 받쳐줍니다.</div>
+      </div>
+      <div class="pattern-badge" style="background:#16a34a;">🏆 안정형</div>
+    </div>
+    <div class="suri-seasons-grid">
+      <div class="season-card good">
+        <span class="season-emoji">🌱</span>
+        <div class="season-period">봄 · 초년 (0~20대)</div>
+        <div class="season-num">16</div>
+        <div class="season-name">덕망수</div>
+        <span class="season-grade grade-g">좋음</span>
+      </div>
+      <div class="season-card good">
+        <span class="season-emoji">☀️</span>
+        <div class="season-period">여름 · 청년 (20~40대)</div>
+        <div class="season-num">23</div>
+        <div class="season-name">공명수</div>
+        <span class="season-grade grade-vg">매우 좋음</span>
+      </div>
+      <div class="season-card good">
+        <span class="season-emoji">🍂</span>
+        <div class="season-period">가을 · 장년 (40~60대)</div>
+        <div class="season-num">15</div>
+        <div class="season-name">복수수</div>
+        <span class="season-grade grade-vg">매우 좋음</span>
+      </div>
+      <div class="season-card good highlight">
+        <span class="season-emoji">❄️</span>
+        <div class="season-period">겨울 · 말년 (60대~)</div>
+        <div class="season-num">38</div>
+        <div class="season-name">문예수</div>
+        <span class="season-grade grade-vg">매우 좋음</span>
+        <div><span class="total-badge">총운</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════
+     IDEA 2: 비교표 미니 도트
+════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Idea 2</div>
+  <div class="section-title">비교표 — 사격수리 미니 흐름 시각화</div>
+  <div class="section-desc">
+    현재 비교표의 "사격수리" 열은 단일 등급 텍스트만 표시합니다.<br>
+    4개 컬러 도트로 각 격(초년·청년·장년·말년)의 길흉을 한눈에 보여줍니다.
+  </div>
+
+  <div class="card">
+    <div style="overflow-x:auto;">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="min-width:110px;">항목</th>
+            <th class="name-col">김민준<br><span style="font-size:0.6rem;color:rgba(255,255,255,0.35);font-weight:400;">金旼俊</span></th>
+            <th class="name-col">김민재<br><span style="font-size:0.6rem;color:rgba(255,255,255,0.35);font-weight:400;">金旼在</span></th>
+            <th class="name-col">김준서<br><span style="font-size:0.6rem;color:rgba(255,255,255,0.35);font-weight:400;">金俊瑞</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-size:0.8rem;font-weight:700;color:#0f172a;">자원오행</td>
+            <td class="name-col"><span style="color:#14532d;font-weight:800;">✦ 매우 좋음</span></td>
+            <td class="name-col"><span style="color:#1d4ed8;font-weight:800;">✦ 좋음</span></td>
+            <td class="name-col"><span style="color:#1d4ed8;font-weight:800;">✦ 좋음</span></td>
+          </tr>
+          <tr>
+            <td style="font-size:0.8rem;font-weight:700;color:#0f172a;">발음 오행</td>
+            <td class="name-col"><span style="color:#14532d;font-weight:800;">✦ 매우 좋음</span></td>
+            <td class="name-col"><span style="color:#14532d;font-weight:800;">✦ 매우 좋음</span></td>
+            <td class="name-col"><span style="color:#b45309;font-weight:800;">▼ 나쁨</span></td>
+          </tr>
+          <!-- 사격수리 — 현재 방식 vs 개선 방식 나란히 -->
+          <tr style="background:#fffcf3;">
+            <td style="font-size:0.8rem;font-weight:700;color:#0f172a;">
+              사격수리<br>
+              <span style="font-size:0.68rem;color:#d4af37;font-weight:600;">현재 방식 →</span>
+            </td>
+            <td class="name-col"><span style="color:#14532d;font-weight:800;">✦ 매우 좋음</span></td>
+            <td class="name-col"><span style="color:#1d4ed8;font-weight:800;">✦ 좋음</span></td>
+            <td class="name-col"><span style="color:#1d4ed8;font-weight:800;">✦ 좋음</span></td>
+          </tr>
+          <tr style="background:#fffdf0;border-top:2px solid #d4af37;">
+            <td style="font-size:0.8rem;font-weight:700;color:#0f172a;">
+              사격수리<br>
+              <span style="font-size:0.68rem;color:#d4af37;font-weight:800;">개선 방식 ✦</span>
+            </td>
+            <!-- 민준: 🟢🟢🟢🟢 안정형 -->
+            <td class="name-col">
+              <div class="suri-dots">
+                <div class="suri-dot-row">
+                  <div class="dot vg" title="원격(초년)"></div>
+                  <div class="dot vg" title="형격(청년)"></div>
+                  <div class="dot vg" title="이격(장년)"></div>
+                  <div class="dot vg" title="정격(총운)"></div>
+                </div>
+                <div class="dot-label">초년 · 청년 · 장년 · 총운</div>
+                <div class="suri-summary stable">🏆 안정형</div>
+              </div>
+            </td>
+            <!-- 민재: 🔵🟢🟡🔵 혼합형 -->
+            <td class="name-col">
+              <div class="suri-dots">
+                <div class="suri-dot-row">
+                  <div class="dot g" title="원격(초년)"></div>
+                  <div class="dot vg" title="형격(청년)"></div>
+                  <div class="dot b" title="이격(장년)"></div>
+                  <div class="dot g" title="정격(총운)"></div>
+                </div>
+                <div class="dot-label">초년 · 청년 · 장년 · 총운</div>
+                <div class="suri-summary mixed">⚡ 중반주의</div>
+              </div>
+            </td>
+            <!-- 준서: 🔴🔵🟢🟢 상승형 -->
+            <td class="name-col">
+              <div class="suri-dots">
+                <div class="suri-dot-row">
+                  <div class="dot vb" title="원격(초년)"></div>
+                  <div class="dot g" title="형격(청년)"></div>
+                  <div class="dot vg" title="이격(장년)"></div>
+                  <div class="dot vg" title="정격(총운)"></div>
+                </div>
+                <div class="dot-label">초년 · 청년 · 장년 · 총운</div>
+                <div class="suri-summary rising">🌅 상승형</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size:0.8rem;font-weight:700;color:#0f172a;">수리 오행</td>
+            <td class="name-col"><span style="color:#14532d;font-weight:800;">✦ 매우 좋음</span></td>
+            <td class="name-col"><span style="color:#1d4ed8;font-weight:800;">✦ 좋음</span></td>
+            <td class="name-col"><span style="color:#b45309;font-weight:800;">▼ 나쁨</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:14px;padding:12px 16px;background:#f8fafc;border-radius:10px;font-size:0.78rem;color:#64748b;line-height:1.6;">
+      💡 <b>개선 포인트:</b> 김민준·김민재 둘 다 "좋음"이지만 민준은 4격 전부 길, 민재는 장년기에 주의가 필요합니다.
+      도트 하나로 이 차이를 즉시 파악할 수 있습니다.
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════
+     IDEA 3: 타임라인 바
+════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Idea 3</div>
+  <div class="section-title">수리 흐름 타임라인 바</div>
+  <div class="section-desc">
+    4격을 인생 연령대별 가로 타임라인으로 시각화합니다.<br>
+    단독 보고서와 이름 비교 두 가지 형태로 활용 가능합니다.
+  </div>
+
+  <!-- 단독 타임라인 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">김민준 — 인생 수리 흐름</div>
+    <div class="timeline-bar">
+      <div class="tl-seg vg">
+        <div class="tl-num">16</div>
+        <div class="tl-label">🌱 원격</div>
+      </div>
+      <div class="tl-seg vg">
+        <div class="tl-num">23</div>
+        <div class="tl-label">☀️ 형격</div>
+      </div>
+      <div class="tl-seg vg">
+        <div class="tl-num">38</div>
+        <div class="tl-label">🍂 이격</div>
+      </div>
+      <div class="tl-seg vg" style="border:2px solid #d4af37;border-left:none;">
+        <div class="tl-num">31</div>
+        <div class="tl-label">❄️ 정격 ★</div>
+      </div>
+    </div>
+    <div class="timeline-ages">
+      <div class="tl-age">0 ~ 20대</div>
+      <div class="tl-age">20 ~ 40대</div>
+      <div class="tl-age">40 ~ 60대</div>
+      <div class="tl-age">60대 ~ (총운)</div>
+    </div>
+  </div>
+
+  <!-- 비교 타임라인 -->
+  <div class="card">
+    <div class="card-title">이름 후보 인생 흐름 비교</div>
+    <div class="timeline-compare">
+      <div>
+        <div class="tc-row">
+          <div class="tc-name">김민준</div>
+          <div class="tc-bar">
+            <div class="tc-seg vg">16</div>
+            <div class="tc-seg vg">23</div>
+            <div class="tc-seg vg">38</div>
+            <div class="tc-seg vg" style="border:2px solid #d4af37;border-left:none;font-size:0.75rem;">31 ★</div>
+          </div>
+          <div class="tc-pattern stable">🏆 안정형</div>
+        </div>
+      </div>
+      <div>
+        <div class="tc-row">
+          <div class="tc-name">김민재</div>
+          <div class="tc-bar">
+            <div class="tc-seg g">24</div>
+            <div class="tc-seg vg">32</div>
+            <div class="tc-seg b">14</div>
+            <div class="tc-seg g">22</div>
+          </div>
+          <div class="tc-pattern mixed" style="color:#64748b;">⚡ 중반주의</div>
+        </div>
+      </div>
+      <div>
+        <div class="tc-row">
+          <div class="tc-name">김준서</div>
+          <div class="tc-bar">
+            <div class="tc-seg vb">4</div>
+            <div class="tc-seg g">12</div>
+            <div class="tc-seg vg">23</div>
+            <div class="tc-seg vg">31</div>
+          </div>
+          <div class="tc-pattern rising">🌅 상승형</div>
+        </div>
+      </div>
+    </div>
+    <div class="tc-ages">
+      <div class="tc-age">0~20대</div>
+      <div class="tc-age">20~40대</div>
+      <div class="tc-age">40~60대</div>
+      <div class="tc-age">60대~</div>
+    </div>
+    <div style="margin-top:14px;padding:12px 16px;background:#f8fafc;border-radius:10px;font-size:0.78rem;color:#64748b;line-height:1.6;">
+      💡 <b>개선 포인트:</b> 김준서는 초년이 대흉수지만 총운(정격)은 31 대길수입니다. 타임라인으로 "힘들게 시작해서 빛나는 인생"을 한눈에 전달할 수 있습니다.
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 종합 의견 -->
+<div class="section">
+  <div class="section-label">Summary</div>
+  <div class="section-title">구현 난이도 & 임팩트 비교</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;">
+    <div class="card" style="border-top:3px solid #16a34a;">
+      <div style="font-size:0.7rem;font-weight:800;color:#16a34a;margin-bottom:8px;">IDEA 1</div>
+      <div style="font-size:0.88rem;font-weight:800;margin-bottom:6px;">흐름 패턴 라벨</div>
+      <div style="font-size:0.75rem;color:#64748b;line-height:1.5;margin-bottom:12px;">패턴 판정 로직 + 배너 UI</div>
+      <div style="font-size:0.72rem;"><span style="color:#16a34a;font-weight:700;">난이도 ●●○○○</span></div>
+      <div style="font-size:0.72rem;"><span style="color:#d4af37;font-weight:700;">임팩트 ●●●●○</span></div>
+    </div>
+    <div class="card" style="border-top:3px solid #d4af37;">
+      <div style="font-size:0.7rem;font-weight:800;color:#d4af37;margin-bottom:8px;">IDEA 2</div>
+      <div style="font-size:0.88rem;font-weight:800;margin-bottom:6px;">비교표 미니 도트</div>
+      <div style="font-size:0.75rem;color:#64748b;line-height:1.5;margin-bottom:12px;">비교표 렌더 함수 수정</div>
+      <div style="font-size:0.72rem;"><span style="color:#16a34a;font-weight:700;">난이도 ●●○○○</span></div>
+      <div style="font-size:0.72rem;"><span style="color:#d4af37;font-weight:700;">임팩트 ●●●●●</span></div>
+    </div>
+    <div class="card" style="border-top:3px solid #3b82f6;">
+      <div style="font-size:0.7rem;font-weight:800;color:#3b82f6;margin-bottom:8px;">IDEA 3</div>
+      <div style="font-size:0.88rem;font-weight:800;margin-bottom:6px;">타임라인 바</div>
+      <div style="font-size:0.75rem;color:#64748b;line-height:1.5;margin-bottom:12px;">CSS + 렌더 함수 신규 작성</div>
+      <div style="font-size:0.72rem;"><span style="color:#f59e0b;font-weight:700;">난이도 ●●●○○</span></div>
+      <div style="font-size:0.72rem;"><span style="color:#d4af37;font-weight:700;">임팩트 ●●●●●</span></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
