@@ -67,9 +67,15 @@ suite('[LOGIC] buildUserPrompt — JSON 응답 스키마 계약');
   };
   const p = buildUserPrompt(candidate, { nameSpec, constraints: {}, _saju: raw, _scores: scores });
 
-  // 프롬프트가 요청하는 8개 서술 필드 = 폴백(catch) 반환 키와 일치해야 함
-  ['tagline','sajuStory','jawonStory','hanjaDetails','hanjaStory','conclusionLetter','careerAdvice']
+  // 프롬프트가 요청하는 6개 서술 필드 = 폴백(catch) 반환 키와 일치해야 함
+  ['tagline','sajuStory','jawonStory','hanjaStory','conclusionLetter','careerAdvice']
     .forEach(k => assert(p.includes(`"${k}"`), `JSON 스키마에 "${k}" 필드 요청 포함`));
+
+  // hanjaDetails는 더 이상 Claude에게 요청하지 않는다 — DB(h.m) 기반으로
+  // _genHanjaDetails가 결정적으로 조립하므로, AI가 훈음을 창작할 경로 자체가 없다.
+  assert(!p.includes('"hanjaDetails"'), 'JSON 스키마에 "hanjaDetails" 필드는 요청하지 않음 (DB 확정값으로 별도 조립)');
+  assert(p.includes('한자 뜻'), '프롬프트에 DB 확정 훈음("한자 뜻:")은 문맥용으로 여전히 전달됨');
+  assert(p.includes('창작 금지') || p.includes('지어내'), '다른 서술 필드에서도 훈음 임의 창작을 금지하는 지침 포함');
 }
 
 suite('[LOGIC] buildUserPrompt — 외자(1글자) 이름 처리');

@@ -5,7 +5,8 @@
  *   (프롬프트 계약 + 폴백 경계 원칙: Claude 산출물 자체는 단언하지 않음)
  *
  *   대상: _calcGuk(81수리 원형이정 4격), _getSuriData(81수 정규화),
- *         _genCareerJobs(오행→직업), _genHealthAdvice(최약 오행 건강).
+ *         _genCareerJobs(오행→직업), _genHealthAdvice(최약 오행 건강),
+ *         _genHanjaDetails/_genOneHanjaDetail(DB 확정 훈음 조립 — AI 창작 차단).
  *   ※ _genSoundStory/_genFormulaFields 는 브라우저 window.getCho 의존 → 여기서 제외.
  */
 
@@ -71,4 +72,46 @@ suite('[LOGIC] _genHealthAdvice — 최약 오행 건강 조언');
   // _scores 없음 → 기본 조언 폴백
   const c = _genHealthAdvice({});
   assert(c.includes('규칙적인'), '_scores 없음 → 기본 조언 폴백');
+}
+
+// ── _genHanjaDetails / _genOneHanjaDetail — DB 확정 훈음 조립 ──────────
+// 2026-07 세션에서 발견된 버그(尹="미쁠", 潤="불을" 등 AI가 DB에 없는
+// 훈음을 창작)의 근본 수정 대상. AI 호출 없이 h.m만으로 조립되므로,
+// "meaning에 DB의 각 훈음 조각이 모두 포함되고, 그 외의 문구가 훈음
+// 자리에 섞이지 않는다"를 구조적으로 보증해야 한다.
+suite('[LOGIC] _genHanjaDetails — DB(h.m) 확정 훈음 조립, AI 창작 차단');
+{
+  // 尹 사례 재현: DB 원문 "다스릴,벼슬" — "미쁠" 등 DB에 없는 훈음이 섞이면 안 됨
+  const yun = _genOneHanjaDetail({ h:'尹', kr:'윤', m:'다스릴,벼슬', s:4, o:'水' }, null);
+  assert(yun.meaning.includes('다스릴') && yun.meaning.includes('벼슬'), 'DB 훈음(다스릴,벼슬)이 meaning에 그대로 포함');
+  assert(!yun.meaning.includes('미쁠') && !yun.meaning.includes('미쁘'), 'DB에 없는 훈음(미쁠)은 섞이지 않음');
+
+  // 潤 사례 재현: DB 원문 "풍부할,윤택" — "불을" 같은 창작 훈음 차단
+  const yoon2 = _genOneHanjaDetail({ h:'潤', kr:'윤', m:'풍부할,윤택', s:16, o:'水' }, null);
+  assert(yoon2.meaning.includes('풍부할') && yoon2.meaning.includes('윤택'), 'DB 훈음(풍부할,윤택)이 meaning에 그대로 포함');
+  assert(!yoon2.meaning.includes('불을'), 'DB에 없는 훈음(불을)은 섞이지 않음');
+
+  // 기본 필드(hanja/kr/strokes/oheng)는 입력값을 그대로 반영 (가공 없음)
+  assertEq(yun.hanja, '尹', 'hanja 필드는 입력 그대로');
+  assertEq(yun.strokes, 4, 'strokes 필드는 입력 그대로');
+  assertEq(yun.oheng, '水', 'oheng 필드는 입력 그대로');
+
+  // synergyWithSaju — nameSpec 기반 결정적 분기 (용신 > prefer > 희신 > avoid > 중립)
+  const nameSpecYongsin = { prefer:[], avoid:[], yongsin:{ yongsinOheng:'金', heesinOheng:'土' } };
+  const yongsinCase = _genOneHanjaDetail({ h:'銀', kr:'은', m:'은,화폐', s:14, o:'金' }, nameSpecYongsin);
+  assert(yongsinCase.synergyWithSaju.includes('용신'), '오행이 용신과 일치하면 "용신" 언급');
+
+  const nameSpecPrefer = { prefer:['水'], avoid:['火'], yongsin:null };
+  const preferCase = _genOneHanjaDetail({ h:'河', kr:'하', m:'물,강이름', s:9, o:'水' }, nameSpecPrefer);
+  assert(preferCase.synergyWithSaju.includes('보완'), 'prefer 오행 포함 시 "보완" 언급');
+
+  const avoidCase = _genOneHanjaDetail({ h:'夏', kr:'하', m:'여름', s:10, o:'火' }, nameSpecPrefer);
+  assert(avoidCase.synergyWithSaju.includes('조심'), 'avoid 오행 포함 시 "조심" 언급');
+
+  // 성/이름 후보 통합 함수 — h1/h2 모두 반영, h2 없으면(외자) 1건만 반환
+  const details2 = _genHanjaDetails({ h1:{h:'瑞',kr:'서',m:'상서,길조',s:14,o:'金'}, h2:{h:'尹',kr:'윤',m:'다스릴,벼슬',s:4,o:'水'} }, { nameSpec: nameSpecYongsin });
+  assertEq(details2.length, 2, 'h1+h2 있으면 2건 반환');
+
+  const details1 = _genHanjaDetails({ h1:{h:'勳',kr:'훈',m:'공로',s:12,o:'火'}, h2:null }, { nameSpec: null });
+  assertEq(details1.length, 1, '외자(h2 없음)면 1건만 반환');
 }

@@ -149,18 +149,64 @@ function _genHealthAdvice(state) {
   return HEALTH[weakest] || '규칙적인 생활 습관으로 타고난 기운을 온전히 보전하세요.';
 }
 
-/** 5개 공식 필드 한 번에 생성 */
+// ── 한자 뜻풀이(hanjaDetails) — DB(h.m) 확정값 기반 결정적 생성 ──────────
+// AI가 훈음을 임의로 창작(예: 尹="미쁠", 潤="불을")하는 것을 원천 차단하기 위해
+// Claude 호출 없이 한자DB의 m 필드만으로 조립한다. (2026-07 세션에서 발견된
+// hanjaDetails.meaning 훈음 오염 버그의 근본 수정)
+const _OHENG_KR_FULL = {'木':'나무(木)','火':'불(火)','土':'흙(土)','金':'쇠(金)','水':'물(水)'};
+const _OHENG_SYMBOL  = {
+  '木': '꾸준한 성장과 생명력',
+  '火': '따뜻한 열정과 표현력',
+  '土': '든든한 포용과 안정감',
+  '金': '단단한 결단력과 명료함',
+  '水': '깊은 지혜와 유연함'
+};
+
+function _genOneHanjaDetail(h, nameSpec) {
+  if (!h || !h.h) return null;
+  const readings   = String(h.m || '').split(/[,.]/).map(s => s.trim()).filter(Boolean);
+  const readingStr = readings.length ? readings.join('·') : (h.m || '');
+  const oKr    = _OHENG_KR_FULL[h.o] || h.o || '';
+  const symbol = _OHENG_SYMBOL[h.o]  || '';
+
+  const meaning = `${h.kr||''}(${h.h}). '${readingStr}'이라는 뜻을 지닌 한자입니다. ${oKr} 기운을 품어 ${symbol}을 상징합니다.`;
+
+  const ys = nameSpec?.yongsin;
+  let synergyWithSaju;
+  if (ys && h.o === ys.yongsinOheng) {
+    synergyWithSaju = `이 사주를 살리는 용신(用神)인 ${oKr} 기운을 직접 채워줍니다.`;
+  } else if ((nameSpec?.prefer || []).includes(h.o)) {
+    synergyWithSaju = `사주에 부족한 ${oKr} 기운을 직접 보완합니다.`;
+  } else if (ys && h.o === ys.heesinOheng) {
+    synergyWithSaju = `용신을 뒷받침하는 희신(喜神) ${oKr} 기운으로 사주의 균형을 돕습니다.`;
+  } else if ((nameSpec?.avoid || []).includes(h.o)) {
+    synergyWithSaju = `사주에서 다소 조심스러운 기운이지만, 다른 글자와 어우러져 균형을 이룹니다.`;
+  } else {
+    synergyWithSaju = `사주의 기운과 자연스럽게 어우러져 균형을 뒷받침합니다.`;
+  }
+
+  return { hanja: h.h, kr: h.kr, meaning, strokes: h.s, oheng: h.o, synergyWithSaju };
+}
+
+function _genHanjaDetails(candidate, state) {
+  const { h1, h2 } = candidate;
+  const nameSpec = state?.nameSpec;
+  return [h1, h2].filter(Boolean).map(h => _genOneHanjaDetail(h, nameSpec)).filter(Boolean);
+}
+
+/** 6개 공식 필드 한 번에 생성 (hanjaDetails 포함 — AI 호출 없이 DB 확정값으로 조립) */
 function _genFormulaFields(candidate, state) {
   return {
-    soundStory:  _genSoundStory(candidate),
-    suriStory:   _genSuriStory(candidate),
-    lifeFlow:    _genLifeFlow(candidate),
-    careerJobs:  _genCareerJobs(candidate),
+    soundStory:   _genSoundStory(candidate),
+    suriStory:    _genSuriStory(candidate),
+    hanjaDetails: _genHanjaDetails(candidate, state),
+    lifeFlow:     _genLifeFlow(candidate),
+    careerJobs:   _genCareerJobs(candidate),
     healthAdvice: _genHealthAdvice(state)
   };
 }
 
-// ── 프롬프트 조립 + Claude API 호출 (8개 서술 필드) ──────────────────
+// ── 프롬프트 조립 + Claude API 호출 (6개 서술 필드 — hanjaDetails는 DB 확정값 별도 조립) ──────────────────
 
 /**
  * buildUserPrompt — Claude 에게 보낼 userPrompt 문자열을 결정적으로 조립.
@@ -265,7 +311,7 @@ function buildUserPrompt(candidate, state) {
     : '';
   const specialRequest = state.specialRequest || '';
 
-  // ── 사용자 프롬프트 (8개 서술 필드만 요청) ───────────────────────
+  // ── 사용자 프롬프트 (6개 서술 필드만 요청 (hanjaDetails는 요청하지 않음 — _genHanjaDetails로 별도 조립)) ───────────────────────
   const userPrompt =
 `"${nameKr}(${nameHanja})" 이름의 프리미엄 작명 소견서를 작성해주세요.
 
@@ -296,7 +342,7 @@ ${_ysStr}
 한자: ${familyHanja}(${familyKr}) · ${h1.h}(${h1.kr}) · ${h2?h2.h+'('+h2.kr+')':''}
 자원오행: ${h1.o}${h2?'+'+h2.o:''} / 원획법: ${familyHanja} ${s0}획 · ${h1.h} ${s1}획${h2?' · '+h2.h+' '+s2+'획':''}
 한자 뜻: ${h1.kr}(${h1.h}) = ${h1.m}${h2?' / '+h2.kr+'('+h2.h+') = '+h2.m:''}
-【중요】위 "한자 뜻"이 각 한자에 대해 제공된 유일한 근거 훈음입니다. hanjaDetails.meaning을 포함한 모든 서술에서 이 뜻을 시적으로 풀어 쓰거나 어원적 배경을 덧붙이는 것은 좋으나, 여기 없는 다른 훈음이나 뜻을 새로 지어내거나 추가하지 마세요(예: "다스릴"만 주어졌는데 "미쁠"을 임의로 덧붙이는 식의 창작 금지).
+【중요】위 "한자 뜻"이 각 한자에 대해 제공된 유일한 근거 훈음입니다. 아래 모든 서술(hanjaStory, conclusionLetter 등)에서 이 뜻을 시적으로 풀어 쓰거나 어원적 배경을 덧붙이는 것은 좋으나, 여기 없는 다른 훈음이나 뜻을 새로 지어내거나 추가하지 마세요(예: "다스릴"만 주어졌는데 "미쁠"을 임의로 덧붙이는 식의 창작 금지).
 사격수리: 원격 ${getSuriInfo(g1)} / 형격 ${getSuriInfo(g2)} / 이격 ${getSuriInfo(g3)} / 정격 ${getSuriInfo(g4)}
 종합 점수: ${score}/100점
 ${parentOhengStr ? `\n[부모 오행 분석]\n${parentOhengStr}` : ''}
@@ -310,17 +356,7 @@ ${traitStr}
   "tagline": "핵심 한 줄 시그니처 (따옴표로 감싼 시적 표현, 20~40자)",
   "sajuStory": "사주 원국 서사. 일주를 중심으로 아이의 타고난 기질, 사주 지형의 특징, 부족한 기운과 넘치는 기운의 의미를 3~4문장으로 풍부하게 서술. 부모가 읽으면 고개를 끄덕이게 되는 이야기여야 함. 【필수】위 [사주 오행 분류]가 불균형·편중형·강세인 경우 결핍/강한 기운을 반드시 언급할 것. 8자 분류와 지장간 점수가 불일치하는 경우(※ 메모가 있을 때)에는 '표면상 ○ 기운이 강해 보이지만, 지장간의 실질 에너지까지 고려하면 균형에 가깝습니다'처럼 한 문장으로 명시할 것. 【종격 필수】[종격 판정] 섹션이 있으면: ①이 사주가 종격임을 밝히고, ②일반 사주와 달리 강한 기운에 순응(따라가야)해야 하는 원리를 쉽게 설명하며, ③강한 기운을 억제하는 것이 오히려 역효과임을 언급할 것. 【억부 참고】[용신 분석] 섹션의 신강/신약 정보를 자연스럽게 녹여 '이 아이의 사주는 ○○ 기운이 강한 신강(身强) 체질' 또는 '신약(身弱)하여 ○○ 기운의 도움이 필요한 체질'임을 한 문장으로 언급할 것 (용신이 있는 경우에만).",
   "jawonStory": "자원오행 보완 서사. 선택된 이름의 한자들이 어떻게 사주의 빈자리를 채우는지, 구체적인 오행 흐름과 함께 2~3문장으로 설명.",
-  "hanjaDetails": [
-    {
-      "hanja": "한자 글자",
-      "kr": "한글 음",
-      "meaning": "뜻 풀이 — 【필수】위 [이름 분석]의 '한자 뜻'에 제공된 뜻만을 근거로 쓸 것(다른 훈음·별도 의미를 새로 지어내지 말 것). 그 뜻을 시적으로 풀어내거나 어원적 배경을 덧붙여 2~3문장으로 풍부하게",
-      "strokes": 획수,
-      "oheng": "자원오행",
-      "synergyWithSaju": "이 한자가 이 아이의 사주에 미치는 구체적 시너지 1~2문장"
-    }
-  ],
-  "hanjaStory": "세 글자(성+이름)가 하나의 이름으로 합쳐졌을 때의 종합적 의미. '이 이름을 풀어쓰면...' 형태로 시적이고 감성적으로 2~3문장.",
+  "hanjaStory": "세 글자(성+이름)가 하나의 이름으로 합쳐졌을 때의 종합적 의미. '이 이름을 풀어쓰면...' 형태로 시적이고 감성적으로 2~3문장. 【필수】한자 뜻은 위 [이름 분석]의 '한자 뜻'에 제공된 훈음만 근거로 쓸 것(다른 훈음을 새로 지어내지 말 것).",
   "conclusionLetter": "부모님께 보내는 따뜻한 편지. 【필수 규칙】사주·오행·자원오행·수리·원격·형격·이격·정격·간지·자원획수 같은 전문 용어는 절대 쓰지 말 것. 대신 일상 언어로 풀어서 표현할 것(예: '오행이 보완된다' → '이름이 부족한 기운을 채워준다' / '일간의 기질' → '이 아이가 태어날 때부터 가진 성품'). 구성: ①이 아이가 타고난 성품과 가능성을 동네 어른도 바로 이해할 수 있는 말로 한 문장. ②이 이름의 각 글자가 품고 있는 뜻이 아이의 삶에 어떤 이야기를 만들어주는지 쉽고 따뜻하게 2문장. ③평생 이 이름을 불러줄 부모님을 향한 진심 어린 응원과 따뜻한 축원으로 1~2문장 마무리. 총 4~5문장. 중학생이 읽어도 뜻이 바로 통하는 편지 말투.",
   "careerAdvice": "이름의 역할 서사 (반드시 4문장 이상). ①이 아이의 사주 원국에서 드러나는 일간의 타고난 기질과 강한 오행 기운을 1문장으로 설명. ②사주에서 부족했던 오행과 그로 인한 인생의 과제를 1문장으로 설명. ③이 이름이 그 빈자리를 어떻게 채우고, 그 결과 아이의 인생이 어떤 방향으로 펼쳐지는지를 1~2문장으로 서술. ④이 이름과 함께할 아이의 미래에 대한 따뜻한 축원 1문장으로 마무리. 오행·수리 근거를 자연스럽게 녹여 이야기 형식으로."
 }`;
@@ -328,7 +364,7 @@ ${traitStr}
   return userPrompt;
 }
 
-// ── Claude API 호출 (8개 서술 필드) ──────────────────────────────────
+// ── Claude API 호출 (6개 서술 필드) ──────────────────────────────────
 async function generatePremiumReport(candidate, state) {
   const { h1, h2, familyKr, familyHanja } = candidate;
   const { _saju } = state;
@@ -389,15 +425,11 @@ async function generatePremiumReport(candidate, state) {
 
   } catch (err) {
     console.error('generatePremiumReport 오류:', err);
-    // 오류 시 8개 Claude 필드 폴백 (공식 필드는 generateAllReports에서 병합)
+    // 오류 시 6개 Claude 필드 폴백 (hanjaDetails는 formulaFields가 항상 담당 — 여기서 만들지 않음)
     return {
       tagline: `"${nameKr}, 맑고 깊은 기운으로 세상을 밝히다"`,
       sajuStory: `${_saju?.day?.gan||''}${_saju?.day?.ji||''}일주의 아이는 독특한 기질과 감수성을 타고났습니다. 사주 원국의 오행 분포를 살펴보면 특정 기운이 강하고 일부가 부족한 지형을 보이는데, 이것이 바로 이름으로 보완해야 할 핵심 과제입니다.`,
       jawonStory: `자원오행 ${h1.o}${h2?'+'+h2.o:''}의 기운이 사주의 필요를 정확히 보완합니다. 이 이름의 한자들이 부족한 기운을 채워 아이의 타고난 잠재력이 더욱 빛날 수 있도록 돕습니다.`,
-      hanjaDetails: [
-        { hanja:h1.h, kr:h1.kr, meaning:h1.m, strokes:h1.s, oheng:h1.o, synergyWithSaju:'이 한자의 기운이 사주와 조화를 이룹니다.' },
-        ...(h2 ? [{ hanja:h2.h, kr:h2.kr, meaning:h2.m, strokes:h2.s, oheng:h2.o, synergyWithSaju:'이 한자가 사주의 균형을 완성합니다.' }] : [])
-      ],
       hanjaStory: `이 이름을 풀어쓰면, ${h1.kr}(${h1.h})의 ${h1.m} 기운과${h2 ? ' '+h2.kr+'('+h2.h+')의 '+h2.m+' 기운이' : ''} 하나로 어우러져 아이의 이름이 됩니다.`,
       conclusionLetter: `${nameKr}이라는 이름은 이 아이가 가진 타고난 성품과 꼭 맞게 지어진 이름입니다. 이름 한 글자 한 글자에 담긴 뜻이 아이의 삶 속에서 조금씩 빛을 발하며 좋은 길잡이가 되어줄 거예요. 이 이름을 불러줄 때마다 아이에게 따뜻한 기운이 전해지길 바라며, 건강하고 행복하게 자라나길 진심으로 응원합니다.`,
       careerAdvice: `${nameKr}이라는 이름을 가진 아이는 타고난 기질과 이름의 오행이 어우러져 다양한 분야에서 잠재력을 발휘합니다. 이름이 보완해주는 오행 기운이 아이의 인생 여정을 더욱 풍요롭게 만들어줄 것입니다.`
@@ -413,8 +445,10 @@ async function generateAllReports(candidates, state) {
   for (const c of top) {
     const formulaFields = _genFormulaFields(c, state);
     const claudeFields  = await generatePremiumReport(c, state);
-    // 공식 필드 + Claude 서술 필드 병합 (Claude 필드 우선)
-    results.push(Object.assign({}, formulaFields, claudeFields));
+    // 공식 필드 + Claude 서술 필드 병합. hanjaDetails는 DB 확정값(formulaFields)이
+    // 항상 최종 승리하도록 병합 뒤 명시적으로 재고정 — Claude가 요청받지 않은
+    // hanjaDetails를 임의로 반환하더라도 화면에는 절대 노출되지 않는다.
+    results.push(Object.assign({}, formulaFields, claudeFields, { hanjaDetails: formulaFields.hanjaDetails }));
   }
   return results;
 }
