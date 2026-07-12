@@ -34,6 +34,9 @@ except ImportError:
     print("  pip install flask flask-cors anthropic google-generativeai")
     sys.exit(1)
 
+sys.path.insert(0, str(Path(__file__).parent))
+import lib.db as db  # 운영 데이터 적재 (admin_site_plan.md Phase 0) — 미설정 시 no-op
+
 # Gemini는 선택적 임포트 (없어도 서버 동작)
 try:
     from google import genai as google_genai
@@ -119,8 +122,16 @@ def claude_proxy():
             messages   = body.get('messages', [])
         )
 
+        db.insert_ai_usage('report', model, response.usage.input_tokens, response.usage.output_tokens)
+
         return jsonify({
-            'content': [{'type': 'text', 'text': response.content[0].text}]
+            'content': [{'type': 'text', 'text': response.content[0].text}],
+            'usage': {
+                'input_tokens':  response.usage.input_tokens,
+                'output_tokens': response.usage.output_tokens,
+                'cache_read_input_tokens':     getattr(response.usage, 'cache_read_input_tokens', 0),
+                'cache_creation_input_tokens': getattr(response.usage, 'cache_creation_input_tokens', 0),
+            }
         })
 
     except anthropic.AuthenticationError:
@@ -214,6 +225,8 @@ def claude_chat():
             messages   = messages
         )
 
+        db.insert_ai_usage('chat', 'claude-sonnet-4-6', response.usage.input_tokens, response.usage.output_tokens)
+
         reply = response.content[0].text
         return jsonify({
             'reply': reply,
@@ -281,6 +294,11 @@ def gemini_chat():
             )
         )
 
+        usage_meta = getattr(resp, 'usage_metadata', None)
+        in_tok  = getattr(usage_meta, 'prompt_token_count', 0) or 0
+        out_tok = getattr(usage_meta, 'candidates_token_count', 0) or 0
+        db.insert_ai_usage('chat', 'gemini-2.0-flash', in_tok, out_tok)
+
         reply = resp.text
         return jsonify({'reply': reply, 'usage': len(reply)})
 
@@ -300,44 +318,96 @@ def health():
         'status':     'ok',
         'claude':     'set' if API_KEY else 'missing',
         'gemini':     'set' if GEMINI_API_KEY else 'missing',
+        'db':         'set' if db.ENABLED else 'missing',
         'version':    'v2.0.0'
     })
 
-# ── 토스페이먼츠 결제 검증 (선택적) ──────────────────────
+# ── 토스페이먼츠 결제 검증 + 운영 데이터 적재 ──────────────
 @app.route('/proxy/toss/verify', methods=['POST'])
 def toss_verify():
     """
-    토스페이먼츠 결제 검증 (서버사이드)
-    실서비스에서는 여기서 DB에 결제 기록 저장
+    토스페이먼츠 결제 검증(서버사이드, TOSS_SECRET_KEY 설정 시) 후
+    members/orders 테이블에 기록한다 (admin_site_plan.md Phase 0).
+    TOSS_SECRET_KEY 미설정 시 검증 없이 테스트 모드로 기록만 남긴다.
     """
     try:
         body = request.get_json(force=True)
         payment_key = body.get('paymentKey')
         order_id    = body.get('orderId')
         amount      = body.get('amount')
+        product     = body.get('product', 'premium')
+        member      = body.get('member') or {}
 
-        if not all([payment_key, order_id, amount]):
-            return jsonify({'error': '필수 파라미터 누락'}), 400
+        if amount is None:
+            return jsonify({'error': '필수 파라미터 누락(amount)'}), 400
 
         # 실제 환경: 토스페이먼츠 서버 검증 API 호출
         # POST https://api.tosspayments.com/v1/payments/confirm
         TOSS_SECRET = os.environ.get('TOSS_SECRET_KEY', '')
-        if not TOSS_SECRET:
-            # 테스트 모드: 검증 없이 통과
-            return jsonify({'status': 'ok', 'mode': 'test'})
+        payment_result = None
+        mode = 'test'
 
-        import base64, urllib.request
-        credentials = base64.b64encode(f'{TOSS_SECRET}:'.encode()).decode()
-        req = urllib.request.Request(
-            'https://api.tosspayments.com/v1/payments/confirm',
-            data=json.dumps({'paymentKey': payment_key, 'orderId': order_id, 'amount': amount}).encode(),
-            headers={'Authorization': f'Basic {credentials}', 'Content-Type': 'application/json'},
-            method='POST'
+        if TOSS_SECRET and payment_key and order_id:
+            mode = 'live'
+            import base64, urllib.request
+            credentials = base64.b64encode(f'{TOSS_SECRET}:'.encode()).decode()
+            req = urllib.request.Request(
+                'https://api.tosspayments.com/v1/payments/confirm',
+                data=json.dumps({'paymentKey': payment_key, 'orderId': order_id, 'amount': amount}).encode(),
+                headers={'Authorization': f'Basic {credentials}', 'Content-Type': 'application/json'},
+                method='POST'
+            )
+            with urllib.request.urlopen(req) as resp:
+                payment_result = json.loads(resp.read())
+                # 요청 금액과 실제 결제 금액이 다르면 위변조 의심 → 기록하지 않고 거부
+                if payment_result.get('totalAmount') != amount:
+                    return jsonify({'error': '결제 금액 불일치'}), 400
+
+        member_row = db.upsert_member(
+            uid=member.get('uid'),
+            name=member.get('name', ''),
+            contact=member.get('email', ''),
+            login_provider=member.get('provider', 'guest'),
         )
-        with urllib.request.urlopen(req) as resp:
-            result = json.loads(resp.read())
-            return jsonify({'status': 'ok', 'payment': result})
+        order_row = db.insert_order(
+            member_id=member_row['id'] if member_row else None,
+            product=product,
+            amount=amount,
+            status='paid',
+            toss_order_id=order_id,
+            toss_payment_key=payment_key,
+        )
 
+        resp_body = {'status': 'ok', 'mode': mode}
+        if payment_result is not None:
+            resp_body['payment'] = payment_result
+        if order_row:
+            resp_body['orderId'] = order_row['id']
+        return jsonify(resp_body)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ── 보고서 생성 결과 저장 (Phase 0) ────────────────────────
+@app.route('/proxy/report/save', methods=['POST'])
+def report_save():
+    """
+    프론트(api/claude-report.js)가 조립한 최종 보고서(report_json)를
+    reports 테이블에 저장한다. DB 미설정 시 no-op(200 반환, 보고서 열람에는 영향 없음).
+    """
+    try:
+        body = request.get_json(force=True)
+        report_row = db.insert_report(
+            order_id=body.get('orderId'),
+            baby_name_kr=body.get('babyNameKr', ''),
+            baby_name_hanja=body.get('babyNameHanja', ''),
+            birth_dt=body.get('birthDt'),
+            gender=body.get('gender'),
+            score=body.get('score'),
+            report_json=body.get('reportJson'),
+        )
+        return jsonify({'status': 'ok', 'reportId': report_row['id'] if report_row else None})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -347,5 +417,6 @@ if __name__ == '__main__':
     print(f"  주소: http://localhost:{PORT}")
     print(f"  Claude:  {'[OK]' if API_KEY        else '[NO] ANTHROPIC_API_KEY 미설정 (소견서 생성 불가)'}")
     print(f"  Gemini:  {'[OK]' if GEMINI_API_KEY  else '[NO] GEMINI_API_KEY 미설정  (채팅 상담 불가)'}")
+    print(f"  DB(운영):{'[OK]' if db.ENABLED       else '[NO] SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY 미설정 (운영 데이터 미적재)'}")
     print(f"  정적파일: {BASE_DIR}")
     app.run(host='0.0.0.0', port=PORT, debug=True)

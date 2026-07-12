@@ -192,6 +192,13 @@
 5. Claude/Gemini 호출 시 토큰 사용량을 **`ai_usage`에 INSERT**
 > 산출물: "오늘부터 발생하는 회원/주문/보고서가 DB에 쌓이기 시작" — 이 시점부터 어드민이 의미 있어짐.
 
+> **🚧 진행 상황(2026-07-12):** 코드는 이 저장소(`dearname`)에 반영 완료.
+> - `supabase/schema.sql` — 테이블 6개 + 인덱스 + RLS + 회원 집계 트리거
+> - `lib/db.py` — Supabase REST(PostgREST) 연동 (env 미설정 시 자동 no-op, 기존 서비스 무영향)
+> - `server.py` — `/proxy/toss/verify`(회원 upsert + 주문 INSERT, 실결제 시 금액 위변조 검증 포함), 신규 `/proxy/report/save`(보고서 INSERT), 3개 AI 프록시에 `ai_usage` INSERT 연결
+> - `index.html` — 결제(테스트모드/실토스) 시 주문 기록 호출 + 보고서 생성 완료 시 서버 저장 호출 연결
+> - **남은 일(사람이 해야 함):** Supabase 프로젝트 생성 → `supabase/schema.sql` 실행 → Render 환경변수에 `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` 입력. 입력 전까지는 기존과 동일하게 데이터 미적재 상태로 안전하게 동작.
+
 ### 🚀 Phase 1 — 어드민 MVP (별도 `dearname-admin` 프로젝트)
 조회(읽기) → 환불(쓰기·민감) → 대시보드 순으로, **위험이 낮은 것부터** 쌓는다.
 1. Next.js + Supabase 어드민 템플릿으로 새 GitHub repo 생성, Vercel 배포

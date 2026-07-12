@@ -5360,8 +5360,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const CLIENT_KEY = window.TOSS_CLIENT_KEY || null;
 
         if (!CLIENT_KEY) {
-            // 개발/테스트 모드: 결제 없이 바로 보고서 생성
+            // 개발/테스트 모드: 결제 없이 바로 보고서 생성 (주문 기록은 남김)
             console.info('[DearName] 토스페이먼츠 CLIENT_KEY 미설정 → 테스트 모드');
+            const rec = await _dnRecordOrder({ product: 'premium', amount, tossOrderId: 'test_' + Date.now() });
+            _lastOrderId = rec.orderId;
             await startPremiumReportGeneration(reportCount);
             return;
         }
@@ -5393,6 +5395,58 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         return key;
     }
 
+    // ── 운영 데이터 적재 (admin_site_plan.md Phase 0) ────────────────
+    // 서버 DB(Supabase) 미설정 시에도 서비스 이용에는 영향 없음(베스트 에포트).
+    let _lastOrderId = null;
+
+    async function _dnRecordOrder({ product, amount, tossOrderId, tossPaymentKey }) {
+        try {
+            const resp = await fetch('/proxy/toss/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    paymentKey: tossPaymentKey || null,
+                    orderId:    tossOrderId,
+                    amount,
+                    product,
+                    member: _dnUser
+                        ? { uid: _dnUser.uid, name: _dnUser.name, email: _dnUser.email, provider: _dnUser.provider }
+                        : { uid: _getUserKey(), provider: 'guest' }
+                })
+            });
+            const data = await resp.json().catch(() => ({}));
+            return { ok: resp.ok, orderId: data.orderId || null };
+        } catch (e) {
+            console.warn('[DearName] 주문 기록 실패(진행에는 영향 없음):', e);
+            return { ok: true, orderId: null };
+        }
+    }
+
+    async function _dnSaveReportToServer(candidate, report, state, orderId) {
+        try {
+            const nameKr    = `${candidate.familyKr}${candidate.h1.kr}${candidate.h2?.kr||''}`;
+            const nameHanja = `${candidate.familyHanja}${candidate.h1.h}${candidate.h2?.h||''}`;
+            const birthDt   = state._inputRaw?.birthDate
+                ? `${state._inputRaw.birthDate} ${state._inputRaw.birthTime||'12:00'}`
+                : null;
+            await fetch('/proxy/report/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId,
+                    babyNameKr:    nameKr,
+                    babyNameHanja: nameHanja,
+                    birthDt,
+                    gender:        state.gender || null,
+                    score:         candidate.score,
+                    reportJson:    { candidate, report }
+                })
+            });
+        } catch (e) {
+            console.warn('[DearName] 보고서 DB 저장 실패(진행에는 영향 없음):', e);
+        }
+    }
+
     window.onclick = function(event) {
         const loginModal = document.getElementById('login-modal');
         if (event.target == loginModal) { loginModal.style.display = "none"; }
@@ -5403,9 +5457,23 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const params = new URLSearchParams(location.search);
         const payStatus = params.get('dn_payment');
         if (payStatus === 'success') {
-            const count = parseInt(params.get('count') || '1');
+            const count        = parseInt(params.get('count') || '1');
+            const tossPaymentKey = params.get('paymentKey');
+            const tossOrderId   = params.get('orderId');
+            const tossAmount    = parseInt(params.get('amount') || '0');
             history.replaceState(null, '', location.pathname);
-            window.addEventListener('load', () => startPremiumReportGeneration(count));
+            window.addEventListener('load', async () => {
+                const rec = await _dnRecordOrder({
+                    product: 'premium', amount: tossAmount,
+                    tossOrderId, tossPaymentKey
+                });
+                if (!rec.ok) {
+                    _showToast('결제 확인에 실패했습니다. 고객센터로 문의해주세요.');
+                    return;
+                }
+                _lastOrderId = rec.orderId;
+                startPremiumReportGeneration(count);
+            });
         } else if (payStatus === 'fail') {
             history.replaceState(null, '', location.pathname);
             _showToast('결제가 취소되었거나 실패했습니다.');
@@ -6635,10 +6703,14 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             _renderReportContent(top3[0], _allReports[0], 0);
             requestAnimationFrame(() => _hideReportSkeleton());
 
-            // 보고서 저장 (로그인 회원만)
+            // 보고서 저장 (로그인 회원만, 로컬)
             if (_dnUser && _dnUser.provider !== 'guest') {
                 _saveReport(top3, _allReports, _currentState);
             }
+
+            // 보고서 저장 (서버 DB — admin_site_plan.md Phase 0, 실패해도 열람에 영향 없음)
+            _dnSaveReportToServer(top3[0], _allReports[0], _currentState, _lastOrderId);
+            _lastOrderId = null;
 
             // 히스토리 저장
             _saveHistory({
