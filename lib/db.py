@@ -140,6 +140,11 @@ def get_taboo_hanja():
     return [r['hanja'] for r in rows]
 
 
+def get_hanja_overrides():
+    """한자DB 정정값 전체 조회 (Phase 3 — 어드민 "한자 DB 수정"). DB 미설정 시 빈 리스트."""
+    return _request('GET', 'hanja_overrides', params={'select': '*'}, prefer=None) or []
+
+
 # 대략적인 추정 단가(USD, 1M 토큰당) — 정확한 원가 산정용이 아닌 마진 모니터링 참고치
 _PRICE_PER_M = {
     'claude-sonnet-4-20250514': (3.0, 15.0),

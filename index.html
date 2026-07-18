@@ -5484,6 +5484,28 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         } catch (e) { /* 무시 */ }
     })();
 
+    // 어드민이 관리하는 한자 DB 정정값 — data/hanja-db.js(HANJA_DB_FULL)는 정적 파일이라
+    // 어드민에서 고친 값을 여기서 메모리 위에 그대로 덮어써 검색 엔진에 반영한다.
+    // 실패해도 원본 데이터로 그대로 동작(베스트 에포트).
+    (async function _dnLoadHanjaOverrides() {
+        try {
+            const res = await fetch('/api/hanja/overrides');
+            if (!res.ok) return;
+            const data = await res.json();
+            const overrides = Array.isArray(data?.overrides) ? data.overrides : [];
+            if (!overrides.length || typeof HANJA_DB_FULL === 'undefined') return;
+            for (const ov of overrides) {
+                const list = HANJA_DB_FULL[ov.kr];
+                if (!list) continue;
+                const entry = list.find(e => e.h === ov.hanja);
+                if (!entry) continue;
+                if (ov.m != null) entry.m = ov.m;
+                if (ov.s != null) entry.s = ov.s;
+                if (ov.o != null) entry.o = ov.o;
+            }
+        } catch (e) { /* 무시 */ }
+    })();
+
     async function _dnRecordOrder({ product, amount, tossOrderId, tossPaymentKey }) {
         try {
             const resp = await fetch('/proxy/toss/verify', {

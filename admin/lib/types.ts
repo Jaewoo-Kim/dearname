@@ -82,3 +82,16 @@ export interface TabooHanjaRow {
   hanja: string;
   reason: string | null;
 }
+
+// Phase 3 — 본 서비스 GET /api/hanja/search 응답 (data/hanja-db.js + hanja_overrides 병합 결과)
+export interface HanjaSearchResult {
+  kr: string;
+  h: string;
+  m: string | null;
+  s: number | null;
+  o: string | null;
+  baseM: string | null;
+  baseS: number | null;
+  baseO: string | null;
+  overridden: boolean;
+}
