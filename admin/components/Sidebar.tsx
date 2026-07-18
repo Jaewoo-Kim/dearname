@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { href: '/members', label: '회원', icon: Users },
   { href: '/funnel', label: '전환율 퍼널', icon: Filter },
   { href: '/ai-usage', label: 'AI 비용', icon: Bot },
+  { href: '/settings', label: '설정', icon: Settings },
 ];
 
 export default function Sidebar({ email }: { email: string }) {
@@ -94,10 +95,6 @@ export default function Sidebar({ email }: { email: string }) {
                 </Link>
               );
             })}
-            <span className="mt-1 flex cursor-not-allowed items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-300">
-              <Settings className="h-4 w-4 shrink-0" strokeWidth={2} />
-              설정 (예정)
-            </span>
           </nav>
         </div>
 

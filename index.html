@@ -5326,6 +5326,10 @@
     }
 
     function requestPremiumReport() {
+        if (_dnMaintenanceMode) {
+            _showToast('현재 시스템 점검 중이라 프리미엄 신청이 일시적으로 제한됩니다.');
+            return;
+        }
         if (!validatePremiumForm()) return;
         _dnTrackEvent('premium_view');
 
@@ -5336,10 +5340,9 @@
             return;
         }
 
-        // 결제 모달 표시
-        const defaultOption = document.querySelector('input[name="report_count"][value="30000"]');
-        if(defaultOption) defaultOption.checked = true;
-        updatePrice({value: "30000"});
+        // 결제 모달 표시 (첫 번째 옵션을 기본 선택 — 가격은 어드민 설정에 따라 달라질 수 있음)
+        const defaultOption = document.querySelector('#payment-modal input[name="report_count"]');
+        if (defaultOption) { defaultOption.checked = true; updatePrice(defaultOption); }
         document.getElementById('payment-modal').style.display = 'flex';
         _dnTrackEvent('checkout_start');
     }
@@ -5355,7 +5358,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         document.getElementById('payment-modal').style.display = 'none';
 
         const amount = parseInt(document.querySelector('[name="report_count"]:checked')?.value || '30000');
-        const countMap = {30000:1, 50000:2, 70000:3, 100000:5};
+        const countMap = window._dnCountMap || {30000:1, 50000:2, 70000:3, 100000:5};
         const reportCount = countMap[amount] || 1;
 
         // 토스페이먼츠 결제 (클라이언트키 설정 필요)
@@ -5411,6 +5414,61 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             }).catch(() => {});
         } catch (e) { /* 무시 — 퍼널 로깅 실패가 서비스 이용을 막으면 안 됨 */ }
     }
+
+    // ── 운영자 설정 (Phase 3 — 가격/점검모드, admin_site_plan.md) ─────
+    let _dnMaintenanceMode = false;
+
+    function _dnShowMaintenanceBanner(message) {
+        if (document.getElementById('dn-maintenance-banner')) return;
+        const banner = document.createElement('div');
+        banner.id = 'dn-maintenance-banner';
+        banner.style.cssText = 'position:sticky;top:0;z-index:9999;background:#fee2e2;color:#991b1b;' +
+            'text-align:center;padding:10px 16px;font-size:14px;font-weight:600;';
+        banner.textContent = (message && message.trim())
+            ? `⚠️ ${message}`
+            : '⚠️ 현재 시스템 점검 중이라 프리미엄 신청이 일시적으로 제한됩니다.';
+        document.body.prepend(banner);
+        _dnMaintenanceMode = true;
+    }
+
+    function _dnApplyPricing(tiers) {
+        if (!Array.isArray(tiers) || !tiers.length) return;
+        const options = document.querySelectorAll('#payment-modal .payment-option');
+        const basePrice = tiers.find(t => t.count === 1)?.price || tiers[0].price;
+
+        tiers.forEach((tier, i) => {
+            const opt = options[i];
+            if (!opt) return;
+            const input = opt.querySelector('input[name="report_count"]');
+            const priceEl = opt.querySelector('.pay-price');
+            const labelEl = opt.querySelector('.pay-label');
+            if (input) input.value = String(tier.price);
+            if (priceEl) priceEl.textContent = tier.price.toLocaleString('ko-KR') + '원';
+            if (labelEl) {
+                const discount = (tier.count > 1 && basePrice)
+                    ? Math.round((1 - tier.price / (tier.count * basePrice)) * 100)
+                    : 0;
+                const badge = discount > 0 ? ` <b class="pay-badge">${discount}% 할인</b>` : '';
+                labelEl.innerHTML = `소견서 ${tier.count}개${badge}`;
+            }
+        });
+
+        // countMap(amount → 개수)도 실제 가격 기준으로 다시 맞춘다
+        window._dnCountMap = tiers.reduce((m, t) => { m[t.price] = t.count; return m; }, {});
+
+        const checked = document.querySelector('#payment-modal input[name="report_count"]:checked');
+        if (checked) updatePrice(checked);
+    }
+
+    (async function _dnLoadSettings() {
+        try {
+            const res = await fetch('/api/settings');
+            if (!res.ok) return;
+            const data = await res.json();
+            _dnApplyPricing(data?.pricing?.tiers);
+            if (data?.maintenance?.enabled) _dnShowMaintenanceBanner(data.maintenance.message);
+        } catch (e) { /* 무시 — 설정 조회 실패해도 기본값(하드코딩된 가격)으로 정상 동작 */ }
+    })();
 
     async function _dnRecordOrder({ product, amount, tossOrderId, tossPaymentKey }) {
         try {

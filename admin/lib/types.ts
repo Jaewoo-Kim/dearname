@@ -61,3 +61,18 @@ export interface PaymentMethodRow {
   order_count: number;
   revenue: number;
 }
+
+// Phase 3 — settings 테이블 (key-value)
+export interface PricingTier {
+  count: number;
+  price: number;
+}
+
+export interface PricingSettings {
+  tiers: PricingTier[];
+}
+
+export interface MaintenanceSettings {
+  enabled: boolean;
+  message: string;
+}
