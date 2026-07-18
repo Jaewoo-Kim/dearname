@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DearName 보고서 열람</title>
+<style>
+  :root {
+    --gold: #a8792a;
+    --gold-bg: #fdf7ee;
+    --ink: #1e293b;
+    --sub: #64748b;
+    --line: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: #f8fafc;
+    color: var(--ink);
+    padding: 32px 16px 80px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .header h1 { margin: 0 0 4px; font-size: 24px; }
+  .header .hanja { color: var(--sub); font-weight: 400; margin-left: 6px; }
+  .header .meta { color: var(--sub); font-size: 14px; margin-top: 4px; }
+  .tagline {
+    background: var(--gold-bg);
+    color: var(--gold);
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .section h2 { font-size: 14px; color: var(--sub); margin: 0 0 8px; font-weight: 600; }
+  .section p { margin: 0; line-height: 1.7; white-space: pre-line; }
+  .hanja-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .hanja-chip {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    min-width: 140px;
+  }
+  .hanja-chip b { font-size: 16px; }
+  .state { text-align: center; color: var(--sub); padding: 80px 0; }
+  .state.error { color: #b91c1c; }
+  .footer-note { text-align: center; color: var(--sub); font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+  <div class="wrap" id="app">
+    <div class="state">보고서를 불러오는 중입니다...</div>
+  </div>
+
+<script>
+(function () {
+  const OHENG_LABEL = { '木':'나무(木)', '火':'불(火)', '土':'흙(土)', '金':'쇠(金)', '水':'물(水)' };
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderError(message) {
+    document.getElementById('app').innerHTML =
+      `<div class="state error">${esc(message)}</div>`;
+  }
+
+  function section(title, text) {
+    if (!text) return '';
+    return `<div class="card section"><h2>${esc(title)}</h2><p>${esc(text)}</p></div>`;
+  }
+
+  function render(row) {
+    const rj = row.report_json || {};
+    const r = rj.report || {};
+    const hanjaDetails = Array.isArray(r.hanjaDetails) ? r.hanjaDetails : [];
+
+    const genderLabel = row.gender === 'M' ? '남아' : row.gender === 'F' ? '여아' : '';
+    const created = row.created_at ? new Date(row.created_at).toLocaleDateString('ko-KR') : '';
+
+    let html = `
+      <div class="card header">
+        <h1>${esc(row.baby_name_kr)}<span class="hanja">${esc(row.baby_name_hanja || '')}</span></h1>
+        <div class="meta">${[created, genderLabel, row.score != null ? row.score + '점' : ''].filter(Boolean).join(' · ')}</div>
+      </div>
+    `;
+
+    if (r.tagline) html += `<div class="card tagline">${esc(r.tagline)}</div>`;
+
+    html += section('사주 원국 서사', r.sajuStory);
+    html += section('자원오행 보완', r.jawonStory);
+    html += section('한자 종합 의미', r.hanjaStory);
+
+    if (hanjaDetails.length) {
+      html += `<div class="card section"><h2>한자 뜻풀이</h2><div class="hanja-list">`
+        + hanjaDetails.map(h => `
+          <div class="hanja-chip">
+            <b>${esc(h.hanja)}</b>(${esc(h.kr)}) · ${esc(OHENG_LABEL[h.oheng] || h.oheng || '')}<br>
+            <span>${esc(h.meaning)}</span>
+          </div>
+        `).join('')
+        + `</div></div>`;
+    }
+
+    html += section('부모님께 드리는 편지', r.conclusionLetter);
+    html += section('이름의 역할', r.careerAdvice);
+
+    if (r.lifeFlow) {
+      html += `<div class="card section"><h2>인생 흐름</h2>`
+        + `<p><b>초년</b> ${esc(r.lifeFlow.early)}</p>`
+        + `<p style="margin-top:10px"><b>중년</b> ${esc(r.lifeFlow.middle)}</p>`
+        + `<p style="margin-top:10px"><b>말년</b> ${esc(r.lifeFlow.late)}</p>`
+        + `</div>`;
+    }
+
+    if (Array.isArray(r.careerJobs) && r.careerJobs.length) {
+      html += section('추천 진로 방향', r.careerJobs.join(' · '));
+    }
+    html += section('건강 조언', r.healthAdvice);
+
+    html += `<p class="footer-note">이 페이지는 DearName 어드민에서 발급한 열람 링크입니다.</p>`;
+
+    document.getElementById('app').innerHTML = html;
+  }
+
+  async function main() {
+    const id = new URLSearchParams(location.search).get('id');
+    if (!id) {
+      renderError('보고서 ID가 없습니다. 링크를 다시 확인해주세요.');
+      return;
+    }
+    try {
+      const res = await fetch(`/proxy/report/${encodeURIComponent(id)}`);
+      const data = await res.json();
+      if (!res.ok) {
+        renderError(data.error || '보고서를 불러오지 못했습니다.');
+        return;
+      }
+      render(data.report);
+    } catch (e) {
+      renderError('네트워크 오류로 보고서를 불러오지 못했습니다.');
+    }
+  }
+
+  main();
+})();
+</script>
+</body>
+</html>

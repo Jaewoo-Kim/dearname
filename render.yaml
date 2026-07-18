@@ -7,5 +7,11 @@ services:
     envVars:
       - key: ANTHROPIC_API_KEY
         sync: false          # Render 대시보드에서 직접 입력
+      - key: SUPABASE_URL
+        sync: false          # 운영 데이터 적재(admin_site_plan.md Phase 0) — 미입력 시 자동 비활성화
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false          # 브라우저에 절대 노출 금지, 서버 전용
+      - key: TOSS_SECRET_KEY
+        sync: false          # 실결제 검증용 (미입력 시 테스트 모드)
       - key: PYTHON_VERSION
         value: 3.11.0

@@ -192,6 +192,13 @@
 5. Claude/Gemini 호출 시 토큰 사용량을 **`ai_usage`에 INSERT**
 > 산출물: "오늘부터 발생하는 회원/주문/보고서가 DB에 쌓이기 시작" — 이 시점부터 어드민이 의미 있어짐.
 
+> **🚧 진행 상황(2026-07-12):** 코드는 이 저장소(`dearname`)에 반영 완료.
+> - `supabase/schema.sql` — 테이블 6개 + 인덱스 + RLS + 회원 집계 트리거
+> - `lib/db.py` — Supabase REST(PostgREST) 연동 (env 미설정 시 자동 no-op, 기존 서비스 무영향)
+> - `server.py` — `/proxy/toss/verify`(회원 upsert + 주문 INSERT, 실결제 시 금액 위변조 검증 포함), 신규 `/proxy/report/save`(보고서 INSERT), 3개 AI 프록시에 `ai_usage` INSERT 연결
+> - `index.html` — 결제(테스트모드/실토스) 시 주문 기록 호출 + 보고서 생성 완료 시 서버 저장 호출 연결
+> - **남은 일(사람이 해야 함):** Supabase 프로젝트 생성 → `supabase/schema.sql` 실행 → Render 환경변수에 `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` 입력. 입력 전까지는 기존과 동일하게 데이터 미적재 상태로 안전하게 동작.
+
 ### 🚀 Phase 1 — 어드민 MVP (별도 `dearname-admin` 프로젝트)
 조회(읽기) → 환불(쓰기·민감) → 대시보드 순으로, **위험이 낮은 것부터** 쌓는다.
 1. Next.js + Supabase 어드민 템플릿으로 새 GitHub repo 생성, Vercel 배포
@@ -224,9 +231,14 @@
 | **3** | 🟥 필수 | 어드민 뼈대: Next.js + Auth 로그인 + 사이드바 레이아웃 | 허용 운영자만 로그인, 5개 메뉴 표시 |
 | **4** | 🟥 필수 | **읽기 화면**: 주문목록·통합상세·보고서·회원(조회 전용) | 쌓인 데이터가 화면에 정확히 보임 |
 | **5** | 🟥 필수 | **환불(민감)**: 서버 함수 + 토스 환불 + 멱등성 + audit_log | 테스트 환불 성공 → 상태 'refunded' + 로그 1건 |
+| **3~4 진행상황** | | `admin/` (Next.js, 이 저장소 하위) 뼈대 + 매직링크 로그인 + 4개 읽기 화면 구현 완료(2026-07-12). Supabase 프로젝트 연결 전까지는 로그인 불가 상태. | |
+| **5 진행상황** | | 환불 구현 완료(2026-07-18): `/api/refund` Route Handler(서버 전용) + 토스 결제취소 + CAS 멱등성 + `audit_logs` 기록. 주문·회원·보고서 상세 어디서든 실행 가능. Phase 0 테스트 모드 주문은 실제 토스 호출 없이 상태만 정리. | |
 | **6** | 🟧 1차 | 보고서 재발급 + "디어네임에서 열기" 버튼 | 재발송 동작 / 버튼이 본 서비스 보고서로 이동 |
+| **6 진행상황** | | 구현 완료(2026-07-18): 본 서비스에 `report-view.html` + `/proxy/report/<id>` 신설(서비스에 없던 "저장된 보고서 ID로 재조회" 기능 자체를 새로 만듦) → 어드민의 "디어네임에서 열기" 버튼이 실제로 새 탭에서 엶. "재발급"은 이메일 발송 인프라가 없어 링크 복사 + `audit_logs`(action='resend_report') 기록으로 대체 구현. | |
 | **7** | 🟧 1차 | 대시보드: 일/월/연 전환 + 매출 추이 그래프 + 구간 금액 | 구간 전환 시 숫자·그래프가 DB 집계와 일치 |
+| **7 진행상황** | | 구현 완료(2026-07-18): `supabase/schema.sql`에 `revenue_daily/monthly/yearly`·`revenue_by_product` 뷰 추가(`date_trunc` 그룹핑, 별도 집계 테이블 없음) → 대시보드에 일/월/연 세그먼트, 매출·주문·객단가·환불 카드, 매출 추이 콤보 차트, 상품 비중 도넛 차트(Recharts) 구현. Phase 1(STEP 3~7) 전체 완료. | |
 | **8** | 🟦 2차 | 전환율 퍼널 · AI 비용 · 차트 고도화 | — |
+| **8 진행상황** | | STEP 8 전체 완료(2026-07-18). 전환율 퍼널·AI 비용: 본 서비스가 `self_done`/`premium_view`/`checkout_start`(클라이언트, `/proxy/event`) + `paid`(서버, `/proxy/toss/verify` 성공 시)를 `events`에 기록 → 어드민 `/funnel`에서 4단계 건수·전환율 표시. `ai_cost_daily` 뷰 추가 → `/ai-usage`에서 최근 14일 비용 추이 + 모델별 비용 표시. 차트 고도화: `orders.payment_method`(토스 응답 `method` 또는 테스트모드 `'test'`) + `revenue_by_payment_method` 뷰 추가 → 대시보드에 결제수단별 매출 막대 차트 추가. Phase 2 전체 완료, 남은 건 후순위 Phase 3뿐. | |
 | **9** | ⬜ 후순위 | 콘텐츠/가격/점검 설정 화면 | — |
 
 > 핵심 원칙: **읽기 먼저, 쓰기(환불) 나중.** 환불은 가장 위험하므로 읽기 화면이 안정된 뒤(STEP 4 완료) 착수한다.
