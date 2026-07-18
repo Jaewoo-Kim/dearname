@@ -62,6 +62,16 @@ DEFAULT_PRICING = {
 }
 DEFAULT_MAINTENANCE = {'enabled': False, 'message': ''}
 
+# lib/name-search-worker.js에 하드코딩돼 있던 금기 한자(뜻이 불길한 한자) 42자와 동일한 기본값.
+# 어드민에서 목록을 바꾸기 전까지, 또는 DB 미설정 시 이 값으로 폴백한다.
+DEFAULT_TABOO_HANJA = [
+    '死', '鬼', '亡', '殺', '邪', '禍', '毒', '凶', '惡',
+    '賤', '奴', '罪', '貧', '苦', '怨', '恨', '悲', '哭', '泣',
+    '危', '破', '敗', '廢', '末', '窮', '孤', '暗',
+    '盲', '啞', '癡', '狂', '愚', '劣', '醜', '陋', '拙',
+    '辱', '侮', '欺', '奸', '賊', '盜',
+]
+
 # Gemini 클라이언트 초기화
 if GEMINI_API_KEY and _GENAI_OK:
     _GEMINI_CLIENT = google_genai.Client(api_key=GEMINI_API_KEY)
@@ -439,6 +449,19 @@ def public_settings():
     pricing = db.get_setting('pricing', DEFAULT_PRICING)
     maintenance = db.get_setting('maintenance', DEFAULT_MAINTENANCE)
     return _no_cache(jsonify({'pricing': pricing, 'maintenance': maintenance}))
+
+
+# ── 금기 한자 조회 (Phase 3 — 어드민 "금기 한자 관리") ──────
+@app.route('/api/taboo-hanja')
+def public_taboo_hanja():
+    """
+    프론트(name-search-worker.js)가 이름 후보 탐색 시 걸러낼 금기 한자 목록.
+    DB 미설정/행 없음 시 코드 내장 기본값(DEFAULT_TABOO_HANJA)으로 폴백한다.
+    """
+    hanja_list = db.get_taboo_hanja()
+    if hanja_list is None:
+        hanja_list = DEFAULT_TABOO_HANJA
+    return _no_cache(jsonify({'hanja': hanja_list}))
 
 
 # ── 보고서 생성 결과 저장 (Phase 0) ────────────────────────

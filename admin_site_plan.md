@@ -218,12 +218,15 @@
 - 한자 DB 수정, 금기 한자 관리, 가격 변경, 점검(maintenance) 모드
 - 지금은 JS 파일을 손으로 고치는 중 → 나중에 어드민 화면으로 이관
 
-> **진행상황(2026-07-18):** 가격·점검모드 설정 화면 구현 완료. `settings`(key-value) 테이블을
-> 신설해 `pricing`/`maintenance` 두 키로 관리한다. 본 서비스는 `GET /api/settings`로 조회만 하고
-> (DB 미설정 시 코드 내장 기본값으로 폴백), 쓰기는 어드민 `/settings` 화면 → `/api/settings`
-> Route Handler(service_role)에서만 수행 — 기존 환불 패턴과 동일한 보안 모델. index.html은
-> 결제 모달의 가격을 이 값으로 동적으로 다시 그리고, 점검모드 on 시 상단 배너를 띄우고
-> 프리미엄 신청을 막는다. 한자 DB 수정·금기 한자 관리는 아직 미착수.
+> **진행상황(2026-07-18):** 가격·점검모드·금기 한자 관리 화면 구현 완료. `settings`(key-value)
+> 테이블을 신설해 `pricing`/`maintenance` 두 키로 관리하고, 별도로 `taboo_hanja` 테이블을 신설해
+> `lib/name-search-worker.js`에 하드코딩돼 있던 금기 한자(뜻이 불길한 한자) 42자를 이관했다.
+> 본 서비스는 `GET /api/settings`·`GET /api/taboo-hanja`로 조회만 하고(DB 미설정 시 코드 내장
+> 기본값으로 폴백), 쓰기는 어드민 `/settings` 화면 → 각 Route Handler(service_role)에서만
+> 수행 — 기존 환불 패턴과 동일한 보안 모델. index.html은 결제 모달의 가격을 동적으로 다시 그리고,
+> 점검모드 on 시 상단 배너를 띄워 프리미엄 신청을 막으며, 이름 탐색 엔진(Worker)이 초기화 시
+> 최신 금기 한자 목록을 받아 후보군에서 자동 제외한다. 한자 DB(7000여 자) 전체 수정 화면은
+> 범위가 커서(별도 마이그레이션·검색 UI 필요) 아직 미착수 — 다음 후보.
 
 ---
 

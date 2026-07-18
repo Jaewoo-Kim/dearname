@@ -219,3 +219,27 @@ insert into settings (key, value) values
   ('pricing', '{"tiers":[{"count":1,"price":30000},{"count":2,"price":50000},{"count":3,"price":70000},{"count":5,"price":100000}]}'::jsonb),
   ('maintenance', '{"enabled":false,"message":""}'::jsonb)
 on conflict (key) do nothing;
+
+-- ── taboo_hanja — 금기 한자 관리 (Phase 3) ────────────────────────────
+-- 지금까지 lib/name-search-worker.js에 하드코딩돼 있던 "뜻이 불길한 한자"
+-- 목록을 여기로 옮긴다. 본 서비스는 GET /api/taboo-hanja로 조회만 하고
+-- (DB 미설정/미조회 시 코드 내장 기본값 42자로 폴백), 쓰기는 어드민에서만 한다.
+create table if not exists taboo_hanja (
+  hanja       text primary key,
+  reason      text,
+  created_at  timestamptz not null default now(),
+  created_by  text
+);
+
+alter table taboo_hanja enable row level security;
+drop policy if exists "운영자 조회" on taboo_hanja;
+create policy "운영자 조회" on taboo_hanja for select using (auth.role() = 'authenticated');
+
+-- 기존 하드코딩 42자 시드 — 이미 있으면 건드리지 않음(재실행 안전)
+insert into taboo_hanja (hanja) values
+  ('死'),('鬼'),('亡'),('殺'),('邪'),('禍'),('毒'),('凶'),('惡'),
+  ('賤'),('奴'),('罪'),('貧'),('苦'),('怨'),('恨'),('悲'),('哭'),('泣'),
+  ('危'),('破'),('敗'),('廢'),('末'),('窮'),('孤'),('暗'),
+  ('盲'),('啞'),('癡'),('狂'),('愚'),('劣'),('醜'),('陋'),('拙'),
+  ('辱'),('侮'),('欺'),('奸'),('賊'),('盜')
+on conflict (hanja) do nothing;
