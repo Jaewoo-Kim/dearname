@@ -8,6 +8,8 @@ const NAV_ITEMS = [
   { href: '/orders', label: '주문·결제', icon: '🧾' },
   { href: '/reports', label: '보고서', icon: '📄' },
   { href: '/members', label: '회원', icon: '👤' },
+  { href: '/funnel', label: '전환율 퍼널', icon: '🔻' },
+  { href: '/ai-usage', label: 'AI 비용', icon: '🤖' },
 ];
 
 export default function Sidebar({ email }: { email: string }) {

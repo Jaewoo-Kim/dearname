@@ -174,3 +174,16 @@ create or replace view revenue_by_product as
   from orders
   where status = 'paid'
   group by 1;
+
+-- ── AI 비용 뷰 (Phase 2 — 어드민 AI 비용 대시보드) ────────────────────
+create or replace view ai_cost_daily as
+  select
+    date_trunc('day', created_at) as bucket,
+    model,
+    kind,
+    count(*) as calls,
+    sum(input_tokens) as input_tokens,
+    sum(output_tokens) as output_tokens,
+    sum(est_cost_usd) as cost_usd
+  from ai_usage
+  group by 1, 2, 3;

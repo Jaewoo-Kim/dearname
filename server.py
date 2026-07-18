@@ -382,6 +382,9 @@ def toss_verify():
             toss_payment_key=payment_key,
         )
 
+        if order_row:
+            db.insert_event('paid', session_id=member.get('uid'))
+
         resp_body = {'status': 'ok', 'mode': mode}
         if payment_result is not None:
             resp_body['payment'] = payment_result
@@ -389,6 +392,24 @@ def toss_verify():
             resp_body['orderId'] = order_row['id']
         return jsonify(resp_body)
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ── 전환율 퍼널 이벤트 (Phase 2) ────────────────────────────
+@app.route('/proxy/event', methods=['POST'])
+def track_event():
+    """
+    self_done / premium_view / checkout_start 이벤트 기록.
+    ('paid'는 /proxy/toss/verify 성공 시 서버가 직접 기록하므로 여기서 받지 않음)
+    """
+    try:
+        body = request.get_json(force=True)
+        name = body.get('name')
+        if name not in ('self_done', 'premium_view', 'checkout_start'):
+            return jsonify({'error': '알 수 없는 이벤트'}), 400
+        db.insert_event(name, session_id=body.get('sessionId'))
+        return jsonify({'status': 'ok'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -115,6 +115,15 @@ def get_report(report_id):
     return _first(rows)
 
 
+def insert_event(name, session_id=None):
+    """전환율 퍼널 이벤트 기록 (Phase 2 — self_done/premium_view/checkout_start/paid)."""
+    if not name:
+        return None
+    body = {'name': name, 'session_id': session_id}
+    rows = _request('POST', 'events', body=body)
+    return _first(rows)
+
+
 # 대략적인 추정 단가(USD, 1M 토큰당) — 정확한 원가 산정용이 아닌 마진 모니터링 참고치
 _PRICE_PER_M = {
     'claude-sonnet-4-20250514': (3.0, 15.0),

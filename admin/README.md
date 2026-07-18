@@ -1,12 +1,13 @@
 # dearname-admin
 
-DearName 운영 어드민. `admin_site_plan.md` STEP 3~7 구현(조회 화면 + 환불 + 재발급/열기 + 대시보드).
+DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2 일부(전환율 퍼널, AI 비용) 구현.
 
 ## 구성
 
 - Next.js 14 (App Router) + Tailwind + Recharts
-- Supabase Auth(매직 링크) + Postgres(RLS + 매출 집계 뷰)
-- 화면: 대시보드(일/월/연 전환, 매출 추이·상품 비중 그래프) / 주문·결제(목록+통합 상세, 환불) / 보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불)
+- Supabase Auth(매직 링크) + Postgres(RLS + 매출/AI비용 집계 뷰)
+- 화면: 대시보드(일/월/연 전환, 매출 추이·상품 비중 그래프) / 주문·결제(목록+통합 상세, 환불) /
+  보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불) / 전환율 퍼널 / AI 비용
 - 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출 (브라우저는 직접 호출 안 함)
 
 ## 로컬 실행
@@ -57,8 +58,14 @@ npm run dev
 필요한 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ADMIN_ALLOWED_EMAILS`,
 `SUPABASE_SERVICE_ROLE_KEY`, `TOSS_SECRET_KEY`(실결제 전환 시), `NEXT_PUBLIC_DEARNAME_SITE_URL`.
 
-## 다음 단계 (Phase 1 완료, Phase 2 후보)
+## 전환율 퍼널 · AI 비용 (Phase 2)
 
-- 셀프분석→프리미엄 전환율 퍼널(`events` 테이블은 스키마에 있으나 아직 적재 코드 없음)
-- AI 비용 대시보드(`ai_usage`는 이미 적재 중 — 화면만 추가하면 됨)
-- 결제수단별 매출 세분화
+- 본 서비스가 `self_done`(셀프분석 완료) / `premium_view`(프리미엄 요청) / `checkout_start`(결제 모달 오픈) 시점에
+  `/proxy/event`로 이벤트를 기록하고, `paid`는 `/proxy/toss/verify` 성공 시 서버가 직접 기록한다.
+- `/funnel` 화면은 네 단계의 건수와 이전 단계 대비 전환율을 보여준다.
+- `/ai-usage` 화면은 `ai_cost_daily` 뷰(일자·모델·kind별 집계)를 조회해 최근 14일 비용 추이와 모델별 비용을 보여준다.
+
+## 다음 단계 (Phase 2 잔여 / Phase 3)
+
+- 결제수단별 매출 세분화(토스 응답의 `method` 필드를 `orders`에 저장해야 함)
+- Phase 3: 한자 DB 수정, 금기 한자 관리, 가격 변경, 점검(maintenance) 모드 등 콘텐츠·운영 설정 화면

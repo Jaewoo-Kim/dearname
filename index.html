@@ -5327,6 +5327,7 @@
 
     function requestPremiumReport() {
         if (!validatePremiumForm()) return;
+        _dnTrackEvent('premium_view');
 
         // 비로그인 시 로그인 모달 먼저 → 로그인 후 자동 재개
         if (!_dnUser) {
@@ -5340,6 +5341,7 @@
         if(defaultOption) defaultOption.checked = true;
         updatePrice({value: "30000"});
         document.getElementById('payment-modal').style.display = 'flex';
+        _dnTrackEvent('checkout_start');
     }
 
     
@@ -5398,6 +5400,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // ── 운영 데이터 적재 (admin_site_plan.md Phase 0) ────────────────
     // 서버 DB(Supabase) 미설정 시에도 서비스 이용에는 영향 없음(베스트 에포트).
     let _lastOrderId = null;
+
+    // ── 전환율 퍼널 이벤트 (Phase 2 — admin_site_plan.md) ────────────
+    function _dnTrackEvent(name) {
+        try {
+            fetch('/proxy/event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, sessionId: _dnUser?.uid || _getUserKey() })
+            }).catch(() => {});
+        } catch (e) { /* 무시 — 퍼널 로깅 실패가 서비스 이용을 막으면 안 됨 */ }
+    }
 
     async function _dnRecordOrder({ product, amount, tossOrderId, tossPaymentKey }) {
         try {
@@ -5971,6 +5984,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
         setTimeout(function() {
             if (_loader) _loader.classList.remove('active');
+            _dnTrackEvent('self_done');
 
             ['main-view','report-view','theory-detail-view'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('self-report-view').style.display = 'block';
