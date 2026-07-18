@@ -1,12 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-
-function getAllowlist(): string[] {
-  return (process.env.ADMIN_ALLOWED_EMAILS || '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-}
+import { isAllowedEmail } from '@/lib/authz';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
@@ -38,10 +32,13 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isPublic = pathname.startsWith('/login') || pathname.startsWith('/auth');
 
-  const allowlist = getAllowlist();
-  const isAllowed = !!user?.email && (allowlist.length === 0 || allowlist.includes(user.email.toLowerCase()));
+  const isAllowed = isAllowedEmail(user?.email);
 
   if (!isAllowed && !isPublic) {
+    // API 라우트는 HTML 리다이렉트 대신 JSON 401을 내려줘야 fetch() 호출부가 정확히 처리할 수 있다.
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+    }
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     if (user) url.searchParams.set('error', 'not_allowed');

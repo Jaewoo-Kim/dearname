@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate, formatKRW, maskContact, maskName, PRODUCT_LABEL } from '@/lib/format';
 import StatusBadge from '@/components/StatusBadge';
+import RefundButton from '@/components/RefundButton';
 import type { Member, Order } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -76,6 +77,7 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
                 <th className="py-2 font-medium">상품</th>
                 <th className="py-2 font-medium">금액</th>
                 <th className="py-2 font-medium">상태</th>
+                <th className="py-2 font-medium"></th>
               </tr>
             </thead>
             <tbody>
@@ -89,6 +91,9 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
                   <td className="py-2 text-slate-600">{PRODUCT_LABEL[o.product] || o.product}</td>
                   <td className="py-2 font-medium text-slate-900">{formatKRW(o.amount)}</td>
                   <td className="py-2"><StatusBadge status={o.status} /></td>
+                  <td className="py-2 text-right">
+                    {o.status === 'paid' && <RefundButton orderId={o.id} />}
+                  </td>
                 </tr>
               ))}
             </tbody>

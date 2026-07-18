@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate, formatKRW, maskContact, maskName, PRODUCT_LABEL } from '@/lib/format';
 import StatusBadge from '@/components/StatusBadge';
+import RefundButton from '@/components/RefundButton';
 import type { Member, Order, Report } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -65,14 +66,15 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             {typedOrder.refunded_at && <p>환불일시: {formatDate(typedOrder.refunded_at)}</p>}
           </div>
 
-          <button
-            type="button"
-            disabled
-            title="환불 기능은 다음 단계(STEP 5)에서 서버 함수와 함께 지원될 예정입니다"
-            className="mt-4 w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-400"
-          >
-            환불 (다음 단계에서 지원 예정)
-          </button>
+          <div className="mt-4">
+            <RefundButton
+              orderId={typedOrder.id}
+              disabled={typedOrder.status !== 'paid'}
+              disabledReason={
+                typedOrder.status === 'refunded' ? '이미 환불된 주문입니다' : '결제완료 상태의 주문만 환불할 수 있습니다'
+              }
+            />
+          </div>
         </section>
       </div>
 

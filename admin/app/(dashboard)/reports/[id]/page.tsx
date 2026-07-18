@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
-import type { Report } from '@/lib/types';
+import RefundButton from '@/components/RefundButton';
+import type { Order, Report } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,11 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
   const rj = (report.report_json || {}) as ReportJson;
   const story = rj.report || {};
 
+  const { data: order } = report.order_id
+    ? await supabase.from('orders').select('*').eq('id', report.order_id).single()
+    : { data: null };
+  const typedOrder = order as unknown as Order | null;
+
   const FIELDS: Array<[string, string | undefined]> = [
     ['핵심 메시지', story.tagline],
     ['사주 원국 서사', story.sajuStory],
@@ -57,14 +63,23 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
         생성일시 {formatDate(report.created_at)} · {report.gender || '-'} · {report.score != null ? `${report.score}점` : '-'}
       </p>
 
-      <button
-        type="button"
-        disabled
-        title="본 서비스에 보고서 재조회 화면이 연결되면 다음 단계에서 활성화됩니다"
-        className="mt-4 cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-400"
-      >
-        디어네임에서 열기 (다음 단계에서 지원 예정)
-      </button>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled
+          title="본 서비스에 보고서 재조회 화면이 연결되면 다음 단계에서 활성화됩니다"
+          className="cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-400"
+        >
+          디어네임에서 열기 (다음 단계에서 지원 예정)
+        </button>
+        {typedOrder && (
+          <RefundButton
+            orderId={typedOrder.id}
+            disabled={typedOrder.status !== 'paid'}
+            disabledReason={typedOrder.status === 'refunded' ? '이미 환불된 주문입니다' : '결제완료 상태의 주문만 환불할 수 있습니다'}
+          />
+        )}
+      </div>
 
       <section className="mt-6 space-y-4">
         {FIELDS.filter(([, v]) => v).map(([label, value]) => (
