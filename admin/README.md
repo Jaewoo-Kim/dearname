@@ -1,12 +1,12 @@
 # dearname-admin
 
-DearName 운영 어드민. `admin_site_plan.md` STEP 3~5 구현(조회 화면 + 환불).
+DearName 운영 어드민. `admin_site_plan.md` STEP 3~6 구현(조회 화면 + 환불 + 재발급/열기).
 
 ## 구성
 
 - Next.js 14 (App Router) + Tailwind
 - Supabase Auth(매직 링크) + Postgres(RLS)
-- 화면: 대시보드(합계 카드) / 주문·결제(목록+통합 상세, 환불) / 보고서(목록+상세, 환불) / 회원(목록+상세, 환불)
+- 화면: 대시보드(합계 카드) / 주문·결제(목록+통합 상세, 환불) / 보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불)
 - 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출 (브라우저는 직접 호출 안 함)
 
 ## 로컬 실행
@@ -35,13 +35,20 @@ npm run dev
 - 이미 `refunded`/`failed` 상태인 주문은 CAS(조건부 업데이트)로 재환불을 차단합니다(멱등성).
 - 모든 환불 시도는 `audit_logs`에 운영자 이메일·금액·사유와 함께 기록됩니다.
 
+## 보고서 재발급 · "디어네임에서 열기"
+
+- "디어네임에서 열기"는 본 서비스(저장소 루트)의 `report-view.html?id=<reportId>`로 이동합니다.
+  `NEXT_PUBLIC_DEARNAME_SITE_URL`을 설정해야 링크가 활성화됩니다.
+- "재발급"은 아직 이메일 발송 인프라가 없어 **실제 메일 전송 대신** ①`audit_logs`에 재발급 기록을 남기고
+  ②열람 링크를 운영자 클립보드로 복사합니다. 운영자가 그 링크를 고객에게 직접 전달하는 방식입니다.
+  (추후 Resend/SendGrid 등을 붙이면 이 버튼 하나로 실제 발송까지 확장 가능)
+
 ## 배포 (Vercel)
 
 이 저장소를 Vercel에 연결할 때 **Root Directory를 `admin`으로 지정**합니다.
 필요한 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ADMIN_ALLOWED_EMAILS`,
-`SUPABASE_SERVICE_ROLE_KEY`, `TOSS_SECRET_KEY`(실결제 전환 시).
+`SUPABASE_SERVICE_ROLE_KEY`, `TOSS_SECRET_KEY`(실결제 전환 시), `NEXT_PUBLIC_DEARNAME_SITE_URL`.
 
 ## 다음 단계 (미구현)
 
-- STEP 6 보고서 재발급 + "디어네임에서 열기"(본 서비스에 보고서 재조회 라우트가 아직 없어 연결 보류)
 - STEP 7 대시보드 일/월/연 전환 + 매출 추이 그래프

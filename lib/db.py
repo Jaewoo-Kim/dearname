@@ -107,6 +107,14 @@ def insert_report(order_id, baby_name_kr, baby_name_hanja, birth_dt, gender, sco
     return _first(rows)
 
 
+def get_report(report_id):
+    """ID로 저장된 보고서 조회 (report-view.html / 어드민 "디어네임에서 열기"용)."""
+    if not report_id:
+        return None
+    rows = _request('GET', 'reports', params={'id': f'eq.{report_id}', 'select': '*'}, prefer=None)
+    return _first(rows)
+
+
 # 대략적인 추정 단가(USD, 1M 토큰당) — 정확한 원가 산정용이 아닌 마진 모니터링 참고치
 _PRICE_PER_M = {
     'claude-sonnet-4-20250514': (3.0, 15.0),

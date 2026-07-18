@@ -82,6 +82,10 @@ def data_files(filename):
 
 @app.route('/lib/<path:filename>')
 def lib_files(filename):
+    # lib/ 폴더에는 브라우저용 JS 외에 서버 전용 db.py(Supabase 연동)도 함께 있으므로
+    # .js 파일만 서빙해 소스 노출을 막는다.
+    if not filename.endswith('.js'):
+        return jsonify({'error': 'not found'}), 404
     return _no_cache(send_from_directory(BASE_DIR / 'lib', filename))
 
 @app.route('/api/<path:filename>')
@@ -410,6 +414,22 @@ def report_save():
         return jsonify({'status': 'ok', 'reportId': report_row['id'] if report_row else None})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# ── 저장된 보고서 조회 (STEP 6 — report-view.html / 어드민 "디어네임에서 열기") ──
+@app.route('/proxy/report/<report_id>', methods=['GET'])
+def report_get(report_id):
+    if not db.ENABLED:
+        return jsonify({'error': '운영 데이터 조회가 설정되지 않았습니다.'}), 503
+    report_row = db.get_report(report_id)
+    if not report_row:
+        return jsonify({'error': '보고서를 찾을 수 없습니다.'}), 404
+    return jsonify({'status': 'ok', 'report': report_row})
+
+
+@app.route('/report-view.html')
+def report_view_page():
+    return _no_cache(send_file(BASE_DIR / 'report-view.html'))
 
 
 if __name__ == '__main__':

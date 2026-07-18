@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import RefundButton from '@/components/RefundButton';
+import ResendReportButton from '@/components/ResendReportButton';
 import type { Order, Report } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -38,6 +39,9 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
     : { data: null };
   const typedOrder = order as unknown as Order | null;
 
+  const siteUrl = process.env.NEXT_PUBLIC_DEARNAME_SITE_URL || '';
+  const viewUrl = siteUrl ? `${siteUrl.replace(/\/$/, '')}/report-view.html?id=${report.id}` : null;
+
   const FIELDS: Array<[string, string | undefined]> = [
     ['핵심 메시지', story.tagline],
     ['사주 원국 서사', story.sajuStory],
@@ -63,15 +67,29 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
         생성일시 {formatDate(report.created_at)} · {report.gender || '-'} · {report.score != null ? `${report.score}점` : '-'}
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled
-          title="본 서비스에 보고서 재조회 화면이 연결되면 다음 단계에서 활성화됩니다"
-          className="cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-400"
-        >
-          디어네임에서 열기 (다음 단계에서 지원 예정)
-        </button>
+      <div className="mt-4 flex flex-wrap items-start gap-2">
+        {viewUrl ? (
+          <a
+            href={viewUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100"
+          >
+            디어네임에서 열기 ↗
+          </a>
+        ) : (
+          <button
+            type="button"
+            disabled
+            title="NEXT_PUBLIC_DEARNAME_SITE_URL 환경변수를 설정하면 활성화됩니다"
+            className="cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-400"
+          >
+            디어네임에서 열기 (사이트 주소 미설정)
+          </button>
+        )}
+
+        <ResendReportButton reportId={report.id} viewUrl={viewUrl} />
+
         {typedOrder && (
           <RefundButton
             orderId={typedOrder.id}
