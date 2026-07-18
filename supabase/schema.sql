@@ -199,3 +199,23 @@ create or replace view ai_cost_daily as
     sum(est_cost_usd) as cost_usd
   from ai_usage
   group by 1, 2, 3;
+
+-- ── settings — 운영자 설정 (Phase 3 — 가격/점검모드) ──────────────────
+-- key-value 저장소. 본 서비스(server.py)는 GET /api/settings로 조회만 하고,
+-- 쓰기는 어드민의 Route Handler(service_role)에서만 수행한다.
+create table if not exists settings (
+  key         text primary key,
+  value       jsonb not null,
+  updated_at  timestamptz not null default now(),
+  updated_by  text
+);
+
+alter table settings enable row level security;
+drop policy if exists "운영자 조회" on settings;
+create policy "운영자 조회" on settings for select using (auth.role() = 'authenticated');
+
+-- 기본값 시드 — 이미 있으면 건드리지 않음(재실행 안전)
+insert into settings (key, value) values
+  ('pricing', '{"tiers":[{"count":1,"price":30000},{"count":2,"price":50000},{"count":3,"price":70000},{"count":5,"price":100000}]}'::jsonb),
+  ('maintenance', '{"enabled":false,"message":""}'::jsonb)
+on conflict (key) do nothing;

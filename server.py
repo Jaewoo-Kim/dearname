@@ -51,6 +51,17 @@ API_KEY         = os.environ.get('ANTHROPIC_API_KEY', '')
 GEMINI_API_KEY  = os.environ.get('GEMINI_API_KEY', '')
 CLIENT          = anthropic.Anthropic(api_key=API_KEY) if API_KEY else None
 
+# 어드민에서 값을 바꾸기 전까지 사용할 기본값 (admin_site_plan.md Phase 3 — 가격/점검모드)
+DEFAULT_PRICING = {
+    'tiers': [
+        {'count': 1, 'price': 30000},
+        {'count': 2, 'price': 50000},
+        {'count': 3, 'price': 70000},
+        {'count': 5, 'price': 100000},
+    ]
+}
+DEFAULT_MAINTENANCE = {'enabled': False, 'message': ''}
+
 # Gemini 클라이언트 초기화
 if GEMINI_API_KEY and _GENAI_OK:
     _GEMINI_CLIENT = google_genai.Client(api_key=GEMINI_API_KEY)
@@ -415,6 +426,19 @@ def track_event():
         return jsonify({'status': 'ok'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# ── 운영자 설정 조회 (Phase 3 — 가격/점검모드) ──────────────
+@app.route('/api/settings')
+def public_settings():
+    """
+    프론트(index.html)가 결제 모달 가격·점검모드 배너를 그리는 데 쓰는 공개 조회 API.
+    쓰기는 어드민(Route Handler, service_role)에서만 하고 여기서는 절대 받지 않는다.
+    DB 미설정/값 없음 시 코드에 내장된 기본값으로 안전하게 폴백한다.
+    """
+    pricing = db.get_setting('pricing', DEFAULT_PRICING)
+    maintenance = db.get_setting('maintenance', DEFAULT_MAINTENANCE)
+    return _no_cache(jsonify({'pricing': pricing, 'maintenance': maintenance}))
 
 
 # ── 보고서 생성 결과 저장 (Phase 0) ────────────────────────

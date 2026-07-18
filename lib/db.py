@@ -125,6 +125,13 @@ def insert_event(name, session_id=None):
     return _first(rows)
 
 
+def get_setting(key, default=None):
+    """운영자 설정 조회 (Phase 3 — pricing/maintenance 등). DB 미설정/행 없으면 default 반환."""
+    rows = _request('GET', 'settings', params={'key': f'eq.{key}', 'select': 'value'}, prefer=None)
+    row = _first(rows)
+    return row['value'] if row else default
+
+
 # 대략적인 추정 단가(USD, 1M 토큰당) — 정확한 원가 산정용이 아닌 마진 모니터링 참고치
 _PRICE_PER_M = {
     'claude-sonnet-4-20250514': (3.0, 15.0),
