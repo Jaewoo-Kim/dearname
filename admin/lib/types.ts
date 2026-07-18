@@ -37,3 +37,19 @@ export interface Report {
   score: number | null;
   report_json: unknown;
 }
+
+// STEP 7 대시보드 — supabase/schema.sql의 revenue_daily/monthly/yearly 뷰
+export interface RevenueRow {
+  bucket: string;
+  order_count: number;
+  revenue: number;
+  refund_count: number;
+  refund_amount: number;
+}
+
+// supabase/schema.sql의 revenue_by_product 뷰
+export interface ProductMixRow {
+  product: Product;
+  order_count: number;
+  revenue: number;
+}

@@ -1,12 +1,12 @@
 # dearname-admin
 
-DearName 운영 어드민. `admin_site_plan.md` STEP 3~6 구현(조회 화면 + 환불 + 재발급/열기).
+DearName 운영 어드민. `admin_site_plan.md` STEP 3~7 구현(조회 화면 + 환불 + 재발급/열기 + 대시보드).
 
 ## 구성
 
-- Next.js 14 (App Router) + Tailwind
-- Supabase Auth(매직 링크) + Postgres(RLS)
-- 화면: 대시보드(합계 카드) / 주문·결제(목록+통합 상세, 환불) / 보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불)
+- Next.js 14 (App Router) + Tailwind + Recharts
+- Supabase Auth(매직 링크) + Postgres(RLS + 매출 집계 뷰)
+- 화면: 대시보드(일/월/연 전환, 매출 추이·상품 비중 그래프) / 주문·결제(목록+통합 상세, 환불) / 보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불)
 - 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출 (브라우저는 직접 호출 안 함)
 
 ## 로컬 실행
@@ -43,12 +43,22 @@ npm run dev
   ②열람 링크를 운영자 클립보드로 복사합니다. 운영자가 그 링크를 고객에게 직접 전달하는 방식입니다.
   (추후 Resend/SendGrid 등을 붙이면 이 버튼 하나로 실제 발송까지 확장 가능)
 
+## 대시보드
+
+`supabase/schema.sql`에 추가된 `revenue_daily`/`revenue_monthly`/`revenue_yearly`/`revenue_by_product` 뷰를 조회합니다
+(별도 집계 테이블 없이 `orders`를 `date_trunc`로 그룹핑 — 뷰이므로 `orders`의 기존 RLS 정책을 그대로 따름).
+
+- 상단 세그먼트로 일/월/연 전환, 가장 최근 구간의 매출·주문·평균 객단가·환불 금액을 카드로 표시
+- 매출 추이는 막대(매출)+라인(주문건수) 콤보 차트, 상품 비중은 도넛 차트(Recharts)
+
 ## 배포 (Vercel)
 
 이 저장소를 Vercel에 연결할 때 **Root Directory를 `admin`으로 지정**합니다.
 필요한 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ADMIN_ALLOWED_EMAILS`,
 `SUPABASE_SERVICE_ROLE_KEY`, `TOSS_SECRET_KEY`(실결제 전환 시), `NEXT_PUBLIC_DEARNAME_SITE_URL`.
 
-## 다음 단계 (미구현)
+## 다음 단계 (Phase 1 완료, Phase 2 후보)
 
-- STEP 7 대시보드 일/월/연 전환 + 매출 추이 그래프
+- 셀프분석→프리미엄 전환율 퍼널(`events` 테이블은 스키마에 있으나 아직 적재 코드 없음)
+- AI 비용 대시보드(`ai_usage`는 이미 적재 중 — 화면만 추가하면 됨)
+- 결제수단별 매출 세분화

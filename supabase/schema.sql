@@ -132,3 +132,45 @@ create policy "운영자 조회" on events for select using (auth.role() = 'auth
 
 -- 참고: 어드민 화면(dearname-admin)에서 로그인 허용 이메일을 더 좁히려면
 -- auth.jwt()->>'email' = ANY(array[...]) 조건을 위 정책에 추가한다.
+
+-- ── 매출 추이 뷰 (STEP 7 — 어드민 대시보드 일/월/연 그래프) ──────────
+-- 별도 집계 테이블 없이 orders를 date_trunc로 그룹핑한 뷰. 뷰는 SECURITY DEFINER가
+-- 아니므로 조회 시 orders에 걸린 RLS 정책("운영자 조회")을 그대로 따른다.
+create or replace view revenue_daily as
+  select
+    date_trunc('day', created_at) as bucket,
+    count(*) filter (where status = 'paid') as order_count,
+    coalesce(sum(amount) filter (where status = 'paid'), 0) as revenue,
+    count(*) filter (where status = 'refunded') as refund_count,
+    coalesce(sum(amount) filter (where status = 'refunded'), 0) as refund_amount
+  from orders
+  group by 1;
+
+create or replace view revenue_monthly as
+  select
+    date_trunc('month', created_at) as bucket,
+    count(*) filter (where status = 'paid') as order_count,
+    coalesce(sum(amount) filter (where status = 'paid'), 0) as revenue,
+    count(*) filter (where status = 'refunded') as refund_count,
+    coalesce(sum(amount) filter (where status = 'refunded'), 0) as refund_amount
+  from orders
+  group by 1;
+
+create or replace view revenue_yearly as
+  select
+    date_trunc('year', created_at) as bucket,
+    count(*) filter (where status = 'paid') as order_count,
+    coalesce(sum(amount) filter (where status = 'paid'), 0) as revenue,
+    count(*) filter (where status = 'refunded') as refund_count,
+    coalesce(sum(amount) filter (where status = 'refunded'), 0) as refund_amount
+  from orders
+  group by 1;
+
+create or replace view revenue_by_product as
+  select
+    product,
+    count(*) as order_count,
+    coalesce(sum(amount), 0) as revenue
+  from orders
+  where status = 'paid'
+  group by 1;
