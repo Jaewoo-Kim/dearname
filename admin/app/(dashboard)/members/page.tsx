@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate, formatKRW, maskContact, maskName } from '@/lib/format';
+import PageHeader from '@/components/PageHeader';
+import EmptyState from '@/components/EmptyState';
 import type { Member } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -24,46 +27,54 @@ export default async function MembersPage({ searchParams }: { searchParams: { pa
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">회원</h1>
+      <PageHeader title="회원" />
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">가입일</th>
-              <th className="px-4 py-3 font-medium">이름</th>
-              <th className="px-4 py-3 font-medium">연락처</th>
-              <th className="px-4 py-3 font-medium">구매횟수</th>
-              <th className="px-4 py-3 font-medium">누적결제</th>
-            </tr>
-          </thead>
-          <tbody>
-            {error && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-red-600">회원 목록을 불러오지 못했습니다: {error.message}</td></tr>
-            )}
-            {!error && members.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-400">회원 데이터가 없습니다.</td></tr>
-            )}
-            {members.map((m) => (
-              <tr key={m.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-500">{formatDate(m.created_at)}</td>
-                <td className="px-4 py-3">
-                  <Link href={`/members/${m.id}`} className="text-brand-700 hover:underline">
-                    {maskName(m.name)}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-slate-600">{maskContact(m.contact)}</td>
-                <td className="px-4 py-3 text-slate-600">{m.order_count}건</td>
-                <td className="px-4 py-3 font-medium text-slate-900">{formatKRW(m.total_spent)}</td>
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+        {error ? (
+          <p className="px-4 py-8 text-center text-sm text-red-600">
+            회원 목록을 불러오지 못했습니다: {error.message}
+          </p>
+        ) : members.length === 0 ? (
+          <EmptyState title="회원 데이터가 없습니다" />
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">가입일</th>
+                <th className="px-4 py-3 font-medium">이름</th>
+                <th className="px-4 py-3 font-medium">연락처</th>
+                <th className="px-4 py-3 font-medium">구매횟수</th>
+                <th className="px-4 py-3 font-medium">누적결제</th>
+                <th className="px-4 py-3" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {members.map((m) => (
+                <tr key={m.id} className="group border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                  <td className="px-4 py-3 text-slate-500">{formatDate(m.created_at)}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/members/${m.id}`} className="text-brand-700 hover:underline">
+                      {maskName(m.name)}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">{maskContact(m.contact)}</td>
+                  <td className="px-4 py-3 text-slate-600">{m.order_count}건</td>
+                  <td className="px-4 py-3 font-medium tabular-nums text-slate-900">{formatKRW(m.total_spent)}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/members/${m.id}`}>
+                      <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm text-slate-500">
         <span>총 {(count || 0).toLocaleString('ko-KR')}명</span>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {page > 1 && <Link className="hover:underline" href={`/members?page=${page - 1}`}>이전</Link>}
           <span>{page} / {totalPages}</span>
           {page < totalPages && <Link className="hover:underline" href={`/members?page=${page + 1}`}>다음</Link>}

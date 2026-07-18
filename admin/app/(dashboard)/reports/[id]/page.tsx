@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import RefundButton from '@/components/RefundButton';
 import ResendReportButton from '@/components/ResendReportButton';
+import BackLink from '@/components/BackLink';
+import EmptyState from '@/components/EmptyState';
 import type { Order, Report } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -53,8 +56,10 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
 
   return (
     <div className="max-w-3xl">
+      <BackLink href="/reports" label="보고서 목록으로" />
+
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           {report.baby_name_kr} <span className="text-slate-400">{report.baby_name_hanja}</span>
         </h1>
         {report.order_id && (
@@ -73,9 +78,9 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
             href={viewUrl}
             target="_blank"
             rel="noreferrer"
-            className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100"
           >
-            디어네임에서 열기 ↗
+            디어네임에서 열기 <ExternalLink className="h-3.5 w-3.5" />
           </a>
         ) : (
           <button
@@ -101,14 +106,14 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
 
       <section className="mt-6 space-y-4">
         {FIELDS.filter(([, v]) => v).map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5">
+          <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
             <h2 className="text-sm font-semibold text-slate-500">{label}</h2>
             <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">{value}</p>
           </div>
         ))}
         {FIELDS.every(([, v]) => !v) && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-400">
-            저장된 보고서 본문을 표시할 수 없습니다.
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-card">
+            <EmptyState title="저장된 보고서 본문을 표시할 수 없습니다" />
           </div>
         )}
       </section>

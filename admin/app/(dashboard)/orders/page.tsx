@@ -1,7 +1,10 @@
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate, formatKRW, maskName, PRODUCT_LABEL } from '@/lib/format';
+import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
+import EmptyState from '@/components/EmptyState';
 import type { Order } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -39,62 +42,71 @@ export default async function OrdersPage({
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">주문·결제</h1>
-
-      <div className="mt-4 flex gap-2">
-        {STATUS_TABS.map((tab) => (
+      <PageHeader
+        title="주문·결제"
+        actions={STATUS_TABS.map((tab) => (
           <Link
             key={tab.value}
             href={tab.value ? `/orders?status=${tab.value}` : '/orders'}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
               status === tab.value
                 ? 'bg-brand-600 text-white'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
             {tab.label}
           </Link>
         ))}
-      </div>
+      />
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">주문일시</th>
-              <th className="px-4 py-3 font-medium">회원</th>
-              <th className="px-4 py-3 font-medium">상품</th>
-              <th className="px-4 py-3 font-medium">금액</th>
-              <th className="px-4 py-3 font-medium">상태</th>
-            </tr>
-          </thead>
-          <tbody>
-            {error && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-red-600">주문 목록을 불러오지 못했습니다: {error.message}</td></tr>
-            )}
-            {!error && orders.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-400">주문 내역이 없습니다.</td></tr>
-            )}
-            {orders.map((o) => (
-              <tr key={o.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3">
-                  <Link href={`/orders/${o.id}`} className="text-brand-700 hover:underline">
-                    {formatDate(o.created_at)}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-slate-600">{maskName(o.members?.name)}</td>
-                <td className="px-4 py-3 text-slate-600">{PRODUCT_LABEL[o.product] || o.product}</td>
-                <td className="px-4 py-3 font-medium text-slate-900">{formatKRW(o.amount)}</td>
-                <td className="px-4 py-3"><StatusBadge status={o.status} /></td>
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+        {error ? (
+          <p className="px-4 py-8 text-center text-sm text-red-600">
+            주문 목록을 불러오지 못했습니다: {error.message}
+          </p>
+        ) : orders.length === 0 ? (
+          <EmptyState title="주문 내역이 없습니다" />
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">주문일시</th>
+                <th className="px-4 py-3 font-medium">회원</th>
+                <th className="px-4 py-3 font-medium">상품</th>
+                <th className="px-4 py-3 font-medium">금액</th>
+                <th className="px-4 py-3 font-medium">상태</th>
+                <th className="px-4 py-3" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {orders.map((o) => (
+                <tr key={o.id} className="group border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                  <td className="px-4 py-3">
+                    <Link href={`/orders/${o.id}`} className="text-brand-700 hover:underline">
+                      {formatDate(o.created_at)}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">{maskName(o.members?.name)}</td>
+                  <td className="px-4 py-3 text-slate-600">{PRODUCT_LABEL[o.product] || o.product}</td>
+                  <td className="px-4 py-3 font-medium tabular-nums text-slate-900">{formatKRW(o.amount)}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={o.status} />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/orders/${o.id}`}>
+                      <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm text-slate-500">
         <span>총 {(count || 0).toLocaleString('ko-KR')}건</span>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {page > 1 && (
             <Link className="hover:underline" href={`/orders?status=${status}&page=${page - 1}`}>이전</Link>
           )}

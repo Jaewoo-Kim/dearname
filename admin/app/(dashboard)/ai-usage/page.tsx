@@ -1,5 +1,9 @@
+import { Bot, Zap } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import AiCostChart from '@/components/AiCostChart';
+import PageHeader from '@/components/PageHeader';
+import StatCard from '@/components/StatCard';
+import EmptyState from '@/components/EmptyState';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,35 +60,34 @@ export default async function AiUsagePage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">AI 비용</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Claude/Gemini 호출 시 서버가 자동 기록한 추정 비용입니다(마진 관리 참고용, 실제 청구 금액과 다를 수 있음).
-      </p>
+      <PageHeader
+        title="AI 비용"
+        description="Claude/Gemini 호출 시 서버가 자동 기록한 추정 비용입니다(마진 관리 참고용, 실제 청구 금액과 다를 수 있음)."
+      />
 
-      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-sm text-slate-500">최근 14일 비용</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-900">${totalCost14d.toFixed(2)}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-sm text-slate-500">최근 14일 호출 수</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-900">{totalCalls14d.toLocaleString('ko-KR')}건</p>
-        </div>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="최근 14일 비용" value={`$${totalCost14d.toFixed(2)}`} icon={Zap} />
+        <StatCard
+          label="최근 14일 호출 수"
+          value={`${totalCalls14d.toLocaleString('ko-KR')}건`}
+          icon={Bot}
+          accent="slate"
+        />
       </div>
 
-      <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <h2 className="text-sm font-semibold text-slate-500">일별 비용 추이 (최근 14일)</h2>
         {chartData.length === 0 ? (
-          <p className="mt-8 text-center text-sm text-slate-400">표시할 데이터가 없습니다.</p>
+          <EmptyState title="표시할 데이터가 없습니다" />
         ) : (
           <AiCostChart data={chartData} />
         )}
       </section>
 
-      <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
+      <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <h2 className="text-sm font-semibold text-slate-500">모델별 비용 (전체 기간)</h2>
         {modelRows.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-400">표시할 데이터가 없습니다.</p>
+          <EmptyState title="표시할 데이터가 없습니다" />
         ) : (
           <table className="mt-3 w-full text-left text-sm">
             <thead className="border-b border-slate-100 text-xs text-slate-500">
@@ -99,7 +102,7 @@ export default async function AiUsagePage() {
                 <tr key={m.model} className="border-b border-slate-50 last:border-0">
                   <td className="py-2 text-slate-600">{m.model}</td>
                   <td className="py-2 text-slate-600">{m.calls.toLocaleString('ko-KR')}건</td>
-                  <td className="py-2 font-medium text-slate-900">${m.cost.toFixed(4)}</td>
+                  <td className="py-2 font-medium tabular-nums text-slate-900">${m.cost.toFixed(4)}</td>
                 </tr>
               ))}
             </tbody>

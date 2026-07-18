@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
+import PageHeader from '@/components/PageHeader';
+import EmptyState from '@/components/EmptyState';
 import type { Report } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -24,46 +27,56 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pa
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">보고서</h1>
+      <PageHeader title="보고서" />
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">생성일시</th>
-              <th className="px-4 py-3 font-medium">이름</th>
-              <th className="px-4 py-3 font-medium">한자</th>
-              <th className="px-4 py-3 font-medium">성별</th>
-              <th className="px-4 py-3 font-medium">점수</th>
-            </tr>
-          </thead>
-          <tbody>
-            {error && (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-red-600">보고서 목록을 불러오지 못했습니다: {error.message}</td></tr>
-            )}
-            {!error && reports.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-400">생성된 보고서가 없습니다.</td></tr>
-            )}
-            {reports.map((r) => (
-              <tr key={r.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-500">{formatDate(r.created_at)}</td>
-                <td className="px-4 py-3">
-                  <Link href={`/reports/${r.id}`} className="text-brand-700 hover:underline">
-                    {r.baby_name_kr || '-'}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-slate-500">{r.baby_name_hanja || '-'}</td>
-                <td className="px-4 py-3 text-slate-600">{r.gender || '-'}</td>
-                <td className="px-4 py-3 font-medium text-slate-900">{r.score != null ? `${r.score}점` : '-'}</td>
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+        {error ? (
+          <p className="px-4 py-8 text-center text-sm text-red-600">
+            보고서 목록을 불러오지 못했습니다: {error.message}
+          </p>
+        ) : reports.length === 0 ? (
+          <EmptyState title="생성된 보고서가 없습니다" />
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">생성일시</th>
+                <th className="px-4 py-3 font-medium">이름</th>
+                <th className="px-4 py-3 font-medium">한자</th>
+                <th className="px-4 py-3 font-medium">성별</th>
+                <th className="px-4 py-3 font-medium">점수</th>
+                <th className="px-4 py-3" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {reports.map((r) => (
+                <tr key={r.id} className="group border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                  <td className="px-4 py-3 text-slate-500">{formatDate(r.created_at)}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/reports/${r.id}`} className="text-brand-700 hover:underline">
+                      {r.baby_name_kr || '-'}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">{r.baby_name_hanja || '-'}</td>
+                  <td className="px-4 py-3 text-slate-600">{r.gender || '-'}</td>
+                  <td className="px-4 py-3 font-medium tabular-nums text-slate-900">
+                    {r.score != null ? `${r.score}점` : '-'}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/reports/${r.id}`}>
+                      <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm text-slate-500">
         <span>총 {(count || 0).toLocaleString('ko-KR')}건</span>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {page > 1 && <Link className="hover:underline" href={`/reports?page=${page - 1}`}>이전</Link>}
           <span>{page} / {totalPages}</span>
           {page < totalPages && <Link className="hover:underline" href={`/reports?page=${page + 1}`}>다음</Link>}
