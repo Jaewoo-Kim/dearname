@@ -80,7 +80,7 @@ def upsert_member(uid, name='', contact='', login_provider='guest'):
     return _first(rows)
 
 
-def insert_order(member_id, product, amount, status='paid', toss_order_id=None, toss_payment_key=None):
+def insert_order(member_id, product, amount, status='paid', toss_order_id=None, toss_payment_key=None, payment_method=None):
     body = {
         'member_id': member_id,
         'product': product,
@@ -88,6 +88,7 @@ def insert_order(member_id, product, amount, status='paid', toss_order_id=None, 
         'status': status,
         'toss_order_id': toss_order_id,
         'toss_payment_key': toss_payment_key,
+        'payment_method': payment_method,
     }
     rows = _request('POST', 'orders', body=body)
     return _first(rows)

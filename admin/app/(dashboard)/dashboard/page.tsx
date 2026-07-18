@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { formatKRW } from '@/lib/format';
 import RevenueChart from '@/components/RevenueChart';
 import ProductMixChart from '@/components/ProductMixChart';
-import type { ProductMixRow, RevenueRow } from '@/lib/types';
+import PaymentMethodChart from '@/components/PaymentMethodChart';
+import type { PaymentMethodRow, ProductMixRow, RevenueRow } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,9 +44,10 @@ async function getDashboardData(range: RangeKey) {
   const supabase = createClient();
   const cfg = RANGE_CONFIG[range];
 
-  const [{ data: trendDesc }, { data: productMix }, { count: memberCount }] = await Promise.all([
+  const [{ data: trendDesc }, { data: productMix }, { data: paymentMix }, { count: memberCount }] = await Promise.all([
     supabase.from(cfg.view).select('*').order('bucket', { ascending: false }).limit(cfg.limit),
     supabase.from('revenue_by_product').select('*'),
+    supabase.from('revenue_by_payment_method').select('*'),
     supabase.from('members').select('*', { count: 'exact', head: true }),
   ]);
 
@@ -56,6 +58,7 @@ async function getDashboardData(range: RangeKey) {
     trend,
     latest,
     productMix: (productMix as unknown as ProductMixRow[]) || [],
+    paymentMix: (paymentMix as unknown as PaymentMethodRow[]) || [],
     memberCount: memberCount || 0,
   };
 }
@@ -65,7 +68,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     ? (searchParams.range as RangeKey)
     : 'month';
 
-  const { trend, latest, productMix, memberCount } = await getDashboardData(range);
+  const { trend, latest, productMix, paymentMix, memberCount } = await getDashboardData(range);
   const cfg = RANGE_CONFIG[range];
 
   const avgOrderValue = latest && latest.order_count > 0 ? Math.round(latest.revenue / latest.order_count) : 0;
@@ -128,6 +131,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
           <h2 className="text-sm font-semibold text-slate-500">상품 비중 (매출 기준)</h2>
           <ProductMixChart data={productMix} />
+        </section>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 lg:col-span-2">
+          <h2 className="text-sm font-semibold text-slate-500">결제수단별 매출</h2>
+          <PaymentMethodChart data={paymentMix} />
         </section>
       </div>
 

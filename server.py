@@ -367,6 +367,8 @@ def toss_verify():
                 if payment_result.get('totalAmount') != amount:
                     return jsonify({'error': '결제 금액 불일치'}), 400
 
+        payment_method = payment_result.get('method') if payment_result else 'test'
+
         member_row = db.upsert_member(
             uid=member.get('uid'),
             name=member.get('name', ''),
@@ -380,6 +382,7 @@ def toss_verify():
             status='paid',
             toss_order_id=order_id,
             toss_payment_key=payment_key,
+            payment_method=payment_method,
         )
 
         if order_row:

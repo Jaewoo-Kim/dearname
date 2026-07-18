@@ -30,8 +30,11 @@ create table if not exists orders (
   status            text not null default 'paid',  -- 'paid' / 'refunded' / 'failed'
   toss_order_id     text,
   toss_payment_key  text,
-  refunded_at       timestamptz
+  refunded_at       timestamptz,
+  payment_method    text  -- 토스 응답의 method('카드'/'가상계좌'/'계좌이체' 등) 또는 테스트 모드 'test'
 );
+-- 이미 orders 테이블을 만든 뒤 이 스크립트를 다시 실행하는 경우를 위한 컬럼 추가(신규 생성 시에는 위 정의로 이미 포함됨)
+alter table orders add column if not exists payment_method text;
 create index if not exists idx_orders_created_at on orders(created_at);
 create index if not exists idx_orders_status     on orders(status);
 create index if not exists idx_orders_member_id  on orders(member_id);
@@ -169,6 +172,15 @@ create or replace view revenue_yearly as
 create or replace view revenue_by_product as
   select
     product,
+    count(*) as order_count,
+    coalesce(sum(amount), 0) as revenue
+  from orders
+  where status = 'paid'
+  group by 1;
+
+create or replace view revenue_by_payment_method as
+  select
+    coalesce(payment_method, '미지정') as payment_method,
     count(*) as order_count,
     coalesce(sum(amount), 0) as revenue
   from orders

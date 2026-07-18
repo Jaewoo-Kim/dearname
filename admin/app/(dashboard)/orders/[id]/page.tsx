@@ -62,6 +62,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             <p>주문일시: {formatDate(typedOrder.created_at)}</p>
             <p>상품: {PRODUCT_LABEL[typedOrder.product] || typedOrder.product}</p>
             <p>금액: <span className="font-medium text-slate-900">{formatKRW(typedOrder.amount)}</span></p>
+            <p>결제수단: {typedOrder.payment_method || '-'}</p>
             <p>토스 주문번호: {typedOrder.toss_order_id || '-'}</p>
             {typedOrder.refunded_at && <p>환불일시: {formatDate(typedOrder.refunded_at)}</p>}
           </div>

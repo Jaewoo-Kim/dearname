@@ -23,6 +23,7 @@ export interface Order {
   toss_order_id: string | null;
   toss_payment_key: string | null;
   refunded_at: string | null;
+  payment_method: string | null;
   members?: Member | null;
 }
 
@@ -50,6 +51,13 @@ export interface RevenueRow {
 // supabase/schema.sql의 revenue_by_product 뷰
 export interface ProductMixRow {
   product: Product;
+  order_count: number;
+  revenue: number;
+}
+
+// supabase/schema.sql의 revenue_by_payment_method 뷰
+export interface PaymentMethodRow {
+  payment_method: string;
   order_count: number;
   revenue: number;
 }

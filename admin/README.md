@@ -46,11 +46,13 @@ npm run dev
 
 ## 대시보드
 
-`supabase/schema.sql`에 추가된 `revenue_daily`/`revenue_monthly`/`revenue_yearly`/`revenue_by_product` 뷰를 조회합니다
-(별도 집계 테이블 없이 `orders`를 `date_trunc`로 그룹핑 — 뷰이므로 `orders`의 기존 RLS 정책을 그대로 따름).
+`supabase/schema.sql`에 추가된 `revenue_daily`/`revenue_monthly`/`revenue_yearly`/`revenue_by_product`/
+`revenue_by_payment_method` 뷰를 조회합니다(별도 집계 테이블 없이 `orders`를 `date_trunc`로 그룹핑 —
+뷰이므로 `orders`의 기존 RLS 정책을 그대로 따름).
 
 - 상단 세그먼트로 일/월/연 전환, 가장 최근 구간의 매출·주문·평균 객단가·환불 금액을 카드로 표시
-- 매출 추이는 막대(매출)+라인(주문건수) 콤보 차트, 상품 비중은 도넛 차트(Recharts)
+- 매출 추이는 막대(매출)+라인(주문건수) 콤보 차트, 상품 비중은 도넛 차트, 결제수단별 매출은 가로 막대 차트(Recharts)
+- 결제수단은 `orders.payment_method`에 저장 — 토스 실결제는 응답의 `method` 값 그대로, 테스트 모드는 `'test'`
 
 ## 배포 (Vercel)
 
@@ -65,7 +67,6 @@ npm run dev
 - `/funnel` 화면은 네 단계의 건수와 이전 단계 대비 전환율을 보여준다.
 - `/ai-usage` 화면은 `ai_cost_daily` 뷰(일자·모델·kind별 집계)를 조회해 최근 14일 비용 추이와 모델별 비용을 보여준다.
 
-## 다음 단계 (Phase 2 잔여 / Phase 3)
+## 다음 단계 (Phase 3, 후순위)
 
-- 결제수단별 매출 세분화(토스 응답의 `method` 필드를 `orders`에 저장해야 함)
-- Phase 3: 한자 DB 수정, 금기 한자 관리, 가격 변경, 점검(maintenance) 모드 등 콘텐츠·운영 설정 화면
+- 한자 DB 수정, 금기 한자 관리, 가격 변경, 점검(maintenance) 모드 등 콘텐츠·운영 설정 화면
