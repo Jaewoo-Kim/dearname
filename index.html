@@ -5470,6 +5470,20 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         } catch (e) { /* 무시 — 설정 조회 실패해도 기본값(하드코딩된 가격)으로 정상 동작 */ }
     })();
 
+    // 어드민이 관리하는 금기 한자 목록 — 이름 탐색 엔진 초기화 전에 미리 받아둔다.
+    // 실패해도 name-search.js/name-search-worker.js가 자체 하드코딩 기본값으로 동작한다.
+    let TABOO_HANJA_OVERRIDE = null;
+    (async function _dnLoadTabooHanja() {
+        try {
+            const res = await fetch('/api/taboo-hanja');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (Array.isArray(data?.hanja) && data.hanja.length) {
+                TABOO_HANJA_OVERRIDE = data.hanja;
+            }
+        } catch (e) { /* 무시 */ }
+    })();
+
     async function _dnRecordOrder({ product, amount, tossOrderId, tossPaymentKey }) {
         try {
             const resp = await fetch('/proxy/toss/verify', {

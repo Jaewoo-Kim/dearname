@@ -1,14 +1,18 @@
 # dearname-admin
 
-DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2 일부(전환율 퍼널, AI 비용) 구현.
+DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2(전환율 퍼널, AI 비용,
+결제수단별 매출) + Phase 3 일부(가격/점검모드/금기 한자) 구현.
 
 ## 구성
 
 - Next.js 14 (App Router) + Tailwind + Recharts
 - Supabase Auth(매직 링크) + Postgres(RLS + 매출/AI비용 집계 뷰)
-- 화면: 대시보드(일/월/연 전환, 매출 추이·상품 비중 그래프) / 주문·결제(목록+통합 상세, 환불) /
-  보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불) / 전환율 퍼널 / AI 비용
+- 화면: 대시보드(일/월/연 전환, 매출 추이·상품 비중·결제수단 그래프) / 주문·결제(목록+통합 상세, 환불) /
+  보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불) / 전환율 퍼널 / AI 비용 /
+  설정(가격·점검모드·금기 한자)
 - 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출 (브라우저는 직접 호출 안 함)
+- 설정: `/api/settings`, `/api/taboo-hanja` Route Handler가 service_role로 저장 — 본 서비스는
+  각각 `GET /api/settings`, `GET /api/taboo-hanja`로 조회만 함(브라우저가 직접 DB에 쓰지 않음)
 
 ## 로컬 실행
 

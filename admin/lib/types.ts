@@ -76,3 +76,9 @@ export interface MaintenanceSettings {
   enabled: boolean;
   message: string;
 }
+
+// Phase 3 — taboo_hanja 테이블
+export interface TabooHanjaRow {
+  hanja: string;
+  reason: string | null;
+}

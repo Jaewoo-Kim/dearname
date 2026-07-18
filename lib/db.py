@@ -132,6 +132,14 @@ def get_setting(key, default=None):
     return row['value'] if row else default
 
 
+def get_taboo_hanja():
+    """금기 한자 목록 조회 (Phase 3). DB 미설정/행 없으면 None(호출부에서 기본값 폴백)."""
+    rows = _request('GET', 'taboo_hanja', params={'select': 'hanja'}, prefer=None)
+    if not rows:
+        return None
+    return [r['hanja'] for r in rows]
+
+
 # 대략적인 추정 단가(USD, 1M 토큰당) — 정확한 원가 산정용이 아닌 마진 모니터링 참고치
 _PRICE_PER_M = {
     'claude-sonnet-4-20250514': (3.0, 15.0),
