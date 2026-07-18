@@ -13,7 +13,7 @@
 #   GEMINI_API_KEY    — Google Gemini API (채팅 상담용, 무료 티어)
 #   PORT              — 기본 3000
 
-import os, json, sys
+import os, json, re, sys
 from pathlib import Path
 
 # .env 파일 자동 로드 (로컬 개발용)
@@ -79,7 +79,10 @@ else:
     _GEMINI_CLIENT = None
 
 app = Flask(__name__, static_folder=str(BASE_DIR))
-CORS(app, origins=['http://localhost:*', 'https://*.dearname.kr', 'https://*.onrender.com'])
+# *.vercel.app: 어드민(admin/)이 /api/hanja/* 같은 공개 읽기 API를 크로스오리진으로 호출하기 위함.
+# 이 도메인들에 노출된 라우트는 전부 공개 조회(GET) 아니면 본 서비스 프론트가 어차피 같은 오리진에서
+# 호출하는 것들이라, service_role/토스 시크릿 같은 민감정보는 절대 여기로 흘러들어오지 않는다.
+CORS(app, origins=['http://localhost:*', 'https://*.dearname.kr', 'https://*.onrender.com', 'https://*.vercel.app'])
 
 # ── 캐시 비활성화 헬퍼 ───────────────────────────────────
 def _no_cache(response):
@@ -462,6 +465,75 @@ def public_taboo_hanja():
     if hanja_list is None:
         hanja_list = DEFAULT_TABOO_HANJA
     return _no_cache(jsonify({'hanja': hanja_list}))
+
+
+# ── 한자DB 검색·수정 이력 (Phase 3 — 어드민 "한자 DB 수정") ──
+# data/hanja-db.js의 HANJA_DB_FULL(7000여 자, 505개 한글 음)은 정적 JS 파일이라
+# Supabase로 통째로 옮기지 않는다. 대신 hanja_overrides 테이블에 "정정값"만 저장하고,
+# 조회 시 원본 위에 겹쳐서 보여준다. 본 서비스(index.html)도 페이지 로드 시 이 정정값을
+# 받아 메모리 상의 HANJA_DB_FULL에 그대로 패치해 검색 엔진에 반영한다.
+_HANJA_DB_CACHE = None
+
+
+def _load_hanja_db():
+    global _HANJA_DB_CACHE
+    if _HANJA_DB_CACHE is not None:
+        return _HANJA_DB_CACHE
+    try:
+        content = (BASE_DIR / 'data' / 'hanja-db.js').read_text(encoding='utf-8')
+        m = re.search(r'const HANJA_DB_FULL = (\{.*\});', content, re.S)
+        _HANJA_DB_CACHE = json.loads(m.group(1)) if m else {}
+    except Exception as e:
+        print(f'[hanja] hanja-db.js 파싱 실패: {e}', file=sys.stderr)
+        _HANJA_DB_CACHE = {}
+    return _HANJA_DB_CACHE
+
+
+@app.route('/api/hanja/search')
+def hanja_search():
+    """
+    어드민 한자DB 검색(읽기 전용, 공개 — 개인정보 아님).
+    q가 한글 음 1글자면 그 음 전체를, 아니면 그 한자를 포함하는 모든 (음,한자) 쌍을 반환.
+    hanja_overrides가 있으면 겹쳐서 "현재 실제 적용 중인 값"을 함께 보여준다.
+    """
+    q = (request.args.get('q') or '').strip()
+    if not q:
+        return jsonify({'results': []})
+
+    hanja_db = _load_hanja_db()
+    overrides = {}
+    for row in (db.get_hanja_overrides() or []):
+        overrides[(row['kr'], row['hanja'])] = row
+
+    def _to_result(kr, entry):
+        ov = overrides.get((kr, entry['h']))
+        return {
+            'kr': kr,
+            'h': entry['h'],
+            'm': ov['m'] if ov and ov.get('m') is not None else entry.get('m'),
+            's': ov['s'] if ov and ov.get('s') is not None else entry.get('s'),
+            'o': ov['o'] if ov and ov.get('o') is not None else entry.get('o'),
+            'baseM': entry.get('m'), 'baseS': entry.get('s'), 'baseO': entry.get('o'),
+            'overridden': ov is not None,
+        }
+
+    results = []
+    if q in hanja_db:
+        results = [_to_result(q, entry) for entry in hanja_db[q]]
+    else:
+        for kr, entries in hanja_db.items():
+            for entry in entries:
+                if entry.get('h') == q:
+                    results.append(_to_result(kr, entry))
+
+    return _no_cache(jsonify({'results': results[:50]}))
+
+
+@app.route('/api/hanja/overrides')
+def public_hanja_overrides():
+    """본 서비스(index.html)가 페이지 로드 시 받아 HANJA_DB_FULL에 패치하는 정정값 목록."""
+    rows = db.get_hanja_overrides() or []
+    return _no_cache(jsonify({'overrides': rows}))
 
 
 # ── 보고서 생성 결과 저장 (Phase 0) ────────────────────────

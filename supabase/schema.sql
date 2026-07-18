@@ -243,3 +243,22 @@ insert into taboo_hanja (hanja) values
   ('盲'),('啞'),('癡'),('狂'),('愚'),('劣'),('醜'),('陋'),('拙'),
   ('辱'),('侮'),('欺'),('奸'),('賊'),('盜')
 on conflict (hanja) do nothing;
+
+-- ── hanja_overrides — 한자 DB 수정 (Phase 3) ──────────────────────────
+-- data/hanja-db.js의 7000여 자를 통째로 옮기지 않고, 정정값만 여기 저장한다.
+-- (hanja, kr) 조합이 PK인 이유: 다음자(多音字, 같은 한자가 여러 음으로 읽힘,
+-- 예: 更=경/갱)는 음마다 뜻(m)이 다를 수 있어 음 단위로 정정해야 한다.
+create table if not exists hanja_overrides (
+  hanja       text not null,
+  kr          text not null,
+  m           text,
+  s           int,
+  o           text,
+  updated_at  timestamptz not null default now(),
+  updated_by  text,
+  primary key (hanja, kr)
+);
+
+alter table hanja_overrides enable row level security;
+drop policy if exists "운영자 조회" on hanja_overrides;
+create policy "운영자 조회" on hanja_overrides for select using (auth.role() = 'authenticated');

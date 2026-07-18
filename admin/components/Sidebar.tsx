@@ -8,6 +8,7 @@ import {
   Bot,
   Filter,
   FileText,
+  LanguagesIcon,
   LogOut,
   Menu,
   Receipt,
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { href: '/members', label: '회원', icon: Users },
   { href: '/funnel', label: '전환율 퍼널', icon: Filter },
   { href: '/ai-usage', label: 'AI 비용', icon: Bot },
+  { href: '/hanja-db', label: '한자 DB', icon: LanguagesIcon },
   { href: '/settings', label: '설정', icon: Settings },
 ];
 

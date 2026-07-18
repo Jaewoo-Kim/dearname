@@ -1,7 +1,7 @@
 # dearname-admin
 
 DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2(전환율 퍼널, AI 비용,
-결제수단별 매출) + Phase 3 일부(가격/점검모드/금기 한자) 구현.
+결제수단별 매출) + Phase 3(가격/점검모드/금기 한자/한자DB 수정) 구현.
 
 ## 구성
 
@@ -9,10 +9,11 @@ DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2(전�
 - Supabase Auth(매직 링크) + Postgres(RLS + 매출/AI비용 집계 뷰)
 - 화면: 대시보드(일/월/연 전환, 매출 추이·상품 비중·결제수단 그래프) / 주문·결제(목록+통합 상세, 환불) /
   보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불) / 전환율 퍼널 / AI 비용 /
-  설정(가격·점검모드·금기 한자)
+  한자 DB(검색+수정) / 설정(가격·점검모드·금기 한자)
 - 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출 (브라우저는 직접 호출 안 함)
-- 설정: `/api/settings`, `/api/taboo-hanja` Route Handler가 service_role로 저장 — 본 서비스는
-  각각 `GET /api/settings`, `GET /api/taboo-hanja`로 조회만 함(브라우저가 직접 DB에 쓰지 않음)
+- 설정: `/api/settings`, `/api/taboo-hanja`, `/api/hanja-overrides` Route Handler가 service_role로
+  저장 — 본 서비스는 각각 `GET /api/settings`·`/api/taboo-hanja`·`/api/hanja/overrides`로
+  조회만 함(브라우저가 직접 DB에 쓰지 않음)
 
 ## 로컬 실행
 
@@ -71,6 +72,23 @@ npm run dev
 - `/funnel` 화면은 네 단계의 건수와 이전 단계 대비 전환율을 보여준다.
 - `/ai-usage` 화면은 `ai_cost_daily` 뷰(일자·모델·kind별 집계)를 조회해 최근 14일 비용 추이와 모델별 비용을 보여준다.
 
-## 다음 단계 (Phase 3, 후순위)
+## 한자 DB 수정
 
-- 한자 DB 수정, 금기 한자 관리, 가격 변경, 점검(maintenance) 모드 등 콘텐츠·운영 설정 화면
+`data/hanja-db.js`(7000여 자)는 정적 파일이라 통째로 옮기지 않고, "정정값만 저장하는 오버레이"
+방식을 사용합니다.
+
+- `hanja_overrides` 테이블: (hanja, kr) 복합키 — 다음자(多音字, 한 한자가 여러 음으로 읽힘)는
+  음마다 뜻이 다를 수 있어 음 단위로 정정합니다.
+- `/hanja-db` 화면에서 본 서비스의 `GET /api/hanja/search?q=`(음 또는 한자로 검색, 오버라이드가
+  있으면 겹쳐서 "현재 실제 적용 값"을 함께 표시)로 검색 → 뜻/획수/자원오행 수정 → `/api/hanja-overrides`
+  Route Handler로 저장/원복.
+- 검색은 어드민(Vercel)에서 본 서비스(Render) 도메인으로 크로스오리진 요청이라
+  `NEXT_PUBLIC_DEARNAME_SITE_URL`이 설정돼 있어야 하고, 본 서비스의 CORS 허용 목록에
+  `*.vercel.app`이 포함돼 있어야 합니다(이미 `server.py`에 반영됨).
+- 본 서비스는 페이지 로드 시 `GET /api/hanja/overrides`로 정정값을 받아 메모리 상의
+  `HANJA_DB_FULL`을 직접 패치 — 저장 즉시 이름 탐색 결과에 반영됩니다.
+
+## 다음 단계
+
+- 없음(계획서 Phase 0~3 전체 구현 완료). 실 서비스 트래픽이 쌓이면 STEP 1(Supabase 프로젝트
+  생성·스키마 실행)과 각 배포 환경변수 설정만 남았습니다.
