@@ -2,6 +2,7 @@
 
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { PRODUCT_LABEL, formatKRW } from '@/lib/format';
+import EmptyState from '@/components/EmptyState';
 import type { ProductMixRow } from '@/lib/types';
 
 const COLORS = ['#c9973a', '#94a3b8'];
@@ -12,7 +13,7 @@ export default function ProductMixChart({ data }: { data: ProductMixRow[] }) {
     .map((d) => ({ name: PRODUCT_LABEL[d.product] || d.product, value: d.revenue }));
 
   if (chartData.length === 0) {
-    return <p className="mt-8 text-center text-sm text-slate-400">표시할 데이터가 없습니다.</p>;
+    return <EmptyState title="표시할 데이터가 없습니다" />;
   }
 
   return (

@@ -9,4 +9,28 @@ html, body {
 body {
   background-color: #f8fafc;
   color: #0f172a;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-feature-settings: 'tnum' 1;
+}
+
+::selection {
+  background-color: #f0d9ab;
+  color: #5a3e18;
+}
+
+/* 스크롤바 (Webkit) — 어드민 내부 스크롤 영역용 은은한 스타일 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+  border: 2px solid #f8fafc;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
 }

@@ -2,6 +2,7 @@
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { formatKRW } from '@/lib/format';
+import EmptyState from '@/components/EmptyState';
 import type { PaymentMethodRow } from '@/lib/types';
 
 export default function PaymentMethodChart({ data }: { data: PaymentMethodRow[] }) {
@@ -11,7 +12,7 @@ export default function PaymentMethodChart({ data }: { data: PaymentMethodRow[] 
     .map((d) => ({ label: d.payment_method, revenue: d.revenue }));
 
   if (chartData.length === 0) {
-    return <p className="mt-8 text-center text-sm text-slate-400">표시할 데이터가 없습니다.</p>;
+    return <EmptyState title="표시할 데이터가 없습니다" />;
   }
 
   return (
