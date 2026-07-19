@@ -66,7 +66,7 @@ export default async function OrdersPage({
 
       <PeriodFilterBar basePath="/orders" baseParams={baseParams} period={period} />
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
         {error ? (
           <p className="px-4 py-8 text-center text-sm text-red-600">
             주문 목록을 불러오지 못했습니다: {error.message}
@@ -74,32 +74,32 @@ export default async function OrdersPage({
         ) : orders.length === 0 ? (
           <EmptyState title="주문 내역이 없습니다" />
         ) : (
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
               <tr>
-                <th className="px-4 py-3 font-medium">주문일시</th>
-                <th className="px-4 py-3 font-medium">회원</th>
-                <th className="px-4 py-3 font-medium">상품</th>
-                <th className="px-4 py-3 font-medium">금액</th>
-                <th className="px-4 py-3 font-medium">상태</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">주문일시</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">회원</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">상품</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">금액</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">상태</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id} className="group border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                  <td className="px-4 py-3">
+                  <td className="whitespace-nowrap px-4 py-3">
                     <Link href={`/orders/${o.id}`} className="text-brand-700 hover:underline">
                       {formatDate(o.created_at)}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{maskName(o.members?.name)}</td>
-                  <td className="px-4 py-3 text-slate-600">{PRODUCT_LABEL[o.product] || o.product}</td>
-                  <td className="px-4 py-3 font-medium tabular-nums text-slate-900">{formatKRW(o.amount)}</td>
-                  <td className="px-4 py-3">
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">{maskName(o.members?.name)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">{PRODUCT_LABEL[o.product] || o.product}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-medium tabular-nums text-slate-900">{formatKRW(o.amount)}</td>
+                  <td className="whitespace-nowrap px-4 py-3">
                     <StatusBadge status={o.status} />
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="whitespace-nowrap px-4 py-3 text-right">
                     <Link href={`/orders/${o.id}`}>
                       <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500" />
                     </Link>

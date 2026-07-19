@@ -61,34 +61,36 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
         {typedOrders.length === 0 ? (
           <EmptyState title="구매 이력이 없습니다" />
         ) : (
-          <table className="mt-3 w-full text-left text-sm">
-            <thead className="border-b border-slate-100 text-xs text-slate-500">
-              <tr>
-                <th className="py-2 font-medium">주문일시</th>
-                <th className="py-2 font-medium">상품</th>
-                <th className="py-2 font-medium">금액</th>
-                <th className="py-2 font-medium">상태</th>
-                <th className="py-2 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {typedOrders.map((o) => (
-                <tr key={o.id} className="border-b border-slate-50 last:border-0">
-                  <td className="py-2">
-                    <Link href={`/orders/${o.id}`} className="text-brand-700 hover:underline">
-                      {formatDate(o.created_at)}
-                    </Link>
-                  </td>
-                  <td className="py-2 text-slate-600">{PRODUCT_LABEL[o.product] || o.product}</td>
-                  <td className="py-2 font-medium tabular-nums text-slate-900">{formatKRW(o.amount)}</td>
-                  <td className="py-2"><StatusBadge status={o.status} /></td>
-                  <td className="py-2 text-right">
-                    {o.status === 'paid' && <RefundButton orderId={o.id} />}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="mt-3 w-full min-w-[560px] text-left text-sm">
+              <thead className="border-b border-slate-100 text-xs text-slate-500">
+                <tr>
+                  <th className="whitespace-nowrap py-2 font-medium">주문일시</th>
+                  <th className="whitespace-nowrap py-2 font-medium">상품</th>
+                  <th className="whitespace-nowrap py-2 font-medium">금액</th>
+                  <th className="whitespace-nowrap py-2 font-medium">상태</th>
+                  <th className="py-2 font-medium"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {typedOrders.map((o) => (
+                  <tr key={o.id} className="border-b border-slate-50 last:border-0">
+                    <td className="whitespace-nowrap py-2">
+                      <Link href={`/orders/${o.id}`} className="text-brand-700 hover:underline">
+                        {formatDate(o.created_at)}
+                      </Link>
+                    </td>
+                    <td className="whitespace-nowrap py-2 text-slate-600">{PRODUCT_LABEL[o.product] || o.product}</td>
+                    <td className="whitespace-nowrap py-2 font-medium tabular-nums text-slate-900">{formatKRW(o.amount)}</td>
+                    <td className="whitespace-nowrap py-2"><StatusBadge status={o.status} /></td>
+                    <td className="whitespace-nowrap py-2 text-right">
+                      {o.status === 'paid' && <RefundButton orderId={o.id} />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

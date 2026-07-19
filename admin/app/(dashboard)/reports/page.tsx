@@ -37,7 +37,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
       <PageHeader title="보고서" />
       <PeriodFilterBar basePath="/reports" baseParams={baseParams} period={period} />
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
         {error ? (
           <p className="px-4 py-8 text-center text-sm text-red-600">
             보고서 목록을 불러오지 못했습니다: {error.message}
@@ -45,30 +45,30 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
         ) : reports.length === 0 ? (
           <EmptyState title="생성된 보고서가 없습니다" />
         ) : (
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
               <tr>
-                <th className="px-4 py-3 font-medium">생성일시</th>
-                <th className="px-4 py-3 font-medium">이름</th>
-                <th className="px-4 py-3 font-medium">한자</th>
-                <th className="px-4 py-3 font-medium">성별</th>
-                <th className="px-4 py-3 font-medium">점수</th>
-                <th className="px-4 py-3 font-medium">요청사항</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">생성일시</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">이름</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">한자</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">성별</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">점수</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">요청사항</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {reports.map((r) => (
                 <tr key={r.id} className="group border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                  <td className="px-4 py-3 text-slate-500">{formatDate(r.created_at)}</td>
-                  <td className="px-4 py-3">
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(r.created_at)}</td>
+                  <td className="whitespace-nowrap px-4 py-3">
                     <Link href={`/reports/${r.id}`} className="text-brand-700 hover:underline">
                       {r.baby_name_kr || '-'}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-slate-500">{r.baby_name_hanja || '-'}</td>
-                  <td className="px-4 py-3 text-slate-600">{r.gender || '-'}</td>
-                  <td className="px-4 py-3 font-medium tabular-nums text-slate-900">
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-500">{r.baby_name_hanja || '-'}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">{r.gender || '-'}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-medium tabular-nums text-slate-900">
                     {r.score != null ? `${r.score}점` : '-'}
                   </td>
                   <td className="max-w-xs px-4 py-3 text-slate-600">

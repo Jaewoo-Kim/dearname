@@ -89,24 +89,26 @@ export default async function AiUsagePage() {
         {modelRows.length === 0 ? (
           <EmptyState title="표시할 데이터가 없습니다" />
         ) : (
-          <table className="mt-3 w-full text-left text-sm">
-            <thead className="border-b border-slate-100 text-xs text-slate-500">
-              <tr>
-                <th className="py-2 font-medium">모델</th>
-                <th className="py-2 font-medium">호출 수</th>
-                <th className="py-2 font-medium">비용</th>
-              </tr>
-            </thead>
-            <tbody>
-              {modelRows.map((m) => (
-                <tr key={m.model} className="border-b border-slate-50 last:border-0">
-                  <td className="py-2 text-slate-600">{m.model}</td>
-                  <td className="py-2 text-slate-600">{m.calls.toLocaleString('ko-KR')}건</td>
-                  <td className="py-2 font-medium tabular-nums text-slate-900">${m.cost.toFixed(4)}</td>
+          <div className="overflow-x-auto">
+            <table className="mt-3 w-full min-w-[420px] text-left text-sm">
+              <thead className="border-b border-slate-100 text-xs text-slate-500">
+                <tr>
+                  <th className="whitespace-nowrap py-2 font-medium">모델</th>
+                  <th className="whitespace-nowrap py-2 font-medium">호출 수</th>
+                  <th className="whitespace-nowrap py-2 font-medium">비용</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {modelRows.map((m) => (
+                  <tr key={m.model} className="border-b border-slate-50 last:border-0">
+                    <td className="whitespace-nowrap py-2 text-slate-600">{m.model}</td>
+                    <td className="whitespace-nowrap py-2 text-slate-600">{m.calls.toLocaleString('ko-KR')}건</td>
+                    <td className="whitespace-nowrap py-2 font-medium tabular-nums text-slate-900">${m.cost.toFixed(4)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>
