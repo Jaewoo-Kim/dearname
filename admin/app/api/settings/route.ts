@@ -14,12 +14,19 @@ function isValidPricing(value: unknown): boolean {
   if (!Number.isFinite(v.self) || (v.self as number) < 0) return false;
   const tiers = v.tiers;
   if (!Array.isArray(tiers) || tiers.length === 0) return false;
-  return tiers.every(
+  const shapeValid = tiers.every(
     (t) =>
       t && typeof t === 'object' &&
       Number.isInteger((t as { count?: unknown }).count) && (t as { count: number }).count > 0 &&
       Number.isFinite((t as { price?: unknown }).price) && (t as { price: number }).price >= 0
   );
+  if (!shapeValid) return false;
+
+  // index.html의 _dnCountMap이 price를 키로 개수를 역참조하므로, 가격이 겹치면
+  // 결제 시 엉뚱한 구성(개수)으로 매칭될 수 있다 — count/price 모두 중복을 막는다.
+  const counts = tiers.map((t) => (t as { count: number }).count);
+  const prices = tiers.map((t) => (t as { price: number }).price);
+  return new Set(counts).size === counts.length && new Set(prices).size === prices.length;
 }
 
 function isValidMaintenance(value: unknown): boolean {
