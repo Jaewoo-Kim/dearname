@@ -1332,6 +1332,7 @@
         }
         .pay-label { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
         .pay-price { font-size: 1.2rem; font-weight: 900; color: var(--bg-dark); }
+        .pay-price-original { font-size: 0.95rem; color: #94a3b8; text-decoration: line-through; margin-right: 6px; }
         .pay-badge { font-size: 0.75rem; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: var(--radius-sm); font-weight: 800; }
         
         .payment-option:hover .payment-option-content { background: var(--bg-subtle); border-color: var(--border-subtle); }
@@ -4088,6 +4089,24 @@
                 <div id="mypage-payments"><!-- JS 동적 생성 --></div>
             </div>
 
+            <!-- [6] 고객문의 -->
+            <div class="report-card" style="margin-bottom:24px;">
+                <span class="mp-section-tag">고객문의</span>
+                <h2 class="mp-section-title" style="margin-top:8px;">고객문의</h2>
+                <p style="font-size:0.85rem;color:var(--text-secondary);margin:6px 0 16px;">
+                    보고서 내용에 대한 요청이나 궁금한 점을 남겨주시면 운영팀이 확인 후 답변드립니다.
+                </p>
+                <div id="mypage-inquiries" style="margin-bottom:18px;"><!-- JS 동적 생성 --></div>
+                <div style="border-top:1px solid var(--border-light,#e2e8f0);padding-top:16px;">
+                    <input id="inquiry-subject" type="text" placeholder="제목(선택)" style="margin-bottom:10px;">
+                    <textarea id="inquiry-message" rows="3" placeholder="문의 내용을 입력해주세요."></textarea>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+                        <button class="mp-btn mp-btn-gold" onclick="_submitInquiry()">문의 보내기</button>
+                        <span id="inquiry-submit-status" style="font-size:0.82rem;"></span>
+                    </div>
+                </div>
+            </div>
+
             <div style="text-align:center;margin-top:60px;">
                 <button onclick="showMainView()" class="btn btn-navy" style="width:auto;padding:16px 48px;font-size:1rem;">
                     메인으로 돌아가기
@@ -4769,7 +4788,9 @@
     <div class="modal-content payment-content">
         <h3 style="color: #0f172a; font-size: 1.8rem; font-weight: 900; margin-bottom: 10px;">프리미엄 소견서 결제</h3>
         <p style="color: #64748b; margin-bottom: 25px;">AI 프리미엄 작명 소견서를 의뢰합니다.<br>원하시는 소견서 개수를 선택해 주세요.</p>
-        
+
+        <div id="payment-promo-banner" style="display:none;background:#fff7ed;color:#c2410c;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:0.92rem;font-weight:700;"></div>
+
         <div class="payment-options-group">
             <label class="payment-option">
                 <input type="radio" name="report_count" value="30000" onchange="updatePrice(this)" checked>
@@ -5325,7 +5346,7 @@
         document.getElementById('premium').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function requestPremiumReport() {
+    async function requestPremiumReport() {
         if (_dnMaintenanceMode) {
             _showToast('현재 시스템 점검 중이라 프리미엄 신청이 일시적으로 제한됩니다.');
             return;
@@ -5340,11 +5361,45 @@
             return;
         }
 
+        // 어드민이 부여한 무료 생성권이 있으면 결제 없이 바로 진행(1건 소진)
+        const hasCredit = await _dnTryConsumeCredit();
+        if (hasCredit) return;
+
         // 결제 모달 표시 (첫 번째 옵션을 기본 선택 — 가격은 어드민 설정에 따라 달라질 수 있음)
         const defaultOption = document.querySelector('#payment-modal input[name="report_count"]');
         if (defaultOption) { defaultOption.checked = true; updatePrice(defaultOption); }
         document.getElementById('payment-modal').style.display = 'flex';
         _dnTrackEvent('checkout_start');
+    }
+
+    // 재발급으로 부여된 무료 생성권이 있으면 소진하고 바로 보고서 생성을 시작한다.
+    // 반환값 true면 호출부(requestPremiumReport)는 결제 모달을 띄우지 않고 종료해야 한다.
+    async function _dnTryConsumeCredit() {
+        try {
+            const checkRes = await fetch(`/proxy/credit/check?uid=${encodeURIComponent(_dnUser.uid)}`);
+            if (!checkRes.ok) return false;
+            const { credits } = await checkRes.json();
+            if (!credits || credits <= 0) return false;
+
+            const consumeRes = await fetch('/proxy/credit/consume', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    member: { uid: _dnUser.uid, name: _dnUser.name, email: _dnUser.email, provider: _dnUser.provider }
+                })
+            });
+            if (!consumeRes.ok) return false;
+            const data = await consumeRes.json();
+
+            _lastOrderId = data.orderId || null;
+            _dnTrackEvent('checkout_start');
+            _showToast('🎁 보유하신 무료 생성권으로 보고서를 만들어 드릴게요.');
+            await startPremiumReportGeneration(1);
+            return true;
+        } catch (e) {
+            console.warn('[DearName] 생성권 확인 실패(결제 플로우로 진행):', e);
+            return false;
+        }
     }
 
     
@@ -5431,31 +5486,50 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         _dnMaintenanceMode = true;
     }
 
-    function _dnApplyPricing(tiers) {
+    function _dnApplyPricing(pricing) {
+        const tiers = pricing?.tiers;
         if (!Array.isArray(tiers) || !tiers.length) return;
         const group = document.querySelector('#payment-modal .payment-options-group');
         if (!group) return;
-        const basePrice = tiers.find(t => t.count === 1)?.price ?? tiers[0].price;
+
+        const promo = pricing?.promotion;
+        const promoActive = !!(promo && promo.enabled && promo.percent > 0);
+        // 100원 단위 이하 우수리 없는 깔끔한 할인가를 위해 10원 단위로 반올림
+        const applyPromo = (price) => promoActive ? Math.round(price * (1 - promo.percent / 100) / 10) * 10 : price;
+
+        const basePrice = applyPromo(tiers.find(t => t.count === 1)?.price ?? tiers[0].price);
 
         // 어드민이 구성을 추가/삭제할 수 있으므로 4개 고정 DOM을 패치하는 대신
         // 매번 tiers 배열 길이에 맞춰 옵션 목록 자체를 새로 그린다.
         group.innerHTML = tiers.map((tier, i) => {
+            const finalPrice = applyPromo(tier.price);
             const discount = (tier.count > 1 && basePrice)
-                ? Math.round((1 - tier.price / (tier.count * basePrice)) * 100)
+                ? Math.round((1 - finalPrice / (tier.count * basePrice)) * 100)
                 : 0;
             const badge = discount > 0 ? ` <b class="pay-badge">${discount}% 할인</b>` : '';
+            const priceHtml = promoActive
+                ? `<span class="pay-price-original">${tier.price.toLocaleString('ko-KR')}원</span><span class="pay-price">${finalPrice.toLocaleString('ko-KR')}원</span>`
+                : `<span class="pay-price">${finalPrice.toLocaleString('ko-KR')}원</span>`;
             return `
             <label class="payment-option">
-                <input type="radio" name="report_count" value="${tier.price}" onchange="updatePrice(this)"${i === 0 ? ' checked' : ''}>
+                <input type="radio" name="report_count" value="${finalPrice}" onchange="updatePrice(this)"${i === 0 ? ' checked' : ''}>
                 <div class="payment-option-content">
                     <span class="pay-label">소견서 ${tier.count}개${badge}</span>
-                    <span class="pay-price">${tier.price.toLocaleString('ko-KR')}원</span>
+                    ${priceHtml}
                 </div>
             </label>`;
         }).join('');
 
         // countMap(amount → 개수)도 실제 가격 기준으로 다시 맞춘다
-        window._dnCountMap = tiers.reduce((m, t) => { m[t.price] = t.count; return m; }, {});
+        window._dnCountMap = tiers.reduce((m, t) => { m[applyPromo(t.price)] = t.count; return m; }, {});
+
+        const promoBanner = document.getElementById('payment-promo-banner');
+        if (promoBanner) {
+            promoBanner.style.display = promoActive ? 'block' : 'none';
+            promoBanner.textContent = promoActive
+                ? `🎉 ${promo.label ? promo.label + ' — ' : ''}${promo.percent}% 할인 진행 중`
+                : '';
+        }
 
         const checked = document.querySelector('#payment-modal input[name="report_count"]:checked');
         if (checked) updatePrice(checked);
@@ -5466,7 +5540,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const res = await fetch('/api/settings');
             if (!res.ok) return;
             const data = await res.json();
-            _dnApplyPricing(data?.pricing?.tiers);
+            _dnApplyPricing(data?.pricing);
             if (data?.maintenance?.enabled) _dnShowMaintenanceBanner(data.maintenance.message);
         } catch (e) { /* 무시 — 설정 조회 실패해도 기본값(하드코딩된 가격)으로 정상 동작 */ }
     })();
@@ -5547,7 +5621,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     birthDt,
                     gender:        state.gender || null,
                     score:         candidate.score,
-                    reportJson:    { candidate, report }
+                    reportJson:    { candidate, report },
+                    specialRequest: state.specialRequest || null
                 })
             });
         } catch (e) {
@@ -9887,6 +9962,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         _renderMypageSelfReports();
         _renderMypageAIReports();
         _renderMypagePayments();
+        _renderMypageInquiries();
     }
 
     function _renderMypageProfile() {
@@ -10120,6 +10196,78 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             { id:'demo2', type:'ai',   label:'AI 프리미엄 작명 의뢰', desc:'이도윤 외 4후보', amount:49000, status:'done', paidAt: Date.now() - 86400000 * 10 },
             { id:'demo3', type:'sub',  label:'셀프작명 이용권 1개월', desc:'월간 구독',  amount:9900,  status:'done',   paidAt: Date.now() - 86400000 * 33 },
         ];
+    }
+
+    // ── 고객문의 (마이페이지) ─────────────────────────────────────────
+    async function _renderMypageInquiries() {
+        const el = document.getElementById('mypage-inquiries');
+        if (!el || !_dnUser?.uid) return;
+        el.innerHTML = `<div class="mp-empty">불러오는 중...</div>`;
+        try {
+            const res = await fetch(`/proxy/inquiry/mine?uid=${encodeURIComponent(_dnUser.uid)}`);
+            if (!res.ok) { el.innerHTML = ''; return; }
+            const { inquiries } = await res.json();
+            if (!inquiries || !inquiries.length) {
+                el.innerHTML = `<div class="mp-empty">아직 보낸 문의가 없습니다.</div>`;
+                return;
+            }
+            el.innerHTML = inquiries.map(iq => {
+                const date = iq.created_at ? new Date(iq.created_at).toLocaleDateString('ko-KR') : '';
+                const answered = iq.status === 'answered';
+                const statusHtml = answered
+                    ? `<span style="color:#16a34a;font-weight:700;">답변완료</span>`
+                    : `<span style="color:#d97706;font-weight:700;">답변 대기중</span>`;
+                const replyHtml = answered && iq.reply
+                    ? `<div style="margin-top:8px;padding:10px 12px;background:var(--bg-subtle,#f8fafc);border-radius:8px;font-size:0.85rem;color:var(--text-secondary);white-space:pre-line;">${iq.reply}</div>`
+                    : '';
+                return `
+                <div class="mp-report-row" style="align-items:flex-start;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:0.95rem;font-weight:800;color:var(--bg-dark);">${iq.subject || '(제목 없음)'}</div>
+                        <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${date} · ${statusHtml}</div>
+                        <div style="margin-top:6px;font-size:0.88rem;color:var(--text-secondary);white-space:pre-line;">${iq.message}</div>
+                        ${replyHtml}
+                    </div>
+                </div>`;
+            }).join('');
+        } catch (e) {
+            el.innerHTML = '';
+            console.warn('[DearName] 문의 내역 조회 실패:', e);
+        }
+    }
+
+    async function _submitInquiry() {
+        if (!_dnUser) { openLoginModal(); return; }
+        const subjectEl = document.getElementById('inquiry-subject');
+        const messageEl = document.getElementById('inquiry-message');
+        const statusEl  = document.getElementById('inquiry-submit-status');
+        const message = messageEl?.value?.trim() || '';
+        if (!message) {
+            if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.textContent = '문의 내용을 입력해주세요.'; }
+            return;
+        }
+        if (statusEl) { statusEl.style.color = 'var(--text-secondary)'; statusEl.textContent = '전송 중...'; }
+        try {
+            const res = await fetch('/proxy/inquiry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    member: { uid: _dnUser.uid, name: _dnUser.name, email: _dnUser.email, provider: _dnUser.provider },
+                    subject: subjectEl?.value?.trim() || '',
+                    message
+                })
+            });
+            if (!res.ok) {
+                if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.textContent = '전송에 실패했습니다. 잠시 후 다시 시도해주세요.'; }
+                return;
+            }
+            if (subjectEl) subjectEl.value = '';
+            if (messageEl) messageEl.value = '';
+            if (statusEl) { statusEl.style.color = '#16a34a'; statusEl.textContent = '문의가 접수되었습니다.'; }
+            _renderMypageInquiries();
+        } catch (e) {
+            if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.textContent = '네트워크 오류로 전송하지 못했습니다.'; }
+        }
     }
 
     function _openSavedReport(id) {

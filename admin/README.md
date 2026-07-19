@@ -1,20 +1,22 @@
 # dearname-admin
 
 DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2(전환율 퍼널, AI 비용,
-결제수단별 매출) + Phase 3(가격/점검모드/금기 한자/한자DB 수정) 구현.
+결제수단별 매출) + Phase 3(가격/프로모션/점검모드/금기 한자/한자DB 수정/재발급 생성권/고객문의) 구현.
 
 ## 구성
 
 - Next.js 14 (App Router) + Tailwind + Recharts
 - Supabase Auth(매직 링크) + Postgres(RLS + 매출/AI비용 집계 뷰)
 - 화면: 대시보드(월/연 전환 + 월·연 선택 + 매출 추이 12개월 고정·상품 비중·결제수단 그래프) /
-  주문·결제(기간 필터+목록+통합 상세, 환불) / 보고서(기간 필터+목록+상세, 환불·재발급·열기) /
-  회원(기간 필터+목록+상세, 환불) / 전환율 퍼널 / AI 비용 / 한자 DB(검색+수정+금기 한자 관리) /
-  운영 관리(가격·상품 구성·점검모드)
-- 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출 (브라우저는 직접 호출 안 함)
-- 설정: `/api/settings`, `/api/taboo-hanja`, `/api/hanja-overrides` Route Handler가 service_role로
-  저장 — 본 서비스는 각각 `GET /api/settings`·`/api/taboo-hanja`·`/api/hanja/overrides`로
-  조회만 함(브라우저가 직접 DB에 쓰지 않음)
+  주문·결제(기간 필터+목록+통합 상세, 환불) / 보고서(기간 필터+목록+상세, 재발급(생성권 부여)·열기,
+  특별 요청사항 표시) / 고객문의(기간·상태 필터+목록+상세 응대) / 회원(기간 필터+목록+상세, 환불) /
+  전환율 퍼널 / AI 비용 / 한자 DB(검색+수정+금기 한자 관리) / 운영 관리(가격·프로모션·상품 구성·점검모드)
+- 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출(브라우저는 직접 호출 안 함) —
+  주문·회원 상세에서만 실행 가능(보고서 상세에서는 제거됨)
+- 설정: `/api/settings`, `/api/taboo-hanja`, `/api/hanja-overrides`, `/api/reports/[id]/reissue`,
+  `/api/inquiries/[id]/reply` Route Handler가 service_role로 저장 — 본 서비스는 각각
+  `GET /api/settings`·`/api/taboo-hanja`·`/api/hanja/overrides`·`/proxy/credit/*`·`/proxy/inquiry/*`로
+  조회/소진만 함(브라우저가 직접 DB에 쓰지 않음)
 
 ## 로컬 실행
 
@@ -34,7 +36,8 @@ npm run dev
 
 ## 환불
 
-주문·회원·보고서 상세 어디서든 "환불하기" 버튼(결제완료 상태인 주문만 노출)으로 실행합니다.
+주문·회원 상세에서 "환불하기" 버튼(결제완료 상태인 주문만 노출)으로 실행합니다(보고서 상세에는
+더 이상 환불 버튼이 없습니다 — 환불은 항상 주문 단위로 처리하는 게 맞아서 주문·회원 상세로만 남겼습니다).
 
 - `SUPABASE_SERVICE_ROLE_KEY`, `TOSS_SECRET_KEY`는 서버 전용 환경변수(`NEXT_PUBLIC_` 접두사 절대 금지)로만 설정합니다.
 - Phase 0에서 테스트 모드로 쌓인 주문(`toss_payment_key`가 없거나 `test_` 접두)은 실제 토스 API를 호출하지 않고 상태만 `refunded`로 정리합니다.
@@ -42,13 +45,19 @@ npm run dev
 - 이미 `refunded`/`failed` 상태인 주문은 CAS(조건부 업데이트)로 재환불을 차단합니다(멱등성).
 - 모든 환불 시도는 `audit_logs`에 운영자 이메일·금액·사유와 함께 기록됩니다.
 
-## 보고서 재발급 · "디어네임에서 열기"
+## 보고서 재발급(생성권 부여) · "디어네임에서 열기" · 특별 요청사항
 
 - "디어네임에서 열기"는 본 서비스(저장소 루트)의 `report-view.html?id=<reportId>`로 이동합니다.
   `NEXT_PUBLIC_DEARNAME_SITE_URL`을 설정해야 링크가 활성화됩니다.
-- "재발급"은 아직 이메일 발송 인프라가 없어 **실제 메일 전송 대신** ①`audit_logs`에 재발급 기록을 남기고
-  ②열람 링크를 운영자 클립보드로 복사합니다. 운영자가 그 링크를 고객에게 직접 전달하는 방식입니다.
-  (추후 Resend/SendGrid 등을 붙이면 이 버튼 하나로 실제 발송까지 확장 가능)
+- "재발급"은 링크를 복사해 운영자가 직접 전달하던 기존 방식 대신, **고객에게 무료 생성권을
+  부여**하는 방식입니다. `/api/reports/[id]/reissue`가 보고서→주문→회원을 역추적해
+  `members.bonus_credits`를 1 증가시키고 `audit_logs`에 기록합니다. 고객이 로그인 후 프리미엄
+  신청을 누르면 본 서비스가 `GET /proxy/credit/check?uid=`로 보유 생성권을 확인하고, 있으면
+  결제 모달을 건너뛰고 `POST /proxy/credit/consume`으로 1개를 소진하며 amount=0/
+  payment_method='credit'인 `orders` 행을 만들어 곧바로 보고서 생성을 시작합니다(기존
+  주문·대시보드 집계에 그대로 잡힘).
+- 프리미엄 신청 폼의 "기타 특별 요청사항"(`#prem-request`)이 `reports.special_request`로
+  저장되어, 보고서 목록에 요약이, 상세 화면에 전체 텍스트가 표시됩니다.
 
 ## 대시보드
 
@@ -108,17 +117,36 @@ npm run dev
   (기존 설정 화면에서 이동). `taboo_hanja` 테이블을 `/api/taboo-hanja`로 저장하며, 본 서비스는
   `GET /api/taboo-hanja`로 조회해 이름 탐색 엔진(Worker) 초기화 시 최신 목록을 받아옵니다.
 
-## 운영 관리 (가격 · 상품 구성 · 점검모드)
+## 운영 관리 (가격 · 프로모션 · 상품 구성 · 점검모드)
 
-기존 "설정" 화면을 "운영 관리"로 개명했습니다. `settings` key-value 테이블의 `pricing` 키로 관리합니다.
+기존 "설정" 화면을 "운영 관리"로 개명했습니다. `settings` key-value 테이블의 `pricing` 키로 관리하며,
+화면 순서는 점검 모드(긴급 스위치라 가장 먼저 보이도록) → 가격 설정 순입니다.
 
 - **셀프 작명 가격**: 참고용 필드입니다. 본 서비스는 현재 셀프 작명을 무료로 제공하며 실제 결제
   플로우가 연결돼 있지 않아, 이 값을 바꿔도 사이트 동작에는 아직 영향이 없습니다.
 - **AI 프리미엄 작명 상품 구성**: 소견서 개수·가격 조합을 화면에서 추가/삭제할 수 있습니다
-  (최소 1개 유지). 저장하면 `/api/settings`가 `pricing.tiers` 배열 전체를 갱신합니다.
+  (최소 1개 유지, count/price 모두 중복 불가). 저장하면 `/api/settings`가 `pricing.tiers` 배열
+  전체를 갱신합니다.
+- **프로모션 할인**: on/off + 할인율(1~90%) + 라벨(선택)을 `pricing.promotion`에 저장합니다.
+  켜져 있으면 `index.html`의 `_dnApplyPricing()`이 모든 상품 구성 가격에 할인을 적용해 결제
+  모달에 정가(취소선)+할인가를 함께 표시하고, 실제 청구 금액도 할인가로 계산합니다.
 - `index.html`의 `_dnApplyPricing()`은 고정된 4개 DOM을 patch하지 않고, 저장된 `tiers` 배열
   길이에 맞춰 결제 모달의 옵션 목록(`.payment-options-group`)을 매번 새로 그립니다 — 그래서
   운영자가 구성을 3개나 5개로 바꿔도 실제 결제 화면에 정확히 그만큼 표시됩니다.
+
+## 고객문의
+
+본 서비스에 로그인한 고객이 마이페이지에서 문의를 남기고, 어드민에서 응대하는 채널입니다.
+이메일 발송 인프라가 없어 답변은 고객이 마이페이지에 다시 방문했을 때 확인하는 방식입니다.
+
+- `inquiries` 테이블: `member_id`, 선택적 `report_id`(특정 보고서에 대한 문의일 때), `message`,
+  `status`(`pending`/`answered`), `reply`, `replied_at`, `replied_by`.
+- 본 서비스: `POST /proxy/inquiry`(로그인한 고객이 문의 등록 — `member`를 통해 upsert_member로
+  회원을 먼저 확보), `GET /proxy/inquiry/mine?uid=`(본인 문의+답변 조회, 마이페이지 "고객문의"
+  섹션에서 사용).
+- 어드민: `/inquiries`(기간·상태 필터 목록) → `/inquiries/[id]`(문의 내용 확인 + 답변 작성).
+  답변 저장은 `/api/inquiries/[id]/reply`(service_role)가 처리하며 `status`를 `answered`로
+  바꾸고 `audit_logs`에 기록합니다.
 
 ## 다음 단계
 

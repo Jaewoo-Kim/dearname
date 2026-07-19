@@ -14,9 +14,14 @@ function withIds(tiers: PricingSettings['tiers']): TierRow[] {
   return tiers.map((t, i) => ({ id: `t${i}-${t.count}-${t.price}`, count: t.count, price: t.price }));
 }
 
+const DEFAULT_PROMOTION = { enabled: false, percent: 0, label: '' };
+
 export default function PricingSettingsForm({ initial }: { initial: PricingSettings }) {
   const [selfPrice, setSelfPrice] = useState(initial.self ?? 0);
   const [tiers, setTiers] = useState<TierRow[]>(withIds(initial.tiers));
+  const [promoEnabled, setPromoEnabled] = useState(initial.promotion?.enabled ?? DEFAULT_PROMOTION.enabled);
+  const [promoPercent, setPromoPercent] = useState(initial.promotion?.percent ?? DEFAULT_PROMOTION.percent);
+  const [promoLabel, setPromoLabel] = useState(initial.promotion?.label ?? DEFAULT_PROMOTION.label);
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [error, setError] = useState('');
 
@@ -44,6 +49,11 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
       setError('구성별 개수와 가격은 서로 겹치지 않게 설정해 주세요(가격이 같으면 결제 시 다른 구성으로 잘못 매칭될 수 있습니다).');
       return;
     }
+    if (promoEnabled && (promoPercent <= 0 || promoPercent > 90)) {
+      setStatus('error');
+      setError('프로모션 할인율은 1~90% 사이로 설정해 주세요.');
+      return;
+    }
     setStatus('saving');
     setError('');
     try {
@@ -52,7 +62,11 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           key: 'pricing',
-          value: { self: selfPrice, tiers: tiers.map(({ count, price }) => ({ count, price })) },
+          value: {
+            self: selfPrice,
+            tiers: tiers.map(({ count, price }) => ({ count, price })),
+            promotion: { enabled: promoEnabled, percent: promoPercent, label: promoLabel },
+          },
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -137,6 +151,60 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
           <Plus className="h-4 w-4" />
           구성 추가
         </button>
+      </div>
+
+      <div className="mt-5 border-t border-slate-100 pt-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-slate-700">프로모션 할인</p>
+            <p className="mt-0.5 text-xs text-slate-400">
+              켜면 위 상품 구성 가격에 전부 일괄 %할인이 적용돼 결제 모달에 정가와 함께 표시됩니다.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={promoEnabled}
+            onClick={() => {
+              setStatus('idle');
+              setPromoEnabled((v) => !v);
+            }}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${promoEnabled ? 'bg-brand-600' : 'bg-slate-200'}`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                promoEnabled ? 'translate-x-5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
+
+        {promoEnabled && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <input
+              type="number"
+              min={1}
+              max={90}
+              value={promoPercent}
+              onChange={(e) => {
+                setStatus('idle');
+                setPromoPercent(parseInt(e.target.value || '0', 10));
+              }}
+              className="w-20 rounded-lg border border-slate-300 px-2 py-2 text-center text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            />
+            <span className="shrink-0 text-sm text-slate-500">% 할인 —</span>
+            <input
+              type="text"
+              value={promoLabel}
+              onChange={(e) => {
+                setStatus('idle');
+                setPromoLabel(e.target.value);
+              }}
+              placeholder="프로모션 이름(선택, 예: 여름 프로모션)"
+              className="min-w-[180px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            />
+          </div>
+        )}
       </div>
 
       <div className="mt-5 flex items-center gap-3 border-t border-slate-100 pt-4">

@@ -94,7 +94,7 @@ def insert_order(member_id, product, amount, status='paid', toss_order_id=None, 
     return _first(rows)
 
 
-def insert_report(order_id, baby_name_kr, baby_name_hanja, birth_dt, gender, score, report_json):
+def insert_report(order_id, baby_name_kr, baby_name_hanja, birth_dt, gender, score, report_json, special_request=None):
     body = {
         'order_id': order_id,
         'baby_name_kr': baby_name_kr,
@@ -103,6 +103,7 @@ def insert_report(order_id, baby_name_kr, baby_name_hanja, birth_dt, gender, sco
         'gender': gender,
         'score': score,
         'report_json': report_json,
+        'special_request': special_request or None,
     }
     rows = _request('POST', 'reports', body=body)
     return _first(rows)
@@ -143,6 +144,59 @@ def get_taboo_hanja():
 def get_hanja_overrides():
     """한자DB 정정값 전체 조회 (Phase 3 — 어드민 "한자 DB 수정"). DB 미설정 시 빈 리스트."""
     return _request('GET', 'hanja_overrides', params={'select': '*'}, prefer=None) or []
+
+
+def get_member_by_uid(uid):
+    """external_uid(프론트 dn_user_key 또는 소셜 로그인 sub)로 회원 조회."""
+    if not uid:
+        return None
+    rows = _request('GET', 'members', params={'external_uid': f'eq.{uid}', 'select': '*'}, prefer=None)
+    return _first(rows)
+
+
+def consume_bonus_credit(uid):
+    """
+    어드민이 재발급으로 부여한 무료 생성권 1개를 소진한다(CAS).
+    조회 시점의 bonus_credits 값을 조건으로 걸어 갱신하므로, 동시 요청으로 인한
+    중복 소진(잔여 1개인데 두 번 생성)을 막는다 — 환불의 CAS 패턴과 동일.
+    성공 시 갱신된 member row, 잔여 0 또는 경합으로 실패 시 None.
+    """
+    member = get_member_by_uid(uid)
+    if not member or (member.get('bonus_credits') or 0) <= 0:
+        return None
+    current = member['bonus_credits']
+    rows = _request(
+        'PATCH', 'members',
+        body={'bonus_credits': current - 1},
+        params={'external_uid': f'eq.{uid}', 'bonus_credits': f'eq.{current}'},
+    )
+    return _first(rows)
+
+
+def insert_inquiry(member_id, message, subject=None, report_id=None):
+    """고객문의 등록. member_id는 upsert_member로 먼저 확보한 값이어야 한다."""
+    if not member_id or not message:
+        return None
+    body = {
+        'member_id': member_id,
+        'report_id': report_id,
+        'subject': subject or None,
+        'message': message,
+    }
+    rows = _request('POST', 'inquiries', body=body)
+    return _first(rows)
+
+
+def get_inquiries_by_member(member_id):
+    """고객 본인의 문의 내역+답변 조회 (마이페이지용). 최신순."""
+    if not member_id:
+        return []
+    rows = _request(
+        'GET', 'inquiries',
+        params={'member_id': f'eq.{member_id}', 'select': '*', 'order': 'created_at.desc'},
+        prefer=None,
+    )
+    return rows or []
 
 
 # 대략적인 추정 단가(USD, 1M 토큰당) — 정확한 원가 산정용이 아닌 마진 모니터링 참고치
