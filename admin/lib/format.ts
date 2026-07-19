@@ -49,6 +49,25 @@ export const PRODUCT_LABEL: Record<string, string> = {
   self: '셀프 작명',
 };
 
+// 기간 필터 UI(주문·보고서·회원 목록 등)에서 공통으로 쓰는 옵션 목록
+export const PERIOD_OPTIONS = [
+  { value: '', label: '전체 기간' },
+  { value: 'today', label: '오늘' },
+  { value: 'week', label: '이번주' },
+  { value: 'month', label: '이번달' },
+  { value: 'year', label: '올해' },
+];
+
+// 쿼리스트링 링크 생성 헬퍼 — 빈 값은 제거해 URL을 깔끔하게 유지
+export function buildQueryHref(basePath: string, params: Record<string, string>): string {
+  const usp = new URLSearchParams(params);
+  for (const [k, v] of Array.from(usp.entries())) {
+    if (!v) usp.delete(k);
+  }
+  const qs = usp.toString();
+  return qs ? `${basePath}?${qs}` : basePath;
+}
+
 // 기간 필터(주문 목록 등)의 KST 기준 시작 시각 계산
 export function getPeriodStartUTC(period: string): Date | null {
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
