@@ -66,7 +66,7 @@ export default async function InquiriesPage({
 
       <PeriodFilterBar basePath="/inquiries" baseParams={baseParams} period={period} />
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
         {error ? (
           <p className="px-4 py-8 text-center text-sm text-red-600">
             문의 목록을 불러오지 못했습니다: {error.message}
@@ -74,21 +74,21 @@ export default async function InquiriesPage({
         ) : inquiries.length === 0 ? (
           <EmptyState title="접수된 문의가 없습니다" />
         ) : (
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
               <tr>
-                <th className="px-4 py-3 font-medium">접수일시</th>
-                <th className="px-4 py-3 font-medium">회원</th>
-                <th className="px-4 py-3 font-medium">문의 내용</th>
-                <th className="px-4 py-3 font-medium">상태</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">접수일시</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">회원</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">문의 내용</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">상태</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {inquiries.map((iq) => (
                 <tr key={iq.id} className="group border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                  <td className="px-4 py-3 text-slate-500">{formatDate(iq.created_at)}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(iq.created_at)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">
                     {maskName(iq.members?.name)}
                     <div className="text-xs text-slate-400">{maskContact(iq.members?.contact)}</div>
                   </td>
@@ -97,7 +97,7 @@ export default async function InquiriesPage({
                       {iq.subject || iq.message.slice(0, 30)}
                     </Link>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="whitespace-nowrap px-4 py-3">
                     <span
                       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
                         iq.status === 'answered' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'

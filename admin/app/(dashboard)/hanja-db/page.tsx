@@ -50,30 +50,32 @@ export default async function HanjaDbPage() {
           {overrides.length === 0 ? (
             <EmptyState title="아직 정정한 한자가 없습니다" />
           ) : (
-            <table className="mt-3 w-full text-left text-sm">
-              <thead className="border-b border-slate-100 text-xs text-slate-500">
-                <tr>
-                  <th className="py-2 font-medium">한자</th>
-                  <th className="py-2 font-medium">음</th>
-                  <th className="py-2 font-medium">뜻</th>
-                  <th className="py-2 font-medium">획수</th>
-                  <th className="py-2 font-medium">자원오행</th>
-                  <th className="py-2 font-medium">수정일시</th>
-                </tr>
-              </thead>
-              <tbody>
-                {overrides.map((r) => (
-                  <tr key={`${r.hanja}-${r.kr}`} className="border-b border-slate-50 last:border-0">
-                    <td className="py-2 text-slate-900">{r.hanja}</td>
-                    <td className="py-2 text-slate-600">{r.kr}</td>
-                    <td className="py-2 text-slate-600">{r.m || '-'}</td>
-                    <td className="py-2 tabular-nums text-slate-600">{r.s ?? '-'}</td>
-                    <td className="py-2 text-slate-600">{r.o || '-'}</td>
-                    <td className="py-2 text-slate-400">{formatDate(r.updated_at)}</td>
+            <div className="overflow-x-auto">
+              <table className="mt-3 w-full min-w-[560px] text-left text-sm">
+                <thead className="border-b border-slate-100 text-xs text-slate-500">
+                  <tr>
+                    <th className="whitespace-nowrap py-2 font-medium">한자</th>
+                    <th className="whitespace-nowrap py-2 font-medium">음</th>
+                    <th className="whitespace-nowrap py-2 font-medium">뜻</th>
+                    <th className="whitespace-nowrap py-2 font-medium">획수</th>
+                    <th className="whitespace-nowrap py-2 font-medium">자원오행</th>
+                    <th className="whitespace-nowrap py-2 font-medium">수정일시</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {overrides.map((r) => (
+                    <tr key={`${r.hanja}-${r.kr}`} className="border-b border-slate-50 last:border-0">
+                      <td className="whitespace-nowrap py-2 text-slate-900">{r.hanja}</td>
+                      <td className="whitespace-nowrap py-2 text-slate-600">{r.kr}</td>
+                      <td className="whitespace-nowrap py-2 text-slate-600">{r.m || '-'}</td>
+                      <td className="whitespace-nowrap py-2 tabular-nums text-slate-600">{r.s ?? '-'}</td>
+                      <td className="whitespace-nowrap py-2 text-slate-600">{r.o || '-'}</td>
+                      <td className="whitespace-nowrap py-2 text-slate-400">{formatDate(r.updated_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </section>
 
