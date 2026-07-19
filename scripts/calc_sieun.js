@@ -1,5 +1,5 @@
 // scripts/calc_sieun.js — 최시은 3옵션 정밀 계산
-// 溡(시,13획,水,물이름)는 DB에 없어 사용자 제공값(원획법 13획, 水, 물이름)을 그대로 사용.
+// 潃(시,14획,水,강이름)는 DB에 없어 사용자 제공값(원획법 14획, 水, 강이름 — 康熙字典 근거)을 그대로 사용.
 // 殷/詩/濦/銀은 DB 확정값.
 'use strict';
 const vm=require('vm'), fs=require('fs'), path=require('path');
@@ -30,9 +30,9 @@ const code=`(function(){
   }
 
   var out = {};
-  // 옵션1: 崔溡殷 — 溡 DB 없음(사용자 제공: 13획,水,물이름), 殷 DB확정
+  // 옵션1: 崔潃殷 — 潃 DB 없음(사용자 제공: 14획,水,강이름 — 원획법/康熙字典), 殷 DB확정
   var eun_DB = DBlook('은','殷');
-  out.opt1 = evalCombo('시','溡','물이름',13,'水', '은','殷',eun_DB.m,eun_DB.s,eun_DB.o, false, true);
+  out.opt1 = evalCombo('시','潃','강이름',14,'水', '은','殷',eun_DB.m,eun_DB.s,eun_DB.o, false, true);
 
   // 옵션2: 崔詩溵 — 둘 다 DB확정 (金+水, 시=詩(시.악장) 은=溵(큰강.물소리) — '강' 테마 유지)
   var si_詩 = DBlook('시','詩'), eun_溵 = DBlook('은','溵');

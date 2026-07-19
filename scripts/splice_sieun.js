@@ -9,7 +9,7 @@ const blockPath = path.join(ROOT, '_sieun_block.txt');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const block = fs.readFileSync(blockPath, 'utf8');
 
-const START_TEXT = '10개 옵션: 성씨 최(崔) · 2026-07-02 08:50 여아 · 현대적 인기 이름';
+const START_TEXT = '최시은 3옵션: 성씨 최(崔) · 2026-07-02 08:50 여아';
 const lineIdx = html.indexOf(START_TEXT);
 if (lineIdx === -1) throw new Error('START_TEXT not found');
 const lineStart = html.lastIndexOf('\n', lineIdx) + 1;
