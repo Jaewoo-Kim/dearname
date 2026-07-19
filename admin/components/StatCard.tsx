@@ -31,7 +31,7 @@ export default function StatCard({
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{label}</p>
         {Icon && (
-          <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${ACCENT_BG[accent]}`}>
+          <span className={`hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg lg:flex ${ACCENT_BG[accent]}`}>
             <Icon className="h-4 w-4" strokeWidth={2} />
           </span>
         )}
