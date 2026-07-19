@@ -128,7 +128,7 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
                 step={1000}
                 value={tier.price}
                 onChange={(e) => updateTier(tier.id, 'price', parseInt(e.target.value || '0', 10))}
-                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
               <span className="shrink-0 text-sm text-slate-400">원</span>
               <button
