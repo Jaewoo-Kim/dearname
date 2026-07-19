@@ -14,6 +14,7 @@ const DEFAULT_PRICING: PricingSettings = {
     { count: 3, price: 70000 },
     { count: 5, price: 100000 },
   ],
+  promotion: { enabled: false, percent: 0, label: '' },
 };
 const DEFAULT_MAINTENANCE: MaintenanceSettings = { enabled: false, message: '' };
 
@@ -41,8 +42,8 @@ export default async function SettingsPage() {
       />
 
       <div className="space-y-4">
-        <PricingSettingsForm initial={pricing} />
         <MaintenanceSettingsForm initial={maintenance} />
+        <PricingSettingsForm initial={pricing} />
       </div>
     </div>
   );

@@ -1,0 +1,60 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { formatDate, maskContact, maskName } from '@/lib/format';
+import BackLink from '@/components/BackLink';
+import InquiryReplyForm from '@/components/InquiryReplyForm';
+import type { InquiryRow } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
+
+export default async function InquiryDetailPage({ params }: { params: { id: string } }) {
+  const supabase = createClient();
+
+  const { data } = await supabase
+    .from('inquiries')
+    .select('*, members(name, contact)')
+    .eq('id', params.id)
+    .single();
+
+  if (!data) notFound();
+  const inquiry = data as unknown as InquiryRow;
+
+  return (
+    <div className="max-w-2xl">
+      <BackLink href="/inquiries" label="고객문의 목록으로" />
+
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          {inquiry.subject || '제목 없음'}
+        </h1>
+        {inquiry.report_id && (
+          <Link href={`/reports/${inquiry.report_id}`} className="text-sm text-brand-700 hover:underline">
+            연결 보고서 보기 →
+          </Link>
+        )}
+      </div>
+      <p className="mt-1 text-sm text-slate-500">
+        {formatDate(inquiry.created_at)} · {maskName(inquiry.members?.name)} · {maskContact(inquiry.members?.contact)}
+      </p>
+
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+        <h2 className="text-sm font-semibold text-slate-500">문의 내용</h2>
+        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">{inquiry.message}</p>
+      </div>
+
+      {inquiry.status === 'answered' && inquiry.reply && (
+        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-card">
+          <h2 className="text-sm font-semibold text-emerald-700">
+            답변 완료 {inquiry.replied_by && `· ${inquiry.replied_by}`} {inquiry.replied_at && `· ${formatDate(inquiry.replied_at)}`}
+          </h2>
+          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-emerald-900">{inquiry.reply}</p>
+        </div>
+      )}
+
+      <div className="mt-4">
+        <InquiryReplyForm inquiryId={inquiry.id} />
+      </div>
+    </div>
+  );
+}

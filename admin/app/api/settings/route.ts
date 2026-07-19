@@ -8,10 +8,19 @@ import { isAllowedEmail } from '@/lib/authz';
 const ALLOWED_KEYS = ['pricing', 'maintenance'] as const;
 type SettingKey = (typeof ALLOWED_KEYS)[number];
 
+function isValidPromotion(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as { enabled?: unknown; percent?: unknown; label?: unknown };
+  if (typeof v.enabled !== 'boolean') return false;
+  if (!Number.isFinite(v.percent) || (v.percent as number) < 0 || (v.percent as number) > 90) return false;
+  return typeof v.label === 'string';
+}
+
 function isValidPricing(value: unknown): boolean {
   if (!value || typeof value !== 'object') return false;
-  const v = value as { self?: unknown; tiers?: unknown };
+  const v = value as { self?: unknown; tiers?: unknown; promotion?: unknown };
   if (!Number.isFinite(v.self) || (v.self as number) < 0) return false;
+  if (!isValidPromotion(v.promotion)) return false;
   const tiers = v.tiers;
   if (!Array.isArray(tiers) || tiers.length === 0) return false;
   const shapeValid = tiers.every(

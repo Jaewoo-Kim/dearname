@@ -19,6 +19,8 @@ create table if not exists members (
   last_order_at   timestamptz
 );
 create index if not exists idx_members_contact on members(contact);
+-- 어드민이 보고서 재발급 시 부여하는 "무료 생성권" 잔여 개수. 부여 시 audit_logs에도 기록된다.
+alter table members add column if not exists bonus_credits int not null default 0;
 
 -- ── orders — 주문·결제 ──────────────────────────────────────────────
 create table if not exists orders (
@@ -49,9 +51,11 @@ create table if not exists reports (
   birth_dt         timestamptz,  -- ⚠️ 개인정보
   gender           text,
   score            int,
-  report_json      jsonb         -- Claude가 생성한 보고서 전체 (재발급용)
+  report_json      jsonb,        -- Claude가 생성한 보고서 전체 (재발급용)
+  special_request  text          -- 프리미엄 신청 시 고객이 남긴 "기타 특별 요청사항"(#prem-request)
 );
 create index if not exists idx_reports_order_id on reports(order_id);
+alter table reports add column if not exists special_request text;
 
 -- ── ai_usage — AI 비용 모니터링 ──────────────────────────────────────
 create table if not exists ai_usage (
@@ -216,7 +220,7 @@ create policy "운영자 조회" on settings for select using (auth.role() = 'au
 
 -- 기본값 시드 — 이미 있으면 건드리지 않음(재실행 안전)
 insert into settings (key, value) values
-  ('pricing', '{"self":0,"tiers":[{"count":1,"price":30000},{"count":2,"price":50000},{"count":3,"price":70000},{"count":5,"price":100000}]}'::jsonb),
+  ('pricing', '{"self":0,"tiers":[{"count":1,"price":30000},{"count":2,"price":50000},{"count":3,"price":70000},{"count":5,"price":100000}],"promotion":{"enabled":false,"percent":0,"label":""}}'::jsonb),
   ('maintenance', '{"enabled":false,"message":""}'::jsonb)
 on conflict (key) do nothing;
 
@@ -224,6 +228,11 @@ on conflict (key) do nothing;
 update settings
 set value = value || '{"self": 0}'::jsonb
 where key = 'pricing' and not (value ? 'self');
+
+-- 프로모션 할인(전 상품 구성에 일괄 적용되는 %할인) 키 보강(재실행 안전)
+update settings
+set value = value || '{"promotion": {"enabled": false, "percent": 0, "label": ""}}'::jsonb
+where key = 'pricing' and not (value ? 'promotion');
 
 -- ── taboo_hanja — 금기 한자 관리 (Phase 3) ────────────────────────────
 -- 지금까지 lib/name-search-worker.js에 하드코딩돼 있던 "뜻이 불길한 한자"
@@ -267,3 +276,27 @@ create table if not exists hanja_overrides (
 alter table hanja_overrides enable row level security;
 drop policy if exists "운영자 조회" on hanja_overrides;
 create policy "운영자 조회" on hanja_overrides for select using (auth.role() = 'authenticated');
+
+-- ── inquiries — 고객문의 ──────────────────────────────────────────────
+-- 본 서비스에 로그인한 고객이 남긴 문의. 특정 보고서에 대한 요청이면 report_id를 채우고,
+-- 일반 문의면 비워둔다. 본 서비스는 server.py(service_role)로 쓰기·본인 문의 조회를 하고,
+-- 어드민은 이 테이블을 조회+응대(reply)한다 — 환불/설정과 동일한 보안 모델.
+create table if not exists inquiries (
+  id           uuid primary key default gen_random_uuid(),
+  created_at   timestamptz not null default now(),
+  member_id    uuid references members(id),
+  report_id    uuid references reports(id),
+  subject      text,
+  message      text not null,
+  status       text not null default 'pending',  -- 'pending' / 'answered'
+  reply        text,
+  replied_at   timestamptz,
+  replied_by   text  -- 응대한 운영자 이메일
+);
+create index if not exists idx_inquiries_created_at on inquiries(created_at);
+create index if not exists idx_inquiries_member_id on inquiries(member_id);
+create index if not exists idx_inquiries_status on inquiries(status);
+
+alter table inquiries enable row level security;
+drop policy if exists "운영자 조회" on inquiries;
+create policy "운영자 조회" on inquiries for select using (auth.role() = 'authenticated');

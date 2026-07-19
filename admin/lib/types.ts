@@ -37,6 +37,7 @@ export interface Report {
   gender: string | null;
   score: number | null;
   report_json: unknown;
+  special_request: string | null;
 }
 
 // STEP 7 대시보드 — supabase/schema.sql의 revenue_daily/monthly/yearly 뷰
@@ -68,14 +69,36 @@ export interface PricingTier {
   price: number;
 }
 
+export interface PricingPromotion {
+  enabled: boolean;
+  percent: number;
+  label: string;
+}
+
 export interface PricingSettings {
   self: number;
   tiers: PricingTier[];
+  promotion: PricingPromotion;
 }
 
 export interface MaintenanceSettings {
   enabled: boolean;
   message: string;
+}
+
+// 고객문의 — inquiries 테이블
+export interface InquiryRow {
+  id: string;
+  created_at: string;
+  member_id: string | null;
+  report_id: string | null;
+  subject: string | null;
+  message: string;
+  status: 'pending' | 'answered';
+  reply: string | null;
+  replied_at: string | null;
+  replied_by: string | null;
+  members?: { name: string | null; contact: string | null } | null;
 }
 
 // Phase 3 — taboo_hanja 테이블

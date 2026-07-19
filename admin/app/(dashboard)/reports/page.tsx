@@ -53,6 +53,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
                 <th className="px-4 py-3 font-medium">한자</th>
                 <th className="px-4 py-3 font-medium">성별</th>
                 <th className="px-4 py-3 font-medium">점수</th>
+                <th className="px-4 py-3 font-medium">요청사항</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -69,6 +70,15 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
                   <td className="px-4 py-3 text-slate-600">{r.gender || '-'}</td>
                   <td className="px-4 py-3 font-medium tabular-nums text-slate-900">
                     {r.score != null ? `${r.score}점` : '-'}
+                  </td>
+                  <td className="max-w-xs px-4 py-3 text-slate-600">
+                    {r.special_request ? (
+                      <span className="line-clamp-1" title={r.special_request}>
+                        {r.special_request}
+                      </span>
+                    ) : (
+                      <span className="text-slate-300">-</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/reports/${r.id}`}>

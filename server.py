@@ -61,7 +61,9 @@ DEFAULT_PRICING = {
         {'count': 2, 'price': 50000},
         {'count': 3, 'price': 70000},
         {'count': 5, 'price': 100000},
-    ]
+    ],
+    # promotion: 전 상품 구성에 일괄 적용되는 기간 한정 %할인. enabled=false면 정가 그대로.
+    'promotion': {'enabled': False, 'percent': 0, 'label': ''},
 }
 DEFAULT_MAINTENANCE = {'enabled': False, 'message': ''}
 
@@ -444,6 +446,89 @@ def track_event():
         return jsonify({'error': str(e)}), 500
 
 
+# ── 무료 생성권 (어드민 "재발급" 시 부여) ────────────────────
+# 실제 이메일/링크 재발급 대신, 로그인한 고객이 프리미엄 신청을 다시 결제 없이
+# 1회 더 진행할 수 있는 "생성권"을 회원에게 부여하는 방식으로 바뀌었다(admin_site_plan.md).
+@app.route('/proxy/credit/check')
+def credit_check():
+    uid = request.args.get('uid', '')
+    member = db.get_member_by_uid(uid) if uid else None
+    credits = (member or {}).get('bonus_credits') or 0
+    return _no_cache(jsonify({'credits': credits}))
+
+
+@app.route('/proxy/credit/consume', methods=['POST'])
+def credit_consume():
+    """
+    생성권 1개를 소진하고, 결제 없이 프리미엄 보고서를 진행할 수 있도록
+    amount=0인 orders 행을 만들어 반환한다(대시보드·주문목록에도 그대로 집계됨).
+    """
+    try:
+        body = request.get_json(force=True)
+        member = body.get('member') or {}
+        uid = member.get('uid')
+        if not uid:
+            return jsonify({'error': '로그인이 필요합니다.'}), 401
+
+        updated_member = db.consume_bonus_credit(uid)
+        if not updated_member:
+            return jsonify({'error': '사용 가능한 생성권이 없습니다.'}), 403
+
+        order_row = db.insert_order(
+            member_id=updated_member['id'],
+            product='premium',
+            amount=0,
+            status='paid',
+            payment_method='credit',
+        )
+        return jsonify({'status': 'ok', 'orderId': order_row['id'] if order_row else None})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ── 고객문의 ──────────────────────────────────────────────
+@app.route('/proxy/inquiry', methods=['POST'])
+def inquiry_submit():
+    """로그인한 고객이 문의를 등록한다. 특정 보고서에 대한 문의면 reportId를 함께 보낸다."""
+    try:
+        body = request.get_json(force=True)
+        member = body.get('member') or {}
+        message = (body.get('message') or '').strip()
+        if not member.get('uid') or not message:
+            return jsonify({'error': '로그인 후 문의 내용을 입력해주세요.'}), 400
+
+        member_row = db.upsert_member(
+            uid=member.get('uid'),
+            name=member.get('name', ''),
+            contact=member.get('email', ''),
+            login_provider=member.get('provider', 'guest'),
+        )
+        if not member_row:
+            return jsonify({'error': '문의 등록이 설정되지 않았습니다.'}), 503
+
+        inquiry_row = db.insert_inquiry(
+            member_id=member_row['id'],
+            message=message[:2000],
+            subject=(body.get('subject') or '').strip()[:200] or None,
+            report_id=body.get('reportId') or None,
+        )
+        return jsonify({'status': 'ok', 'inquiryId': inquiry_row['id'] if inquiry_row else None})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/proxy/inquiry/mine')
+def inquiry_mine():
+    """로그인한 고객 본인의 문의 내역+답변 조회 (마이페이지)."""
+    uid = request.args.get('uid', '')
+    if not uid:
+        return _no_cache(jsonify({'inquiries': []}))
+    member = db.get_member_by_uid(uid)
+    if not member:
+        return _no_cache(jsonify({'inquiries': []}))
+    return _no_cache(jsonify({'inquiries': db.get_inquiries_by_member(member['id'])}))
+
+
 # ── 운영자 설정 조회 (Phase 3 — 가격/점검모드) ──────────────
 @app.route('/api/settings')
 def public_settings():
@@ -556,6 +641,7 @@ def report_save():
             gender=body.get('gender'),
             score=body.get('score'),
             report_json=body.get('reportJson'),
+            special_request=body.get('specialRequest'),
         )
         return jsonify({'status': 'ok', 'reportId': report_row['id'] if report_row else None})
     except Exception as e:

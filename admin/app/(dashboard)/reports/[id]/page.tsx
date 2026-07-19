@@ -3,11 +3,10 @@ import { notFound } from 'next/navigation';
 import { ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
-import RefundButton from '@/components/RefundButton';
-import ResendReportButton from '@/components/ResendReportButton';
+import ReissueCreditButton from '@/components/ReissueCreditButton';
 import BackLink from '@/components/BackLink';
 import EmptyState from '@/components/EmptyState';
-import type { Order, Report } from '@/lib/types';
+import type { Report } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,11 +35,6 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
   const report = data as unknown as Report;
   const rj = (report.report_json || {}) as ReportJson;
   const story = rj.report || {};
-
-  const { data: order } = report.order_id
-    ? await supabase.from('orders').select('*').eq('id', report.order_id).single()
-    : { data: null };
-  const typedOrder = order as unknown as Order | null;
 
   const siteUrl = process.env.NEXT_PUBLIC_DEARNAME_SITE_URL || '';
   const viewUrl = siteUrl ? `${siteUrl.replace(/\/$/, '')}/report-view.html?id=${report.id}` : null;
@@ -93,16 +87,15 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
           </button>
         )}
 
-        <ResendReportButton reportId={report.id} viewUrl={viewUrl} />
-
-        {typedOrder && (
-          <RefundButton
-            orderId={typedOrder.id}
-            disabled={typedOrder.status !== 'paid'}
-            disabledReason={typedOrder.status === 'refunded' ? '이미 환불된 주문입니다' : '결제완료 상태의 주문만 환불할 수 있습니다'}
-          />
-        )}
+        <ReissueCreditButton reportId={report.id} />
       </div>
+
+      {report.special_request && (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-card">
+          <h2 className="text-sm font-semibold text-amber-700">고객이 남긴 특별 요청사항</h2>
+          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-amber-900">{report.special_request}</p>
+        </div>
+      )}
 
       <section className="mt-6 space-y-4">
         {FIELDS.filter(([, v]) => v).map(([label, value]) => (
