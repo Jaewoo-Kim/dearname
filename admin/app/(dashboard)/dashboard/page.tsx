@@ -112,7 +112,7 @@ export default async function DashboardPage({
   const defaultMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
   const defaultYear = String(now.getUTCFullYear());
 
-  const month = /^\d{4}-\d{2}$/.test(searchParams.month || '') ? (searchParams.month as string) : defaultMonth;
+  const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(searchParams.month || '') ? (searchParams.month as string) : defaultMonth;
   const year = /^\d{4}$/.test(searchParams.year || '') ? (searchParams.year as string) : defaultYear;
 
   const { trend, latest, prev, productMix, paymentMix, memberCount, availableYears } = await getDashboardData(

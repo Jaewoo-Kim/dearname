@@ -37,6 +37,13 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
   }
 
   async function handleSave() {
+    const counts = tiers.map((t) => t.count);
+    const prices = tiers.map((t) => t.price);
+    if (new Set(counts).size !== counts.length || new Set(prices).size !== prices.length) {
+      setStatus('error');
+      setError('구성별 개수와 가격은 서로 겹치지 않게 설정해 주세요(가격이 같으면 결제 시 다른 구성으로 잘못 매칭될 수 있습니다).');
+      return;
+    }
     setStatus('saving');
     setError('');
     try {
