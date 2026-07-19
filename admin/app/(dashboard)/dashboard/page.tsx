@@ -14,28 +14,10 @@ export const dynamic = 'force-dynamic';
 
 type RangeKey = 'day' | 'month' | 'year';
 
-const RANGE_CONFIG: Record<
-  RangeKey,
-  { view: string; limit: number; label: string; format: (bucket: string) => string }
-> = {
-  day: {
-    view: 'revenue_daily',
-    limit: 14,
-    label: '오늘',
-    format: (b) => new Date(b).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }),
-  },
-  month: {
-    view: 'revenue_monthly',
-    limit: 12,
-    label: '이번달',
-    format: (b) => new Date(b).toLocaleDateString('ko-KR', { year: '2-digit', month: 'short' }),
-  },
-  year: {
-    view: 'revenue_yearly',
-    limit: 5,
-    label: '올해',
-    format: (b) => new Date(b).toLocaleDateString('ko-KR', { year: 'numeric' }),
-  },
+const RANGE_CONFIG: Record<RangeKey, { view: string; label: string }> = {
+  day: { view: 'revenue_daily', label: '오늘' },
+  month: { view: 'revenue_monthly', label: '이번달' },
+  year: { view: 'revenue_yearly', label: '올해' },
 };
 
 const RANGE_TABS: Array<{ value: RangeKey; label: string }> = [
@@ -43,6 +25,10 @@ const RANGE_TABS: Array<{ value: RangeKey; label: string }> = [
   { value: 'month', label: '월별' },
   { value: 'year', label: '연도별' },
 ];
+
+// 매출 추이 그래프는 필터와 무관하게 항상 최근 12개월 고정
+const TREND_MONTHS = 12;
+const formatMonth = (b: string) => new Date(b).toLocaleDateString('ko-KR', { year: '2-digit', month: 'short' });
 
 function pctChange(current: number, prev: number): number | null {
   if (!prev) return null;
@@ -53,16 +39,20 @@ async function getDashboardData(range: RangeKey) {
   const supabase = createClient();
   const cfg = RANGE_CONFIG[range];
 
-  const [{ data: trendDesc }, { data: productMix }, { data: paymentMix }, { count: memberCount }] = await Promise.all([
-    supabase.from(cfg.view).select('*').order('bucket', { ascending: false }).limit(cfg.limit),
-    supabase.from('revenue_by_product').select('*'),
-    supabase.from('revenue_by_payment_method').select('*'),
-    supabase.from('members').select('*', { count: 'exact', head: true }),
-  ]);
+  const [{ data: statDesc }, { data: trendDesc }, { data: productMix }, { data: paymentMix }, { count: memberCount }] =
+    await Promise.all([
+      supabase.from(cfg.view).select('*').order('bucket', { ascending: false }).limit(2),
+      supabase.from('revenue_monthly').select('*').order('bucket', { ascending: false }).limit(TREND_MONTHS),
+      supabase.from('revenue_by_product').select('*'),
+      supabase.from('revenue_by_payment_method').select('*'),
+      supabase.from('members').select('*', { count: 'exact', head: true }),
+    ]);
+
+  const stats = ((statDesc as unknown as RevenueRow[]) || []).slice().reverse();
+  const latest = stats[stats.length - 1];
+  const prev = stats[stats.length - 2];
 
   const trend = ((trendDesc as unknown as RevenueRow[]) || []).slice().reverse();
-  const latest = trend[trend.length - 1];
-  const prev = trend[trend.length - 2];
 
   return {
     trend,
@@ -90,7 +80,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   const avgTrend = prev ? pctChange(avgOrderValue, prevAvgOrderValue) : null;
 
   const chartData = trend.map((row) => ({
-    label: cfg.format(row.bucket),
+    label: formatMonth(row.bucket),
     revenue: row.revenue,
     orderCount: row.order_count,
   }));
@@ -146,7 +136,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card lg:col-span-2">
-          <h2 className="text-sm font-semibold text-slate-500">매출 추이</h2>
+          <h2 className="text-sm font-semibold text-slate-500">매출 추이 (최근 12개월)</h2>
           {chartData.length === 0 ? (
             <EmptyState title="표시할 데이터가 없습니다" />
           ) : (

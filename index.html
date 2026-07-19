@@ -5433,25 +5433,26 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     function _dnApplyPricing(tiers) {
         if (!Array.isArray(tiers) || !tiers.length) return;
-        const options = document.querySelectorAll('#payment-modal .payment-option');
-        const basePrice = tiers.find(t => t.count === 1)?.price || tiers[0].price;
+        const group = document.querySelector('#payment-modal .payment-options-group');
+        if (!group) return;
+        const basePrice = tiers.find(t => t.count === 1)?.price ?? tiers[0].price;
 
-        tiers.forEach((tier, i) => {
-            const opt = options[i];
-            if (!opt) return;
-            const input = opt.querySelector('input[name="report_count"]');
-            const priceEl = opt.querySelector('.pay-price');
-            const labelEl = opt.querySelector('.pay-label');
-            if (input) input.value = String(tier.price);
-            if (priceEl) priceEl.textContent = tier.price.toLocaleString('ko-KR') + '원';
-            if (labelEl) {
-                const discount = (tier.count > 1 && basePrice)
-                    ? Math.round((1 - tier.price / (tier.count * basePrice)) * 100)
-                    : 0;
-                const badge = discount > 0 ? ` <b class="pay-badge">${discount}% 할인</b>` : '';
-                labelEl.innerHTML = `소견서 ${tier.count}개${badge}`;
-            }
-        });
+        // 어드민이 구성을 추가/삭제할 수 있으므로 4개 고정 DOM을 패치하는 대신
+        // 매번 tiers 배열 길이에 맞춰 옵션 목록 자체를 새로 그린다.
+        group.innerHTML = tiers.map((tier, i) => {
+            const discount = (tier.count > 1 && basePrice)
+                ? Math.round((1 - tier.price / (tier.count * basePrice)) * 100)
+                : 0;
+            const badge = discount > 0 ? ` <b class="pay-badge">${discount}% 할인</b>` : '';
+            return `
+            <label class="payment-option">
+                <input type="radio" name="report_count" value="${tier.price}" onchange="updatePrice(this)"${i === 0 ? ' checked' : ''}>
+                <div class="payment-option-content">
+                    <span class="pay-label">소견서 ${tier.count}개${badge}</span>
+                    <span class="pay-price">${tier.price.toLocaleString('ko-KR')}원</span>
+                </div>
+            </label>`;
+        }).join('');
 
         // countMap(amount → 개수)도 실제 가격 기준으로 다시 맞춘다
         window._dnCountMap = tiers.reduce((m, t) => { m[t.price] = t.count; return m; }, {});

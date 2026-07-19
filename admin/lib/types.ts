@@ -69,6 +69,7 @@ export interface PricingTier {
 }
 
 export interface PricingSettings {
+  self: number;
   tiers: PricingTier[];
 }
 

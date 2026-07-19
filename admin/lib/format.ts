@@ -45,6 +45,37 @@ export const STATUS_LABEL: Record<string, string> = {
 };
 
 export const PRODUCT_LABEL: Record<string, string> = {
-  premium: '프리미엄',
-  self: '셀프분석',
+  premium: 'AI 프리미엄 작명',
+  self: '셀프 작명',
 };
+
+// 기간 필터(주문 목록 등)의 KST 기준 시작 시각 계산
+export function getPeriodStartUTC(period: string): Date | null {
+  const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+  const kstNow = new Date(Date.now() + KST_OFFSET_MS);
+  const y = kstNow.getUTCFullYear();
+  const m = kstNow.getUTCMonth();
+  const d = kstNow.getUTCDate();
+
+  let startKst: Date;
+  switch (period) {
+    case 'today':
+      startKst = new Date(Date.UTC(y, m, d));
+      break;
+    case 'week': {
+      const day = kstNow.getUTCDay(); // 0=일요일
+      const diffToMonday = day === 0 ? 6 : day - 1;
+      startKst = new Date(Date.UTC(y, m, d - diffToMonday));
+      break;
+    }
+    case 'month':
+      startKst = new Date(Date.UTC(y, m, 1));
+      break;
+    case 'year':
+      startKst = new Date(Date.UTC(y, 0, 1));
+      break;
+    default:
+      return null;
+  }
+  return new Date(startKst.getTime() - KST_OFFSET_MS);
+}

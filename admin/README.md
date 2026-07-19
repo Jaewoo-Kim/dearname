@@ -7,9 +7,10 @@ DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2(전�
 
 - Next.js 14 (App Router) + Tailwind + Recharts
 - Supabase Auth(매직 링크) + Postgres(RLS + 매출/AI비용 집계 뷰)
-- 화면: 대시보드(일/월/연 전환, 매출 추이·상품 비중·결제수단 그래프) / 주문·결제(목록+통합 상세, 환불) /
-  보고서(목록+상세, 환불·재발급·열기) / 회원(목록+상세, 환불) / 전환율 퍼널 / AI 비용 /
-  한자 DB(검색+수정) / 설정(가격·점검모드·금기 한자)
+- 화면: 대시보드(일/월/연 전환 카드 + 매출 추이 12개월 고정·상품 비중·결제수단 그래프) /
+  주문·결제(기간 필터+목록+통합 상세, 환불) / 보고서(목록+상세, 환불·재발급·열기) /
+  회원(목록+상세, 환불) / 전환율 퍼널 / AI 비용 / 한자 DB(검색+수정+금기 한자 관리) /
+  운영 관리(가격·상품 구성·점검모드)
 - 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출 (브라우저는 직접 호출 안 함)
 - 설정: `/api/settings`, `/api/taboo-hanja`, `/api/hanja-overrides` Route Handler가 service_role로
   저장 — 본 서비스는 각각 `GET /api/settings`·`/api/taboo-hanja`·`/api/hanja/overrides`로
@@ -55,9 +56,16 @@ npm run dev
 `revenue_by_payment_method` 뷰를 조회합니다(별도 집계 테이블 없이 `orders`를 `date_trunc`로 그룹핑 —
 뷰이므로 `orders`의 기존 RLS 정책을 그대로 따름).
 
-- 상단 세그먼트로 일/월/연 전환, 가장 최근 구간의 매출·주문·평균 객단가·환불 금액을 카드로 표시
-- 매출 추이는 막대(매출)+라인(주문건수) 콤보 차트, 상품 비중은 도넛 차트, 결제수단별 매출은 가로 막대 차트(Recharts)
+- 상단 세그먼트로 일/월/연 전환(기본값 월), 가장 최근 구간의 매출·주문·평균 객단가·환불 금액을 카드로 표시
+- 매출 추이 차트는 세그먼트와 무관하게 항상 `revenue_monthly` 최근 12개월 고정 표시(막대: 매출, 라인: 주문건수)
+- 상품 비중은 도넛 차트(AI 프리미엄 작명 / 셀프 작명 2종), 결제수단별 매출은 가로 막대 차트(Recharts)
 - 결제수단은 `orders.payment_method`에 저장 — 토스 실결제는 응답의 `method` 값 그대로, 테스트 모드는 `'test'`
+
+## 주문·결제 기간 필터
+
+`/orders` 화면 상단에 전체 기간/오늘/이번주/이번달/올해 필터가 있습니다. `lib/format.ts`의
+`getPeriodStartUTC()`가 KST(UTC+9) 기준으로 구간 시작 시각을 계산해 `orders.created_at`에
+`gte` 조건으로 적용합니다(상태 필터와 함께 조합 가능).
 
 ## 배포 (Vercel)
 
@@ -87,6 +95,21 @@ npm run dev
   `*.vercel.app`이 포함돼 있어야 합니다(이미 `server.py`에 반영됨).
 - 본 서비스는 페이지 로드 시 `GET /api/hanja/overrides`로 정정값을 받아 메모리 상의
   `HANJA_DB_FULL`을 직접 패치 — 저장 즉시 이름 탐색 결과에 반영됩니다.
+- 같은 화면 하단에 금기 한자(뜻이 불길해 이름 후보에서 제외하는 한자) 관리 UI가 있습니다
+  (기존 설정 화면에서 이동). `taboo_hanja` 테이블을 `/api/taboo-hanja`로 저장하며, 본 서비스는
+  `GET /api/taboo-hanja`로 조회해 이름 탐색 엔진(Worker) 초기화 시 최신 목록을 받아옵니다.
+
+## 운영 관리 (가격 · 상품 구성 · 점검모드)
+
+기존 "설정" 화면을 "운영 관리"로 개명했습니다. `settings` key-value 테이블의 `pricing` 키로 관리합니다.
+
+- **셀프 작명 가격**: 참고용 필드입니다. 본 서비스는 현재 셀프 작명을 무료로 제공하며 실제 결제
+  플로우가 연결돼 있지 않아, 이 값을 바꿔도 사이트 동작에는 아직 영향이 없습니다.
+- **AI 프리미엄 작명 상품 구성**: 소견서 개수·가격 조합을 화면에서 추가/삭제할 수 있습니다
+  (최소 1개 유지). 저장하면 `/api/settings`가 `pricing.tiers` 배열 전체를 갱신합니다.
+- `index.html`의 `_dnApplyPricing()`은 고정된 4개 DOM을 patch하지 않고, 저장된 `tiers` 배열
+  길이에 맞춰 결제 모달의 옵션 목록(`.payment-options-group`)을 매번 새로 그립니다 — 그래서
+  운영자가 구성을 3개나 5개로 바꿔도 실제 결제 화면에 정확히 그만큼 표시됩니다.
 
 ## 다음 단계
 
