@@ -7,9 +7,9 @@ DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2(전�
 
 - Next.js 14 (App Router) + Tailwind + Recharts
 - Supabase Auth(매직 링크) + Postgres(RLS + 매출/AI비용 집계 뷰)
-- 화면: 대시보드(일/월/연 전환 카드 + 매출 추이 12개월 고정·상품 비중·결제수단 그래프) /
-  주문·결제(기간 필터+목록+통합 상세, 환불) / 보고서(목록+상세, 환불·재발급·열기) /
-  회원(목록+상세, 환불) / 전환율 퍼널 / AI 비용 / 한자 DB(검색+수정+금기 한자 관리) /
+- 화면: 대시보드(월/연 전환 + 월·연 선택 + 매출 추이 12개월 고정·상품 비중·결제수단 그래프) /
+  주문·결제(기간 필터+목록+통합 상세, 환불) / 보고서(기간 필터+목록+상세, 환불·재발급·열기) /
+  회원(기간 필터+목록+상세, 환불) / 전환율 퍼널 / AI 비용 / 한자 DB(검색+수정+금기 한자 관리) /
   운영 관리(가격·상품 구성·점검모드)
 - 환불: `/api/refund` Route Handler가 토스페이먼츠 결제취소 API를 서버에서만 호출 (브라우저는 직접 호출 안 함)
 - 설정: `/api/settings`, `/api/taboo-hanja`, `/api/hanja-overrides` Route Handler가 service_role로
@@ -56,16 +56,25 @@ npm run dev
 `revenue_by_payment_method` 뷰를 조회합니다(별도 집계 테이블 없이 `orders`를 `date_trunc`로 그룹핑 —
 뷰이므로 `orders`의 기존 RLS 정책을 그대로 따름).
 
-- 상단 세그먼트로 일/월/연 전환(기본값 월), 가장 최근 구간의 매출·주문·평균 객단가·환불 금액을 카드로 표시
-- 매출 추이 차트는 세그먼트와 무관하게 항상 `revenue_monthly` 최근 12개월 고정 표시(막대: 매출, 라인: 주문건수)
+- 상단 세그먼트로 월/연 전환(기본값 월별·이번달), 가장 최근 구간의 매출·주문·평균 객단가·환불
+  금액을 카드로 표시
+- 월별을 선택하면 `<input type="month">`(`components/MonthPicker.tsx`)로, 연도별을 선택하면
+  드롭다운(`components/YearPicker.tsx`)으로 원하는 특정 월/연도를 직접 골라 그 구간의 통계와
+  전월/전년 대비 증감률을 볼 수 있습니다 — `revenue_monthly`/`revenue_yearly` 뷰를 해당 구간과
+  직전 구간의 `bucket` 값으로 정확히 조회(`.in('bucket', [...])`)해 계산합니다.
+- 매출 추이 차트는 선택한 구간과 무관하게 항상 `revenue_monthly` 최근 12개월 고정 표시(막대: 매출, 라인: 주문건수)
 - 상품 비중은 도넛 차트(AI 프리미엄 작명 / 셀프 작명 2종), 결제수단별 매출은 가로 막대 차트(Recharts)
 - 결제수단은 `orders.payment_method`에 저장 — 토스 실결제는 응답의 `method` 값 그대로, 테스트 모드는 `'test'`
 
-## 주문·결제 기간 필터
+## 목록 화면 기간 필터 (주문·결제 / 보고서 / 회원)
 
-`/orders` 화면 상단에 전체 기간/오늘/이번주/이번달/올해 필터가 있습니다. `lib/format.ts`의
-`getPeriodStartUTC()`가 KST(UTC+9) 기준으로 구간 시작 시각을 계산해 `orders.created_at`에
-`gte` 조건으로 적용합니다(상태 필터와 함께 조합 가능).
+데이터가 쌓일수록 목록이 끝없이 길어지는 걸 막기 위해 세 목록 화면(`/orders`, `/reports`,
+`/members`) 모두 상단에 전체 기간/오늘/이번주/이번달/올해 필터가 있습니다.
+
+- `lib/format.ts`의 `getPeriodStartUTC()`가 KST(UTC+9) 기준으로 구간 시작 시각을 계산해
+  각 화면의 `created_at`에 `gte` 조건으로 적용합니다(주문·결제는 상태 필터와 함께 조합 가능).
+- `PERIOD_OPTIONS`(옵션 목록)·`buildQueryHref()`(쿼리스트링 링크 생성)와
+  `components/PeriodFilterBar.tsx`(필터 pill UI)로 세 화면이 로직·UI를 공유합니다.
 
 ## 배포 (Vercel)
 

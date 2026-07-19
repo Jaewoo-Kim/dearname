@@ -8,20 +8,15 @@ import EmptyState from '@/components/EmptyState';
 import RevenueChart from '@/components/RevenueChart';
 import ProductMixChart from '@/components/ProductMixChart';
 import PaymentMethodChart from '@/components/PaymentMethodChart';
+import MonthPicker from '@/components/MonthPicker';
+import YearPicker from '@/components/YearPicker';
 import type { PaymentMethodRow, ProductMixRow, RevenueRow } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-type RangeKey = 'day' | 'month' | 'year';
-
-const RANGE_CONFIG: Record<RangeKey, { view: string; label: string }> = {
-  day: { view: 'revenue_daily', label: '오늘' },
-  month: { view: 'revenue_monthly', label: '이번달' },
-  year: { view: 'revenue_yearly', label: '올해' },
-};
+type RangeKey = 'month' | 'year';
 
 const RANGE_TABS: Array<{ value: RangeKey; label: string }> = [
-  { value: 'day', label: '일별' },
   { value: 'month', label: '월별' },
   { value: 'year', label: '연도별' },
 ];
@@ -35,24 +30,65 @@ function pctChange(current: number, prev: number): number | null {
   return Math.round(((current - prev) / prev) * 100);
 }
 
-async function getDashboardData(range: RangeKey) {
+function monthKey(bucket: string) {
+  return bucket.slice(0, 7); // 'YYYY-MM'
+}
+function yearKey(bucket: string) {
+  return bucket.slice(0, 4); // 'YYYY'
+}
+
+async function getDashboardData(range: RangeKey, month: string, year: string) {
   const supabase = createClient();
-  const cfg = RANGE_CONFIG[range];
 
-  const [{ data: statDesc }, { data: trendDesc }, { data: productMix }, { data: paymentMix }, { count: memberCount }] =
-    await Promise.all([
-      supabase.from(cfg.view).select('*').order('bucket', { ascending: false }).limit(2),
-      supabase.from('revenue_monthly').select('*').order('bucket', { ascending: false }).limit(TREND_MONTHS),
-      supabase.from('revenue_by_product').select('*'),
-      supabase.from('revenue_by_payment_method').select('*'),
-      supabase.from('members').select('*', { count: 'exact', head: true }),
-    ]);
+  const [my, mm] = month.split('-').map(Number);
+  const curMonthBucket = new Date(Date.UTC(my, mm - 1, 1)).toISOString();
+  const prevMonthDate = new Date(Date.UTC(my, mm - 2, 1));
+  const prevMonthBucket = prevMonthDate.toISOString();
+  const prevMonthKey = `${prevMonthDate.getUTCFullYear()}-${String(prevMonthDate.getUTCMonth() + 1).padStart(2, '0')}`;
 
-  const stats = ((statDesc as unknown as RevenueRow[]) || []).slice().reverse();
-  const latest = stats[stats.length - 1];
-  const prev = stats[stats.length - 2];
+  const yNum = Number(year);
+  const curYearBucket = new Date(Date.UTC(yNum, 0, 1)).toISOString();
+  const prevYearBucket = new Date(Date.UTC(yNum - 1, 0, 1)).toISOString();
+  const prevYearKey = String(yNum - 1);
+
+  const [
+    { data: monthRows },
+    { data: yearRows },
+    { data: yearOptionRows },
+    { data: trendDesc },
+    { data: productMix },
+    { data: paymentMix },
+    { count: memberCount },
+  ] = await Promise.all([
+    supabase.from('revenue_monthly').select('*').in('bucket', [curMonthBucket, prevMonthBucket]),
+    supabase.from('revenue_yearly').select('*').in('bucket', [curYearBucket, prevYearBucket]),
+    supabase.from('revenue_yearly').select('bucket').order('bucket', { ascending: false }).limit(20),
+    supabase.from('revenue_monthly').select('*').order('bucket', { ascending: false }).limit(TREND_MONTHS),
+    supabase.from('revenue_by_product').select('*'),
+    supabase.from('revenue_by_payment_method').select('*'),
+    supabase.from('members').select('*', { count: 'exact', head: true }),
+  ]);
+
+  const monthList = (monthRows as unknown as RevenueRow[]) || [];
+  const yearList = (yearRows as unknown as RevenueRow[]) || [];
+
+  const latest =
+    range === 'month'
+      ? monthList.find((r) => monthKey(r.bucket) === month)
+      : yearList.find((r) => yearKey(r.bucket) === year);
+  const prev =
+    range === 'month'
+      ? monthList.find((r) => monthKey(r.bucket) === prevMonthKey)
+      : yearList.find((r) => yearKey(r.bucket) === prevYearKey);
 
   const trend = ((trendDesc as unknown as RevenueRow[]) || []).slice().reverse();
+
+  const yearOptionsSet = new Set(
+    ((yearOptionRows as unknown as Array<{ bucket: string }>) || []).map((r) => yearKey(r.bucket))
+  );
+  yearOptionsSet.add(String(new Date().getUTCFullYear()));
+  yearOptionsSet.add(year);
+  const availableYears = Array.from(yearOptionsSet).sort((a, b) => Number(b) - Number(a));
 
   return {
     trend,
@@ -61,16 +97,32 @@ async function getDashboardData(range: RangeKey) {
     productMix: (productMix as unknown as ProductMixRow[]) || [],
     paymentMix: (paymentMix as unknown as PaymentMethodRow[]) || [],
     memberCount: memberCount || 0,
+    availableYears,
   };
 }
 
-export default async function DashboardPage({ searchParams }: { searchParams: { range?: string } }) {
-  const range: RangeKey = (['day', 'month', 'year'] as string[]).includes(searchParams.range || '')
-    ? (searchParams.range as RangeKey)
-    : 'month';
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: { range?: string; month?: string; year?: string };
+}) {
+  const range: RangeKey = searchParams.range === 'year' ? 'year' : 'month';
 
-  const { trend, latest, prev, productMix, paymentMix, memberCount } = await getDashboardData(range);
-  const cfg = RANGE_CONFIG[range];
+  const now = new Date();
+  const defaultMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+  const defaultYear = String(now.getUTCFullYear());
+
+  const month = /^\d{4}-\d{2}$/.test(searchParams.month || '') ? (searchParams.month as string) : defaultMonth;
+  const year = /^\d{4}$/.test(searchParams.year || '') ? (searchParams.year as string) : defaultYear;
+
+  const { trend, latest, prev, productMix, paymentMix, memberCount, availableYears } = await getDashboardData(
+    range,
+    month,
+    year
+  );
+
+  const [my, mm] = month.split('-');
+  const rangeLabel = range === 'month' ? `${my}년 ${Number(mm)}월` : `${year}년`;
 
   const avgOrderValue = latest && latest.order_count > 0 ? Math.round(latest.revenue / latest.order_count) : 0;
   const prevAvgOrderValue = prev && prev.order_count > 0 ? Math.round(prev.revenue / prev.order_count) : 0;
@@ -90,30 +142,39 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       <PageHeader
         title="대시보드"
         description="이전 구간 대비 변화율과 함께 최근 매출 현황을 한눈에 봅니다."
-        actions={RANGE_TABS.map((tab) => (
-          <Link
-            key={tab.value}
-            href={`/dashboard?range=${tab.value}`}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-              range === tab.value
-                ? 'bg-brand-600 text-white'
-                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            {tab.label}
-          </Link>
-        ))}
+        actions={
+          <>
+            {RANGE_TABS.map((tab) => (
+              <Link
+                key={tab.value}
+                href={`/dashboard?range=${tab.value}`}
+                className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                  range === tab.value
+                    ? 'bg-brand-600 text-white'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {tab.label}
+              </Link>
+            ))}
+            {range === 'month' ? (
+              <MonthPicker value={month} />
+            ) : (
+              <YearPicker value={year} options={availableYears} />
+            )}
+          </>
+        }
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
-          label={`${cfg.label} 매출`}
+          label={`${rangeLabel} 매출`}
           value={formatKRW(latest?.revenue || 0)}
           icon={Wallet}
           trend={revenueTrend != null ? { value: revenueTrend, label: '이전 구간 대비' } : undefined}
         />
         <StatCard
-          label={`${cfg.label} 주문`}
+          label={`${rangeLabel} 주문`}
           value={`${(latest?.order_count || 0).toLocaleString('ko-KR')}건`}
           icon={ReceiptText}
           accent="slate"
@@ -127,7 +188,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
           trend={avgTrend != null ? { value: avgTrend, label: '이전 구간 대비' } : undefined}
         />
         <StatCard
-          label={`${cfg.label} 환불`}
+          label={`${rangeLabel} 환불`}
           value={formatKRW(latest?.refund_amount || 0)}
           icon={RotateCcw}
           accent="red"

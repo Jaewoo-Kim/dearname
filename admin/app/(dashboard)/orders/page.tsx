@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import { formatDate, formatKRW, getPeriodStartUTC, maskName, PRODUCT_LABEL } from '@/lib/format';
+import { buildQueryHref, formatDate, formatKRW, getPeriodStartUTC, maskName, PRODUCT_LABEL } from '@/lib/format';
 import PageHeader from '@/components/PageHeader';
+import PeriodFilterBar from '@/components/PeriodFilterBar';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import type { Order } from '@/lib/types';
@@ -16,22 +17,6 @@ const STATUS_TABS = [
   { value: 'refunded', label: '환불' },
   { value: 'failed', label: '실패' },
 ];
-const PERIOD_OPTIONS = [
-  { value: '', label: '전체 기간' },
-  { value: 'today', label: '오늘' },
-  { value: 'week', label: '이번주' },
-  { value: 'month', label: '이번달' },
-  { value: 'year', label: '올해' },
-];
-
-function buildHref(base: Record<string, string>, overrides: Record<string, string>) {
-  const params = new URLSearchParams({ ...base, ...overrides });
-  for (const [k, v] of Array.from(params.entries())) {
-    if (!v) params.delete(k);
-  }
-  const qs = params.toString();
-  return qs ? `/orders?${qs}` : '/orders';
-}
 
 export default async function OrdersPage({
   searchParams,
@@ -67,7 +52,7 @@ export default async function OrdersPage({
         actions={STATUS_TABS.map((tab) => (
           <Link
             key={tab.value}
-            href={buildHref(baseParams, { status: tab.value, page: '' })}
+            href={buildQueryHref('/orders', { ...baseParams, status: tab.value, page: '' })}
             className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
               status === tab.value
                 ? 'bg-brand-600 text-white'
@@ -79,21 +64,7 @@ export default async function OrdersPage({
         ))}
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        {PERIOD_OPTIONS.map((opt) => (
-          <Link
-            key={opt.value}
-            href={buildHref(baseParams, { period: opt.value, page: '' })}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              period === opt.value
-                ? 'bg-slate-800 text-white'
-                : 'border border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            {opt.label}
-          </Link>
-        ))}
-      </div>
+      <PeriodFilterBar basePath="/orders" baseParams={baseParams} period={period} />
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
         {error ? (
@@ -144,11 +115,11 @@ export default async function OrdersPage({
         <span>총 {(count || 0).toLocaleString('ko-KR')}건</span>
         <div className="flex gap-3">
           {page > 1 && (
-            <Link className="hover:underline" href={buildHref(baseParams, { page: String(page - 1) })}>이전</Link>
+            <Link className="hover:underline" href={buildQueryHref('/orders', { ...baseParams, page: String(page - 1) })}>이전</Link>
           )}
           <span>{page} / {totalPages}</span>
           {page < totalPages && (
-            <Link className="hover:underline" href={buildHref(baseParams, { page: String(page + 1) })}>다음</Link>
+            <Link className="hover:underline" href={buildQueryHref('/orders', { ...baseParams, page: String(page + 1) })}>다음</Link>
           )}
         </div>
       </div>
