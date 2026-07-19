@@ -1165,6 +1165,8 @@
             /* report-visual 패딩 (AI 소견서 미리보기 카드) */
             .report-visual { padding: 28px 20px; }
             .report-visual h4 { font-size: 1.2rem; }
+            /* PREMIUM REPORT 배지가 절대좌표라 좁은 화면에서 제목과 겹침 → 제목 위에 쌓이도록 변경 */
+            .badge-premium { position: static; display: inline-block; margin-bottom: 12px; }
             .report-narrative { padding: 16px; margin: 20px 0; font-size: 0.95rem; }
             /* form-card 패딩 (셀프 작명 폼) */
             .form-card { padding: 28px 16px; border-radius: var(--radius-lg); }
@@ -2128,7 +2130,9 @@
         .cfn-item:hover::after { background: var(--text-muted); transform: scale(1.3); }
         .cfn-item.cfn-active::after { background: var(--gold-premium); width: 7px; height: 14px; border-radius: 4px; }
         @media (max-width: 768px) {
-            #chapter-float-nav { right: 2px; }
+            /* 좁은 화면에서는 고정 위치 챕터 네비게이터가 본문 텍스트와 겹쳐서
+               아예 숨긴다(모바일에서는 스크롤로 충분히 이동 가능) */
+            #chapter-float-nav { display: none !important; }
         }
         /* 빈 스토리 블록 숨김 */
         .ai-story-block:empty { display: none !important; }
