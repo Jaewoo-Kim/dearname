@@ -124,6 +124,13 @@ export default async function DashboardPage({
   const [my, mm] = month.split('-');
   const rangeLabel = range === 'month' ? `${my}년 ${Number(mm)}월` : `${year}년`;
 
+  // 월별↔연도별 탭 전환 시 보고 있던 구간을 최대한 이어가도록 링크를 계산
+  // (연도별에서 월별로 가면 그 연도의 12월로, 월별에서 연도별로 가면 그 달의 연도로)
+  const monthTabHref =
+    range === 'year' ? `/dashboard?range=month&month=${year === defaultYear ? defaultMonth : `${year}-12`}` : `/dashboard?range=month&month=${month}`;
+  const yearTabHref = range === 'month' ? `/dashboard?range=year&year=${my}` : `/dashboard?range=year&year=${year}`;
+  const rangeTabHref: Record<RangeKey, string> = { month: monthTabHref, year: yearTabHref };
+
   const avgOrderValue = latest && latest.order_count > 0 ? Math.round(latest.revenue / latest.order_count) : 0;
   const prevAvgOrderValue = prev && prev.order_count > 0 ? Math.round(prev.revenue / prev.order_count) : 0;
 
@@ -147,7 +154,7 @@ export default async function DashboardPage({
             {RANGE_TABS.map((tab) => (
               <Link
                 key={tab.value}
-                href={`/dashboard?range=${tab.value}`}
+                href={rangeTabHref[tab.value]}
                 className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                   range === tab.value
                     ? 'bg-brand-600 text-white'
