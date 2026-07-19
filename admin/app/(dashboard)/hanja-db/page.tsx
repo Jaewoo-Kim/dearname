@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import PageHeader from '@/components/PageHeader';
 import HanjaDbSearch from '@/components/HanjaDbSearch';
+import TabooHanjaForm from '@/components/TabooHanjaForm';
 import EmptyState from '@/components/EmptyState';
 import { formatDate } from '@/lib/format';
+import type { TabooHanjaRow } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,21 +18,28 @@ interface HanjaOverrideRow {
   updated_by: string | null;
 }
 
-async function getOverrides() {
+async function getPageData() {
   const supabase = createClient();
-  const { data } = await supabase.from('hanja_overrides').select('*').order('updated_at', { ascending: false });
-  return (data as HanjaOverrideRow[] | null) || [];
+  const [{ data: overridesData }, { data: tabooData }] = await Promise.all([
+    supabase.from('hanja_overrides').select('*').order('updated_at', { ascending: false }),
+    supabase.from('taboo_hanja').select('hanja, reason').order('hanja', { ascending: true }),
+  ]);
+
+  return {
+    overrides: (overridesData as HanjaOverrideRow[] | null) || [],
+    tabooHanja: (tabooData as TabooHanjaRow[] | null) || [],
+  };
 }
 
 export default async function HanjaDbPage() {
-  const overrides = await getOverrides();
+  const { overrides, tabooHanja } = await getPageData();
   const siteUrl = process.env.NEXT_PUBLIC_DEARNAME_SITE_URL || null;
 
   return (
     <div className="max-w-3xl">
       <PageHeader
-        title="한자 DB 수정"
-        description="한자 검색 후 뜻·획수·자원오행을 정정할 수 있습니다. 저장하면 이름 탐색 결과에 바로 반영됩니다."
+        title="한자 DB"
+        description="한자 검색·정정과 금기 한자 관리를 한 곳에서 합니다. 저장하면 이름 탐색 결과에 바로 반영됩니다."
       />
 
       <div className="space-y-4">
@@ -67,6 +76,8 @@ export default async function HanjaDbPage() {
             </table>
           )}
         </section>
+
+        <TabooHanjaForm initial={tabooHanja} />
       </div>
     </div>
   );

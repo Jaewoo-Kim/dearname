@@ -216,9 +216,14 @@ create policy "운영자 조회" on settings for select using (auth.role() = 'au
 
 -- 기본값 시드 — 이미 있으면 건드리지 않음(재실행 안전)
 insert into settings (key, value) values
-  ('pricing', '{"tiers":[{"count":1,"price":30000},{"count":2,"price":50000},{"count":3,"price":70000},{"count":5,"price":100000}]}'::jsonb),
+  ('pricing', '{"self":0,"tiers":[{"count":1,"price":30000},{"count":2,"price":50000},{"count":3,"price":70000},{"count":5,"price":100000}]}'::jsonb),
   ('maintenance', '{"enabled":false,"message":""}'::jsonb)
 on conflict (key) do nothing;
+
+-- 이미 pricing을 만들어 둔 기존 환경에는 self 키만 안전하게 보강(재실행 안전)
+update settings
+set value = value || '{"self": 0}'::jsonb
+where key = 'pricing' and not (value ? 'self');
 
 -- ── taboo_hanja — 금기 한자 관리 (Phase 3) ────────────────────────────
 -- 지금까지 lib/name-search-worker.js에 하드코딩돼 있던 "뜻이 불길한 한자"

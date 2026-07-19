@@ -10,7 +10,9 @@ type SettingKey = (typeof ALLOWED_KEYS)[number];
 
 function isValidPricing(value: unknown): boolean {
   if (!value || typeof value !== 'object') return false;
-  const tiers = (value as { tiers?: unknown }).tiers;
+  const v = value as { self?: unknown; tiers?: unknown };
+  if (!Number.isFinite(v.self) || (v.self as number) < 0) return false;
+  const tiers = v.tiers;
   if (!Array.isArray(tiers) || tiers.length === 0) return false;
   return tiers.every(
     (t) =>

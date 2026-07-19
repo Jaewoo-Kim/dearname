@@ -52,7 +52,10 @@ GEMINI_API_KEY  = os.environ.get('GEMINI_API_KEY', '')
 CLIENT          = anthropic.Anthropic(api_key=API_KEY) if API_KEY else None
 
 # 어드민에서 값을 바꾸기 전까지 사용할 기본값 (admin_site_plan.md Phase 3 — 가격/점검모드)
+# self: 셀프 작명 가격(현재 0=무료. 실제 과금은 아직 본 서비스에 연결돼 있지 않음 — 어드민에서
+# 값만 관리 가능하고, 셀프 작명 결제 플로우 자체를 추가하려면 별도 작업 필요)
 DEFAULT_PRICING = {
+    'self': 0,
     'tiers': [
         {'count': 1, 'price': 30000},
         {'count': 2, 'price': 50000},
