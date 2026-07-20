@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/serviceRole';
 import { isAllowedEmail } from '@/lib/authz';
+import { fetchRole } from '@/lib/adminUser';
+import { canWrite } from '@/lib/roles';
 
 // 환불 처리 (admin_site_plan.md 3-B / STEP 5)
 // 브라우저는 절대 토스 API를 직접 호출하지 않는다 — 이 Route Handler(서버)가 대신 호출한다.
@@ -12,6 +14,9 @@ export async function POST(request: Request) {
 
   if (!isAllowedEmail(user?.email)) {
     return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  }
+  if (!canWrite(await fetchRole(supabase, user!.email!))) {
+    return NextResponse.json({ error: '조회 권한만 있어 환불을 처리할 수 없습니다.' }, { status: 403 });
   }
 
   const body = await request.json().catch(() => ({}));

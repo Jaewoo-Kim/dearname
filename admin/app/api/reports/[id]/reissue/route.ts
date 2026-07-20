@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/serviceRole';
 import { isAllowedEmail } from '@/lib/authz';
+import { fetchRole } from '@/lib/adminUser';
+import { canWrite } from '@/lib/roles';
 
 // 보고서 "재발급" — 링크를 복사해 운영자가 직접 전달하던 기존 방식 대신, 고객이
 // 로그인 상태에서 결제 없이 새 프리미엄 보고서를 1회 더 생성할 수 있는 "무료 생성권"을
@@ -12,6 +14,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   if (!isAllowedEmail(user?.email)) {
     return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  }
+  if (!canWrite(await fetchRole(supabase, user!.email!))) {
+    return NextResponse.json({ error: '조회 권한만 있어 생성권을 부여할 수 없습니다.' }, { status: 403 });
   }
 
   const db = createServiceRoleClient();

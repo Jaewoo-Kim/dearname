@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { fetchRole } from '@/lib/adminUser';
 import PageHeader from '@/components/PageHeader';
 import HanjaDbSearch from '@/components/HanjaDbSearch';
 import TabooHanjaForm from '@/components/TabooHanjaForm';
@@ -32,6 +33,10 @@ async function getPageData() {
 }
 
 export default async function HanjaDbPage() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isViewer = (await fetchRole(supabase, user?.email || '')) === 'viewer';
+
   const { overrides, tabooHanja } = await getPageData();
   const siteUrl = process.env.NEXT_PUBLIC_DEARNAME_SITE_URL || null;
 
@@ -43,7 +48,7 @@ export default async function HanjaDbPage() {
       />
 
       <div className="space-y-4">
-        <HanjaDbSearch siteUrl={siteUrl} />
+        <HanjaDbSearch siteUrl={siteUrl} readOnly={isViewer} />
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
           <h2 className="text-sm font-semibold text-slate-500">현재 적용 중인 정정 내역</h2>
@@ -79,7 +84,7 @@ export default async function HanjaDbPage() {
           )}
         </section>
 
-        <TabooHanjaForm initial={tabooHanja} />
+        <TabooHanjaForm initial={tabooHanja} readOnly={isViewer} />
       </div>
     </div>
   );

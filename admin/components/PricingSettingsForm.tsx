@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import type { PricingSettings } from '@/lib/types';
+import type { AdminRole } from '@/lib/roles';
 
 interface TierRow {
   id: string;
@@ -16,14 +17,15 @@ function withIds(tiers: PricingSettings['tiers']): TierRow[] {
 
 const DEFAULT_PROMOTION = { enabled: false, percent: 0, label: '' };
 
-export default function PricingSettingsForm({ initial }: { initial: PricingSettings }) {
+export default function PricingSettingsForm({ initial, role }: { initial: PricingSettings; role: AdminRole }) {
   const [selfPrice, setSelfPrice] = useState(initial.self ?? 0);
   const [tiers, setTiers] = useState<TierRow[]>(withIds(initial.tiers));
   const [promoEnabled, setPromoEnabled] = useState(initial.promotion?.enabled ?? DEFAULT_PROMOTION.enabled);
   const [promoPercent, setPromoPercent] = useState(initial.promotion?.percent ?? DEFAULT_PROMOTION.percent);
   const [promoLabel, setPromoLabel] = useState(initial.promotion?.label ?? DEFAULT_PROMOTION.label);
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'pending' | 'error'>('idle');
   const [error, setError] = useState('');
+  const readOnly = role === 'viewer';
 
   function updateTier(id: string, field: 'count' | 'price', value: number) {
     setStatus('idle');
@@ -75,7 +77,7 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
         setError(data.error || '저장에 실패했습니다.');
         return;
       }
-      setStatus('saved');
+      setStatus(data.status === 'pending' ? 'pending' : 'saved');
     } catch {
       setStatus('error');
       setError('네트워크 오류로 저장하지 못했습니다.');
@@ -99,11 +101,12 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
             min={0}
             step={1000}
             value={selfPrice}
+            disabled={readOnly}
             onChange={(e) => {
               setStatus('idle');
               setSelfPrice(parseInt(e.target.value || '0', 10));
             }}
-            className="w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            className="w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:bg-slate-50"
           />
           <span className="text-sm text-slate-400">원</span>
         </div>
@@ -118,8 +121,9 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
                 type="number"
                 min={1}
                 value={tier.count}
+                disabled={readOnly}
                 onChange={(e) => updateTier(tier.id, 'count', parseInt(e.target.value || '1', 10))}
-                className="w-16 rounded-lg border border-slate-300 px-2 py-2 text-center text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                className="w-16 rounded-lg border border-slate-300 px-2 py-2 text-center text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:bg-slate-50"
               />
               <span className="shrink-0 text-sm text-slate-500">개 —</span>
               <input
@@ -127,30 +131,35 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
                 min={0}
                 step={1000}
                 value={tier.price}
+                disabled={readOnly}
                 onChange={(e) => updateTier(tier.id, 'price', parseInt(e.target.value || '0', 10))}
-                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:bg-slate-50"
               />
               <span className="shrink-0 text-sm text-slate-400">원</span>
-              <button
-                type="button"
-                onClick={() => removeTier(tier.id)}
-                disabled={tiers.length <= 1}
-                title={tiers.length <= 1 ? '최소 1개는 있어야 합니다' : '삭제'}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-30 disabled:hover:bg-transparent"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={() => removeTier(tier.id)}
+                  disabled={tiers.length <= 1}
+                  title={tiers.length <= 1 ? '최소 1개는 있어야 합니다' : '삭제'}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
             </div>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={addTier}
-          className="mt-3 flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-800"
-        >
-          <Plus className="h-4 w-4" />
-          구성 추가
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={addTier}
+            className="mt-3 flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-800"
+          >
+            <Plus className="h-4 w-4" />
+            구성 추가
+          </button>
+        )}
       </div>
 
       <div className="mt-5 border-t border-slate-100 pt-4">
@@ -165,11 +174,12 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
             type="button"
             role="switch"
             aria-checked={promoEnabled}
+            disabled={readOnly}
             onClick={() => {
               setStatus('idle');
               setPromoEnabled((v) => !v);
             }}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${promoEnabled ? 'bg-brand-600' : 'bg-slate-200'}`}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${promoEnabled ? 'bg-brand-600' : 'bg-slate-200'}`}
           >
             <span
               className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
@@ -186,39 +196,50 @@ export default function PricingSettingsForm({ initial }: { initial: PricingSetti
               min={1}
               max={90}
               value={promoPercent}
+              disabled={readOnly}
               onChange={(e) => {
                 setStatus('idle');
                 setPromoPercent(parseInt(e.target.value || '0', 10));
               }}
-              className="w-20 rounded-lg border border-slate-300 px-2 py-2 text-center text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              className="w-20 rounded-lg border border-slate-300 px-2 py-2 text-center text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:bg-slate-50"
             />
             <span className="shrink-0 text-sm text-slate-500">% 할인 —</span>
             <input
               type="text"
               value={promoLabel}
+              disabled={readOnly}
               onChange={(e) => {
                 setStatus('idle');
                 setPromoLabel(e.target.value);
               }}
               placeholder="프로모션 이름(선택, 예: 여름 프로모션)"
-              className="min-w-[180px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              className="min-w-[180px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:bg-slate-50"
             />
           </div>
         )}
       </div>
 
       <div className="mt-5 flex items-center gap-3 border-t border-slate-100 pt-4">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={status === 'saving' || tiers.length === 0}
-          className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          {status === 'saving' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          저장
-        </button>
-        {status === 'saved' && <span className="text-sm text-emerald-600">저장되었습니다.</span>}
-        {status === 'error' && <span className="text-sm text-red-600">{error}</span>}
+        {readOnly ? (
+          <span className="text-sm text-slate-400">조회 권한만 있어 가격 설정을 변경할 수 없습니다.</span>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={status === 'saving' || tiers.length === 0}
+              className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+            >
+              {status === 'saving' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              저장
+            </button>
+            {status === 'saved' && <span className="text-sm text-emerald-600">저장되었습니다.</span>}
+            {status === 'pending' && (
+              <span className="text-sm text-amber-600">변경 요청이 접수되었습니다. 어드민 승인 후 적용됩니다.</span>
+            )}
+            {status === 'error' && <span className="text-sm text-red-600">{error}</span>}
+          </>
+        )}
       </div>
     </section>
   );

@@ -300,3 +300,43 @@ create index if not exists idx_inquiries_status on inquiries(status);
 alter table inquiries enable row level security;
 drop policy if exists "운영자 조회" on inquiries;
 create policy "운영자 조회" on inquiries for select using (auth.role() = 'authenticated');
+
+-- ── admin_users — 어드민 계정 등급(역할) 관리 ─────────────────────────
+-- 로그인 자체는 여전히 Supabase 매직링크 + ADMIN_ALLOWED_EMAILS(Vercel 환경변수) 허용목록으로
+-- 통제된다. 이 테이블은 "로그인된 계정이 무엇을 할 수 있는가"(어드민/편집자/뷰어)를 결정한다.
+-- 최초 로그인 시 app/auth/callback/route.ts가 자동으로 행을 만든다 — 테이블이 비어있으면
+-- 그 첫 계정이 admin이 되고(부트스트랩), 이후 신규 계정은 안전하게 viewer로 시작한다.
+create table if not exists admin_users (
+  id          uuid primary key default gen_random_uuid(),
+  email       text unique not null,
+  role        text not null default 'viewer',  -- 'admin' / 'editor' / 'viewer'
+  created_at  timestamptz not null default now(),
+  created_by  text,
+  updated_at  timestamptz not null default now(),
+  updated_by  text
+);
+
+alter table admin_users enable row level security;
+drop policy if exists "운영자 조회" on admin_users;
+create policy "운영자 조회" on admin_users for select using (auth.role() = 'authenticated');
+
+-- ── pending_settings_changes — 운영 관리(가격/점검모드) 변경 승인 대기열 ─
+-- 편집자가 가격·점검모드를 변경하면 바로 반영되지 않고 여기에 대기 요청으로 쌓인다.
+-- 어드민만 /api/settings/approvals에서 승인(→ settings 테이블에 실제 반영)하거나 반려할 수 있다.
+create table if not exists pending_settings_changes (
+  id               uuid primary key default gen_random_uuid(),
+  created_at       timestamptz not null default now(),
+  key              text not null,       -- 'pricing' / 'maintenance'
+  requested_value  jsonb not null,
+  previous_value   jsonb,               -- 요청 당시 적용 중이던 값(승인 화면 diff 표시용 스냅샷)
+  requested_by     text not null,
+  status           text not null default 'pending',  -- 'pending' / 'approved' / 'rejected'
+  reviewed_by      text,
+  reviewed_at      timestamptz,
+  reject_reason    text
+);
+create index if not exists idx_pending_settings_changes_status on pending_settings_changes(status);
+
+alter table pending_settings_changes enable row level security;
+drop policy if exists "운영자 조회" on pending_settings_changes;
+create policy "운영자 조회" on pending_settings_changes for select using (auth.role() = 'authenticated');

@@ -16,7 +16,7 @@ function keyOf(r: { kr: string; h: string }) {
   return `${r.kr}-${r.h}`;
 }
 
-export default function HanjaDbSearch({ siteUrl }: { siteUrl: string | null }) {
+export default function HanjaDbSearch({ siteUrl, readOnly }: { siteUrl: string | null; readOnly?: boolean }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<HanjaSearchResult[]>([]);
   const [edits, setEdits] = useState<Record<string, RowState>>({});
@@ -181,52 +181,59 @@ export default function HanjaDbSearch({ siteUrl }: { siteUrl: string | null }) {
                       )}
                     </div>
 
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <input
-                        type="text"
-                        value={edit.m}
-                        onChange={(e) => updateEdit(key, 'm', e.target.value)}
-                        placeholder="뜻"
-                        className="min-w-[8rem] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-                      />
-                      <input
-                        type="number"
-                        value={edit.s}
-                        onChange={(e) => updateEdit(key, 's', e.target.value)}
-                        placeholder="획수"
-                        className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-                      />
-                      <select
-                        value={edit.o}
-                        onChange={(e) => updateEdit(key, 'o', e.target.value)}
-                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-                      >
-                        {OHENG_OPTIONS.map((o) => (
-                          <option key={o} value={o}>{o}</option>
-                        ))}
-                      </select>
+                    {readOnly ? (
+                      <p className="mt-3 text-sm text-slate-600">
+                        {r.m || '-'} · {r.s ?? '-'}획 · {r.o || '-'}{' '}
+                        <span className="text-xs text-slate-400">(조회 권한만 있어 수정할 수 없습니다)</span>
+                      </p>
+                    ) : (
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <input
+                          type="text"
+                          value={edit.m}
+                          onChange={(e) => updateEdit(key, 'm', e.target.value)}
+                          placeholder="뜻"
+                          className="min-w-[8rem] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                        />
+                        <input
+                          type="number"
+                          value={edit.s}
+                          onChange={(e) => updateEdit(key, 's', e.target.value)}
+                          placeholder="획수"
+                          className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                        />
+                        <select
+                          value={edit.o}
+                          onChange={(e) => updateEdit(key, 'o', e.target.value)}
+                          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                        >
+                          {OHENG_OPTIONS.map((o) => (
+                            <option key={o} value={o}>{o}</option>
+                          ))}
+                        </select>
 
-                      <button
-                        type="button"
-                        onClick={() => handleSave(r)}
-                        disabled={busy}
-                        className="flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-                      >
-                        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                        저장
-                      </button>
-                      {r.overridden && (
                         <button
                           type="button"
-                          onClick={() => handleRevert(r)}
+                          onClick={() => handleSave(r)}
                           disabled={busy}
-                          className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                          className="flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
                         >
-                          <RotateCcw className="h-4 w-4" />
-                          원복
+                          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                          저장
                         </button>
-                      )}
-                    </div>
+                        {r.overridden && (
+                          <button
+                            type="button"
+                            onClick={() => handleRevert(r)}
+                            disabled={busy}
+                            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                            원복
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <p className="mt-1 text-xs text-slate-400">
                       원본값: {r.baseM || '-'} · {r.baseS ?? '-'}획 · {r.baseO || '-'}
                     </p>

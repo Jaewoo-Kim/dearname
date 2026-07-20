@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { fetchRole } from '@/lib/adminUser';
 import { formatDate, formatKRW, maskContact, maskName, PRODUCT_LABEL } from '@/lib/format';
 import StatusBadge from '@/components/StatusBadge';
 import RefundButton from '@/components/RefundButton';
@@ -12,6 +13,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function MemberDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isViewer = (await fetchRole(supabase, user?.email || '')) === 'viewer';
 
   const { data: member } = await supabase
     .from('members')
@@ -84,7 +87,13 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
                     <td className="whitespace-nowrap py-2 font-medium tabular-nums text-slate-900">{formatKRW(o.amount)}</td>
                     <td className="whitespace-nowrap py-2"><StatusBadge status={o.status} /></td>
                     <td className="whitespace-nowrap py-2 text-right">
-                      {o.status === 'paid' && <RefundButton orderId={o.id} />}
+                      {o.status === 'paid' && (
+                        <RefundButton
+                          orderId={o.id}
+                          disabled={isViewer}
+                          disabledReason={isViewer ? '조회 권한만 있어 환불할 수 없습니다' : undefined}
+                        />
+                      )}
                     </td>
                   </tr>
                 ))}

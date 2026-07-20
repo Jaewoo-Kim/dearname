@@ -4,11 +4,20 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Send } from 'lucide-react';
 
-export default function InquiryReplyForm({ inquiryId }: { inquiryId: string }) {
+export default function InquiryReplyForm({ inquiryId, readOnly }: { inquiryId: string; readOnly?: boolean }) {
   const router = useRouter();
   const [reply, setReply] = useState('');
   const [status, setStatus] = useState<'idle' | 'saving' | 'error'>('idle');
   const [error, setError] = useState('');
+
+  if (readOnly) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+        <h2 className="text-sm font-semibold text-slate-500">답변하기</h2>
+        <p className="mt-2 text-sm text-slate-400">조회 권한만 있어 답변을 등록할 수 없습니다.</p>
+      </div>
+    );
+  }
 
   async function handleSubmit() {
     if (!reply.trim()) {

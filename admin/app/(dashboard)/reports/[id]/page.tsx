@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { fetchRole } from '@/lib/adminUser';
 import { formatDate } from '@/lib/format';
 import ReissueCreditButton from '@/components/ReissueCreditButton';
 import BackLink from '@/components/BackLink';
@@ -24,6 +25,8 @@ interface ReportJson {
 
 export default async function ReportDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isViewer = (await fetchRole(supabase, user?.email || '')) === 'viewer';
 
   const { data } = await supabase
     .from('reports')
@@ -87,7 +90,11 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
           </button>
         )}
 
-        <ReissueCreditButton reportId={report.id} />
+        <ReissueCreditButton
+          reportId={report.id}
+          disabled={isViewer}
+          disabledReason={isViewer ? '조회 권한만 있어 생성권을 부여할 수 없습니다' : undefined}
+        />
       </div>
 
       {report.special_request && (
