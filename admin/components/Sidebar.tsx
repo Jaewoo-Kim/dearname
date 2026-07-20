@@ -8,6 +8,7 @@ import {
   Bot,
   Filter,
   FileText,
+  History,
   LanguagesIcon,
   LogOut,
   Menu,
@@ -32,11 +33,30 @@ const NAV_ITEMS = [
   { href: '/settings', label: '운영 관리', icon: Settings },
 ];
 
-export default function Sidebar({ email, role }: { email: string; role: AdminRole }) {
+const ADMIN_ONLY_NAV_ITEMS = [
+  { href: '/team', label: '팀 관리', icon: ShieldCheck },
+  { href: '/audit-logs', label: '감사 로그', icon: History },
+];
+
+export default function Sidebar({
+  email,
+  role,
+  pendingInquiryCount = 0,
+  pendingApprovalCount = 0,
+}: {
+  email: string;
+  role: AdminRole;
+  pendingInquiryCount?: number;
+  pendingApprovalCount?: number;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const navItems = role === 'admin' ? [...NAV_ITEMS, { href: '/team', label: '팀 관리', icon: ShieldCheck }] : NAV_ITEMS;
+  const navItems = role === 'admin' ? [...NAV_ITEMS, ...ADMIN_ONLY_NAV_ITEMS] : NAV_ITEMS;
+  const badgeCount: Record<string, number> = {
+    '/inquiries': pendingInquiryCount,
+    '/settings': pendingApprovalCount,
+  };
 
   return (
     <>
@@ -84,6 +104,7 @@ export default function Sidebar({ email, role }: { email: string; role: AdminRol
             {navItems.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               const Icon = item.icon;
+              const count = badgeCount[item.href] || 0;
               return (
                 <Link
                   key={item.href}
@@ -99,7 +120,12 @@ export default function Sidebar({ email, role }: { email: string; role: AdminRol
                     className={`h-4 w-4 shrink-0 ${active ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'}`}
                     strokeWidth={2}
                   />
-                  {item.label}
+                  <span className="flex-1">{item.label}</span>
+                  {count > 0 && (
+                    <span className="flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                      {count > 99 ? '99+' : count}
+                    </span>
+                  )}
                 </Link>
               );
             })}

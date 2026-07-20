@@ -86,6 +86,17 @@ export interface MaintenanceSettings {
   message: string;
 }
 
+// audit_logs 테이블
+export interface AuditLogRow {
+  id: string;
+  created_at: string;
+  actor: string;
+  action: string;
+  target_type: string | null;
+  target_id: string | null;
+  detail: unknown;
+}
+
 // 고객문의 — inquiries 테이블
 export interface InquiryRow {
   id: string;
