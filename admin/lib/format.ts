@@ -58,6 +58,12 @@ export const PERIOD_OPTIONS = [
   { value: 'year', label: '올해' },
 ];
 
+// 검색어를 PostgREST .or() 필터 문법에 안전하게 넣기 위한 정리 — 콤마/괄호는
+// or() 문법에서 조건 구분자·그룹핑으로 쓰이므로 검색어에 섞이면 필터가 깨질 수 있다.
+export function sanitizeSearchTerm(q: string): string {
+  return q.replace(/[,()]/g, ' ').trim();
+}
+
 // 쿼리스트링 링크 생성 헬퍼 — 빈 값은 제거해 URL을 깔끔하게 유지
 export function buildQueryHref(basePath: string, params: Record<string, string>): string {
   const usp = new URLSearchParams(params);

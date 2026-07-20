@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import { buildQueryHref, formatDate, maskContact, maskName } from '@/lib/format';
+import { buildQueryHref, formatDate, maskContact, maskName, sanitizeSearchTerm } from '@/lib/format';
 import PageHeader from '@/components/PageHeader';
 import PeriodFilterBar from '@/components/PeriodFilterBar';
+import SearchBar from '@/components/SearchBar';
 import EmptyState from '@/components/EmptyState';
 import type { InquiryRow } from '@/lib/types';
 import { getPeriodStartUTC } from '@/lib/format';
@@ -20,11 +21,12 @@ const STATUS_TABS = [
 export default async function InquiriesPage({
   searchParams,
 }: {
-  searchParams: { status?: string; period?: string; page?: string };
+  searchParams: { status?: string; period?: string; q?: string; page?: string };
 }) {
   const supabase = createClient();
   const status = searchParams.status || '';
   const period = searchParams.period || '';
+  const q = sanitizeSearchTerm(searchParams.q || '');
   const page = Math.max(parseInt(searchParams.page || '1', 10), 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -38,11 +40,12 @@ export default async function InquiriesPage({
   if (status) query = query.eq('status', status);
   const periodStart = getPeriodStartUTC(period);
   if (periodStart) query = query.gte('created_at', periodStart.toISOString());
+  if (q) query = query.or(`subject.ilike.%${q}%,message.ilike.%${q}%`);
 
   const { data, count, error } = await query;
   const inquiries = (data as unknown as InquiryRow[]) || [];
   const totalPages = Math.max(Math.ceil((count || 0) / PAGE_SIZE), 1);
-  const baseParams = { status, period };
+  const baseParams = { status, period, q };
 
   return (
     <div>
@@ -65,6 +68,7 @@ export default async function InquiriesPage({
       />
 
       <PeriodFilterBar basePath="/inquiries" baseParams={baseParams} period={period} />
+      <SearchBar basePath="/inquiries" hiddenParams={{ status, period }} q={q} placeholder="제목 또는 내용 검색" />
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
         {error ? (
