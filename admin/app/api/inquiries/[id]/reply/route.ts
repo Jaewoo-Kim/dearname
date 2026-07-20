@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/serviceRole';
 import { isAllowedEmail } from '@/lib/authz';
+import { fetchRole } from '@/lib/adminUser';
+import { canWrite } from '@/lib/roles';
 
 // 고객문의 응대 — 답변을 저장하면 status가 'answered'로 바뀌고, 본 서비스는
 // GET /proxy/inquiry/mine으로 고객 본인의 문의를 조회할 때 이 답변을 함께 내려준다.
@@ -11,6 +13,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   if (!isAllowedEmail(user?.email)) {
     return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  }
+  if (!canWrite(await fetchRole(supabase, user!.email!))) {
+    return NextResponse.json({ error: '조회 권한만 있어 답변을 등록할 수 없습니다.' }, { status: 403 });
   }
 
   const body = await request.json().catch(() => ({}));

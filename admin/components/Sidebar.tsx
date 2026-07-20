@@ -14,9 +14,11 @@ import {
   MessageCircle,
   Receipt,
   Settings,
+  ShieldCheck,
   Users,
   X,
 } from 'lucide-react';
+import { ROLE_LABEL, type AdminRole } from '@/lib/roles';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: '대시보드', icon: BarChart3 },
@@ -30,9 +32,11 @@ const NAV_ITEMS = [
   { href: '/settings', label: '운영 관리', icon: Settings },
 ];
 
-export default function Sidebar({ email }: { email: string }) {
+export default function Sidebar({ email, role }: { email: string; role: AdminRole }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  const navItems = role === 'admin' ? [...NAV_ITEMS, { href: '/team', label: '팀 관리', icon: ShieldCheck }] : NAV_ITEMS;
 
   return (
     <>
@@ -77,7 +81,7 @@ export default function Sidebar({ email }: { email: string }) {
           </div>
 
           <nav className="mt-2 flex flex-col gap-1 px-3">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               const Icon = item.icon;
               return (
@@ -106,6 +110,9 @@ export default function Sidebar({ email }: { email: string }) {
           <p className="truncate text-xs text-slate-500" title={email}>
             {email}
           </p>
+          <span className="mt-1 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+            {ROLE_LABEL[role]}
+          </span>
           <form action="/auth/signout" method="post" className="mt-2">
             <button
               type="submit"

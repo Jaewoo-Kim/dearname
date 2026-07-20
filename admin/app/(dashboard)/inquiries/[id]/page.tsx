@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { fetchRole } from '@/lib/adminUser';
 import { formatDate, maskContact, maskName } from '@/lib/format';
 import BackLink from '@/components/BackLink';
 import InquiryReplyForm from '@/components/InquiryReplyForm';
@@ -10,6 +11,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function InquiryDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isViewer = (await fetchRole(supabase, user?.email || '')) === 'viewer';
 
   const { data } = await supabase
     .from('inquiries')
@@ -53,7 +56,7 @@ export default async function InquiryDetailPage({ params }: { params: { id: stri
       )}
 
       <div className="mt-4">
-        <InquiryReplyForm inquiryId={inquiry.id} />
+        <InquiryReplyForm inquiryId={inquiry.id} readOnly={isViewer} />
       </div>
     </div>
   );

@@ -2,10 +2,31 @@
 
 import { useState } from 'react';
 
-export default function ReissueCreditButton({ reportId }: { reportId: string }) {
+export default function ReissueCreditButton({
+  reportId,
+  disabled,
+  disabledReason,
+}: {
+  reportId: string;
+  disabled?: boolean;
+  disabledReason?: string;
+}) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [error, setError] = useState('');
   const [credits, setCredits] = useState<number | null>(null);
+
+  if (disabled) {
+    return (
+      <button
+        type="button"
+        disabled
+        title={disabledReason}
+        className="cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-400"
+      >
+        재발급 (생성권 부여)
+      </button>
+    );
+  }
 
   async function handleClick() {
     setStatus('sending');

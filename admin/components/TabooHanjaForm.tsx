@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Loader2, Plus, X } from 'lucide-react';
 import type { TabooHanjaRow } from '@/lib/types';
 
-export default function TabooHanjaForm({ initial }: { initial: TabooHanjaRow[] }) {
+export default function TabooHanjaForm({ initial, readOnly }: { initial: TabooHanjaRow[]; readOnly?: boolean }) {
   const [rows, setRows] = useState<TabooHanjaRow[]>(initial);
   const [newHanja, setNewHanja] = useState('');
   const [newReason, setNewReason] = useState('');
@@ -75,45 +75,51 @@ export default function TabooHanjaForm({ initial }: { initial: TabooHanjaRow[] }
             className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-sm text-red-700"
           >
             {r.hanja}
-            <button
-              type="button"
-              onClick={() => handleRemove(r.hanja)}
-              disabled={busy}
-              className="text-red-400 hover:text-red-700 disabled:opacity-50"
-              aria-label={`${r.hanja} 삭제`}
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => handleRemove(r.hanja)}
+                disabled={busy}
+                className="text-red-400 hover:text-red-700 disabled:opacity-50"
+                aria-label={`${r.hanja} 삭제`}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </span>
         ))}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <input
-          type="text"
-          maxLength={2}
-          value={newHanja}
-          onChange={(e) => setNewHanja(e.target.value)}
-          placeholder="한자 1글자"
-          className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-center text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-        />
-        <input
-          type="text"
-          value={newReason}
-          onChange={(e) => setNewReason(e.target.value)}
-          placeholder="사유(선택)"
-          className="min-w-[10rem] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-        />
-        <button
-          type="button"
-          onClick={handleAdd}
-          disabled={busy || !newHanja.trim()}
-          className="flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          추가
-        </button>
-      </div>
+      {readOnly ? (
+        <p className="mt-4 text-sm text-slate-400">조회 권한만 있어 금기 한자를 수정할 수 없습니다.</p>
+      ) : (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            maxLength={2}
+            value={newHanja}
+            onChange={(e) => setNewHanja(e.target.value)}
+            placeholder="한자 1글자"
+            className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-center text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          />
+          <input
+            type="text"
+            value={newReason}
+            onChange={(e) => setNewReason(e.target.value)}
+            placeholder="사유(선택)"
+            className="min-w-[10rem] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          />
+          <button
+            type="button"
+            onClick={handleAdd}
+            disabled={busy || !newHanja.trim()}
+            className="flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            추가
+          </button>
+        </div>
+      )}
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </section>
   );

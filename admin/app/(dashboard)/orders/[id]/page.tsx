@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CreditCard, FileText, User } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { fetchRole } from '@/lib/adminUser';
 import { formatDate, formatKRW, maskContact, maskName, PRODUCT_LABEL } from '@/lib/format';
 import StatusBadge from '@/components/StatusBadge';
 import RefundButton from '@/components/RefundButton';
@@ -13,6 +14,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const role = await fetchRole(supabase, user?.email || '');
+  const isViewer = role === 'viewer';
 
   const { data: order } = await supabase
     .from('orders')
@@ -83,9 +87,13 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           <div className="mt-4">
             <RefundButton
               orderId={typedOrder.id}
-              disabled={typedOrder.status !== 'paid'}
+              disabled={typedOrder.status !== 'paid' || isViewer}
               disabledReason={
-                typedOrder.status === 'refunded' ? '이미 환불된 주문입니다' : '결제완료 상태의 주문만 환불할 수 있습니다'
+                isViewer
+                  ? '조회 권한만 있어 환불할 수 없습니다'
+                  : typedOrder.status === 'refunded'
+                    ? '이미 환불된 주문입니다'
+                    : '결제완료 상태의 주문만 환불할 수 있습니다'
               }
             />
           </div>

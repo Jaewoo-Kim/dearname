@@ -107,6 +107,31 @@ export interface TabooHanjaRow {
   reason: string | null;
 }
 
+// admin_users — 어드민 계정 등급
+export interface AdminUserRow {
+  id: string;
+  email: string;
+  role: 'admin' | 'editor' | 'viewer';
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+// pending_settings_changes — 운영 관리(가격/점검모드) 변경 승인 대기열
+export interface PendingSettingsChange {
+  id: string;
+  created_at: string;
+  key: 'pricing' | 'maintenance';
+  requested_value: unknown;
+  previous_value: unknown;
+  requested_by: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  reject_reason: string | null;
+}
+
 // Phase 3 — 본 서비스 GET /api/hanja/search 응답 (data/hanja-db.js + hanja_overrides 병합 결과)
 export interface HanjaSearchResult {
   kr: string;

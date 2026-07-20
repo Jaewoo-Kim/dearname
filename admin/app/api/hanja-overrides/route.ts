@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/serviceRole';
 import { isAllowedEmail } from '@/lib/authz';
+import { fetchRole } from '@/lib/adminUser';
+import { canWrite } from '@/lib/roles';
 
 // 한자 DB 정정값 저장/삭제 (Phase 3). 본 서비스는 GET /api/hanja/overrides로 조회만 하고
 // 쓰기는 여기(서버 전용 Route Handler, service_role)에서만 이루어진다.
@@ -13,6 +15,9 @@ export async function POST(request: Request) {
 
   if (!isAllowedEmail(user?.email)) {
     return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  }
+  if (!canWrite(await fetchRole(supabase, user!.email!))) {
+    return NextResponse.json({ error: '조회 권한만 있어 한자 DB를 수정할 수 없습니다.' }, { status: 403 });
   }
 
   const body = await request.json().catch(() => ({}));
@@ -64,6 +69,9 @@ export async function DELETE(request: Request) {
 
   if (!isAllowedEmail(user?.email)) {
     return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  }
+  if (!canWrite(await fetchRole(supabase, user!.email!))) {
+    return NextResponse.json({ error: '조회 권한만 있어 한자 DB를 수정할 수 없습니다.' }, { status: 403 });
   }
 
   const body = await request.json().catch(() => ({}));
