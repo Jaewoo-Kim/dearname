@@ -15,9 +15,28 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const role = await fetchRole(supabase, user.email || '');
   const allowlistConfigured = getAllowlist().length > 0;
 
+  const { count: pendingInquiryCount } = await supabase
+    .from('inquiries')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending');
+
+  let pendingApprovalCount = 0;
+  if (role === 'admin') {
+    const { count } = await supabase
+      .from('pending_settings_changes')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending');
+    pendingApprovalCount = count || 0;
+  }
+
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <Sidebar email={user.email || ''} role={role} />
+      <Sidebar
+        email={user.email || ''}
+        role={role}
+        pendingInquiryCount={pendingInquiryCount || 0}
+        pendingApprovalCount={pendingApprovalCount}
+      />
       <main className="min-w-0 flex-1 overflow-y-auto px-6 pb-6 pt-20 md:px-8 md:pb-8 md:pt-8">
         {!allowlistConfigured && (
           <div className="mb-4 -mt-2">
