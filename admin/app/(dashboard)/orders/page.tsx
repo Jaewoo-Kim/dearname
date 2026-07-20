@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import { buildQueryHref, formatDate, formatKRW, getPeriodStartUTC, maskName, PRODUCT_LABEL } from '@/lib/format';
+import { buildQueryHref, formatDate, formatKRW, getPeriodStartUTC, maskName, PRODUCT_LABEL, sanitizeSearchTerm } from '@/lib/format';
 import PageHeader from '@/components/PageHeader';
 import PeriodFilterBar from '@/components/PeriodFilterBar';
+import SearchBar from '@/components/SearchBar';
 import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/EmptyState';
 import type { Order } from '@/lib/types';
@@ -21,11 +22,12 @@ const STATUS_TABS = [
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: { status?: string; period?: string; page?: string };
+  searchParams: { status?: string; period?: string; q?: string; page?: string };
 }) {
   const supabase = createClient();
   const status = searchParams.status || '';
   const period = searchParams.period || '';
+  const q = sanitizeSearchTerm(searchParams.q || '');
   const page = Math.max(parseInt(searchParams.page || '1', 10), 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -39,11 +41,23 @@ export default async function OrdersPage({
   if (status) query = query.eq('status', status);
   const periodStart = getPeriodStartUTC(period);
   if (periodStart) query = query.gte('created_at', periodStart.toISOString());
+  if (q) {
+    // orders에는 회원 이름/연락처 컬럼이 없어(members 조인 필드) 먼저 일치하는 회원 id를 찾은 뒤
+    // 토스 주문번호 검색과 OR로 묶는다.
+    const { data: matchedMembers } = await supabase
+      .from('members')
+      .select('id')
+      .or(`name.ilike.%${q}%,contact.ilike.%${q}%`);
+    const memberIds = ((matchedMembers as { id: string }[] | null) || []).map((m) => m.id);
+    const orParts = [`toss_order_id.ilike.%${q}%`];
+    if (memberIds.length > 0) orParts.push(`member_id.in.(${memberIds.join(',')})`);
+    query = query.or(orParts.join(','));
+  }
 
   const { data, count, error } = await query;
   const orders = (data as unknown as Order[]) || [];
   const totalPages = Math.max(Math.ceil((count || 0) / PAGE_SIZE), 1);
-  const baseParams = { status, period };
+  const baseParams = { status, period, q };
 
   return (
     <div>
@@ -65,6 +79,7 @@ export default async function OrdersPage({
       />
 
       <PeriodFilterBar basePath="/orders" baseParams={baseParams} period={period} />
+      <SearchBar basePath="/orders" hiddenParams={{ status, period }} q={q} placeholder="회원 이름·연락처 또는 토스 주문번호 검색" />
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
         {error ? (

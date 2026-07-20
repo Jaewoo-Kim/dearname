@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import { buildQueryHref, formatDate, getPeriodStartUTC } from '@/lib/format';
+import { buildQueryHref, formatDate, getPeriodStartUTC, sanitizeSearchTerm } from '@/lib/format';
 import PageHeader from '@/components/PageHeader';
 import PeriodFilterBar from '@/components/PeriodFilterBar';
+import SearchBar from '@/components/SearchBar';
 import EmptyState from '@/components/EmptyState';
 import type { Report } from '@/lib/types';
 
@@ -11,9 +12,10 @@ export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 20;
 
-export default async function ReportsPage({ searchParams }: { searchParams: { period?: string; page?: string } }) {
+export default async function ReportsPage({ searchParams }: { searchParams: { period?: string; q?: string; page?: string } }) {
   const supabase = createClient();
   const period = searchParams.period || '';
+  const q = sanitizeSearchTerm(searchParams.q || '');
   const page = Math.max(parseInt(searchParams.page || '1', 10), 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -26,16 +28,18 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
 
   const periodStart = getPeriodStartUTC(period);
   if (periodStart) query = query.gte('created_at', periodStart.toISOString());
+  if (q) query = query.or(`baby_name_kr.ilike.%${q}%,baby_name_hanja.ilike.%${q}%`);
 
   const { data, count, error } = await query;
   const reports = (data as unknown as Report[]) || [];
   const totalPages = Math.max(Math.ceil((count || 0) / PAGE_SIZE), 1);
-  const baseParams = { period };
+  const baseParams = { period, q };
 
   return (
     <div>
       <PageHeader title="보고서" />
       <PeriodFilterBar basePath="/reports" baseParams={baseParams} period={period} />
+      <SearchBar basePath="/reports" hiddenParams={{ period }} q={q} placeholder="아기 이름(한글/한자) 검색" />
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
         {error ? (
