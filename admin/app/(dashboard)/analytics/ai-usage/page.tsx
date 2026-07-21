@@ -4,6 +4,7 @@ import AiCostChart from '@/components/AiCostChart';
 import PageHeader from '@/components/PageHeader';
 import StatCard from '@/components/StatCard';
 import EmptyState from '@/components/EmptyState';
+import SubTabs from '@/components/SubTabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,6 +64,13 @@ export default async function AiUsagePage() {
       <PageHeader
         title="AI 비용"
         description="Claude/Gemini 호출 시 서버가 자동 기록한 추정 비용입니다(마진 관리 참고용, 실제 청구 금액과 다를 수 있음)."
+      />
+      <SubTabs
+        active="/analytics/ai-usage"
+        tabs={[
+          { href: '/analytics', label: '전환율 퍼널' },
+          { href: '/analytics/ai-usage', label: 'AI 비용' },
+        ]}
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

@@ -5,11 +5,9 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {
   BarChart3,
-  Bot,
-  Filter,
   FileText,
-  History,
   LanguagesIcon,
+  LineChart,
   LogOut,
   Menu,
   MessageCircle,
@@ -27,15 +25,15 @@ const NAV_ITEMS = [
   { href: '/reports', label: '보고서', icon: FileText },
   { href: '/inquiries', label: '고객문의', icon: MessageCircle },
   { href: '/members', label: '회원', icon: Users },
-  { href: '/funnel', label: '전환율 퍼널', icon: Filter },
-  { href: '/ai-usage', label: 'AI 비용', icon: Bot },
+  { href: '/analytics', label: '분석', icon: LineChart },
   { href: '/hanja-db', label: '한자 DB', icon: LanguagesIcon },
   { href: '/settings', label: '운영 관리', icon: Settings },
 ];
 
+// 팀 관리(계정 등급) + 감사 로그를 /team 하위 탭으로 합쳤다 — 어드민에게만 하나의
+// 항목으로 보인다.
 const ADMIN_ONLY_NAV_ITEMS = [
   { href: '/team', label: '팀 관리', icon: ShieldCheck },
-  { href: '/audit-logs', label: '감사 로그', icon: History },
 ];
 
 export default function Sidebar({
