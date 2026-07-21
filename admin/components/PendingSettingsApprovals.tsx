@@ -4,24 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Loader2, X } from 'lucide-react';
 import { formatDate } from '@/lib/format';
+import { SETTINGS_KEY_LABEL, summarizeSettingsValue } from '@/lib/settingsSummary';
 import type { PendingSettingsChange } from '@/lib/types';
-
-const KEY_LABEL: Record<string, string> = { pricing: '가격 설정', maintenance: '점검 모드' };
-
-function summarize(key: string, value: unknown): string {
-  if (!value || typeof value !== 'object') return '-';
-  if (key === 'maintenance') {
-    const v = value as { enabled?: boolean; message?: string };
-    return `점검모드 ${v.enabled ? '켜짐' : '꺼짐'}${v.message ? ` · "${v.message}"` : ''}`;
-  }
-  if (key === 'pricing') {
-    const v = value as { self?: number; tiers?: Array<{ count: number; price: number }>; promotion?: { enabled?: boolean; percent?: number; label?: string } };
-    const tiers = (v.tiers || []).map((t) => `${t.count}개 ${t.price.toLocaleString()}원`).join(', ');
-    const promo = v.promotion?.enabled ? ` · 프로모션 ${v.promotion.percent}%${v.promotion.label ? ` "${v.promotion.label}"` : ''}` : '';
-    return `${tiers}${promo}`;
-  }
-  return JSON.stringify(value);
-}
 
 export default function PendingSettingsApprovals({ items }: { items: PendingSettingsChange[] }) {
   const router = useRouter();
@@ -62,13 +46,13 @@ export default function PendingSettingsApprovals({ items }: { items: PendingSett
           return (
             <div key={item.id} className="rounded-xl border border-amber-200 bg-white p-4">
               <p className="text-sm font-medium text-slate-900">
-                {KEY_LABEL[item.key] || item.key}
+                {SETTINGS_KEY_LABEL[item.key] || item.key}
                 <span className="ml-2 text-xs font-normal text-slate-400">
                   {item.requested_by} · {formatDate(item.created_at)}
                 </span>
               </p>
-              <p className="mt-2 text-xs text-slate-400">현재: {summarize(item.key, item.previous_value)}</p>
-              <p className="mt-1 text-sm text-slate-700">변경 요청: {summarize(item.key, item.requested_value)}</p>
+              <p className="mt-2 text-xs text-slate-400">현재: {summarizeSettingsValue(item.key, item.previous_value)}</p>
+              <p className="mt-1 text-sm text-slate-700">변경 요청: {summarizeSettingsValue(item.key, item.requested_value)}</p>
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <input
