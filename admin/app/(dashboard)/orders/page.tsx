@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Download } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import { buildQueryHref, formatDate, formatKRW, getPeriodStartUTC, maskName, PRODUCT_LABEL, sanitizeSearchTerm } from '@/lib/format';
+import { buildQueryHref, formatDate, formatKRW, maskName, PRODUCT_LABEL, sanitizeSearchTerm } from '@/lib/format';
+import { applyOrdersSearch } from '@/lib/queries/orders';
 import PageHeader from '@/components/PageHeader';
 import PeriodFilterBar from '@/components/PeriodFilterBar';
 import SearchBar from '@/components/SearchBar';
@@ -38,21 +39,7 @@ export default async function OrdersPage({
     .order('created_at', { ascending: false })
     .range(from, to);
 
-  if (status) query = query.eq('status', status);
-  const periodStart = getPeriodStartUTC(period);
-  if (periodStart) query = query.gte('created_at', periodStart.toISOString());
-  if (q) {
-    // orders에는 회원 이름/연락처 컬럼이 없어(members 조인 필드) 먼저 일치하는 회원 id를 찾은 뒤
-    // 토스 주문번호 검색과 OR로 묶는다.
-    const { data: matchedMembers } = await supabase
-      .from('members')
-      .select('id')
-      .or(`name.ilike.%${q}%,contact.ilike.%${q}%`);
-    const memberIds = ((matchedMembers as { id: string }[] | null) || []).map((m) => m.id);
-    const orParts = [`toss_order_id.ilike.%${q}%`];
-    if (memberIds.length > 0) orParts.push(`member_id.in.(${memberIds.join(',')})`);
-    query = query.or(orParts.join(','));
-  }
+  query = await applyOrdersSearch(supabase, query, { status, period, q });
 
   const { data, count, error } = await query;
   const orders = (data as unknown as Order[]) || [];
@@ -79,7 +66,16 @@ export default async function OrdersPage({
       />
 
       <PeriodFilterBar basePath="/orders" baseParams={baseParams} period={period} />
-      <SearchBar basePath="/orders" hiddenParams={{ status, period }} q={q} placeholder="회원 이름·연락처 또는 토스 주문번호 검색" />
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <SearchBar basePath="/orders" hiddenParams={{ status, period }} q={q} placeholder="회원 이름·연락처 또는 토스 주문번호 검색" />
+        <a
+          href={buildQueryHref('/api/export/orders', baseParams)}
+          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+        >
+          <Download className="h-4 w-4" />
+          CSV 다운로드
+        </a>
+      </div>
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-card">
         {error ? (
