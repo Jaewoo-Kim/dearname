@@ -6,6 +6,7 @@ import { buildQueryHref, formatDate, getPeriodStartUTC } from '@/lib/format';
 import { ACTION_LABEL, actionLabel, targetHref, targetLabel } from '@/lib/auditLog';
 import PageHeader from '@/components/PageHeader';
 import PeriodFilterBar from '@/components/PeriodFilterBar';
+import SubTabs from '@/components/SubTabs';
 import EmptyState from '@/components/EmptyState';
 import AuditLogDetail from '@/components/AuditLogDetail';
 import type { AdminUserRow, AuditLogRow } from '@/lib/types';
@@ -55,11 +56,18 @@ export default async function AuditLogsPage({
         title="감사 로그"
         description="환불·승인·등급 변경 등 민감한 작업의 기록입니다. 누가·언제·무엇을 했는지 여기서 확인할 수 있습니다."
       />
+      <SubTabs
+        active="/team/audit-logs"
+        tabs={[
+          { href: '/team', label: '계정 관리' },
+          { href: '/team/audit-logs', label: '감사 로그' },
+        ]}
+      />
 
-      <PeriodFilterBar basePath="/audit-logs" baseParams={baseParams} period={period} />
+      <PeriodFilterBar basePath="/team/audit-logs" baseParams={baseParams} period={period} />
 
       <div className="mb-4">
-        <form className="flex flex-wrap gap-2" action="/audit-logs" method="get">
+        <form className="flex flex-wrap gap-2" action="/team/audit-logs" method="get">
           {period && <input type="hidden" name="period" value={period} />}
           <select
             name="action"
@@ -140,11 +148,11 @@ export default async function AuditLogsPage({
         <span>총 {(count || 0).toLocaleString('ko-KR')}건</span>
         <div className="flex gap-3">
           {page > 1 && (
-            <Link className="hover:underline" href={buildQueryHref('/audit-logs', { ...baseParams, page: String(page - 1) })}>이전</Link>
+            <Link className="hover:underline" href={buildQueryHref('/team/audit-logs', { ...baseParams, page: String(page - 1) })}>이전</Link>
           )}
           <span>{page} / {totalPages}</span>
           {page < totalPages && (
-            <Link className="hover:underline" href={buildQueryHref('/audit-logs', { ...baseParams, page: String(page + 1) })}>다음</Link>
+            <Link className="hover:underline" href={buildQueryHref('/team/audit-logs', { ...baseParams, page: String(page + 1) })}>다음</Link>
           )}
         </div>
       </div>

@@ -4,6 +4,7 @@ import { getCurrentAdminUser } from '@/lib/adminUser';
 import { ROLE_LABEL } from '@/lib/roles';
 import { formatDate } from '@/lib/format';
 import PageHeader from '@/components/PageHeader';
+import SubTabs from '@/components/SubTabs';
 import AddAdminUserForm from '@/components/AddAdminUserForm';
 import TeamRoleSelect from '@/components/TeamRoleSelect';
 import EmptyState from '@/components/EmptyState';
@@ -24,6 +25,13 @@ export default async function TeamPage() {
       <PageHeader
         title="팀 관리"
         description="어드민만 다른 계정의 등급(어드민/편집자/뷰어)을 지정할 수 있습니다. 뷰어는 조회만, 편집자는 대부분의 작업이 가능하지만 운영 관리(가격·점검모드) 변경은 어드민 승인이 필요합니다."
+      />
+      <SubTabs
+        active="/team"
+        tabs={[
+          { href: '/team', label: '계정 관리' },
+          { href: '/team/audit-logs', label: '감사 로그' },
+        ]}
       />
 
       <div className="space-y-4">

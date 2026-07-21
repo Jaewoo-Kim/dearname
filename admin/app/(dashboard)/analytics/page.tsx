@@ -4,6 +4,7 @@ import FunnelChart from '@/components/FunnelChart';
 import PageHeader from '@/components/PageHeader';
 import StatCard from '@/components/StatCard';
 import EmptyState from '@/components/EmptyState';
+import SubTabs from '@/components/SubTabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,7 @@ async function getCounts() {
   return STAGES.map((s, i) => ({ ...s, value: results[i].count || 0 }));
 }
 
-export default async function FunnelPage() {
+export default async function AnalyticsPage() {
   const stages = await getCounts();
   const first = stages[0]?.value || 0;
 
@@ -31,6 +32,13 @@ export default async function FunnelPage() {
       <PageHeader
         title="전환율 퍼널"
         description="셀프분석 완료 → 프리미엄 조회 → 결제 시작 → 결제 완료까지의 이용자 흐름입니다."
+      />
+      <SubTabs
+        active="/analytics"
+        tabs={[
+          { href: '/analytics', label: '전환율 퍼널' },
+          { href: '/analytics/ai-usage', label: 'AI 비용' },
+        ]}
       />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
