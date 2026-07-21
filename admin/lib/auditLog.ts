@@ -1,6 +1,7 @@
 export const ACTION_LABEL: Record<string, string> = {
   refund: '환불 처리',
   grant_report_credit: '재발급(생성권 부여)',
+  edit_report_content: '보고서 본문 수정',
   reply_inquiry: '고객문의 답변',
   update_hanja: '한자 DB 정정',
   revert_hanja: '한자 DB 정정 원복',

@@ -5,8 +5,8 @@ import { createClient } from '@/lib/supabase/server';
 import { fetchRole } from '@/lib/adminUser';
 import { formatDate } from '@/lib/format';
 import ReissueCreditButton from '@/components/ReissueCreditButton';
+import ReportContentEditor from '@/components/ReportContentEditor';
 import BackLink from '@/components/BackLink';
-import EmptyState from '@/components/EmptyState';
 import type { Report } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -41,15 +41,6 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
 
   const siteUrl = process.env.NEXT_PUBLIC_DEARNAME_SITE_URL || '';
   const viewUrl = siteUrl ? `${siteUrl.replace(/\/$/, '')}/report-view.html?id=${report.id}` : null;
-
-  const FIELDS: Array<[string, string | undefined]> = [
-    ['핵심 메시지', story.tagline],
-    ['사주 원국 서사', story.sajuStory],
-    ['자원오행 보완', story.jawonStory],
-    ['한자 종합 의미', story.hanjaStory],
-    ['부모님께 드리는 편지', story.conclusionLetter],
-    ['이름의 역할', story.careerAdvice],
-  ];
 
   return (
     <div className="max-w-3xl">
@@ -104,19 +95,7 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
         </div>
       )}
 
-      <section className="mt-6 space-y-4">
-        {FIELDS.filter(([, v]) => v).map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-            <h2 className="text-sm font-semibold text-slate-500">{label}</h2>
-            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">{value}</p>
-          </div>
-        ))}
-        {FIELDS.every(([, v]) => !v) && (
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-card">
-            <EmptyState title="저장된 보고서 본문을 표시할 수 없습니다" />
-          </div>
-        )}
-      </section>
+      <ReportContentEditor reportId={report.id} initial={story} readOnly={isViewer} />
     </div>
   );
 }

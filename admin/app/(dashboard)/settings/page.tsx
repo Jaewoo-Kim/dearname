@@ -4,6 +4,7 @@ import PageHeader from '@/components/PageHeader';
 import PricingSettingsForm from '@/components/PricingSettingsForm';
 import MaintenanceSettingsForm from '@/components/MaintenanceSettingsForm';
 import PendingSettingsApprovals from '@/components/PendingSettingsApprovals';
+import MySettingsRequests from '@/components/MySettingsRequests';
 import type { MaintenanceSettings, PendingSettingsChange, PricingSettings } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -41,6 +42,7 @@ export default async function SettingsPage() {
   const { pricing, maintenance } = await getSettings();
 
   let pendingChanges: PendingSettingsChange[] = [];
+  let myRequests: PendingSettingsChange[] = [];
   if (role === 'admin') {
     const { data } = await supabase
       .from('pending_settings_changes')
@@ -48,6 +50,14 @@ export default async function SettingsPage() {
       .eq('status', 'pending')
       .order('created_at', { ascending: true });
     pendingChanges = (data as PendingSettingsChange[] | null) || [];
+  } else if (role === 'editor' && user?.email) {
+    const { data } = await supabase
+      .from('pending_settings_changes')
+      .select('*')
+      .eq('requested_by', user.email)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    myRequests = (data as PendingSettingsChange[] | null) || [];
   }
 
   return (
@@ -63,6 +73,7 @@ export default async function SettingsPage() {
 
       <div className="space-y-4">
         {role === 'admin' && <PendingSettingsApprovals items={pendingChanges} />}
+        {role === 'editor' && <MySettingsRequests items={myRequests} />}
         <MaintenanceSettingsForm initial={maintenance} role={role} />
         <PricingSettingsForm initial={pricing} role={role} />
       </div>
