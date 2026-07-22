@@ -237,7 +237,7 @@ where key = 'pricing' and not (value ? 'promotion');
 -- ── taboo_hanja — 금기 한자 관리 (Phase 3) ────────────────────────────
 -- 지금까지 lib/name-search-worker.js에 하드코딩돼 있던 "뜻이 불길한 한자"
 -- 목록을 여기로 옮긴다. 본 서비스는 GET /api/taboo-hanja로 조회만 하고
--- (DB 미설정/미조회 시 코드 내장 기본값 42자로 폴백), 쓰기는 어드민에서만 한다.
+-- (DB 미설정/미조회 시 코드 내장 기본값 52자로 폴백), 쓰기는 어드민에서만 한다.
 create table if not exists taboo_hanja (
   hanja       text primary key,
   reason      text,
@@ -256,6 +256,20 @@ insert into taboo_hanja (hanja) values
   ('危'),('破'),('敗'),('廢'),('末'),('窮'),('孤'),('暗'),
   ('盲'),('啞'),('癡'),('狂'),('愚'),('劣'),('醜'),('陋'),('拙'),
   ('辱'),('侮'),('欺'),('奸'),('賊'),('盜')
+on conflict (hanja) do nothing;
+
+-- 주검·요절 계열 보강 — 뜻이 '주검/시체/요절'인 한자가 누락돼 있어 추가(재실행 안전)
+insert into taboo_hanja (hanja, reason) values
+  ('尸', '주검, 시체'),
+  ('屍', '주검, 시체'),
+  ('歿', '죽을, 끝날'),
+  ('崩', '산 무너질, 죽을'),
+  ('喪', '죽을, 잃을, 초상'),
+  ('殉', '죽을, 따라죽을, 목숨 바칠'),
+  ('夭', '일찍 죽을, 어릴'),
+  ('殞', '죽을, 떨어질'),
+  ('斃', '죽을, 넘어질'),
+  ('薨', '훙서, 죽을')
 on conflict (hanja) do nothing;
 
 -- ── hanja_overrides — 한자 DB 수정 (Phase 3) ──────────────────────────
