@@ -991,6 +991,18 @@
         .payment-content p { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 30px; line-height: 1.6;}
         .price-tag { font-size: 2.5rem; font-weight: 900; color: var(--gold-premium); margin-bottom: 40px; }
 
+        /* ── 프리미엄 의뢰 최종 확인 모달 ─────────────────────── */
+        .confirm-info-content { max-width: 560px; text-align: left; }
+        .confirm-info-content h3 { text-align: center; color: var(--bg-dark); font-size: 1.6rem; font-weight: 900; margin: 0 0 6px; }
+        .confirm-info-content > p { text-align: center; color: var(--text-secondary); font-size: 0.98rem; margin: 0 0 22px; }
+        .confirm-info-body { max-height: 46vh; overflow-y: auto; border-top: 1px solid var(--border-light); }
+        .confirm-info-row { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; padding: 12px 4px; border-bottom: 1px solid var(--border-light); }
+        .confirm-info-row .cir-label { flex: 0 0 auto; color: var(--text-secondary); font-weight: 700; font-size: 0.88rem; white-space: nowrap; }
+        .confirm-info-row .cir-value { color: var(--bg-dark); font-weight: 700; font-size: 0.95rem; text-align: right; word-break: keep-all; }
+        .confirm-info-notice { display: flex; gap: 8px; align-items: flex-start; background: var(--bg-light); border-radius: var(--radius-md); padding: 14px 16px; margin-top: 18px; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+        .confirm-info-actions { display: flex; gap: 12px; margin-top: 24px; }
+        .confirm-info-actions .btn { flex: 1; margin-top: 0; }
+
         /* ── 햄버거 메뉴 버튼 ─────────────────────────────────── */
         .nav-hamburger {
             display: none;
@@ -3567,7 +3579,7 @@
                         </div>
                         <div class="wizard-nav">
                             <button type="button" class="wizard-btn-prev" onclick="wizardPrev(3)">← 이전</button>
-                            <button type="button" class="wizard-btn-next" onclick="requestPremiumReport()" style="flex:3;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 20px;">
+                            <button type="button" class="wizard-btn-next" onclick="openConfirmInfoModal()" style="flex:3;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 20px;">
                                 <span>✦ 프리미엄 작명 의뢰하기</span>
                                 <span style="font-size:0.75rem;opacity:0.75;font-weight:500;letter-spacing:0;">소견서 1개 ₩30,000 · 2개 ₩50,000 · 3개 ₩70,000</span>
                             </button>
@@ -4832,6 +4844,23 @@
     </div>
 </div>
 
+<div id="confirm-info-modal" class="modal-overlay" style="z-index:var(--z-modal);">
+    <div class="modal-content confirm-info-content">
+        <button class="close-modal" onclick="closeConfirmInfoModal()" aria-label="확인 창 닫기">&times;</button>
+        <h3>입력하신 정보를 확인해주세요</h3>
+        <p>작명이 시작되면 정보 수정이 어려우니, 한 번 더 꼼꼼히 확인해주세요.</p>
+        <div class="confirm-info-body" id="confirm-info-body"></div>
+        <div class="confirm-info-notice">
+            <span>ℹ️</span>
+            <span>내용이 다르다면 [수정하러 가기]를 눌러 이전 화면에서 바로 고칠 수 있습니다.</span>
+        </div>
+        <div class="confirm-info-actions">
+            <button type="button" class="btn btn-navy" onclick="closeConfirmInfoModal()">✎ 수정하러 가기</button>
+            <button type="button" class="btn btn-gold" onclick="confirmAndSubmitPremium()">확인, 의뢰 진행할게요</button>
+        </div>
+    </div>
+</div>
+
 <!-- ── 구독 팝업 ── -->
 <div id="subscribe-modal" class="modal-overlay" style="z-index:var(--z-modal);">
     <div class="modal-content" style="max-width:480px;padding:44px 40px;text-align:left;">
@@ -5190,6 +5219,127 @@
         prevTab.classList.remove('wt-done');
         prevTab.classList.add('wt-active');
         document.getElementById('premium').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── 프리미엄 의뢰 최종 확인 모달 ─────────────────────────────
+    function _dnEscapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, ch => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[ch]));
+    }
+
+    function _premSelectedHanjaText(selectId) {
+        const el = document.getElementById(selectId);
+        if (!el || !el.value) return '';
+        return el.options[el.selectedIndex]?.text || '';
+    }
+
+    // prefix: 'prem'(아이) | 'parent-father' | 'parent-mother'
+    function _premDateTimeSummary(prefix) {
+        let y, m, d, hour, min, ampm, calLabel;
+        if (prefix === 'prem') {
+            y = document.getElementById('prem-birth-date-year')?.value;
+            m = document.getElementById('prem-birth-date-month')?.value;
+            d = document.getElementById('prem-birth-date-day')?.value;
+            hour = document.getElementById('prem-time-hour')?.value;
+            min = document.getElementById('prem-time-min')?.value;
+            ampm = document.querySelector('[name="prem-ampm"]:checked')?.value;
+            const cal = document.querySelector('[name="cal_type"]:checked')?.value;
+            const leap = document.getElementById('prem-leap-check')?.checked;
+            calLabel = cal === 'lunar' ? (leap ? '음력·윤달' : '음력') : '양력';
+        } else {
+            y = document.getElementById(`${prefix}-year`)?.value;
+            m = document.getElementById(`${prefix}-month`)?.value;
+            d = document.getElementById(`${prefix}-day`)?.value;
+            hour = document.getElementById(`${prefix}-time-hour`)?.value;
+            min = document.getElementById(`${prefix}-time-min`)?.value;
+            const ampmName = prefix === 'parent-father' ? 'parent_father_ampm' : 'parent_mother_ampm';
+            const calName  = prefix === 'parent-father' ? 'parent_father_cal'  : 'parent_mother_cal';
+            ampm = document.querySelector(`[name="${ampmName}"]:checked`)?.value;
+            calLabel = document.querySelector(`[name="${calName}"]:checked`)?.value === 'lunar' ? '음력' : '양력';
+        }
+        if (!y || !m || !d) return '';
+        let s = `${y}년 ${parseInt(m, 10)}월 ${parseInt(d, 10)}일 (${calLabel})`;
+        if (hour) s += `, ${ampm === 'pm' ? '오후' : '오전'} ${hour}시${min ? ' ' + parseInt(min, 10) + '분' : ''}`;
+        return s;
+    }
+
+    function _buildPremiumConfirmRows() {
+        const nameType = document.querySelector('[name="prem_name_type"]:checked')?.value === '1' ? '외자' : '두 글자';
+        const gender   = document.querySelector('[name="premium_gender"]:checked')?.value === 'F' ? '여자' : '남자';
+        const lastName = document.getElementById('prem-last-name')?.value?.trim() || '';
+        const lastNameHanja = _premSelectedHanjaText('prem-last-name-hanja');
+        const city = document.getElementById('prem-city')?.value || '';
+
+        const styleMap = { global: '🌏 글로벌', trendy: '✨ 트렌디', neutral: '🍀 무난한', traditional: '📜 전통' };
+        const style = styleMap[document.querySelector('[name="prem_name_style"]:checked')?.value] || '';
+
+        const traitMap = { '1': '리더십·카리스마', '2': '지혜·총명함', '3': '따뜻함·포용력', '4': '건강·활력', '5': '예술성·창의력', '6': '재물·풍요로움' };
+        const traits = Array.from(document.querySelectorAll('[name="traits"]:checked')).map(el => traitMap[el.value]).filter(Boolean);
+        const traitsText = document.getElementById('prem-traits-text')?.value?.trim();
+        if (traitsText) traits.push(traitsText);
+
+        const dolrim = document.getElementById('prem-dolrim')?.value?.trim();
+        const dolrimHanja = _premSelectedHanjaText('prem-dolrim-hanja');
+        const dolrimPos = document.querySelector('[name="dolrim_pos"]:checked')?.value;
+        const dolrimPosLabel = dolrimPos === '2' ? '가운데' : dolrimPos === '3' ? '끝' : '';
+
+        const hangryul = document.getElementById('prem-hangryul')?.value?.trim();
+        const hangryulHanja = _premSelectedHanjaText('prem-hangryul-hanja');
+        const hangryulPos = document.querySelector('[name="hangryul_pos"]:checked')?.value;
+        const hangryulPosLabel = hangryulPos === '2' ? '가운데' : hangryulPos === '3' ? '끝' : '';
+
+        const fav = document.getElementById('prem-fav')?.value?.trim();
+        const favHanja = _premSelectedHanjaText('prem-fav-hanja');
+
+        const luckMap = { balanced: '기본 (균형)', wealth: '💰 재물·풍요운', leadership: '👑 리더십·명예운', wisdom: '📚 지혜·학업운', health: '🌿 건강·장수운' };
+        const luckVal = document.querySelector('[name="luck_focus"]:checked')?.value;
+        const luck = luckMap[luckVal] || '';
+
+        const avoid = document.getElementById('prem-avoid')?.value?.trim();
+        const request = document.getElementById('prem-request')?.value?.trim();
+
+        const rows = [];
+        rows.push(['이름 형식', nameType]);
+        rows.push(['성별', gender]);
+        rows.push(['성(姓)', lastName + (lastNameHanja ? ` · ${lastNameHanja}` : '')]);
+        rows.push(['출생 일시', _premDateTimeSummary('prem') + (city ? ` · ${city}` : '')]);
+        rows.push(['이름 스타일', style]);
+        if (traits.length) rows.push(['원하는 이미지·성향', traits.join(', ')]);
+        if (dolrim) rows.push(['돌림자', dolrim + (dolrimHanja ? ` · ${dolrimHanja}` : '') + (dolrimPosLabel ? ` (${dolrimPosLabel})` : '')]);
+        if (hangryul) rows.push(['항렬자', hangryul + (hangryulHanja ? ` · ${hangryulHanja}` : '') + (hangryulPosLabel ? ` (${hangryulPosLabel})` : '')]);
+        if (fav) rows.push(['선호 한자', fav + (favHanja ? ` · ${favHanja}` : '')]);
+        if (luckVal && luckVal !== 'balanced') rows.push(['운 중심 설정', luck]);
+        if (avoid) rows.push(['제외할 친인척 이름', avoid]);
+        const fatherDate = _premDateTimeSummary('parent-father');
+        if (fatherDate) rows.push(['아버지 생년월일', fatherDate]);
+        const motherDate = _premDateTimeSummary('parent-mother');
+        if (motherDate) rows.push(['어머니 생년월일', motherDate]);
+        if (request) rows.push(['기타 요청사항', request]);
+
+        return rows;
+    }
+
+    function openConfirmInfoModal() {
+        if (!validatePremiumForm()) return;
+        const rows = _buildPremiumConfirmRows();
+        const body = document.getElementById('confirm-info-body');
+        body.innerHTML = rows.map(([label, value]) => `
+            <div class="confirm-info-row">
+                <span class="cir-label">${_dnEscapeHtml(label)}</span>
+                <span class="cir-value">${_dnEscapeHtml(value) || '—'}</span>
+            </div>
+        `).join('');
+        document.getElementById('confirm-info-modal').style.display = 'flex';
+    }
+
+    function closeConfirmInfoModal() {
+        document.getElementById('confirm-info-modal').style.display = 'none';
+    }
+
+    function confirmAndSubmitPremium() {
+        closeConfirmInfoModal();
+        requestPremiumReport();
     }
 
     async function requestPremiumReport() {
