@@ -36,6 +36,7 @@ except ImportError:
 
 sys.path.insert(0, str(Path(__file__).parent))
 import lib.db as db  # 운영 데이터 적재 (admin_site_plan.md Phase 0) — 미설정 시 no-op
+import lib.notify as notify  # 컴플레인 접수 이메일 알림 — 미설정 시 no-op
 
 # Gemini는 선택적 임포트 (없어도 서버 동작)
 try:
@@ -486,16 +487,31 @@ def credit_consume():
         return jsonify({'error': str(e)}), 500
 
 
-# ── 고객문의 ──────────────────────────────────────────────
+# ── 고객문의/컴플레인 ──────────────────────────────────────
+_INQUIRY_TYPES = {'general', 'complaint'}
+_INQUIRY_CATEGORIES = {'quality', 'payment', 'service', 'etc'}
+_INQUIRY_PRIORITIES = {'low', 'normal', 'urgent'}
+
+
 @app.route('/proxy/inquiry', methods=['POST'])
 def inquiry_submit():
-    """로그인한 고객이 문의를 등록한다. 특정 보고서에 대한 문의면 reportId를 함께 보낸다."""
+    """로그인한 고객이 문의/컴플레인을 등록한다. 특정 보고서에 대한 문의면 reportId를 함께 보낸다."""
     try:
         body = request.get_json(force=True)
         member = body.get('member') or {}
         message = (body.get('message') or '').strip()
         if not member.get('uid') or not message:
             return jsonify({'error': '로그인 후 문의 내용을 입력해주세요.'}), 400
+
+        inquiry_type = body.get('type') or 'general'
+        if inquiry_type not in _INQUIRY_TYPES:
+            inquiry_type = 'general'
+        category = body.get('category') or None
+        if inquiry_type != 'complaint' or category not in _INQUIRY_CATEGORIES:
+            category = None
+        priority = body.get('priority') or 'normal'
+        if priority not in _INQUIRY_PRIORITIES:
+            priority = 'normal'
 
         member_row = db.upsert_member(
             uid=member.get('uid'),
@@ -511,7 +527,18 @@ def inquiry_submit():
             message=message[:2000],
             subject=(body.get('subject') or '').strip()[:200] or None,
             report_id=body.get('reportId') or None,
+            type=inquiry_type,
+            category=category,
+            priority=priority,
         )
+
+        if inquiry_row and inquiry_type == 'complaint':
+            notify.send_complaint_alert(
+                inquiry_row,
+                member_name=member.get('name', ''),
+                member_contact=member.get('email', ''),
+            )
+
         return jsonify({'status': 'ok', 'inquiryId': inquiry_row['id'] if inquiry_row else None})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

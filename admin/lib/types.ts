@@ -109,8 +109,18 @@ export interface InquiryRow {
   reply: string | null;
   replied_at: string | null;
   replied_by: string | null;
+  type: 'general' | 'complaint';
+  category: string | null;
+  priority: 'low' | 'normal' | 'urgent';
   members?: { name: string | null; contact: string | null } | null;
 }
+
+export const INQUIRY_CATEGORY_LABELS: Record<string, string> = {
+  quality: '소견서 품질',
+  payment: '결제·환불',
+  service: '응대 불만',
+  etc: '기타',
+};
 
 // Phase 3 — taboo_hanja 테이블
 export interface TabooHanjaRow {

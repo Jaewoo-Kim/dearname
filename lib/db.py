@@ -173,8 +173,8 @@ def consume_bonus_credit(uid):
     return _first(rows)
 
 
-def insert_inquiry(member_id, message, subject=None, report_id=None):
-    """고객문의 등록. member_id는 upsert_member로 먼저 확보한 값이어야 한다."""
+def insert_inquiry(member_id, message, subject=None, report_id=None, type='general', category=None, priority='normal'):
+    """고객문의/컴플레인 등록. member_id는 upsert_member로 먼저 확보한 값이어야 한다."""
     if not member_id or not message:
         return None
     body = {
@@ -182,6 +182,9 @@ def insert_inquiry(member_id, message, subject=None, report_id=None):
         'report_id': report_id,
         'subject': subject or None,
         'message': message,
+        'type': type,
+        'category': category or None,
+        'priority': priority,
     }
     rows = _request('POST', 'inquiries', body=body)
     return _first(rows)
