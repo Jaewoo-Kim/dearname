@@ -14,12 +14,13 @@ import {
   MessageCircle,
   Receipt,
   Settings,
-  ShieldCheck,
   Users,
   X,
 } from 'lucide-react';
 import { ROLE_LABEL, type AdminRole } from '@/lib/roles';
 
+// 팀 관리(계정 등급)·감사 로그는 별도 메뉴 없이 운영 관리(/settings) 하위 탭으로
+// 들어가 있다 — 어드민에게는 /settings 진입 시 서브탭으로 노출된다.
 const NAV_ITEMS = [
   { href: '/dashboard', label: '대시보드', icon: BarChart3 },
   { href: '/orders', label: '주문·결제', icon: Receipt },
@@ -29,12 +30,6 @@ const NAV_ITEMS = [
   { href: '/analytics', label: '분석', icon: LineChart },
   { href: '/hanja-db', label: '한자 DB', icon: LanguagesIcon },
   { href: '/settings', label: '운영 관리', icon: Settings },
-];
-
-// 팀 관리(계정 등급) + 감사 로그를 /team 하위 탭으로 합쳤다 — 어드민에게만 하나의
-// 항목으로 보인다.
-const ADMIN_ONLY_NAV_ITEMS = [
-  { href: '/team', label: '팀 관리', icon: ShieldCheck },
 ];
 
 export default function Sidebar({
@@ -51,7 +46,6 @@ export default function Sidebar({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const navItems = role === 'admin' ? [...NAV_ITEMS, ...ADMIN_ONLY_NAV_ITEMS] : NAV_ITEMS;
   const badgeCount: Record<string, number> = {
     '/inquiries': pendingInquiryCount,
     '/settings': pendingApprovalCount,
@@ -100,7 +94,7 @@ export default function Sidebar({
           </div>
 
           <nav className="mt-2 flex flex-col gap-1 px-3">
-            {navItems.map((item) => {
+            {NAV_ITEMS.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               const Icon = item.icon;
               const count = badgeCount[item.href] || 0;

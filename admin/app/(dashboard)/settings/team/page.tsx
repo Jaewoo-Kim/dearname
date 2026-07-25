@@ -22,14 +22,15 @@ export default async function TeamPage() {
   return (
     <div className="max-w-2xl">
       <PageHeader
-        title="팀 관리"
-        description="어드민만 다른 계정의 등급(어드민/편집자/뷰어)을 지정할 수 있습니다. 뷰어는 조회만, 편집자는 대부분의 작업이 가능하지만 운영 관리(가격·점검모드) 변경은 어드민 승인이 필요합니다."
+        title="계정 관리"
+        description="어드민만 다른 계정의 등급(어드민/편집자/뷰어)을 지정할 수 있습니다. 뷰어는 조회만, 편집자는 대부분의 작업이 가능하지만 운영 설정(가격·점검모드) 변경은 어드민 승인이 필요합니다."
       />
       <SubTabs
-        active="/team"
+        active="/settings/team"
         tabs={[
-          { href: '/team', label: '계정 관리' },
-          { href: '/team/audit-logs', label: '감사 로그' },
+          { href: '/settings', label: '운영 설정' },
+          { href: '/settings/team', label: '계정 관리' },
+          { href: '/settings/audit-logs', label: '감사 로그' },
         ]}
       />
 
