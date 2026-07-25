@@ -103,6 +103,7 @@ export interface InquiryRow {
   created_at: string;
   member_id: string | null;
   report_id: string | null;
+  order_id: string | null;
   subject: string | null;
   message: string;
   status: 'pending' | 'answered';

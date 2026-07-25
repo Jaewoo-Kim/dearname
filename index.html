@@ -4922,13 +4922,15 @@
                 <option value="general">일반 문의</option>
                 <option value="complaint">불만·컴플레인</option>
             </select>
-            <select id="inquiry-category" style="flex:1;display:none;">
+            <select id="inquiry-category" onchange="_onInquiryCategoryChange()" style="flex:1;display:none;">
                 <option value="quality">소견서 품질</option>
                 <option value="payment">결제·환불</option>
                 <option value="service">응대 불만</option>
                 <option value="etc">기타</option>
             </select>
         </div>
+        <select id="inquiry-order" style="width:100%;box-sizing:border-box;margin-bottom:10px;display:none;"></select>
+        <div id="inquiry-order-empty" style="display:none;font-size:0.8rem;color:var(--text-secondary);margin-bottom:10px;">연결할 결제 내역이 없습니다.</div>
         <input id="inquiry-subject" type="text" placeholder="제목(선택)" style="margin-bottom:10px;">
         <textarea id="inquiry-message" rows="4" placeholder="내용을 입력해주세요."></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:14px;">
@@ -10120,12 +10122,61 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const categoryEl = document.getElementById('inquiry-category');
         if (!typeEl || !categoryEl) return;
         categoryEl.style.display = typeEl.value === 'complaint' ? '' : 'none';
+        _updateInquiryOrderVisibility();
+    }
+
+    function _onInquiryCategoryChange() {
+        _updateInquiryOrderVisibility();
+    }
+
+    let _dnOrdersCache = null;
+    let _dnOrdersCacheUid = null;
+
+    async function _loadInquiryOrders() {
+        const orderEl = document.getElementById('inquiry-order');
+        if (!orderEl || !_dnUser?.uid) return;
+        if (_dnOrdersCache !== null && _dnOrdersCacheUid === _dnUser.uid) return;
+        try {
+            const res = await fetch(`/proxy/orders/mine?uid=${encodeURIComponent(_dnUser.uid)}`);
+            const { orders } = await res.json();
+            _dnOrdersCache = orders || [];
+        } catch (e) {
+            _dnOrdersCache = [];
+        }
+        _dnOrdersCacheUid = _dnUser.uid;
+        const productLabel = { premium: 'AI 프리미엄 작명', self: '셀프 작명' };
+        const statusLabel  = { paid: '결제완료', refunded: '환불됨', failed: '실패' };
+        orderEl.innerHTML = '<option value="">관련 결제건 선택(선택)</option>' + _dnOrdersCache.map(o => {
+            const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ko-KR') : '';
+            const amount = Number(o.amount || 0).toLocaleString('ko-KR');
+            const label = `${date} · ${productLabel[o.product] || o.product} · ${amount}원 (${statusLabel[o.status] || o.status})`;
+            return `<option value="${o.id}">${label}</option>`;
+        }).join('');
+    }
+
+    async function _updateInquiryOrderVisibility() {
+        const typeEl = document.getElementById('inquiry-type');
+        const categoryEl = document.getElementById('inquiry-category');
+        const orderEl = document.getElementById('inquiry-order');
+        const emptyEl = document.getElementById('inquiry-order-empty');
+        if (!typeEl || !categoryEl || !orderEl || !emptyEl) return;
+        const shouldShow = typeEl.value === 'complaint' && categoryEl.value === 'payment' && !!_dnUser;
+        if (!shouldShow) {
+            orderEl.style.display = 'none';
+            emptyEl.style.display = 'none';
+            return;
+        }
+        await _loadInquiryOrders();
+        const hasOrders = _dnOrdersCache && _dnOrdersCache.length > 0;
+        orderEl.style.display = hasOrders ? '' : 'none';
+        emptyEl.style.display = hasOrders ? 'none' : '';
     }
 
     async function _submitInquiry() {
         if (!_dnUser) { openLoginModal(); return; }
         const typeEl = document.getElementById('inquiry-type');
         const categoryEl = document.getElementById('inquiry-category');
+        const orderEl = document.getElementById('inquiry-order');
         const subjectEl = document.getElementById('inquiry-subject');
         const messageEl = document.getElementById('inquiry-message');
         const statusEl  = document.getElementById('inquiry-submit-status');
@@ -10135,6 +10186,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             return;
         }
         const type = typeEl?.value === 'complaint' ? 'complaint' : 'general';
+        const category = type === 'complaint' ? (categoryEl?.value || 'etc') : null;
+        const orderId = (category === 'payment' && orderEl?.style.display !== 'none') ? (orderEl?.value || null) : null;
         if (statusEl) { statusEl.style.color = 'var(--text-secondary)'; statusEl.textContent = '전송 중...'; }
         try {
             const res = await fetch('/proxy/inquiry', {
@@ -10145,7 +10198,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     subject: subjectEl?.value?.trim() || '',
                     message,
                     type,
-                    category: type === 'complaint' ? (categoryEl?.value || 'etc') : null
+                    category,
+                    orderId
                 })
             });
             if (!res.ok) {

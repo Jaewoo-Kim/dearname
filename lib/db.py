@@ -173,7 +173,7 @@ def consume_bonus_credit(uid):
     return _first(rows)
 
 
-def insert_inquiry(member_id, message, subject=None, report_id=None, type='general', category=None, priority='normal'):
+def insert_inquiry(member_id, message, subject=None, report_id=None, type='general', category=None, priority='normal', order_id=None):
     """고객문의/컴플레인 등록. member_id는 upsert_member로 먼저 확보한 값이어야 한다."""
     if not member_id or not message:
         return None
@@ -185,6 +185,7 @@ def insert_inquiry(member_id, message, subject=None, report_id=None, type='gener
         'type': type,
         'category': category or None,
         'priority': priority,
+        'order_id': order_id or None,
     }
     rows = _request('POST', 'inquiries', body=body)
     return _first(rows)
@@ -196,6 +197,18 @@ def get_inquiries_by_member(member_id):
         return []
     rows = _request(
         'GET', 'inquiries',
+        params={'member_id': f'eq.{member_id}', 'select': '*', 'order': 'created_at.desc'},
+        prefer=None,
+    )
+    return rows or []
+
+
+def get_orders_by_member(member_id):
+    """고객 본인의 결제 내역 조회 (컴플레인 접수 시 관련 결제건 선택용). 최신순."""
+    if not member_id:
+        return []
+    rows = _request(
+        'GET', 'orders',
         params={'member_id': f'eq.{member_id}', 'select': '*', 'order': 'created_at.desc'},
         prefer=None,
     )
