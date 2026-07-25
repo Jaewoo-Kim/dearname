@@ -4922,7 +4922,7 @@
                 <option value="general">일반 문의</option>
                 <option value="complaint">불만·컴플레인</option>
             </select>
-            <select id="inquiry-category" onchange="_onInquiryCategoryChange()" style="flex:1;display:none;">
+            <select id="inquiry-category" onchange="_onInquiryCategoryChange()" style="flex:1;" disabled>
                 <option value="quality">소견서 품질</option>
                 <option value="payment">결제·환불</option>
                 <option value="service">응대 불만</option>
@@ -10121,7 +10121,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const typeEl = document.getElementById('inquiry-type');
         const categoryEl = document.getElementById('inquiry-category');
         if (!typeEl || !categoryEl) return;
-        categoryEl.style.display = typeEl.value === 'complaint' ? '' : 'none';
+        categoryEl.disabled = typeEl.value !== 'complaint';
         _updateInquiryOrderVisibility();
     }
 
