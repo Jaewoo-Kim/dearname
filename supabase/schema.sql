@@ -307,17 +307,22 @@ create policy "운영자 조회" on inquiries for select using (auth.role() = 'a
 -- 무엇을 할 수 있는가"(어드민/편집자/뷰어)를 결정한다. 로그인 후 최초 접속 시 행이 없으면
 -- 자동 생성되는데(admin_users가 비어있으면 그 계정이 admin으로 부트스트랩, 이후는 viewer),
 -- 이는 admin_users가 아직 비어있는 배포 초기 1회에만 의미가 있다.
+-- 어드민이 계정을 만들거나 비밀번호를 재설정하면 그 비밀번호를 어드민 본인도 알게 되므로,
+-- must_change_password를 true로 세팅해 로그인 즉시 /account로 강제 이동시켜 본인만 아는
+-- 비밀번호로 바꾸게 한다(middleware.ts 참고).
 create table if not exists admin_users (
-  id            uuid primary key default gen_random_uuid(),
-  email         text unique not null,
-  role          text not null default 'viewer',  -- 'admin' / 'editor' / 'viewer'
-  auth_user_id  uuid,  -- Supabase Auth 사용자 id — 비밀번호 재설정 시 조회용
-  created_at    timestamptz not null default now(),
-  created_by    text,
-  updated_at    timestamptz not null default now(),
-  updated_by    text
+  id                    uuid primary key default gen_random_uuid(),
+  email                 text unique not null,
+  role                  text not null default 'viewer',  -- 'admin' / 'editor' / 'viewer'
+  auth_user_id          uuid,  -- Supabase Auth 사용자 id — 비밀번호 재설정 시 조회용
+  must_change_password  boolean not null default false,  -- true면 어드민이 지정한 비밀번호이므로 최초 로그인 시 본인 비밀번호로 강제 교체
+  created_at            timestamptz not null default now(),
+  created_by            text,
+  updated_at            timestamptz not null default now(),
+  updated_by            text
 );
 alter table admin_users add column if not exists auth_user_id uuid;
+alter table admin_users add column if not exists must_change_password boolean not null default false;
 
 alter table admin_users enable row level security;
 drop policy if exists "운영자 조회" on admin_users;

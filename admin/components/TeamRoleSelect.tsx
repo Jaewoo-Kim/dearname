@@ -178,7 +178,8 @@ export default function TeamRoleSelect({
       )}
       {resetDone && (
         <p className="mt-1 text-xs text-emerald-700">
-          새 비밀번호로 재설정됨: <b>{resetDone}</b> (전달 후 이 메모는 새로고침하면 사라집니다)
+          새 비밀번호로 재설정됨: <b>{resetDone}</b> (전달 후 이 메모는 새로고침하면 사라집니다).
+          다음 로그인 시 본인만 아는 비밀번호로 바꾸도록 자동으로 안내됩니다.
         </p>
       )}
     </div>
