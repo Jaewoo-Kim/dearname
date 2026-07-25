@@ -150,19 +150,25 @@ service_role API로 통제되므로 별도 허용목록이 불필요해졌습니
   길이에 맞춰 결제 모달의 옵션 목록(`.payment-options-group`)을 매번 새로 그립니다 — 그래서
   운영자가 구성을 3개나 5개로 바꿔도 실제 결제 화면에 정확히 그만큼 표시됩니다.
 
-## 고객문의
+## 고객문의 / 컴플레인
 
 본 서비스에 로그인한 고객이 마이페이지에서 문의를 남기고, 어드민에서 응대하는 채널입니다.
-이메일 발송 인프라가 없어 답변은 고객이 마이페이지에 다시 방문했을 때 확인하는 방식입니다.
+고객에게 보내는 답변은 여전히 이메일 발송 인프라가 없어 마이페이지에 다시 방문했을 때 확인하는
+방식이지만, 컴플레인(불만) 접수만은 접수 즉시 운영자에게 이메일로 알립니다(2026-07-25 추가).
 
 - `inquiries` 테이블: `member_id`, 선택적 `report_id`(특정 보고서에 대한 문의일 때), `message`,
-  `status`(`pending`/`answered`), `reply`, `replied_at`, `replied_by`.
-- 본 서비스: `POST /proxy/inquiry`(로그인한 고객이 문의 등록 — `member`를 통해 upsert_member로
-  회원을 먼저 확보), `GET /proxy/inquiry/mine?uid=`(본인 문의+답변 조회, 마이페이지 "고객문의"
-  섹션에서 사용).
-- 어드민: `/inquiries`(기간·상태 필터 목록) → `/inquiries/[id]`(문의 내용 확인 + 답변 작성).
-  답변 저장은 `/api/inquiries/[id]/reply`(service_role)가 처리하며 `status`를 `answered`로
-  바꾸고 `audit_logs`에 기록합니다.
+  `status`(`pending`/`answered`), `reply`, `replied_at`, `replied_by`, `type`(`general`/`complaint`),
+  `category`(컴플레인 사유 — `quality`/`payment`/`service`/`etc`, 일반 문의는 비움),
+  `priority`(`low`/`normal`/`urgent`).
+- 본 서비스: `POST /proxy/inquiry`(로그인한 고객이 문의/컴플레인 등록 — `member`를 통해
+  upsert_member로 회원을 먼저 확보, `type`이 `complaint`면 `lib/notify.py`로 운영자 이메일
+  알림 발송), `GET /proxy/inquiry/mine?uid=`(본인 문의+답변 조회, 마이페이지 "고객문의"
+  섹션에서 사용). 알림용 SMTP 환경변수(`SMTP_HOST`/`SMTP_USER`/`SMTP_PASS`/`ADMIN_ALERT_EMAIL`)
+  미설정 시 알림만 조용히 no-op — 접수 자체는 정상 동작.
+- 어드민: `/inquiries`(기간·상태·유형 필터 목록, "컴플레인" 탭으로 바로 필터링) →
+  `/inquiries/[id]`(문의 내용 + 유형/카테고리 확인 + 답변 작성). 답변 저장은
+  `/api/inquiries/[id]/reply`(service_role)가 처리하며 `status`를 `answered`로 바꾸고
+  `audit_logs`에 기록합니다.
 
 ## 다음 단계
 

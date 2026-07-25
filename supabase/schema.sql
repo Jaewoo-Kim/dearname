@@ -297,6 +297,13 @@ create index if not exists idx_inquiries_created_at on inquiries(created_at);
 create index if not exists idx_inquiries_member_id on inquiries(member_id);
 create index if not exists idx_inquiries_status on inquiries(status);
 
+-- 컴플레인 분류: type='complaint'면 category(불만 사유)·priority(긴급도)를 함께 받아
+-- 어드민 문의함에서 일반 문의와 구분 표시하고, 접수 즉시 운영자에게 이메일로 알린다.
+alter table inquiries add column if not exists type text not null default 'general';  -- 'general' / 'complaint'
+alter table inquiries add column if not exists category text;  -- 컴플레인 사유(품질/결제·환불/응대/기타) — 일반 문의는 비워둠
+alter table inquiries add column if not exists priority text not null default 'normal';  -- 'low' / 'normal' / 'urgent'
+create index if not exists idx_inquiries_type on inquiries(type);
+
 alter table inquiries enable row level security;
 drop policy if exists "운영자 조회" on inquiries;
 create policy "운영자 조회" on inquiries for select using (auth.role() = 'authenticated');

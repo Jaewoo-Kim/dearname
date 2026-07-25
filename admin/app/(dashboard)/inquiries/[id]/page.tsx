@@ -6,6 +6,7 @@ import { formatDate, maskContact, maskName } from '@/lib/format';
 import BackLink from '@/components/BackLink';
 import InquiryReplyForm from '@/components/InquiryReplyForm';
 import type { InquiryRow } from '@/lib/types';
+import { INQUIRY_CATEGORY_LABELS } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,22 @@ export default async function InquiryDetailPage({ params }: { params: { id: stri
       <p className="mt-1 text-sm text-slate-500">
         {formatDate(inquiry.created_at)} · {maskName(inquiry.members?.name)} · {maskContact(inquiry.members?.contact)}
       </p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {inquiry.type === 'complaint' ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700">
+            컴플레인{inquiry.priority === 'urgent' ? ' · 긴급' : ''}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+            일반 문의
+          </span>
+        )}
+        {inquiry.category && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500">
+            {INQUIRY_CATEGORY_LABELS[inquiry.category] || inquiry.category}
+          </span>
+        )}
+      </div>
 
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <h2 className="text-sm font-semibold text-slate-500">문의 내용</h2>

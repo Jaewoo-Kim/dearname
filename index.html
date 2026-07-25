@@ -4102,6 +4102,18 @@
                 </p>
                 <div id="mypage-inquiries" style="margin-bottom:18px;"><!-- JS 동적 생성 --></div>
                 <div style="border-top:1px solid var(--border-light,#e2e8f0);padding-top:16px;">
+                    <div style="display:flex;gap:10px;margin-bottom:10px;">
+                        <select id="inquiry-type" onchange="_onInquiryTypeChange()" style="flex:1;">
+                            <option value="general">일반 문의</option>
+                            <option value="complaint">불만·컴플레인</option>
+                        </select>
+                        <select id="inquiry-category" style="flex:1;display:none;">
+                            <option value="quality">소견서 품질</option>
+                            <option value="payment">결제·환불</option>
+                            <option value="service">응대 불만</option>
+                            <option value="etc">기타</option>
+                        </select>
+                    </div>
                     <input id="inquiry-subject" type="text" placeholder="제목(선택)" style="margin-bottom:10px;">
                     <textarea id="inquiry-message" rows="3" placeholder="문의 내용을 입력해주세요."></textarea>
                     <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
@@ -10063,13 +10075,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 const statusHtml = answered
                     ? `<span style="color:#16a34a;font-weight:700;">답변완료</span>`
                     : `<span style="color:#d97706;font-weight:700;">답변 대기중</span>`;
+                const typeHtml = iq.type === 'complaint'
+                    ? `<span style="display:inline-block;margin-right:6px;padding:2px 8px;border-radius:99px;background:#fef2f2;color:#be123c;font-size:0.75rem;font-weight:700;">컴플레인</span>`
+                    : '';
                 const replyHtml = answered && iq.reply
                     ? `<div style="margin-top:8px;padding:10px 12px;background:var(--bg-subtle,#f8fafc);border-radius:8px;font-size:0.85rem;color:var(--text-secondary);white-space:pre-line;">${iq.reply}</div>`
                     : '';
                 return `
                 <div class="mp-report-row" style="align-items:flex-start;">
                     <div style="flex:1;min-width:0;">
-                        <div style="font-size:0.95rem;font-weight:800;color:var(--bg-dark);">${iq.subject || '(제목 없음)'}</div>
+                        <div style="font-size:0.95rem;font-weight:800;color:var(--bg-dark);">${typeHtml}${iq.subject || '(제목 없음)'}</div>
                         <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">${date} · ${statusHtml}</div>
                         <div style="margin-top:6px;font-size:0.88rem;color:var(--text-secondary);white-space:pre-line;">${iq.message}</div>
                         ${replyHtml}
@@ -10082,8 +10097,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
     }
 
+    function _onInquiryTypeChange() {
+        const typeEl = document.getElementById('inquiry-type');
+        const categoryEl = document.getElementById('inquiry-category');
+        if (!typeEl || !categoryEl) return;
+        categoryEl.style.display = typeEl.value === 'complaint' ? '' : 'none';
+    }
+
     async function _submitInquiry() {
         if (!_dnUser) { openLoginModal(); return; }
+        const typeEl = document.getElementById('inquiry-type');
+        const categoryEl = document.getElementById('inquiry-category');
         const subjectEl = document.getElementById('inquiry-subject');
         const messageEl = document.getElementById('inquiry-message');
         const statusEl  = document.getElementById('inquiry-submit-status');
@@ -10092,6 +10116,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.textContent = '문의 내용을 입력해주세요.'; }
             return;
         }
+        const type = typeEl?.value === 'complaint' ? 'complaint' : 'general';
         if (statusEl) { statusEl.style.color = 'var(--text-secondary)'; statusEl.textContent = '전송 중...'; }
         try {
             const res = await fetch('/proxy/inquiry', {
@@ -10100,7 +10125,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 body: JSON.stringify({
                     member: { uid: _dnUser.uid, name: _dnUser.name, email: _dnUser.email, provider: _dnUser.provider },
                     subject: subjectEl?.value?.trim() || '',
-                    message
+                    message,
+                    type,
+                    category: type === 'complaint' ? (categoryEl?.value || 'etc') : null
                 })
             });
             if (!res.ok) {
@@ -10109,6 +10136,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             }
             if (subjectEl) subjectEl.value = '';
             if (messageEl) messageEl.value = '';
+            if (typeEl) { typeEl.value = 'general'; _onInquiryTypeChange(); }
             if (statusEl) { statusEl.style.color = '#16a34a'; statusEl.textContent = '문의가 접수되었습니다.'; }
             _renderMypageInquiries();
         } catch (e) {
