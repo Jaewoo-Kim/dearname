@@ -522,6 +522,13 @@ def inquiry_submit():
         if not member_row:
             return jsonify({'error': '문의 등록이 설정되지 않았습니다.'}), 503
 
+        order_id = body.get('orderId') or None
+        if order_id:
+            # 본인 결제건만 연결 가능 — 남의 order_id를 임의로 넣지 못하도록 소유권 확인
+            own_order_ids = {o['id'] for o in db.get_orders_by_member(member_row['id'])}
+            if order_id not in own_order_ids:
+                order_id = None
+
         inquiry_row = db.insert_inquiry(
             member_id=member_row['id'],
             message=message[:2000],
@@ -530,6 +537,7 @@ def inquiry_submit():
             type=inquiry_type,
             category=category,
             priority=priority,
+            order_id=order_id,
         )
 
         if inquiry_row and inquiry_type == 'complaint':
@@ -554,6 +562,18 @@ def inquiry_mine():
     if not member:
         return _no_cache(jsonify({'inquiries': []}))
     return _no_cache(jsonify({'inquiries': db.get_inquiries_by_member(member['id'])}))
+
+
+@app.route('/proxy/orders/mine')
+def orders_mine():
+    """로그인한 고객 본인의 결제 내역 조회 (컴플레인 접수 시 관련 결제건 선택 드롭다운용)."""
+    uid = request.args.get('uid', '')
+    if not uid:
+        return _no_cache(jsonify({'orders': []}))
+    member = db.get_member_by_uid(uid)
+    if not member:
+        return _no_cache(jsonify({'orders': []}))
+    return _no_cache(jsonify({'orders': db.get_orders_by_member(member['id'])}))
 
 
 # ── 운영자 설정 조회 (Phase 3 — 가격/점검모드) ──────────────

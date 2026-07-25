@@ -304,6 +304,11 @@ alter table inquiries add column if not exists category text;  -- 컴플레인 �
 alter table inquiries add column if not exists priority text not null default 'normal';  -- 'low' / 'normal' / 'urgent'
 create index if not exists idx_inquiries_type on inquiries(type);
 
+-- 결제·환불 컴플레인이면 어떤 결제건에 대한 것인지 특정할 수 있도록 order_id를 채운다
+-- (report_id와 별개 — 환불은 보고서 없이 결제 자체에 대한 불만일 수 있음).
+alter table inquiries add column if not exists order_id uuid references orders(id);
+create index if not exists idx_inquiries_order_id on inquiries(order_id);
+
 alter table inquiries enable row level security;
 drop policy if exists "운영자 조회" on inquiries;
 create policy "운영자 조회" on inquiries for select using (auth.role() = 'authenticated');

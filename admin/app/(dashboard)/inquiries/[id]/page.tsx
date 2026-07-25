@@ -28,15 +28,22 @@ export default async function InquiryDetailPage({ params }: { params: { id: stri
     <div className="max-w-2xl">
       <BackLink href="/inquiries" label="고객문의 목록으로" />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           {inquiry.subject || '제목 없음'}
         </h1>
-        {inquiry.report_id && (
-          <Link href={`/reports/${inquiry.report_id}`} className="text-sm text-brand-700 hover:underline">
-            연결 보고서 보기 →
-          </Link>
-        )}
+        <div className="flex shrink-0 items-center gap-3">
+          {inquiry.order_id && (
+            <Link href={`/orders/${inquiry.order_id}`} className="text-sm text-brand-700 hover:underline">
+              연결 결제건 보기 →
+            </Link>
+          )}
+          {inquiry.report_id && (
+            <Link href={`/reports/${inquiry.report_id}`} className="text-sm text-brand-700 hover:underline">
+              연결 보고서 보기 →
+            </Link>
+          )}
+        </div>
       </div>
       <p className="mt-1 text-sm text-slate-500">
         {formatDate(inquiry.created_at)} · {maskName(inquiry.members?.name)} · {maskContact(inquiry.members?.contact)}
