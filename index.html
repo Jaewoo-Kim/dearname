@@ -2810,6 +2810,7 @@
             <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('report').scrollIntoView();}, 100);">보고서 미리보기</a>
             <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('theory').scrollIntoView();}, 100);">작명 기준</a>
             <a onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('self-naming').scrollIntoView();}, 100);">셀프 작명</a>
+            <a onclick="closeMobileMenu(); openComplaintModal();">고객센터</a>
             <div class="nav-cta-row">
                 <a class="premium-link" onclick="closeMobileMenu(); showMainView(); setTimeout(()=>{document.getElementById('premium').scrollIntoView();}, 100);">프리미엄 의뢰</a>
                 <a class="login-link" onclick="closeMobileMenu(); openLoginModal()">로그인</a>
@@ -4098,29 +4099,10 @@
                 <span class="mp-section-tag">고객문의</span>
                 <h2 class="mp-section-title" style="margin-top:8px;">고객문의</h2>
                 <p style="font-size:0.85rem;color:var(--text-secondary);margin:6px 0 16px;">
-                    보고서 내용에 대한 요청이나 궁금한 점을 남겨주시면 운영팀이 확인 후 답변드립니다.
+                    보고서 내용에 대한 요청이나 궁금한 점, 불편하신 점을 남겨주시면 운영팀이 확인 후 답변드립니다.
                 </p>
                 <div id="mypage-inquiries" style="margin-bottom:18px;"><!-- JS 동적 생성 --></div>
-                <div style="border-top:1px solid var(--border-light,#e2e8f0);padding-top:16px;">
-                    <div style="display:flex;gap:10px;margin-bottom:10px;">
-                        <select id="inquiry-type" onchange="_onInquiryTypeChange()" style="flex:1;">
-                            <option value="general">일반 문의</option>
-                            <option value="complaint">불만·컴플레인</option>
-                        </select>
-                        <select id="inquiry-category" style="flex:1;display:none;">
-                            <option value="quality">소견서 품질</option>
-                            <option value="payment">결제·환불</option>
-                            <option value="service">응대 불만</option>
-                            <option value="etc">기타</option>
-                        </select>
-                    </div>
-                    <input id="inquiry-subject" type="text" placeholder="제목(선택)" style="margin-bottom:10px;">
-                    <textarea id="inquiry-message" rows="3" placeholder="문의 내용을 입력해주세요."></textarea>
-                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
-                        <button class="mp-btn mp-btn-gold" onclick="_submitInquiry()">문의 보내기</button>
-                        <span id="inquiry-submit-status" style="font-size:0.82rem;"></span>
-                    </div>
-                </div>
+                <button class="mp-btn mp-btn-gold" onclick="openComplaintModal()">문의·컴플레인 남기기</button>
             </div>
 
             <div style="text-align:center;margin-top:60px;">
@@ -4927,6 +4909,32 @@
         <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:14px;text-align:center;">
             ※ 이메일 발송 기능은 곧 서비스 예정입니다
         </p>
+    </div>
+</div>
+
+<div id="complaint-modal" class="modal-overlay" style="z-index:var(--z-modal);">
+    <div class="modal-content" style="max-width:440px;padding:44px 40px;text-align:left;">
+        <button class="close-modal" onclick="closeComplaintModal()" aria-label="문의 창 닫기">&times;</button>
+        <div style="font-size:1.6rem;font-weight:900;color:var(--bg-dark);margin-bottom:8px;">고객센터</div>
+        <p style="color:var(--text-secondary);font-size:0.92rem;margin:0 0 24px;">궁금한 점이나 불편하신 점을 남겨주시면 운영팀이 확인 후 답변드립니다.</p>
+        <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <select id="inquiry-type" onchange="_onInquiryTypeChange()" style="flex:1;">
+                <option value="general">일반 문의</option>
+                <option value="complaint">불만·컴플레인</option>
+            </select>
+            <select id="inquiry-category" style="flex:1;display:none;">
+                <option value="quality">소견서 품질</option>
+                <option value="payment">결제·환불</option>
+                <option value="service">응대 불만</option>
+                <option value="etc">기타</option>
+            </select>
+        </div>
+        <input id="inquiry-subject" type="text" placeholder="제목(선택)" style="margin-bottom:10px;">
+        <textarea id="inquiry-message" rows="4" placeholder="내용을 입력해주세요."></textarea>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:14px;">
+            <button class="btn btn-gold" onclick="_submitInquiry()">보내기</button>
+            <span id="inquiry-submit-status" style="font-size:0.82rem;"></span>
+        </div>
     </div>
 </div>
 
@@ -9764,6 +9772,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function closeEmailModal() {
         document.getElementById('email-modal').style.display = 'none';
     }
+    // ================================================================
+    // 고객센터(문의·컴플레인) 팝업
+    // ================================================================
+    function openComplaintModal() {
+        document.getElementById('complaint-modal').style.display = 'flex';
+    }
+    function closeComplaintModal() {
+        document.getElementById('complaint-modal').style.display = 'none';
+    }
+
     function sendReportEmail() {
         const email = document.getElementById('email-send-input').value.trim();
         if (!email || !email.includes('@')) { _showToast('올바른 이메일을 입력해주세요.'); return; }
@@ -10137,7 +10155,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if (subjectEl) subjectEl.value = '';
             if (messageEl) messageEl.value = '';
             if (typeEl) { typeEl.value = 'general'; _onInquiryTypeChange(); }
-            if (statusEl) { statusEl.style.color = '#16a34a'; statusEl.textContent = '문의가 접수되었습니다.'; }
+            if (statusEl) { statusEl.style.color = ''; statusEl.textContent = ''; }
+            closeComplaintModal();
+            _showToast('문의가 접수되었습니다.');
             _renderMypageInquiries();
         } catch (e) {
             if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.textContent = '네트워크 오류로 전송하지 못했습니다.'; }
