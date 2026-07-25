@@ -6,6 +6,7 @@ import { useState } from 'react';
 import {
   BarChart3,
   FileText,
+  KeyRound,
   LanguagesIcon,
   LineChart,
   LogOut,
@@ -137,15 +138,25 @@ export default function Sidebar({
           <span className="mt-1 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
             {ROLE_LABEL[role]}
           </span>
-          <form action="/auth/signout" method="post" className="mt-2">
-            <button
-              type="submit"
+          <div className="mt-2 flex items-center gap-3">
+            <Link
+              href="/account"
+              onClick={() => setOpen(false)}
               className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-slate-700"
             >
-              <LogOut className="h-3.5 w-3.5" />
-              로그아웃
-            </button>
-          </form>
+              <KeyRound className="h-3.5 w-3.5" />
+              비밀번호 변경
+            </Link>
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-slate-700"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                로그아웃
+              </button>
+            </form>
+          </div>
         </div>
       </aside>
     </>

@@ -302,19 +302,22 @@ drop policy if exists "운영자 조회" on inquiries;
 create policy "운영자 조회" on inquiries for select using (auth.role() = 'authenticated');
 
 -- ── admin_users — 어드민 계정 등급(역할) 관리 ─────────────────────────
--- 로그인 자체는 여전히 Supabase 매직링크 + ADMIN_ALLOWED_EMAILS(Vercel 환경변수) 허용목록으로
--- 통제된다. 이 테이블은 "로그인된 계정이 무엇을 할 수 있는가"(어드민/편집자/뷰어)를 결정한다.
--- 최초 로그인 시 app/auth/callback/route.ts가 자동으로 행을 만든다 — 테이블이 비어있으면
--- 그 첫 계정이 admin이 되고(부트스트랩), 이후 신규 계정은 안전하게 viewer로 시작한다.
+-- 로그인은 이메일+비밀번호(Supabase Auth)로 하고, 계정 자체는 어드민이 /team 화면에서
+-- service_role API로 직접 생성한다(자기 자신 가입 불가) — 이 테이블은 "로그인된 계정이
+-- 무엇을 할 수 있는가"(어드민/편집자/뷰어)를 결정한다. 로그인 후 최초 접속 시 행이 없으면
+-- 자동 생성되는데(admin_users가 비어있으면 그 계정이 admin으로 부트스트랩, 이후는 viewer),
+-- 이는 admin_users가 아직 비어있는 배포 초기 1회에만 의미가 있다.
 create table if not exists admin_users (
-  id          uuid primary key default gen_random_uuid(),
-  email       text unique not null,
-  role        text not null default 'viewer',  -- 'admin' / 'editor' / 'viewer'
-  created_at  timestamptz not null default now(),
-  created_by  text,
-  updated_at  timestamptz not null default now(),
-  updated_by  text
+  id            uuid primary key default gen_random_uuid(),
+  email         text unique not null,
+  role          text not null default 'viewer',  -- 'admin' / 'editor' / 'viewer'
+  auth_user_id  uuid,  -- Supabase Auth 사용자 id — 비밀번호 재설정 시 조회용
+  created_at    timestamptz not null default now(),
+  created_by    text,
+  updated_at    timestamptz not null default now(),
+  updated_by    text
 );
+alter table admin_users add column if not exists auth_user_id uuid;
 
 alter table admin_users enable row level security;
 drop policy if exists "운영자 조회" on admin_users;

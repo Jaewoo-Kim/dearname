@@ -1,6 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { isAllowedEmail } from '@/lib/authz';
 
 export async function middleware(request: NextRequest) {
   // 세션 쿠키는 JWT 크기 탓에 sb-*-auth-token.0/.1/... 여러 조각으로 나뉘어 set()이
@@ -34,22 +33,22 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isPublic = pathname.startsWith('/login') || pathname.startsWith('/auth');
 
-  const isAllowed = isAllowedEmail(user?.email);
-
-  if (!isAllowed && !isPublic) {
+  // 로그인 여부만 확인한다 — 계정 자체가 어드민이 service_role API로 직접 만든
+  // 것만 존재하므로(자가 가입 불가), 로그인됐다는 것 자체가 이미 어드민이 승인한
+  // 계정이라는 뜻이다. 세부 권한(등급)은 각 화면·API에서 admin_users로 별도 확인한다.
+  if (!user && !isPublic) {
     // API 라우트는 HTML 리다이렉트 대신 JSON 401을 내려줘야 fetch() 호출부가 정확히 처리할 수 있다.
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    if (user) url.searchParams.set('error', 'not_allowed');
     return NextResponse.redirect(url);
   }
 
-  if (isAllowed && pathname.startsWith('/login')) {
+  if (user && pathname.startsWith('/login')) {
     const url = request.nextUrl.clone();
-    url.pathname = '/orders';
+    url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 

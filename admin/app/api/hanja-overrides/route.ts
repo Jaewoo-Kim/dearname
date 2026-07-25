@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/serviceRole';
-import { isAllowedEmail } from '@/lib/authz';
 import { fetchRole } from '@/lib/adminUser';
 import { canWrite } from '@/lib/roles';
 
@@ -13,8 +12,8 @@ export async function POST(request: Request) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!isAllowedEmail(user?.email)) {
-    return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  if (!user) {
+    return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
   }
   if (!canWrite(await fetchRole(supabase, user!.email!))) {
     return NextResponse.json({ error: '조회 권한만 있어 한자 DB를 수정할 수 없습니다.' }, { status: 403 });
@@ -67,8 +66,8 @@ export async function DELETE(request: Request) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!isAllowedEmail(user?.email)) {
-    return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  if (!user) {
+    return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
   }
   if (!canWrite(await fetchRole(supabase, user!.email!))) {
     return NextResponse.json({ error: '조회 권한만 있어 한자 DB를 수정할 수 없습니다.' }, { status: 403 });
