@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Save } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const MIN_PASSWORD_LENGTH = 8;
 
 export default function ChangePasswordForm() {
+  const router = useRouter();
+  const forced = useSearchParams().get('forced') === '1';
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -36,13 +39,26 @@ export default function ChangePasswordForm() {
       return;
     }
 
+    // admin_users는 service_role 전용 update 정책이라 본인이라도 직접 갱신할 수
+    // 없다 — 서버 라우트를 통해 강제변경 플래그만 해제한다.
+    await fetch('/api/account/password-changed', { method: 'POST' });
+
     setPassword('');
     setConfirm('');
     setStatus('saved');
+    if (forced) {
+      router.replace('/account');
+      router.refresh();
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="max-w-sm space-y-3">
+      {forced && (
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          어드민이 지정한 비밀번호로 로그인하셨습니다. 본인만 아는 비밀번호로 바꿔주세요.
+        </p>
+      )}
       <div>
         <label className="text-sm font-medium text-slate-700">새 비밀번호</label>
         <input

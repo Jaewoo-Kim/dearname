@@ -52,6 +52,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 어드민이 지정한 비밀번호로 로그인한 계정(신규 생성/재설정 직후)은 어드민도 그
+  // 비밀번호를 알고 있으므로, 본인만 아는 비밀번호로 바꾸기 전까지 /account 외 화면
+  // 접근을 막는다. API 라우트는 각자의 권한 검사를 그대로 따른다.
+  if (user && !isPublic && !pathname.startsWith('/account') && !pathname.startsWith('/api/')) {
+    const { data: adminUser } = await supabase
+      .from('admin_users')
+      .select('must_change_password')
+      .eq('email', (user.email || '').toLowerCase())
+      .maybeSingle();
+
+    if (adminUser?.must_change_password) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/account';
+      url.searchParams.set('forced', '1');
+      return NextResponse.redirect(url);
+    }
+  }
+
   return response;
 }
 

@@ -56,6 +56,7 @@ export default function AddAdminUserForm() {
       <p className="mt-1 text-xs text-slate-400">
         이메일·비밀번호·등급으로 바로 로그인 가능한 계정을 만듭니다. 생성한 비밀번호는
         나중에 다시 볼 수 없으니 아래에 표시될 때 안전하게 전달해주세요(예: 사내 메신저).
+        최초 로그인 시 본인만 아는 비밀번호로 바꾸도록 자동으로 안내됩니다.
       </p>
 
       {created && (
@@ -64,6 +65,7 @@ export default function AddAdminUserForm() {
           <p className="mt-1 text-emerald-700">
             이메일: <b>{created.email}</b> · 비밀번호: <b>{created.password}</b>
           </p>
+          <p className="mt-1 text-emerald-600">최초 로그인 시 비밀번호 변경 화면으로 자동 이동합니다.</p>
         </div>
       )}
 

@@ -124,6 +124,7 @@ export interface AdminUserRow {
   email: string;
   role: 'admin' | 'editor' | 'viewer';
   auth_user_id: string | null;
+  must_change_password: boolean;
   created_at: string;
   created_by: string | null;
   updated_at: string;

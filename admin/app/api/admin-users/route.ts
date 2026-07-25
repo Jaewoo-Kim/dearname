@@ -76,7 +76,9 @@ export async function POST(request: Request) {
     auth_user_id: authUserId,
     updated_at: nowIso,
     updated_by: user!.email,
-    ...(existing ? {} : { created_by: user!.email }),
+    // 신규 계정은 어드민이 지정한 비밀번호를 어드민 본인도 알고 있으므로, 최초 로그인 시
+    // 본인만 아는 비밀번호로 바꾸도록 강제한다. 기존 계정의 등급만 바꾸는 경우는 그대로 둔다.
+    ...(existing ? {} : { created_by: user!.email, must_change_password: true }),
   });
 
   if (error) {

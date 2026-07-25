@@ -42,6 +42,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `비밀번호 재설정 실패: ${error.message}` }, { status: 500 });
   }
 
+  // 어드민이 새 비밀번호를 지정했으므로 어드민 본인도 알고 있다 — 다음 로그인 시
+  // 본인만 아는 비밀번호로 바꾸도록 강제한다.
+  await db.from('admin_users').update({ must_change_password: true }).eq('email', email);
+
   await db.from('audit_logs').insert({
     actor: user!.email,
     action: 'reset_admin_password',
