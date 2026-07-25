@@ -201,11 +201,18 @@ from t_orders
 where status = 'paid';
 
 -- ── inquiries (고객문의 + 컴플레인) ──────────────────────────────────
-insert into inquiries (created_at, member_id, report_id, subject, message, status, reply, replied_at, replied_by, type, category, priority)
+-- 결제·환불(category='payment') 컴플레인은 어떤 결제건에 대한 것인지 order_id로
+-- 특정한다. "select ... where o2.member_id = m.id"는 바깥 행(m.id)과 상관관계가
+-- 있는 서브쿼리라서(위 member_id/이름 뽑기와 달리) 플래너가 매번 새로 평가한다.
+insert into inquiries (created_at, member_id, report_id, order_id, subject, message, status, reply, replied_at, replied_by, type, category, priority)
 select
   m.created_at + interval '5 days',
   m.id,
   null,
+  case when category = 'payment'
+    then (select o2.id from orders o2 where o2.member_id = m.id order by random() limit 1)
+    else null
+  end,
   subj,
   msg,
   st,
