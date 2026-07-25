@@ -14,6 +14,7 @@ export const ACTION_LABEL: Record<string, string> = {
   add_admin_user: '어드민 계정 추가',
   update_admin_role: '어드민 등급 변경',
   remove_admin_user: '어드민 계정 삭제',
+  reset_admin_password: '어드민 비밀번호 재설정',
 };
 
 const TARGET_LABEL: Record<string, string> = {

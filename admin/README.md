@@ -6,7 +6,7 @@ DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2(전�
 ## 구성
 
 - Next.js 14 (App Router) + Tailwind + Recharts
-- Supabase Auth(매직 링크) + Postgres(RLS + 매출/AI비용 집계 뷰)
+- Supabase Auth(이메일+비밀번호, 자가 가입 없이 어드민이 계정을 직접 생성) + Postgres(RLS + 매출/AI비용 집계 뷰)
 - 화면: 대시보드(월/연 전환 + 월·연 선택 + 매출 추이 12개월 고정·상품 비중·결제수단 그래프) /
   주문·결제(기간 필터+목록+통합 상세, 환불) / 보고서(기간 필터+목록+상세, 재발급(생성권 부여)·열기,
   특별 요청사항 표시) / 고객문의(기간·상태 필터+목록+상세 응대) / 회원(기간 필터+목록+상세, 환불) /
@@ -23,16 +23,27 @@ DearName 운영 어드민. `admin_site_plan.md` STEP 3~7(Phase 1) + Phase 2(전�
 ```bash
 cd admin
 npm install
-cp .env.example .env.local   # Supabase URL/키, 허용 이메일, 환불용 시크릿 입력
+cp .env.example .env.local   # Supabase URL/키, 환불용 시크릿 입력
 npm run dev
 ```
 
 사전 준비: 저장소 루트의 `supabase/schema.sql`을 Supabase SQL 편집기에서 실행해 테이블·RLS를 만들어야 합니다.
 
-## 로그인
+## 로그인 · 계정 관리 (Phase 4)
 
-이메일 매직 링크 방식입니다. `ADMIN_ALLOWED_EMAILS`(쉼표 구분)에 등록된 이메일만 로그인 후 화면 접근이 허용됩니다.
-비워두면 개발 편의상 로그인한 모든 계정을 허용하므로, 운영 배포 전 반드시 값을 채우세요.
+이메일+비밀번호 방식이며 자가 가입은 불가능합니다 — 어드민만 `/team` 화면에서 새 계정(이메일·
+초기 비밀번호·등급)을 만들 수 있고, 그 자격 증명 자체가 로그인 가능 여부를 결정합니다(과거의
+`ADMIN_ALLOWED_EMAILS` 환경변수 허용목록은 더 이상 쓰지 않습니다 — 계정 생성 자체가
+service_role API로 통제되므로 별도 허용목록이 불필요해졌습니다).
+
+- 최초 배포 시 `admin_users` 테이블이 비어있으면, 그 상태에서 처음 로그인하는 계정이 자동으로
+  어드민이 됩니다(부트스트랩). 그 계정은 Supabase 대시보드(Authentication → Users → Add user)에서
+  이메일+비밀번호로 직접 만들어야 합니다 — 이후 신규 팀원은 `/team`에서 어드민이 만들면 됩니다.
+- 등급: 어드민(등급 관리+운영 관리 즉시 반영+승인), 편집자(대부분의 쓰기 작업 가능, 운영
+  관리 변경은 어드민 승인 필요), 뷰어(조회만).
+- `/team`에서 계정 추가·등급 변경·비밀번호 강제 재설정·계정 삭제(Supabase Auth 사용자까지 함께
+  삭제)가 가능합니다. 각 계정은 `/account`에서 본인 비밀번호를 스스로 바꿀 수 있습니다.
+- 모든 쓰기 API가 서버에서 로그인 여부(401)와 등급(403)을 재검증합니다.
 
 ## 환불
 
@@ -88,15 +99,15 @@ npm run dev
 ## 배포 (Vercel)
 
 이 저장소를 Vercel에 연결할 때 **Root Directory를 `admin`으로 지정**합니다.
-필요한 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ADMIN_ALLOWED_EMAILS`,
+필요한 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
 `SUPABASE_SERVICE_ROLE_KEY`, `TOSS_SECRET_KEY`(실결제 전환 시), `NEXT_PUBLIC_DEARNAME_SITE_URL`.
 
 ## 전환율 퍼널 · AI 비용 (Phase 2)
 
 - 본 서비스가 `self_done`(셀프분석 완료) / `premium_view`(프리미엄 요청) / `checkout_start`(결제 모달 오픈) 시점에
   `/proxy/event`로 이벤트를 기록하고, `paid`는 `/proxy/toss/verify` 성공 시 서버가 직접 기록한다.
-- `/funnel` 화면은 네 단계의 건수와 이전 단계 대비 전환율을 보여준다.
-- `/ai-usage` 화면은 `ai_cost_daily` 뷰(일자·모델·kind별 집계)를 조회해 최근 14일 비용 추이와 모델별 비용을 보여준다.
+- `/analytics`(전환율 퍼널)는 네 단계의 건수와 이전 단계 대비 전환율을 보여준다.
+- `/analytics/ai-usage`는 `ai_cost_daily` 뷰(일자·모델·kind별 집계)를 조회해 최근 14일 비용 추이와 모델별 비용을 보여준다.
 
 ## 한자 DB 수정
 

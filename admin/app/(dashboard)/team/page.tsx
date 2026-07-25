@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentAdminUser } from '@/lib/adminUser';
-import { ROLE_LABEL } from '@/lib/roles';
 import { formatDate } from '@/lib/format';
 import PageHeader from '@/components/PageHeader';
 import SubTabs from '@/components/SubTabs';
@@ -74,10 +73,6 @@ export default async function TeamPage() {
               </table>
             </div>
           )}
-          <p className="mt-3 text-xs text-slate-400">
-            등급({Object.values(ROLE_LABEL).join(' / ')})을 지정해도 실제 로그인이 되려면 Vercel의
-            ADMIN_ALLOWED_EMAILS 환경변수에도 같은 이메일이 포함되어 있어야 합니다.
-          </p>
         </section>
       </div>
     </div>

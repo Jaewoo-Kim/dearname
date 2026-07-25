@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/serviceRole';
-import { isAllowedEmail } from '@/lib/authz';
 import { fetchRole } from '@/lib/adminUser';
 import { isValidRole } from '@/lib/roles';
 
-// 어드민 계정 등급(admin/editor/viewer) 관리. 어드민만 다른 계정의 등급을 지정할 수 있다.
-// 로그인 가능 여부 자체는 여전히 Vercel의 ADMIN_ALLOWED_EMAILS 환경변수가 결정하므로,
-// 여기서 계정을 추가/등급 지정해도 그 이메일이 허용목록에 없으면 실제로 로그인할 수 없다.
+// 어드민 계정 관리. 로그인 자체가 이메일+비밀번호(Supabase Auth)이고, 계정 자체를
+// 자가 가입 없이 여기서만 만들 수 있다 — 어드민만 새 계정(비밀번호 포함)을 만들거나
+// 등급을 지정하거나 삭제할 수 있다.
+const MIN_PASSWORD_LENGTH = 8;
+
 async function countAdmins(db: ReturnType<typeof createServiceRoleClient>): Promise<number> {
   const { count } = await db.from('admin_users').select('id', { count: 'exact', head: true }).eq('role', 'admin');
   return count || 0;
@@ -17,8 +18,8 @@ export async function POST(request: Request) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!isAllowedEmail(user?.email)) {
-    return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  if (!user) {
+    return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
   }
   const myRole = await fetchRole(supabase, user!.email!);
   if (myRole !== 'admin') {
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   const role = body.role;
+  const password = typeof body.password === 'string' ? body.password : '';
 
   if (!email || !email.includes('@')) {
     return NextResponse.json({ error: '올바른 이메일을 입력해주세요.' }, { status: 400 });
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
 
   const db = createServiceRoleClient();
 
-  const { data: existing } = await db.from('admin_users').select('id, role').eq('email', email).maybeSingle();
+  const { data: existing } = await db.from('admin_users').select('id, role, auth_user_id').eq('email', email).maybeSingle();
 
   // 마지막 남은 어드민을 강등시키면 아무도 등급을 관리할 수 없게 되므로 막는다.
   if (existing?.role === 'admin' && role !== 'admin') {
@@ -48,11 +50,30 @@ export async function POST(request: Request) {
     }
   }
 
+  let authUserId = existing?.auth_user_id ?? null;
+
+  // 신규 계정은 실제 로그인이 가능한 Supabase Auth 사용자를 함께 만들어야 한다.
+  if (!existing) {
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return NextResponse.json({ error: `비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상이어야 합니다.` }, { status: 400 });
+    }
+    const { data: created, error: createError } = await db.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (createError || !created.user) {
+      return NextResponse.json({ error: `계정 생성 실패: ${createError?.message || '알 수 없는 오류'}` }, { status: 500 });
+    }
+    authUserId = created.user.id;
+  }
+
   const nowIso = new Date().toISOString();
   const { error } = await db.from('admin_users').upsert({
     id: existing?.id,
     email,
     role,
+    auth_user_id: authUserId,
     updated_at: nowIso,
     updated_by: user!.email,
     ...(existing ? {} : { created_by: user!.email }),
@@ -77,8 +98,8 @@ export async function DELETE(request: Request) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!isAllowedEmail(user?.email)) {
-    return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 });
+  if (!user) {
+    return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
   }
   const myRole = await fetchRole(supabase, user!.email!);
   if (myRole !== 'admin') {
@@ -97,7 +118,7 @@ export async function DELETE(request: Request) {
 
   const db = createServiceRoleClient();
 
-  const { data: existing } = await db.from('admin_users').select('id, role').eq('email', email).maybeSingle();
+  const { data: existing } = await db.from('admin_users').select('id, role, auth_user_id').eq('email', email).maybeSingle();
   if (!existing) {
     return NextResponse.json({ error: '계정을 찾을 수 없습니다.' }, { status: 404 });
   }
@@ -106,6 +127,12 @@ export async function DELETE(request: Request) {
     if (admins <= 1) {
       return NextResponse.json({ error: '마지막 남은 어드민은 삭제할 수 없습니다.' }, { status: 400 });
     }
+  }
+
+  // admin_users 행만 지우면 실제 로그인 계정(비밀번호)은 그대로 남아 다시 로그인할 수
+  // 있으므로, 로그인 자체를 막으려면 Supabase Auth 사용자도 함께 삭제해야 한다.
+  if (existing.auth_user_id) {
+    await db.auth.admin.deleteUser(existing.auth_user_id);
   }
 
   const { error } = await db.from('admin_users').delete().eq('email', email);

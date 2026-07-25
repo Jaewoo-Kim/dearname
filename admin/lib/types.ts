@@ -123,6 +123,7 @@ export interface AdminUserRow {
   id: string;
   email: string;
   role: 'admin' | 'editor' | 'viewer';
+  auth_user_id: string | null;
   created_at: string;
   created_by: string | null;
   updated_at: string;
