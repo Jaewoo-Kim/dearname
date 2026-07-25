@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { fetchRole } from '@/lib/adminUser';
 import PageHeader from '@/components/PageHeader';
+import SubTabs from '@/components/SubTabs';
 import PricingSettingsForm from '@/components/PricingSettingsForm';
 import MaintenanceSettingsForm from '@/components/MaintenanceSettingsForm';
 import PendingSettingsApprovals from '@/components/PendingSettingsApprovals';
@@ -70,6 +71,16 @@ export default async function SettingsPage() {
             : '본 서비스의 가격과 점검 모드를 관리합니다. 저장하면 실제 사이트에 바로 반영됩니다.'
         }
       />
+      {role === 'admin' && (
+        <SubTabs
+          active="/settings"
+          tabs={[
+            { href: '/settings', label: '운영 설정' },
+            { href: '/settings/team', label: '계정 관리' },
+            { href: '/settings/audit-logs', label: '감사 로그' },
+          ]}
+        />
+      )}
 
       <div className="space-y-4">
         {role === 'admin' && <PendingSettingsApprovals items={pendingChanges} />}
