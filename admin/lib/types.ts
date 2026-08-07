@@ -38,6 +38,19 @@ export interface Report {
   score: number | null;
   report_json: unknown;
   special_request: string | null;
+  last_viewed_at: string | null;
+}
+
+// 보고서 링크 메일 발송 이력 — report_email_logs 테이블
+export interface ReportEmailLogRow {
+  id: string;
+  created_at: string;
+  report_id: string | null;
+  member_id: string | null;
+  to_email: string;
+  status: 'sent' | 'failed';
+  error: string | null;
+  sent_by: string | null;  // null이면 고객 본인이 마이페이지에서 발송한 건
 }
 
 // STEP 7 대시보드 — supabase/schema.sql의 revenue_daily/monthly/yearly 뷰

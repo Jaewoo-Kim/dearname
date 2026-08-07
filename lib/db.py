@@ -240,6 +240,34 @@ def get_orders_by_member(member_id):
     return rows or []
 
 
+def insert_report_email_log(report_id, member_id, to_email, status, error=None, sent_by=None):
+    """보고서 링크 메일 발송 이력 기록. 실패도 남겨야 분쟁 시 원인을 구분할 수 있다."""
+    if not report_id or not to_email:
+        return None
+    body = {
+        'report_id': report_id,
+        'member_id': member_id or None,
+        'to_email': to_email,
+        'status': status,
+        'error': (error or None) and str(error)[:500],
+        'sent_by': sent_by or None,
+    }
+    rows = _request('POST', 'report_email_logs', body=body)
+    return _first(rows)
+
+
+def touch_report_viewed(report_id):
+    """보고서를 링크로 열람한 시각을 기록한다(마지막 열람 시각만 갱신)."""
+    if not report_id:
+        return None
+    rows = _request(
+        'PATCH', 'reports',
+        body={'last_viewed_at': datetime.now(timezone.utc).isoformat()},
+        params={'id': f'eq.{report_id}'},
+    )
+    return _first(rows)
+
+
 def get_reports_by_uid(uid):
     """
     고객 본인의 AI 보고서 조회 (마이페이지 재열람용). 최신순.

@@ -13,7 +13,7 @@
 #   GEMINI_API_KEY    — Google Gemini API (채팅 상담용, 무료 티어)
 #   PORT              — 기본 3000
 
-import os, json, re, sys
+import os, json, re, sys, hmac
 from pathlib import Path
 
 # .env 파일 자동 로드 (로컬 개발용)
@@ -605,9 +605,63 @@ def report_email():
 
         report_url = f"{request.host_url.rstrip('/')}/report-view.html?id={report_id}"
         ok = notify.send_report_link(email, report_url, target.get('baby_name_kr') or '')
+
+        # 성공·실패 모두 남긴다 — "메일이 안 왔다"는 문의에서 발송 자체가 실패한 것인지
+        # 보냈는데 고객이 못 찾은 것인지를 운영자가 구분할 수 있어야 한다.
+        member = db.get_member_by_uid(uid)
+        db.insert_report_email_log(
+            report_id=report_id,
+            member_id=(member or {}).get('id'),
+            to_email=email,
+            status='sent' if ok else 'failed',
+            error=None if ok else '메일 발송 실패(발송 설정 미비 또는 SMTP 오류)',
+        )
+
         if not ok:
             return jsonify({'error': '메일 발송이 아직 설정되지 않았습니다. 아래 링크를 저장해 주세요.',
                             'reportUrl': report_url}), 503
+        return jsonify({'status': 'ok', 'reportUrl': report_url})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/proxy/report/email/admin', methods=['POST'])
+def report_email_admin():
+    """운영자가 어드민에서 보고서 링크를 재발송한다.
+    어드민(Next.js)과 본 서비스(Flask)는 별도 배포라 공유 시크릿으로 호출자를 확인한다.
+    ADMIN_API_SECRET 미설정 시에는 아예 비활성(503)이라 실수로 열려 있을 일이 없다."""
+    secret = os.environ.get('ADMIN_API_SECRET', '')
+    if not secret:
+        return jsonify({'error': 'ADMIN_API_SECRET이 설정되지 않아 재발송이 비활성화되어 있습니다.'}), 503
+    if not hmac.compare_digest(request.headers.get('X-Admin-Secret', ''), secret):
+        return jsonify({'error': '인증되지 않은 요청입니다.'}), 401
+
+    try:
+        body = request.get_json(force=True)
+        report_id = (body.get('reportId') or '').strip()
+        email = (body.get('email') or '').strip()
+        sent_by = (body.get('sentBy') or '').strip() or None
+        if not report_id or '@' not in email:
+            return jsonify({'error': '보고서 id와 이메일 주소가 필요합니다.'}), 400
+
+        report_row = db.get_report(report_id)
+        if not report_row:
+            return jsonify({'error': '보고서를 찾을 수 없습니다.'}), 404
+
+        report_url = f"{request.host_url.rstrip('/')}/report-view.html?id={report_id}"
+        ok = notify.send_report_link(email, report_url, report_row.get('baby_name_kr') or '')
+
+        db.insert_report_email_log(
+            report_id=report_id,
+            member_id=None,
+            to_email=email,
+            status='sent' if ok else 'failed',
+            error=None if ok else '메일 발송 실패(발송 설정 미비 또는 SMTP 오류)',
+            sent_by=sent_by,
+        )
+        if not ok:
+            return jsonify({'error': '메일 발송에 실패했습니다. SMTP 설정을 확인해 주세요.',
+                            'reportUrl': report_url}), 502
         return jsonify({'status': 'ok', 'reportUrl': report_url})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -757,6 +811,8 @@ def report_get(report_id):
     report_row = db.get_report(report_id)
     if not report_row:
         return jsonify({'error': '보고서를 찾을 수 없습니다.'}), 404
+    # 링크로 실제 열람했다는 근거를 남긴다(마지막 열람 시각). 실패해도 열람은 막지 않는다.
+    db.touch_report_viewed(report_id)
     return jsonify({'status': 'ok', 'report': report_row})
 
 
