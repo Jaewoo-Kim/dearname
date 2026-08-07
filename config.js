@@ -34,7 +34,7 @@
     window.DN_CONFIG = {
         serviceName:  'DearName',
         companyName:  'Crazystudio Co.',
-        supportEmail: 'support@dearname.kr',
+        supportEmail: 'cs.crazystudio@gmail.com',
         version:      'v2.0.0',
         buildDate:    '2026-04-04',
     };
