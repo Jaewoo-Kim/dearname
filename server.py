@@ -711,6 +711,16 @@ def report_view_page():
     return _no_cache(send_file(BASE_DIR / 'report-view.html'))
 
 
+@app.route('/terms.html')
+def terms_page():
+    return _no_cache(send_file(BASE_DIR / 'terms.html'))
+
+
+@app.route('/privacy.html')
+def privacy_page():
+    return _no_cache(send_file(BASE_DIR / 'privacy.html'))
+
+
 if __name__ == '__main__':
     print(f"DearName v2 서버 시작")
     print(f"  주소: http://localhost:{PORT}")
