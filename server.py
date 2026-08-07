@@ -576,6 +576,23 @@ def orders_mine():
     return _no_cache(jsonify({'orders': db.get_orders_by_member(member['id'])}))
 
 
+@app.route('/proxy/account/delete', methods=['POST'])
+def account_delete():
+    """회원탈퇴. 이름·연락처·로그인 식별자를 지우고 계정을 비활성화한다.
+    주문·보고서 등 전자상거래법상 보존이 필요한 거래기록은 회원과의 연결만 남기고 보존된다."""
+    try:
+        body = request.get_json(force=True)
+        uid = (body.get('uid') or '').strip()
+        if not uid:
+            return jsonify({'error': '로그인 정보가 없습니다.'}), 400
+        member_row = db.withdraw_member(uid)
+        if not member_row:
+            return jsonify({'error': '회원탈퇴가 설정되지 않았거나 회원 정보를 찾을 수 없습니다.'}), 503
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # ── 운영자 설정 조회 (Phase 3 — 가격/점검모드) ──────────────
 @app.route('/api/settings')
 def public_settings():

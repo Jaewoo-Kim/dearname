@@ -4070,6 +4070,9 @@
                     </div>
                     <button onclick="_signOut()" class="mp-btn mp-btn-outline" style="padding:9px 20px;font-size:0.85rem;">로그아웃</button>
                 </div>
+                <div style="margin-top:14px;text-align:right;">
+                    <a onclick="_confirmWithdraw()" style="font-size:0.78rem;color:var(--text-secondary);text-decoration:underline;cursor:pointer;">회원탈퇴</a>
+                </div>
             </div>
 
             <!-- [2] 구독 현황 -->
@@ -4827,6 +4830,10 @@
         </div>
 
         <div class="price-tag" id="total-price-display" style="color: #d4af37; font-size: 2.5rem; font-weight: 900; margin: 30px 0;">₩ 30,000</div>
+        <p style="font-size:0.78rem;color:#94a3b8;line-height:1.6;margin:0 0 16px;text-align:left;">
+            ※ 결제 후 AI가 소견서 생성을 시작하면(생성 완료 및 열람 시) 「전자상거래법」 제17조 제2항에 따라
+            청약철회가 제한될 수 있습니다. 청약철회·환불 정책은 <a href="/terms.html#c4" target="_blank" style="color:#94a3b8;">이용약관 제12조</a>를 확인해 주세요.
+        </p>
         <button class="btn btn-gold" onclick="processPayment()">결제하고 리포트 보기</button>
         <button class="btn btn-navy" onclick="cancelPayment()" style="margin-top: 15px;">취소</button>
     </div>
@@ -4887,7 +4894,11 @@
             </div>
         </div>
 
-        <button class="btn btn-gold" style="margin-top:20px;" onclick="_onSubscribePay()">
+        <p style="font-size:0.76rem;color:#94a3b8;line-height:1.6;margin:16px 0 0;text-align:left;">
+            ※ 결제 후 보고서를 열람하면 「전자상거래법」 제17조 제2항에 따라 청약철회가 제한될 수 있습니다.
+            청약철회·환불 정책은 <a href="/terms.html#c4" target="_blank" style="color:#94a3b8;">이용약관 제12조</a>를 확인해 주세요.
+        </p>
+        <button class="btn btn-gold" style="margin-top:12px;" onclick="_onSubscribePay()">
             구독하고 보고서 열람
         </button>
 
@@ -10492,6 +10503,27 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
         _updateAuthUI();
         showMainView();
+    }
+
+    async function _confirmWithdraw() {
+        if (!_dnUser?.uid) return;
+        if (!confirm('정말 탈퇴하시겠어요?\n이름·연락처 등 개인정보는 삭제되며, 결제·환불 기록은 관련 법령에 따라 일정 기간 보관됩니다.\n이 작업은 되돌릴 수 없습니다.')) return;
+        try {
+            const res = await fetch('/proxy/account/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: _dnUser.uid })
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                _showToast(data.error || '탈퇴 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+            _showToast('탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.');
+            _signOut();
+        } catch (e) {
+            _showToast('네트워크 오류로 탈퇴 처리에 실패했습니다.');
+        }
     }
 
     function _updateAuthUI() {
