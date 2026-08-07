@@ -1309,8 +1309,7 @@
             .mp-section-tag { font-size: 0.68rem; }
             .mp-card-title { font-size: 0.9rem; }
             .mp-card-meta { font-size: 0.72rem; }
-            .mp-sub-card { padding: 14px 16px; font-size: 0.88rem; }
-            .mp-badge-ai, .mp-badge-sub { font-size: 0.62rem; }
+            .mp-badge-ai, .mp-badge-self { font-size: 0.62rem; }
             /* ─ 보고서 점수 배지: 모바일 축소 (한 줄 유지) ─ */
             .score-badge { font-size: 0.78rem; letter-spacing: 0.5px; padding: 8px 18px; max-width: 92vw; }
             /* 소형 화면: 기준 카드 2열 유지, 패딩/폰트 추가 축소 */
@@ -2704,19 +2703,6 @@
         .oheng-dist-item.weak .oheng-dist-count { color: #ef4444; }
         .oheng-dist-plus { font-size: 0.85rem; font-weight: 900; margin-left: 1px; opacity: 0.85; }
 
-        /* ── 구독 팝업 ── */
-        .plan-option { display:flex; align-items:center; gap:16px; padding:16px 20px; border:2px solid var(--border-light); border-radius: var(--radius-md); cursor:pointer; margin-bottom:12px; transition:all 0.2s; }
-        .plan-option:hover { border-color:var(--gold-premium); }
-        .plan-option.selected { border-color:var(--gold-premium); background:rgba(212,175,55,0.06); }
-        .plan-radio { width:18px; height:18px; border:2px solid var(--border-subtle); border-radius:50%; flex-shrink:0; transition:all 0.2s; }
-        .plan-option.selected .plan-radio { border-color:var(--gold-premium); background:var(--gold-premium); box-shadow:inset 0 0 0 4px white; }
-        .plan-badge { font-size:0.72rem; font-weight:800; padding:3px 9px; border-radius: var(--radius-lg); margin-left:8px; }
-        .plan-badge.popular { background:#fef3c7; color:#92400e; }
-        .plan-badge.best { background:#fee2e2; color:#991b1b; }
-        .plan-price { margin-left:auto; text-align:right; }
-        .plan-price-main { font-size:1.05rem; font-weight:800; color:var(--bg-dark); }
-        .plan-price-per { font-size:0.75rem; color:var(--text-secondary); }
-
         /* ── 마이페이지 섹션 ── */
         .mp-section-tag { color:var(--gold-premium); font-weight:800; font-size:0.78rem; letter-spacing:2px; display:block; margin-bottom:6px; }
         .mp-section-title { font-size:1.2rem; font-weight:800; color:var(--bg-dark); margin:0 0 18px; }
@@ -2732,14 +2718,13 @@
         .mp-btn-outline { background:transparent; border:1px solid var(--border-light); color:var(--text-secondary); }
         .mp-btn-outline:hover { border-color:var(--bg-dark); color:var(--bg-dark); }
         .mp-btn-danger { background:transparent; border:1px solid #fca5a5; color:#ef4444; }
-        .mp-sub-card { background:var(--bg-light); border-radius: var(--radius-md); padding:20px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
         .mp-provider-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius: var(--radius-lg); font-size:0.78rem; font-weight:700; background:var(--bg-subtle); color:#475569; }
 
         /* ── 결제 내역 ── */
         .mp-payment-row { display:flex; align-items:center; gap:14px; padding:16px 0; border-bottom:1px solid var(--border-light); }
         .mp-payment-row:last-child { border-bottom:none; }
         .mp-payment-icon { width:44px; height:44px; border-radius: var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
-        .mp-payment-icon.type-sub { background:linear-gradient(135deg,#f0fdf4,#dcfce7); }
+        .mp-payment-icon.type-self { background:linear-gradient(135deg,#f0fdf4,#dcfce7); }
         .mp-payment-icon.type-ai  { background:linear-gradient(135deg,#fefce8,#fef9c3); }
         .mp-payment-info { flex:1; min-width:0; }
         .mp-payment-title { font-size:0.97rem; font-weight:800; color:var(--bg-dark); }
@@ -2751,7 +2736,7 @@
         .mp-status-cancel { background:#fef2f2; color:#dc2626; }
         .mp-status-refund { background:var(--bg-light); color:var(--text-secondary); }
         .mp-payment-type-badge { display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.5px; padding:2px 8px; border-radius:10px; margin-right:6px; vertical-align:middle; }
-        .mp-badge-sub { background:#dcfce7; color:#15803d; }
+        .mp-badge-self { background:#dcfce7; color:#15803d; }
         .mp-badge-ai  { background:#fef9c3; color:#a16207; }
 
         /* Wizard */
@@ -4032,7 +4017,7 @@
 <div id="mypage-view" style="display:none;">
     <header class="report-header" style="padding:80px 20px 40px;">
         <h1 style="font-size:2.4rem;font-weight:900;color:white;margin:0 0 8px;">마이페이지</h1>
-        <p style="color:rgba(255,255,255,0.6);font-size:1rem;margin:0;">내 작명 기록과 구독 현황을 확인하세요</p>
+        <p style="color:rgba(255,255,255,0.6);font-size:1rem;margin:0;">내 작명 기록과 결제 내역을 확인하세요</p>
     </header>
     <main class="report-main">
 
@@ -4043,7 +4028,7 @@
                 <div style="font-size:1.22rem;font-weight:900;color:var(--bg-dark);margin-bottom:10px;">로그인이 필요합니다</div>
                 <div style="font-size:0.92rem;color:var(--text-secondary);line-height:1.7;margin-bottom:32px;">
                     로그인하면 아래 내용을 확인할 수 있어요.<br>
-                    <span style="color:var(--bg-dark);font-weight:700;">멤버십·구독 현황 · 셀프작명 보고서 기록<br>AI 프리미엄 작명 의뢰 내역 · 결제 내역</span>
+                    <span style="color:var(--bg-dark);font-weight:700;">셀프작명 보고서 기록<br>AI 프리미엄 작명 의뢰 내역 · 결제 내역</span>
                 </div>
                 <button onclick="openLoginModal()" class="btn btn-navy" style="width:auto;padding:15px 44px;font-size:1rem;margin-bottom:16px;">
                     로그인 / 회원가입
@@ -4075,35 +4060,28 @@
                 </div>
             </div>
 
-            <!-- [2] 구독 현황 -->
-            <div class="report-card" style="margin-bottom:24px;">
-                <span class="mp-section-tag">구독 현황</span>
-                <h2 class="mp-section-title" style="margin-top:8px;">셀프작명 이용권</h2>
-                <div id="mypage-subscription"><!-- JS 동적 생성 --></div>
-            </div>
-
-            <!-- [3] 셀프작명 보고서 기록 -->
+            <!-- [2] 셀프작명 보고서 기록 -->
             <div class="report-card" style="margin-bottom:24px;">
                 <span class="mp-section-tag">셀프작명 보고서</span>
                 <h2 class="mp-section-title" style="margin-top:8px;">셀프작명 보고서 기록</h2>
                 <div id="mypage-self-reports"><!-- JS 동적 생성 --></div>
             </div>
 
-            <!-- [4] AI 프리미엄 보고서 -->
+            <!-- [3] AI 프리미엄 보고서 -->
             <div class="report-card" style="margin-bottom:24px;">
                 <span class="mp-section-tag">AI 프리미엄 보고서</span>
                 <h2 class="mp-section-title" style="margin-top:8px;">AI 프리미엄 보고서 기록</h2>
                 <div id="mypage-ai-reports"><!-- JS 동적 생성 --></div>
             </div>
 
-            <!-- [5] 결제 내역 -->
+            <!-- [4] 결제 내역 -->
             <div class="report-card" style="margin-bottom:24px;">
                 <span class="mp-section-tag">결제 내역</span>
                 <h2 class="mp-section-title" style="margin-top:8px;">결제 내역</h2>
                 <div id="mypage-payments"><!-- JS 동적 생성 --></div>
             </div>
 
-            <!-- [6] 고객문의 -->
+            <!-- [5] 고객문의 -->
             <div class="report-card" style="margin-bottom:24px;">
                 <span class="mp-section-tag">고객문의</span>
                 <h2 class="mp-section-title" style="margin-top:8px;">고객문의</h2>
@@ -4836,79 +4814,6 @@
         </p>
         <button class="btn btn-gold" onclick="processPayment()">결제하고 리포트 보기</button>
         <button class="btn btn-navy" onclick="cancelPayment()" style="margin-top: 15px;">취소</button>
-    </div>
-</div>
-
-<!-- ── 구독 팝업 ── -->
-<div id="subscribe-modal" class="modal-overlay" style="z-index:var(--z-modal);">
-    <div class="modal-content" style="max-width:480px;padding:44px 40px;text-align:left;">
-        <button class="close-modal" onclick="closeSubscribeModal()" aria-label="창 닫기">&times;</button>
-        <div style="text-align:center;margin-bottom:28px;">
-            <div style="font-size:1.9rem;font-weight:900;color:var(--bg-dark);margin-bottom:6px;">셀프작명 이용권</div>
-            <p style="color:var(--text-secondary);font-size:0.95rem;margin:0;">분석 보고서를 열람하려면 이용권이 필요합니다.</p>
-        </div>
-
-        <div id="subscribe-plans">
-            <div class="plan-option" onclick="selectPlan(this,'1개월권',19000)">
-                <div class="plan-radio"></div>
-                <div style="flex:1;">
-                    <span style="font-weight:700;color:var(--bg-dark);">1개월권</span>
-                </div>
-                <div class="plan-price">
-                    <div class="plan-price-main">₩19,000</div>
-                    <div class="plan-price-per">월 19,000원</div>
-                </div>
-            </div>
-            <div class="plan-option selected" onclick="selectPlan(this,'3개월권',45000)">
-                <div class="plan-radio"></div>
-                <div style="flex:1;">
-                    <span style="font-weight:700;color:var(--bg-dark);">3개월권</span>
-                    <span class="plan-badge popular">인기 ★</span>
-                </div>
-                <div class="plan-price">
-                    <div class="plan-price-main">₩45,000</div>
-                    <div class="plan-price-per">월 15,000원 · 21% 할인</div>
-                </div>
-            </div>
-            <div class="plan-option" onclick="selectPlan(this,'6개월권',69000)">
-                <div class="plan-radio"></div>
-                <div style="flex:1;">
-                    <span style="font-weight:700;color:var(--bg-dark);">6개월권</span>
-                    <span class="plan-badge popular">39% 할인</span>
-                </div>
-                <div class="plan-price">
-                    <div class="plan-price-main">₩69,000</div>
-                    <div class="plan-price-per">월 11,500원</div>
-                </div>
-            </div>
-            <div class="plan-option" onclick="selectPlan(this,'12개월권',99000)">
-                <div class="plan-radio"></div>
-                <div style="flex:1;">
-                    <span style="font-weight:700;color:var(--bg-dark);">12개월권</span>
-                    <span class="plan-badge best">최저가 🔥</span>
-                </div>
-                <div class="plan-price">
-                    <div class="plan-price-main">₩99,000</div>
-                    <div class="plan-price-per">월 8,250원 · 57% 할인</div>
-                </div>
-            </div>
-        </div>
-
-        <p style="font-size:0.76rem;color:#94a3b8;line-height:1.6;margin:16px 0 0;text-align:left;">
-            ※ 결제 후 보고서를 열람하면 「전자상거래법」 제17조 제2항에 따라 청약철회가 제한될 수 있습니다.
-            청약철회·환불 정책은 <a href="/terms.html#c4" target="_blank" style="color:#94a3b8;">이용약관 제12조</a>를 확인해 주세요.
-        </p>
-        <button class="btn btn-gold" style="margin-top:12px;" onclick="_onSubscribePay()">
-            구독하고 보고서 열람
-        </button>
-
-        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border-light);">
-            <p style="font-size:0.82rem;color:var(--text-secondary);text-align:center;margin:0 0 12px;">비회원도 이메일로 바로 결제 가능합니다</p>
-            <div style="display:flex;gap:10px;">
-                <input type="email" id="subscribe-email" placeholder="이메일 주소 입력" style="flex:1;border:1.5px solid var(--border-light);border-radius: var(--radius-sm);padding:12px 16px;font-size:0.9rem;outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--gold-premium)'" onblur="this.style.borderColor='var(--border-light)'">
-                <button onclick="_onSubscribePayGuest()" style="background:var(--bg-dark);color:white;border:none;border-radius: var(--radius-sm);padding:12px 18px;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap;">결제하기</button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -6014,8 +5919,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     // 셀프 리포트 뷰 오픈 이벤트
     function showSelfReportView() {
-        if (!_isSubscribed()) { openSubscribeModal(); return; }
-
         // ── 필수 입력 검증 ──
         const _bd = document.getElementById('birth-date')?.value;
         if (!_bd) { _showToast('⚠️ 생년월일을 입력해주세요.'); return; }
@@ -9722,18 +9625,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ================================================================
-    // 구독 상태 관리 (localStorage, UI-only)
+    // 셀프작명 보고서 보관 (localStorage)
     // ================================================================
-    const _SUB_KEY = 'dn_subscription';
     const _SELF_REPORTS_KEY = 'dn_self_reports';
     const _MAX_SELF_REPORTS = 20;
-
-    function _getSubscription() {
-        try { return JSON.parse(localStorage.getItem(_SUB_KEY)) || null; } catch(e) { return null; }
-    }
-    function _isSubscribed() {
-        return true; // 개발 모드: 결제 없이 모든 기능 사용 가능
-    }
 
     // 셀프작명 보고서 저장
     function _saveSelfReport(data) {
@@ -9753,31 +9648,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const list = _getSelfReports().filter(r => r.id !== id);
             localStorage.setItem(_SELF_REPORTS_KEY, JSON.stringify(list));
         } catch(e) {}
-    }
-
-    // ================================================================
-    // 구독 팝업
-    // ================================================================
-    let _selectedPlan = { label: '3개월권', price: 45000 };
-
-    function openSubscribeModal() {
-        document.getElementById('subscribe-modal').style.display = 'flex';
-    }
-    function closeSubscribeModal() {
-        document.getElementById('subscribe-modal').style.display = 'none';
-    }
-    function selectPlan(el, label, price) {
-        document.querySelectorAll('#subscribe-plans .plan-option').forEach(o => o.classList.remove('selected'));
-        el.classList.add('selected');
-        _selectedPlan = { label, price };
-    }
-    function _onSubscribePay() {
-        _showToast('결제 기능을 준비 중입니다. 곧 서비스됩니다!');
-    }
-    function _onSubscribePayGuest() {
-        const email = document.getElementById('subscribe-email').value.trim();
-        if (!email || !email.includes('@')) { _showToast('올바른 이메일을 입력해주세요.'); return; }
-        _showToast('결제 기능을 준비 중입니다. 곧 서비스됩니다!');
     }
 
     // ================================================================
@@ -9853,7 +9723,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         if (content)   content.style.display   = 'block';
 
         _renderMypageProfile();
-        _renderMypageSubscription();
         _renderMypageSelfReports();
         _renderMypageAIReports();
         _renderMypagePayments();
@@ -9875,46 +9744,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const label = labels[u.provider] || u.provider || '';
             badgeEl.innerHTML = `<span class="mp-provider-badge">${icon ? `<b>${icon}</b>` : ''}${label}</span>`;
         }
-    }
-
-    function _renderMypageSubscription() {
-        const el = document.getElementById('mypage-subscription');
-        if (!el) return;
-        const sub = _getSubscription();
-        const isDev = !window.TOSS_CLIENT_KEY; // config.js에서 키 없으면 개발 모드
-        if (_isSubscribed() && (sub || isDev)) {
-            const exp  = sub ? new Date(sub.expiresAt).toLocaleDateString('ko-KR') : null;
-            const label = sub?.label || (isDev ? '개발 모드 (결제 우회)' : '이용권');
-            const expHtml = exp
-                ? `<div style="font-size:0.82rem;color:var(--text-secondary);margin-top:4px;">만료: ${exp}</div>`
-                : `<div style="font-size:0.82rem;color:#16a34a;margin-top:4px;">✓ 모든 기능 이용 가능</div>`;
-            el.innerHTML = `
-                <div class="mp-sub-card">
-                    <div>
-                        <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">현재 이용권</div>
-                        <div style="font-size:1.1rem;font-weight:800;color:var(--bg-dark);">${label} <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:6px;vertical-align:middle;"></span></div>
-                        ${expHtml}
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        ${sub ? `<button class="mp-btn mp-btn-gold" onclick="openSubscribeModal()">연장하기</button>
-                        <button class="mp-btn mp-btn-outline" onclick="_cancelSubscription()">구독 취소</button>` : ''}
-                    </div>
-                </div>`;
-        } else {
-            el.innerHTML = `
-                <div class="mp-sub-card">
-                    <div>
-                        <div style="font-size:1rem;font-weight:700;color:var(--bg-dark);">미구독 상태</div>
-                        <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">이용권 구독 시 셀프작명 보고서를 열람할 수 있습니다</div>
-                    </div>
-                    <button class="mp-btn mp-btn-gold" onclick="openSubscribeModal()">구독 시작하기</button>
-                </div>`;
-        }
-    }
-
-    function _cancelSubscription() {
-        if (!confirm('구독을 취소할까요?')) return;
-        _showToast('구독 취소 기능을 준비 중입니다.');
     }
 
     function _renderMypageSelfReports() {
@@ -9950,7 +9779,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function _openSavedSelfReport(id) {
         const entry = _getSelfReports().find(r => r.id === id);
         if (!entry) { _showToast('보고서를 찾을 수 없습니다.'); return; }
-        if (!_isSubscribed()) { openSubscribeModal(); return; }
         _showToast('보고서를 불러오는 중...');
 
         // ① 이름 복원 (구버전 호환: lastName/firstName 없으면 nameKr 분리)
@@ -9995,7 +9823,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     function showSelfReportViewDirect() {
-        // 구독 체크 없이 직접 보고서 뷰로 이동 (마이페이지 복원용)
+        // 마이페이지에서 저장된 보고서를 복원할 때 쓰는 직접 이동 경로
         ['main-view','report-view','theory-detail-view','mypage-view'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
         document.getElementById('self-report-view').style.display = 'block';
         closeMobileMenu();
@@ -10063,10 +9891,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const isAI = p.type === 'ai';
             return `
             <div class="mp-payment-row">
-                <div class="mp-payment-icon ${isAI ? 'type-ai' : 'type-sub'}">${isAI ? '✦' : '♾'}</div>
+                <div class="mp-payment-icon ${isAI ? 'type-ai' : 'type-self'}">${isAI ? '✦' : '✎'}</div>
                 <div class="mp-payment-info">
                     <div class="mp-payment-title">
-                        <span class="mp-payment-type-badge ${isAI ? 'mp-badge-ai' : 'mp-badge-sub'}">${isAI ? 'AI작명' : '멤버십'}</span>${p.label}
+                        <span class="mp-payment-type-badge ${isAI ? 'mp-badge-ai' : 'mp-badge-self'}">${isAI ? 'AI작명' : '셀프작명'}</span>${p.label}
                     </div>
                     <div class="mp-payment-meta">${date}${p.desc ? ' · ' + p.desc : ''}</div>
                 </div>
@@ -10087,9 +9915,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // 데모용 샘플 (로그인 상태일 때만 표시)
         if (!_dnUser) return [];
         return [
-            { id:'demo1', type:'sub',  label:'셀프작명 이용권 1개월', desc:'월간 구독', amount:9900,  status:'done',   paidAt: Date.now() - 86400000 * 2 },
             { id:'demo2', type:'ai',   label:'AI 프리미엄 작명 의뢰', desc:'이도윤 외 4후보', amount:49000, status:'done', paidAt: Date.now() - 86400000 * 10 },
-            { id:'demo3', type:'sub',  label:'셀프작명 이용권 1개월', desc:'월간 구독',  amount:9900,  status:'done',   paidAt: Date.now() - 86400000 * 33 },
         ];
     }
 
