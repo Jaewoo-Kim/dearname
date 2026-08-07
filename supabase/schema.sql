@@ -21,6 +21,9 @@ create table if not exists members (
 create index if not exists idx_members_contact on members(contact);
 -- 어드민이 보고서 재발급 시 부여하는 "무료 생성권" 잔여 개수. 부여 시 audit_logs에도 기록된다.
 alter table members add column if not exists bonus_credits int not null default 0;
+-- 회원탈퇴(계정삭제) 시각. 탈퇴 처리 시 name/contact/external_uid는 비우고 이 값만 남겨
+-- 주문·보고서 등 전자상거래법상 보존이 필요한 거래기록과의 FK 연결은 유지한다.
+alter table members add column if not exists withdrawn_at timestamptz;
 
 -- ── orders — 주문·결제 ──────────────────────────────────────────────
 create table if not exists orders (

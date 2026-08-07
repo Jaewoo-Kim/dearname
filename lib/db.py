@@ -14,6 +14,7 @@ import sys
 import json
 import urllib.request
 import urllib.error
+from datetime import datetime, timezone
 
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
 SUPABASE_SERVICE_ROLE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
@@ -151,6 +152,30 @@ def get_member_by_uid(uid):
     if not uid:
         return None
     rows = _request('GET', 'members', params={'external_uid': f'eq.{uid}', 'select': '*'}, prefer=None)
+    return _first(rows)
+
+
+def withdraw_member(uid):
+    """
+    회원탈퇴. name/contact/external_uid를 비우고 잔여 무료 생성권을 0으로 만든 뒤
+    withdrawn_at을 기록한다. 주문·보고서 등 전자상거래법상 보존이 필요한 거래기록은
+    member_id로 계속 연결되어 있지만, 그 회원의 이름·연락처는 더 이상 조회되지 않는다.
+    external_uid를 비워 같은 소셜 계정으로 재가입 시 새 회원으로 생성되게 한다.
+    """
+    member = get_member_by_uid(uid)
+    if not member:
+        return None
+    rows = _request(
+        'PATCH', 'members',
+        body={
+            'name': None,
+            'contact': None,
+            'external_uid': None,
+            'bonus_credits': 0,
+            'withdrawn_at': datetime.now(timezone.utc).isoformat(),
+        },
+        params={'id': f'eq.{member["id"]}'},
+    )
     return _first(rows)
 
 
