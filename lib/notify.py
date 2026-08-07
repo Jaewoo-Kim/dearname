@@ -27,6 +27,40 @@ if not ENABLED:
     print('[notify] SMTP_HOST/SMTP_USER/SMTP_PASS/ADMIN_ALERT_EMAIL 미설정 → 컴플레인 이메일 알림 비활성화(no-op)', file=sys.stderr)
 
 
+def send_report_link(to_email, report_url, baby_name=''):
+    """구매한 소견서를 다시 볼 수 있는 링크를 고객에게 보낸다.
+    기기·브라우저가 바뀌어도 메일에서 다시 열 수 있게 하는 것이 목적이다."""
+    if not ENABLED or not to_email or not report_url:
+        return False
+
+    name_part = f"{baby_name} " if baby_name else ""
+    subject = f"[DearName] {name_part}작명 소견서 보관용 링크"
+    body = (
+        f"안녕하세요, DearName입니다.\n\n"
+        f"요청하신 {name_part}작명 소견서를 아래 링크에서 다시 보실 수 있습니다.\n\n"
+        f"{report_url}\n\n"
+        f"이 링크는 결제일로부터 6개월간 유효합니다.\n"
+        f"기간이 지나기 전에 필요한 내용은 따로 저장해 두시기를 권해드립니다.\n\n"
+        f"문의: cs.crazystudio@gmail.com\n"
+        f"— 크레이지스튜디오 주식회사\n"
+    )
+
+    msg = MIMEText(body, _charset='utf-8')
+    msg['Subject'] = subject
+    msg['From'] = SMTP_FROM
+    msg['To'] = to_email
+
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=5) as smtp:
+            smtp.starttls()
+            smtp.login(SMTP_USER, SMTP_PASS)
+            smtp.sendmail(SMTP_FROM, [to_email], msg.as_string())
+        return True
+    except Exception as e:
+        print(f'[notify] 보고서 링크 메일 발송 실패: {e}', file=sys.stderr)
+        return False
+
+
 def send_complaint_alert(inquiry, member_name='', member_contact=''):
     """컴플레인 접수 시 운영자에게 이메일로 알린다. 실패해도 문의 접수 자체는 막지 않는다."""
     if not ENABLED or not inquiry:

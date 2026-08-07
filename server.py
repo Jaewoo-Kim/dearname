@@ -576,6 +576,43 @@ def orders_mine():
     return _no_cache(jsonify({'orders': db.get_orders_by_member(member['id'])}))
 
 
+@app.route('/proxy/reports/mine')
+def reports_mine():
+    """로그인한 고객 본인의 AI 보고서 목록 조회 (마이페이지 재열람용).
+    로컬(localStorage)에만 의존하면 기기·브라우저가 바뀔 때 보고서를 잃으므로 서버에서도 내려준다."""
+    uid = request.args.get('uid', '')
+    if not uid:
+        return _no_cache(jsonify({'reports': []}))
+    return _no_cache(jsonify({'reports': db.get_reports_by_uid(uid)}))
+
+
+@app.route('/proxy/report/email', methods=['POST'])
+def report_email():
+    """구매한 소견서의 보관용 링크를 고객 이메일로 보낸다.
+    본인 소유 보고서만 보낼 수 있도록 uid로 소유권을 확인한 뒤 발송한다."""
+    try:
+        body = request.get_json(force=True)
+        uid = (body.get('uid') or '').strip()
+        report_id = (body.get('reportId') or '').strip()
+        email = (body.get('email') or '').strip()
+        if not uid or not report_id or '@' not in email:
+            return jsonify({'error': '보고서 정보와 이메일 주소가 필요합니다.'}), 400
+
+        owned = db.get_reports_by_uid(uid)
+        target = next((r for r in owned if str(r.get('id')) == report_id), None)
+        if not target:
+            return jsonify({'error': '본인이 구매한 보고서만 보낼 수 있습니다.'}), 403
+
+        report_url = f"{request.host_url.rstrip('/')}/report-view.html?id={report_id}"
+        ok = notify.send_report_link(email, report_url, target.get('baby_name_kr') or '')
+        if not ok:
+            return jsonify({'error': '메일 발송이 아직 설정되지 않았습니다. 아래 링크를 저장해 주세요.',
+                            'reportUrl': report_url}), 503
+        return jsonify({'status': 'ok', 'reportUrl': report_url})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/proxy/account/delete', methods=['POST'])
 def account_delete():
     """회원탈퇴. 이름·연락처·로그인 식별자를 지우고 계정을 비활성화한다.

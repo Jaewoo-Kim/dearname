@@ -4012,9 +4012,6 @@
             <button onclick="window.print();" class="btn-report-ghost sm">
                 🖨️ 인쇄 / PDF
             </button>
-            <button onclick="openEmailModal()" class="btn-report-ghost sm">
-                ✉️ 이메일 발송
-            </button>
         </div>
     </main>
 </div>
@@ -4839,14 +4836,21 @@
     <div class="modal-content" style="max-width:400px;padding:44px 40px;">
         <button class="close-modal" onclick="closeEmailModal()" aria-label="이메일 창 닫기">&times;</button>
         <div style="font-size:1.6rem;font-weight:900;color:var(--bg-dark);margin-bottom:8px;">보고서 이메일 발송</div>
-        <p style="color:var(--text-secondary);font-size:0.92rem;margin:0 0 28px;">보고서를 받으실 이메일 주소를 입력해주세요.</p>
+        <p style="color:var(--text-secondary);font-size:0.92rem;margin:0 0 20px;">보고서를 받으실 이메일 주소를 입력해주세요.<br>기기를 바꾸셔도 메일의 링크로 다시 보실 수 있습니다.</p>
         <input type="email" id="email-send-input" placeholder="example@email.com"
             style="width:100%;box-sizing:border-box;border:1.5px solid var(--border-light);border-radius: var(--radius-md);padding:14px 18px;font-size:1rem;outline:none;margin-bottom:14px;transition:border-color 0.2s;"
             onfocus="this.style.borderColor='var(--gold-premium)'" onblur="this.style.borderColor='var(--border-light)'">
         <button class="btn btn-gold" onclick="sendReportEmail()">보내기</button>
-        <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:14px;text-align:center;">
-            ※ 이메일 발송 기능은 곧 서비스 예정입니다
-        </p>
+        <div id="email-link-box" style="display:none;margin-top:18px;padding-top:16px;border-top:1px solid var(--border-light);text-align:left;">
+            <div style="font-size:0.82rem;font-weight:700;color:var(--bg-dark);margin-bottom:6px;">보관용 링크</div>
+            <div style="display:flex;gap:8px;">
+                <input id="email-link-input" type="text" readonly
+                    style="flex:1;min-width:0;box-sizing:border-box;border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:9px 12px;font-size:0.8rem;background:var(--bg-light);color:var(--text-secondary);">
+                <button class="mp-btn mp-btn-outline" onclick="_copyReportLink()">복사</button>
+            </div>
+            <p style="font-size:0.76rem;color:var(--text-secondary);margin:8px 0 0;">이 주소를 저장해 두시면 언제든 소견서를 다시 여실 수 있습니다.</p>
+        </div>
+        <p id="email-send-status" style="font-size:0.8rem;margin-top:12px;text-align:center;"></p>
     </div>
 </div>
 
@@ -5410,14 +5414,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         }
     }
 
-    async function _dnSaveReportToServer(candidate, report, state, orderId) {
+    async function _dnSaveReportToServer(candidates, reports, state, orderId) {
         try {
+            const candidate = candidates[0];
+            const report    = reports[0];
             const nameKr    = `${candidate.familyKr}${candidate.h1.kr}${candidate.h2?.kr||''}`;
             const nameHanja = `${candidate.familyHanja}${candidate.h1.h}${candidate.h2?.h||''}`;
             const birthDt   = state._inputRaw?.birthDate
                 ? `${state._inputRaw.birthDate} ${state._inputRaw.birthTime||'12:00'}`
                 : null;
-            await fetch('/proxy/report/save', {
+            const res = await fetch('/proxy/report/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -5427,12 +5433,25 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     birthDt,
                     gender:        state.gender || null,
                     score:         candidate.score,
-                    reportJson:    { candidate, report },
+                    // candidate/report은 report-view.html·어드민이 쓰는 기존 키라 그대로 두고,
+                    // 마이페이지에서 후보 전체를 복원할 수 있도록 나머지를 함께 저장한다.
+                    reportJson: {
+                        candidate, report,
+                        candidates, reports,
+                        familyKr:    state.familyName?.kr    || '',
+                        familyHanja: state.familyName?.hanja || '',
+                        saju:        state._saju   || null,
+                        ohengScores: state._scores || null,
+                        constraints: state.constraints || {},
+                    },
                     specialRequest: state.specialRequest || null
                 })
             });
+            const data = await res.json().catch(() => ({}));
+            return data.reportId || null;
         } catch (e) {
             console.warn('[DearName] 보고서 DB 저장 실패(진행에는 영향 없음):', e);
+            return null;
         }
     }
 
@@ -6691,13 +6710,19 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             _renderReportContent(top3[0], _allReports[0], 0);
             requestAnimationFrame(() => _hideReportSkeleton());
 
-            // 보고서 저장 (로그인 회원만, 로컬)
-            if (_dnUser && _dnUser.provider !== 'guest') {
-                _saveReport(top3, _allReports, _currentState);
-            }
+            // 보고서 저장 (로컬 — 비회원도 자기 기기에서는 바로 다시 볼 수 있어야 한다)
+            const _localId = _saveReport(top3, _allReports, _currentState);
 
-            // 보고서 저장 (서버 DB — admin_site_plan.md Phase 0, 실패해도 열람에 영향 없음)
-            _dnSaveReportToServer(top3[0], _allReports[0], _currentState, _lastOrderId);
+            // 보고서 저장 (서버 DB — 기기가 바뀌어도 마이페이지에서 찾을 수 있게 한다).
+            // 화면 전환을 막지 않도록 await하지 않고, 응답이 오면 로컬 기록에 서버 id를
+            // 연결해 마이페이지 병합 시 같은 보고서가 두 번 뜨지 않게 한다.
+            _currentServerReportId = null;
+            _dnSaveReportToServer(top3, _allReports, _currentState, _lastOrderId)
+                .then(serverId => {
+                    if (!serverId) return;
+                    _currentServerReportId = serverId;
+                    if (_localId) _linkServerId(_localId, serverId);
+                });
             _lastOrderId = null;
 
             // 히스토리 저장
@@ -9620,7 +9645,20 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             list.unshift(entry);
             if (list.length > _MAX_REPORTS) list.splice(_MAX_REPORTS);
             localStorage.setItem(_REPORTS_KEY, JSON.stringify(list));
-        } catch(e) { console.warn('보고서 저장 실패:', e); }
+            return entry.id;
+        } catch(e) { console.warn('보고서 저장 실패:', e); return null; }
+    }
+
+    // 서버 저장이 끝난 뒤 로컬 기록에 서버 보고서 id를 연결한다(마이페이지 중복 방지).
+    function _linkServerId(localId, serverId) {
+        try {
+            const raw  = localStorage.getItem(_REPORTS_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            const hit  = list.find(r => r.id === localId);
+            if (!hit) return;
+            hit.serverId = serverId;
+            localStorage.setItem(_REPORTS_KEY, JSON.stringify(list));
+        } catch(e) { /* 연결 실패해도 열람에는 영향 없음 */ }
     }
 
     function _getReports(uid) {
@@ -9669,10 +9707,36 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // ================================================================
     // 이메일 발송 팝업
     // ================================================================
-    function openEmailModal() {
+    // 지금 열려 있는 AI 보고서의 서버 id(있을 때만). 보고서 화면의 "이메일 발송"이 참조한다.
+    let _currentServerReportId = null;
+    let _emailReportId = null;
+
+    function openEmailModal(serverReportId) {
+        _emailReportId = serverReportId || null;
         document.getElementById('email-modal').style.display = 'flex';
         const u = _dnUser;
         if (u?.email) document.getElementById('email-send-input').value = u.email;
+
+        const box    = document.getElementById('email-link-box');
+        const status = document.getElementById('email-send-status');
+        if (status) status.textContent = '';
+        // 서버에 저장된 보고서만 링크를 만들 수 있다(저장 전이거나 실패한 건은 id가 없음).
+        if (_emailReportId && box) {
+            document.getElementById('email-link-input').value =
+                `${location.origin}/report-view.html?id=${_emailReportId}`;
+            box.style.display = 'block';
+        } else if (box) {
+            box.style.display = 'none';
+        }
+    }
+
+    function _copyReportLink() {
+        const input = document.getElementById('email-link-input');
+        if (!input) return;
+        input.select();
+        navigator.clipboard?.writeText(input.value)
+            .then(() => _showToast('링크를 복사했습니다.'))
+            .catch(() => { try { document.execCommand('copy'); _showToast('링크를 복사했습니다.'); } catch(e) {} });
     }
     function closeEmailModal() {
         document.getElementById('email-modal').style.display = 'none';
@@ -9687,11 +9751,35 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         document.getElementById('complaint-modal').style.display = 'none';
     }
 
-    function sendReportEmail() {
-        const email = document.getElementById('email-send-input').value.trim();
+    async function sendReportEmail() {
+        const email  = document.getElementById('email-send-input').value.trim();
+        const status = document.getElementById('email-send-status');
         if (!email || !email.includes('@')) { _showToast('올바른 이메일을 입력해주세요.'); return; }
-        closeEmailModal();
-        _showToast('이메일 발송 기능은 곧 서비스 예정입니다!');
+        if (!_emailReportId) {
+            _showToast('이 보고서는 아직 서버에 저장되지 않아 메일로 보낼 수 없습니다.');
+            return;
+        }
+        if (status) { status.style.color = 'var(--text-secondary)'; status.textContent = '전송 중...'; }
+        try {
+            const res = await fetch('/proxy/report/email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: _dnUser?.uid, reportId: _emailReportId, email })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                // 메일 인프라 미설정 등으로 못 보낸 경우에도 링크는 남겨준다.
+                if (status) { status.style.color = '#ef4444'; status.textContent = data.error || '메일을 보내지 못했습니다.'; }
+                if (data.reportUrl) {
+                    document.getElementById('email-link-input').value = data.reportUrl;
+                    document.getElementById('email-link-box').style.display = 'block';
+                }
+                return;
+            }
+            if (status) { status.style.color = '#16a34a'; status.textContent = '메일을 보냈습니다. 받은편지함을 확인해 주세요.'; }
+        } catch (e) {
+            if (status) { status.style.color = '#ef4444'; status.textContent = '네트워크 오류로 보내지 못했습니다.'; }
+        }
     }
 
     // 토스트 메시지
@@ -9785,7 +9873,6 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 </div>
                 <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
                     <button class="mp-btn mp-btn-gold" onclick="_openSavedSelfReport('${r.id}')">보고서 보기</button>
-                    <button class="mp-btn mp-btn-outline" onclick="openEmailModal()">이메일로 받기</button>
                     <button class="mp-btn mp-btn-danger" onclick="_deleteSelfReportConfirm('${r.id}')">삭제</button>
                 </div>
             </div>`;
@@ -9856,10 +9943,59 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         _renderMypageSelfReports();
     }
 
-    function _renderMypageAIReports() {
+    // 마이페이지에 실제로 그려진 목록(로컬+서버 병합). _openSavedReport가 여기서 찾는다.
+    let _mergedReports = [];
+
+    // 서버 보고서 행(reports 테이블)을 로컬 저장 형식으로 변환한다.
+    function _serverRowToEntry(row) {
+        const rj = row.report_json || {};
+        const candidates = rj.candidates || (rj.candidate ? [rj.candidate] : []);
+        const reports    = rj.reports    || (rj.report    ? [rj.report]    : []);
+        if (!candidates.length) return null;
+        return {
+            id:          'srv_' + row.id,
+            serverId:    row.id,
+            fromServer:  true,
+            uid:         _dnUser?.uid || '',
+            createdAt:   row.created_at,
+            familyKr:    rj.familyKr    || (row.baby_name_kr    || '').charAt(0),
+            familyHanja: rj.familyHanja || (row.baby_name_hanja || '').charAt(0),
+            candidates, reports,
+            saju:        rj.saju        || null,
+            ohengScores: rj.ohengScores || null,
+            constraints: rj.constraints || {},
+        };
+    }
+
+    async function _fetchServerReports() {
+        if (!_dnUser?.uid) return [];
+        try {
+            const res = await fetch(`/proxy/reports/mine?uid=${encodeURIComponent(_dnUser.uid)}`);
+            if (!res.ok) return [];
+            const { reports } = await res.json();
+            return (reports || []).map(_serverRowToEntry).filter(Boolean);
+        } catch (e) {
+            console.warn('[DearName] 서버 보고서 조회 실패(로컬 기록은 그대로 표시):', e);
+            return [];
+        }
+    }
+
+    async function _renderMypageAIReports() {
         const el = document.getElementById('mypage-ai-reports');
         if (!el) return;
-        const list = _getReports(_dnUser?.uid);
+        const local = _getReports(_dnUser?.uid);
+        // 로컬을 먼저 그려 체감 지연을 없애고, 서버 응답이 오면 병합해 다시 그린다.
+        _paintAIReports(el, local);
+
+        const server = await _fetchServerReports();
+        const linked = new Set(local.map(r => r.serverId).filter(Boolean));
+        const merged = local.concat(server.filter(s => !linked.has(s.serverId)));
+        merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        _paintAIReports(el, merged);
+    }
+
+    function _paintAIReports(el, list) {
+        _mergedReports = list;
         if (!list.length) {
             el.innerHTML = `<div class="mp-empty">아직 의뢰한 AI 프리미엄 보고서가 없습니다.</div>`;
             return;
@@ -9880,8 +10016,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 </div>
                 <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
                     <button class="mp-btn mp-btn-gold" onclick="_openSavedReport('${r.id}')">보고서 보기</button>
-                    <button class="mp-btn mp-btn-outline" onclick="openEmailModal()">이메일로 받기</button>
-                    <button class="mp-btn mp-btn-danger" onclick="_confirmDeleteReport('${r.id}')">삭제</button>
+                    <button class="mp-btn mp-btn-outline" onclick="openEmailModal('${r.serverId||''}')">이메일로 받기</button>
+                    ${r.fromServer ? '' : `<button class="mp-btn mp-btn-danger" onclick="_confirmDeleteReport('${r.id}')">삭제</button>`}
                 </div>
             </div>`;
         }).join('');
@@ -10078,9 +10214,11 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     function _openSavedReport(id) {
-        const list  = _getReports(_dnUser?.uid);
-        const entry = list.find(r => r.id === id);
+        // 마이페이지에 그려진 목록(로컬+서버 병합)에서 먼저 찾고, 없으면 로컬을 뒤진다.
+        const entry = _mergedReports.find(r => r.id === id)
+                   || _getReports(_dnUser?.uid).find(r => r.id === id);
         if (!entry) return _showToast('보고서를 찾을 수 없습니다.');
+        _currentServerReportId = entry.serverId || null;
         _currentState    = {
             familyName:  { kr: entry.familyKr, hanja: entry.familyHanja },
             _saju:       entry.saju,
@@ -10496,7 +10634,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     function emailReport() {
-        openEmailModal();
+        openEmailModal(_currentServerReportId);
     }
 
     // ── 이름 후보 PDF/이미지 저장 안내 ──────────────────────────────

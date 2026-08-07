@@ -240,6 +240,33 @@ def get_orders_by_member(member_id):
     return rows or []
 
 
+def get_reports_by_uid(uid):
+    """
+    고객 본인의 AI 보고서 조회 (마이페이지 재열람용). 최신순.
+    reports에는 member_id가 없고 order_id만 있으므로 members → orders → reports 순으로 훑는다.
+    주문 기록이 실패해 order_id가 없는 보고서는 소유자를 특정할 수 없어 조회되지 않는다.
+    """
+    if not uid:
+        return []
+    member = get_member_by_uid(uid)
+    if not member:
+        return []
+    orders = get_orders_by_member(member['id'])
+    order_ids = [o['id'] for o in orders if o.get('id')]
+    if not order_ids:
+        return []
+    rows = _request(
+        'GET', 'reports',
+        params={
+            'order_id': f'in.({",".join(order_ids)})',
+            'select': '*',
+            'order': 'created_at.desc',
+        },
+        prefer=None,
+    )
+    return rows or []
+
+
 # 대략적인 추정 단가(USD, 1M 토큰당) — 정확한 원가 산정용이 아닌 마진 모니터링 참고치
 _PRICE_PER_M = {
     'claude-sonnet-4-20250514': (3.0, 15.0),
