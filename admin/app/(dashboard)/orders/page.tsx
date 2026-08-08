@@ -35,7 +35,7 @@ export default async function OrdersPage({
 
   let query = supabase
     .from('orders')
-    .select('*, members(name, contact)', { count: 'exact' })
+    .select('*, members(name, contact, withdrawn_at)', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to);
 
@@ -104,7 +104,7 @@ export default async function OrdersPage({
                       {formatDate(o.created_at)}
                     </Link>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">{maskName(o.members?.name)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">{o.members?.withdrawn_at ? '(탈퇴한 회원)' : maskName(o.members?.name)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-600">{PRODUCT_LABEL[o.product] || o.product}</td>
                   <td className="whitespace-nowrap px-4 py-3 font-medium tabular-nums text-slate-900">{formatKRW(o.amount)}</td>
                   <td className="whitespace-nowrap px-4 py-3">

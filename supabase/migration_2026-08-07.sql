@@ -47,6 +47,24 @@ alter table report_email_logs enable row level security;
 drop policy if exists "운영자 조회" on report_email_logs;
 create policy "운영자 조회" on report_email_logs for select using (auth.role() = 'authenticated');
 
+-- ── 4. 약관·개인정보처리방침 어드민 편집 ───────────────────────────
+-- 저장할 때마다 새 행을 쌓아 개정 이력을 남긴다(UPDATE하지 않는다).
+-- 행이 없으면 본 서비스는 저장소의 정적 파일을 그대로 보여주므로 비어 있어도 안전하다.
+create table if not exists legal_documents (
+  id             uuid primary key default gen_random_uuid(),
+  created_at     timestamptz not null default now(),
+  doc_type       text not null,        -- 'terms' / 'privacy'
+  content        text not null,
+  effective_date date,
+  updated_by     text
+);
+create index if not exists idx_legal_documents_type_created
+  on legal_documents(doc_type, created_at desc);
+
+alter table legal_documents enable row level security;
+drop policy if exists "운영자 조회" on legal_documents;
+create policy "운영자 조회" on legal_documents for select using (auth.role() = 'authenticated');
+
 -- ── 확인용 (실행 후 아래 쿼리로 컬럼이 생겼는지 볼 수 있습니다) ────
 -- select column_name, data_type, column_default
 --   from information_schema.columns

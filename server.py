@@ -821,14 +821,68 @@ def report_view_page():
     return _no_cache(send_file(BASE_DIR / 'report-view.html'))
 
 
+# ── 약관·개인정보처리방침 ─────────────────────────────────
+# 본문은 어드민에서 수정할 수 있도록 DB(legal_documents)에 둔다. 저장소의 정적 파일은
+# 페이지 껍데기(스타일·헤더·푸터) 겸 폴백으로 계속 쓰인다 — DB가 비어 있거나 미설정이면
+# 정적 파일을 그대로 내려주므로 이 기능 없이도 서비스는 정상 동작한다.
+_LEGAL_FILES = {'terms': 'terms.html', 'privacy': 'privacy.html'}
+_LEGAL_START = '<!-- LEGAL:CONTENT:START -->'
+_LEGAL_END   = '<!-- LEGAL:CONTENT:END -->'
+
+
+def _legal_static_html(doc_type):
+    return (BASE_DIR / _LEGAL_FILES[doc_type]).read_text(encoding='utf-8')
+
+
+def _legal_default_content(doc_type):
+    """정적 파일에서 편집 대상 본문만 잘라낸다(어드민 최초 편집 시 초기값)."""
+    html = _legal_static_html(doc_type)
+    start = html.find(_LEGAL_START)
+    end = html.find(_LEGAL_END)
+    if start == -1 or end == -1:
+        return ''
+    return html[start + len(_LEGAL_START):end].strip('\n')
+
+
+def _render_legal(doc_type):
+    """DB에 저장된 본문이 있으면 정적 파일의 본문 자리에 끼워 넣어 렌더링한다."""
+    html = _legal_static_html(doc_type)
+    row = db.get_latest_legal_document(doc_type)
+    if not row or not row.get('content'):
+        return html
+    start = html.find(_LEGAL_START)
+    end = html.find(_LEGAL_END)
+    if start == -1 or end == -1:
+        return html
+    return html[:start + len(_LEGAL_START)] + '\n' + row['content'] + '\n  ' + html[end:]
+
+
 @app.route('/terms.html')
 def terms_page():
-    return _no_cache(send_file(BASE_DIR / 'terms.html'))
+    return _no_cache(Response(_render_legal('terms'), mimetype='text/html'))
 
 
 @app.route('/privacy.html')
 def privacy_page():
-    return _no_cache(send_file(BASE_DIR / 'privacy.html'))
+    return _no_cache(Response(_render_legal('privacy'), mimetype='text/html'))
+
+
+@app.route('/proxy/legal/<doc_type>')
+def legal_content(doc_type):
+    """어드민 편집기가 현재 본문을 불러올 때 쓴다.
+    DB에 저장분이 있으면 그것을, 없으면 정적 파일의 본문을 초기값으로 돌려준다."""
+    if doc_type not in _LEGAL_FILES:
+        return jsonify({'error': '알 수 없는 문서 종류입니다.'}), 404
+    row = db.get_latest_legal_document(doc_type)
+    if row and row.get('content'):
+        return _no_cache(jsonify({
+            'content': row['content'],
+            'source': 'db',
+            'effectiveDate': row.get('effective_date'),
+            'updatedBy': row.get('updated_by'),
+            'updatedAt': row.get('created_at'),
+        }))
+    return _no_cache(jsonify({'content': _legal_default_content(doc_type), 'source': 'file'}))
 
 
 if __name__ == '__main__':

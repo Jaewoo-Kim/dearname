@@ -11,6 +11,9 @@ export interface Member {
   order_count: number;
   total_spent: number;
   last_order_at: string | null;
+  // 회원탈퇴 시각. 탈퇴하면 name/contact/external_uid는 비워지고 이 값만 남는다
+  // (주문·보고서 등 전자상거래법상 보존 대상 기록과의 연결은 유지).
+  withdrawn_at: string | null;
 }
 
 export interface Order {
@@ -126,7 +129,7 @@ export interface InquiryRow {
   type: 'general' | 'complaint';
   category: string | null;
   priority: 'low' | 'normal' | 'urgent';
-  members?: { name: string | null; contact: string | null } | null;
+  members?: { name: string | null; contact: string | null; withdrawn_at: string | null } | null;
 }
 
 export const INQUIRY_CATEGORY_LABELS: Record<string, string> = {
@@ -134,6 +137,23 @@ export const INQUIRY_CATEGORY_LABELS: Record<string, string> = {
   payment: '결제·환불',
   service: '응대 불만',
   etc: '기타',
+};
+
+// legal_documents — 이용약관·개인정보처리방침 본문(저장할 때마다 새 행 = 개정 이력)
+export type LegalDocType = 'terms' | 'privacy';
+
+export interface LegalDocumentRow {
+  id: string;
+  created_at: string;
+  doc_type: LegalDocType;
+  content: string;
+  effective_date: string | null;
+  updated_by: string | null;
+}
+
+export const LEGAL_DOC_LABELS: Record<LegalDocType, string> = {
+  terms: '이용약관',
+  privacy: '개인정보처리방침',
 };
 
 // Phase 3 — taboo_hanja 테이블

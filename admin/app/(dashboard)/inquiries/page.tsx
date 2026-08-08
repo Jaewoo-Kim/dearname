@@ -40,7 +40,7 @@ export default async function InquiriesPage({
 
   let query = supabase
     .from('inquiries')
-    .select('*, members(name, contact)', { count: 'exact' })
+    .select('*, members(name, contact, withdrawn_at)', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to);
 
@@ -118,8 +118,10 @@ export default async function InquiriesPage({
                 <tr key={iq.id} className="group border-b border-slate-50 last:border-0 hover:bg-slate-50">
                   <td className="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(iq.created_at)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                    {maskName(iq.members?.name)}
-                    <div className="text-xs text-slate-400">{maskContact(iq.members?.contact)}</div>
+                    {iq.members?.withdrawn_at ? '(탈퇴한 회원)' : maskName(iq.members?.name)}
+                    <div className="text-xs text-slate-400">
+                      {iq.members?.withdrawn_at ? '-' : maskContact(iq.members?.contact)}
+                    </div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
                     {iq.type === 'complaint' ? (
