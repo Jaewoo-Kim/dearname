@@ -65,6 +65,17 @@ alter table legal_documents enable row level security;
 drop policy if exists "운영자 조회" on legal_documents;
 create policy "운영자 조회" on legal_documents for select using (auth.role() = 'authenticated');
 
+-- ── 5. 보고서 소유자 직접 연결 ─────────────────────────────────────
+-- 지금까지는 reports → orders → members 경로로만 소유자를 찾을 수 있어서, 결제 직후
+-- 주문 기록이 실패한 보고서(order_id가 null)는 고객이 마이페이지에서도, 이메일
+-- 재발송으로도 되찾을 수 없었다. 소유자를 보고서에 직접 남겨 이 사각지대를 없앤다.
+alter table reports add column if not exists member_id uuid references members(id);
+create index if not exists idx_reports_member_id on reports(member_id);
+
+-- 기존 보고서 보정: 연결된 주문의 소유자를 그대로 채워 넣는다(여러 번 실행해도 안전).
+update reports r set member_id = o.member_id
+  from orders o where r.order_id = o.id and r.member_id is null;
+
 -- ── 확인용 (실행 후 아래 쿼리로 컬럼이 생겼는지 볼 수 있습니다) ────
 -- select column_name, data_type, column_default
 --   from information_schema.columns

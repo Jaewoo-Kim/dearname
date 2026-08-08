@@ -62,6 +62,13 @@ alter table reports add column if not exists special_request text;
 -- 고객이 보관용 링크로 보고서를 마지막으로 연 시각. "메일을 못 받았다"는 문의가 왔을 때
 -- 실제로 열람했는지 확인하는 근거가 된다.
 alter table reports add column if not exists last_viewed_at timestamptz;
+-- 보고서의 소유자. order_id만으로 소유자를 찾으면 결제 기록이 실패한 보고서를 영영
+-- 되찾을 수 없어(고아 보고서), 주문과 별개로 소유자를 직접 남긴다.
+alter table reports add column if not exists member_id uuid references members(id);
+create index if not exists idx_reports_member_id on reports(member_id);
+-- 기존 행 보정: order_id로 연결된 주문의 소유자를 member_id에 채워 넣는다.
+update reports r set member_id = o.member_id
+  from orders o where r.order_id = o.id and r.member_id is null;
 
 -- ── report_email_logs — 보고서 링크 메일 발송 이력 ───────────────────
 -- 고객이 마이페이지에서 직접 보낸 건(sent_by=null)과 운영자가 어드민에서 재발송한 건을

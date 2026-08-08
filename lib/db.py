@@ -95,9 +95,12 @@ def insert_order(member_id, product, amount, status='paid', toss_order_id=None, 
     return _first(rows)
 
 
-def insert_report(order_id, baby_name_kr, baby_name_hanja, birth_dt, gender, score, report_json, special_request=None):
+def insert_report(order_id, baby_name_kr, baby_name_hanja, birth_dt, gender, score, report_json, special_request=None, member_id=None):
     body = {
         'order_id': order_id,
+        # 주문 기록이 실패해 order_id가 없어도 소유자는 남겨둔다 — 이 값이 없으면
+        # 고객이 마이페이지에서도 이메일 재발송으로도 보고서를 되찾을 수 없다.
+        'member_id': member_id,
         'baby_name_kr': baby_name_kr,
         'baby_name_hanja': baby_name_hanja,
         'birth_dt': birth_dt,
@@ -246,6 +249,17 @@ def merge_guest_into_member(guest_uid, social_uid, name='', contact='', login_pr
               params={'member_id': f"eq.{guest_member['id']}"})
     _request('PATCH', 'inquiries', body={'member_id': social_member['id']},
               params={'member_id': f"eq.{guest_member['id']}"})
+    _request('PATCH', 'reports', body={'member_id': social_member['id']},
+              params={'member_id': f"eq.{guest_member['id']}"})
+
+    # 어드민이 게스트에게 부여한 무료 생성권도 함께 옮긴다(옮기지 않으면 소셜 전환 시 소멸).
+    leftover = guest_member.get('bonus_credits') or 0
+    if leftover > 0:
+        _request('PATCH', 'members',
+                  body={'bonus_credits': (social_member.get('bonus_credits') or 0) + leftover},
+                  params={'id': f"eq.{social_member['id']}"})
+        _request('PATCH', 'members', body={'bonus_credits': 0},
+                  params={'id': f"eq.{guest_member['id']}"})
     return True
 
 
@@ -343,28 +357,72 @@ def touch_report_viewed(report_id):
 def get_reports_by_uid(uid):
     """
     고객 본인의 AI 보고서 조회 (마이페이지 재열람용). 최신순.
-    reports에는 member_id가 없고 order_id만 있으므로 members → orders → reports 순으로 훑는다.
-    주문 기록이 실패해 order_id가 없는 보고서는 소유자를 특정할 수 없어 조회되지 않는다.
+    reports.member_id로 직접 찾되, 이 컬럼이 생기기 전에 저장된 보고서는 값이 비어 있으므로
+    members → orders → reports 경로로도 함께 훑어 합친다.
     """
     if not uid:
         return []
     member = get_member_by_uid(uid)
     if not member:
         return []
-    orders = get_orders_by_member(member['id'])
-    order_ids = [o['id'] for o in orders if o.get('id')]
-    if not order_ids:
-        return []
+
+    found = {}
+
     rows = _request(
         'GET', 'reports',
-        params={
-            'order_id': f'in.({",".join(order_ids)})',
-            'select': '*',
-            'order': 'created_at.desc',
-        },
+        params={'member_id': f"eq.{member['id']}", 'select': '*', 'order': 'created_at.desc'},
         prefer=None,
     )
-    return rows or []
+    for row in rows or []:
+        found[row['id']] = row
+
+    # 구(舊) 데이터 폴백 — member_id가 채워지기 전에 저장된 보고서.
+    orders = get_orders_by_member(member['id'])
+    order_ids = [o['id'] for o in orders if o.get('id')]
+    if order_ids:
+        legacy = _request(
+            'GET', 'reports',
+            params={
+                'order_id': f'in.({",".join(order_ids)})',
+                'select': '*',
+                'order': 'created_at.desc',
+            },
+            prefer=None,
+        )
+        for row in legacy or []:
+            found.setdefault(row['id'], row)
+
+    return sorted(found.values(), key=lambda r: r.get('created_at') or '', reverse=True)
+
+
+def get_reports_by_contact(contact):
+    """이메일로 본인 보고서를 찾는다(기기를 잃어 uid가 사라진 고객의 셀프 복구용).
+    동일 이메일로 여러 회원이 있을 수 있어(게스트 → 소셜 전환 등) 모두 합쳐서 돌려준다."""
+    if not contact:
+        return []
+    members = _request(
+        'GET', 'members',
+        params={'contact': f'eq.{contact}', 'select': 'id', 'withdrawn_at': 'is.null'},
+        prefer=None,
+    ) or []
+    found = {}
+    for m in members:
+        for row in _request(
+            'GET', 'reports',
+            params={'member_id': f"eq.{m['id']}", 'select': '*', 'order': 'created_at.desc'},
+            prefer=None,
+        ) or []:
+            found[row['id']] = row
+        for o in get_orders_by_member(m['id']):
+            if not o.get('id'):
+                continue
+            for row in _request(
+                'GET', 'reports',
+                params={'order_id': f"eq.{o['id']}", 'select': '*'},
+                prefer=None,
+            ) or []:
+                found.setdefault(row['id'], row)
+    return sorted(found.values(), key=lambda r: r.get('created_at') or '', reverse=True)
 
 
 # 대략적인 추정 단가(USD, 1M 토큰당) — 정확한 원가 산정용이 아닌 마진 모니터링 참고치
