@@ -59,6 +59,30 @@ create table if not exists reports (
 );
 create index if not exists idx_reports_order_id on reports(order_id);
 alter table reports add column if not exists special_request text;
+-- 고객이 보관용 링크로 보고서를 마지막으로 연 시각. "메일을 못 받았다"는 문의가 왔을 때
+-- 실제로 열람했는지 확인하는 근거가 된다.
+alter table reports add column if not exists last_viewed_at timestamptz;
+
+-- ── report_email_logs — 보고서 링크 메일 발송 이력 ───────────────────
+-- 고객이 마이페이지에서 직접 보낸 건(sent_by=null)과 운영자가 어드민에서 재발송한 건을
+-- 모두 남긴다. 성공뿐 아니라 실패도 기록해야 "메일이 안 왔다"는 문의에서 발송 자체가
+-- 실패한 것인지, 보냈는데 고객이 못 찾은 것인지를 구분할 수 있다.
+create table if not exists report_email_logs (
+  id          uuid primary key default gen_random_uuid(),
+  created_at  timestamptz not null default now(),
+  report_id   uuid references reports(id),
+  member_id   uuid references members(id),
+  to_email    text not null,          -- ⚠️ 개인정보
+  status      text not null,          -- 'sent' / 'failed'
+  error       text,                   -- 실패 시 사유
+  sent_by     text                    -- null = 고객 본인 발송, 값이 있으면 재발송한 운영자 이메일
+);
+create index if not exists idx_report_email_logs_report_id on report_email_logs(report_id);
+create index if not exists idx_report_email_logs_created_at on report_email_logs(created_at);
+
+alter table report_email_logs enable row level security;
+drop policy if exists "운영자 조회" on report_email_logs;
+create policy "운영자 조회" on report_email_logs for select using (auth.role() = 'authenticated');
 
 -- ── ai_usage — AI 비용 모니터링 ──────────────────────────────────────
 create table if not exists ai_usage (

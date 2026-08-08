@@ -26,6 +26,27 @@ create index if not exists idx_inquiries_order_id on inquiries(order_id);
 -- 주문·보고서 등 전자상거래법상 보존이 필요한 거래기록은 member_id 연결로 유지된다.
 alter table members add column if not exists withdrawn_at timestamptz;
 
+-- ── 3. 보고서 링크 열람·발송 이력 ──────────────────────────────────
+-- "메일을 못 받았다"는 문의가 왔을 때 발송 여부와 열람 여부를 확인하기 위한 기록.
+alter table reports add column if not exists last_viewed_at timestamptz;
+
+create table if not exists report_email_logs (
+  id          uuid primary key default gen_random_uuid(),
+  created_at  timestamptz not null default now(),
+  report_id   uuid references reports(id),
+  member_id   uuid references members(id),
+  to_email    text not null,
+  status      text not null,          -- 'sent' / 'failed'
+  error       text,
+  sent_by     text                    -- null = 고객 본인 발송, 값이 있으면 재발송한 운영자 이메일
+);
+create index if not exists idx_report_email_logs_report_id on report_email_logs(report_id);
+create index if not exists idx_report_email_logs_created_at on report_email_logs(created_at);
+
+alter table report_email_logs enable row level security;
+drop policy if exists "운영자 조회" on report_email_logs;
+create policy "운영자 조회" on report_email_logs for select using (auth.role() = 'authenticated');
+
 -- ── 확인용 (실행 후 아래 쿼리로 컬럼이 생겼는지 볼 수 있습니다) ────
 -- select column_name, data_type, column_default
 --   from information_schema.columns
