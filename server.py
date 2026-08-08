@@ -646,6 +646,52 @@ def report_email():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/proxy/report/recover', methods=['POST'])
+def report_recover():
+    """기기를 바꾸거나 브라우저 기록이 지워져 uid를 잃은 고객이, 결제 시 입력한 이메일로
+    자기 소견서 링크를 다시 받는다.
+
+    보고서 목록을 화면에 돌려주지 않고 메일로만 보낸다 — 그래야 남의 이메일을 넣어보는
+    것만으로는 구매 이력을 알아낼 수 없다. 같은 이유로 해당 이메일의 구매 이력이 없어도
+    응답은 항상 동일하다(존재 여부를 알려주지 않는다)."""
+    try:
+        body = request.get_json(force=True)
+        email = (body.get('email') or '').strip()
+        if '@' not in email:
+            return jsonify({'error': '올바른 이메일 주소를 입력해 주세요.'}), 400
+
+        generic = {'status': 'ok', 'message': '해당 이메일로 구매하신 소견서가 있다면 링크를 보내드렸습니다.'}
+
+        reports = db.get_reports_by_contact(email)
+        if not reports:
+            return jsonify(generic)
+
+        base = request.host_url.rstrip('/')
+        sent_any = False
+        for row in reports[:10]:  # 대량 발송 악용 방지
+            report_id = str(row.get('id'))
+            ok = notify.send_report_link(
+                email,
+                f'{base}/report-view.html?id={report_id}',
+                row.get('baby_name_kr') or '',
+            )
+            sent_any = sent_any or ok
+            db.insert_report_email_log(
+                report_id=report_id,
+                member_id=row.get('member_id'),
+                to_email=email,
+                status='sent' if ok else 'failed',
+                error=None if ok else '메일 발송 실패(발송 설정 미비 또는 SMTP 오류)',
+                sent_by='self-recover',
+            )
+
+        if not sent_any:
+            return jsonify({'error': '메일 발송이 아직 설정되지 않았습니다. 고객센터로 문의해 주세요.'}), 503
+        return jsonify(generic)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/proxy/report/email/admin', methods=['POST'])
 def report_email_admin():
     """운영자가 어드민에서 보고서 링크를 재발송한다.
@@ -809,8 +855,12 @@ def report_save():
     """
     try:
         body = request.get_json(force=True)
+        # 주문 기록이 실패해 orderId가 없더라도 소유자는 남겨야 고객이 나중에 되찾을 수 있다.
+        uid = (body.get('uid') or '').strip()
+        member = db.get_member_by_uid(uid) if uid else None
         report_row = db.insert_report(
             order_id=body.get('orderId'),
+            member_id=member['id'] if member else None,
             baby_name_kr=body.get('babyNameKr', ''),
             baby_name_hanja=body.get('babyNameHanja', ''),
             birth_dt=body.get('birthDt'),
