@@ -13,6 +13,7 @@ import {
   Menu,
   MessageCircle,
   Receipt,
+  ScrollText,
   Settings,
   ShieldCheck,
   Users,
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { href: '/members', label: '회원', icon: Users },
   { href: '/analytics', label: '분석', icon: LineChart },
   { href: '/hanja-db', label: '한자 DB', icon: LanguagesIcon },
+  { href: '/legal', label: '약관·방침', icon: ScrollText },
   { href: '/settings', label: '운영 관리', icon: Settings },
 ];
 

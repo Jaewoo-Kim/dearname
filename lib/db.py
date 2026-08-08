@@ -240,6 +240,24 @@ def get_orders_by_member(member_id):
     return rows or []
 
 
+def get_latest_legal_document(doc_type):
+    """게시 중인 약관/개인정보처리방침 본문(가장 최근 저장분)을 가져온다.
+    행이 없으면 None — 호출부는 저장소의 정적 파일로 폴백한다."""
+    if doc_type not in ('terms', 'privacy'):
+        return None
+    rows = _request(
+        'GET', 'legal_documents',
+        params={
+            'doc_type': f'eq.{doc_type}',
+            'select': '*',
+            'order': 'created_at.desc',
+            'limit': '1',
+        },
+        prefer=None,
+    )
+    return _first(rows)
+
+
 def insert_report_email_log(report_id, member_id, to_email, status, error=None, sent_by=None):
     """보고서 링크 메일 발송 이력 기록. 실패도 남겨야 분쟁 시 원인을 구분할 수 있다."""
     if not report_id or not to_email:

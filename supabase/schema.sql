@@ -387,3 +387,23 @@ create index if not exists idx_pending_settings_changes_status on pending_settin
 alter table pending_settings_changes enable row level security;
 drop policy if exists "운영자 조회" on pending_settings_changes;
 create policy "운영자 조회" on pending_settings_changes for select using (auth.role() = 'authenticated');
+
+-- ── legal_documents — 이용약관·개인정보처리방침 본문 ──────────────────
+-- 어드민에서 직접 수정할 수 있도록 본문을 DB에 둔다. 저장할 때마다 새 행을 쌓아
+-- 개정 이력을 남긴다(약관 개정은 이전 버전 보존이 중요하므로 UPDATE하지 않는다).
+-- 행이 하나도 없으면 본 서비스는 저장소의 정적 파일(terms.html/privacy.html)을
+-- 그대로 보여주므로, 이 테이블이 비어 있어도 서비스는 정상 동작한다.
+create table if not exists legal_documents (
+  id             uuid primary key default gen_random_uuid(),
+  created_at     timestamptz not null default now(),
+  doc_type       text not null,        -- 'terms' / 'privacy'
+  content        text not null,        -- <div class="wrap"> 안에 들어갈 본문 HTML
+  effective_date date,                 -- 시행일(표시용). 실제 게시 판단은 created_at 최신 행 기준
+  updated_by     text                  -- 수정한 운영자 이메일
+);
+create index if not exists idx_legal_documents_type_created
+  on legal_documents(doc_type, created_at desc);
+
+alter table legal_documents enable row level security;
+drop policy if exists "운영자 조회" on legal_documents;
+create policy "운영자 조회" on legal_documents for select using (auth.role() = 'authenticated');

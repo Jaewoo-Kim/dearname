@@ -139,6 +139,23 @@ export const INQUIRY_CATEGORY_LABELS: Record<string, string> = {
   etc: '기타',
 };
 
+// legal_documents — 이용약관·개인정보처리방침 본문(저장할 때마다 새 행 = 개정 이력)
+export type LegalDocType = 'terms' | 'privacy';
+
+export interface LegalDocumentRow {
+  id: string;
+  created_at: string;
+  doc_type: LegalDocType;
+  content: string;
+  effective_date: string | null;
+  updated_by: string | null;
+}
+
+export const LEGAL_DOC_LABELS: Record<LegalDocType, string> = {
+  terms: '이용약관',
+  privacy: '개인정보처리방침',
+};
+
 // Phase 3 — taboo_hanja 테이블
 export interface TabooHanjaRow {
   hanja: string;
