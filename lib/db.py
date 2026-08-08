@@ -228,6 +228,27 @@ def get_inquiries_by_member(member_id):
     return rows or []
 
 
+def merge_guest_into_member(guest_uid, social_uid, name='', contact='', login_provider='guest'):
+    """게스트로 구매한 뒤 소셜 로그인으로 전환한 경우, 게스트 회원의 주문·문의를 새
+    소셜 계정으로 옮긴다. 두 uid가 서로 다른 회원일 때만 동작하며, 실패해도 로그인
+    자체를 막지 않도록 호출부에서 best-effort로 처리한다."""
+    if not guest_uid or not social_uid or guest_uid == social_uid:
+        return False
+    guest_member = get_member_by_uid(guest_uid)
+    if not guest_member:
+        return False  # 이전할 게스트 구매 이력이 없음 — 정상적인 경우
+
+    social_member = upsert_member(social_uid, name=name, contact=contact, login_provider=login_provider)
+    if not social_member or social_member['id'] == guest_member['id']:
+        return False
+
+    _request('PATCH', 'orders', body={'member_id': social_member['id']},
+              params={'member_id': f"eq.{guest_member['id']}"})
+    _request('PATCH', 'inquiries', body={'member_id': social_member['id']},
+              params={'member_id': f"eq.{guest_member['id']}"})
+    return True
+
+
 def get_orders_by_member(member_id):
     """고객 본인의 결제 내역 조회 (컴플레인 접수 시 관련 결제건 선택용). 최신순."""
     if not member_id:

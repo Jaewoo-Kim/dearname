@@ -4856,6 +4856,22 @@
     </div>
 </div>
 
+<!-- ── 비회원 결제 전 이메일 수집 팝업 ── -->
+<div id="guest-email-modal" class="modal-overlay" style="z-index:var(--z-modal);">
+    <div class="modal-content" style="max-width:400px;padding:44px 40px;">
+        <button class="close-modal" onclick="closeGuestEmailModal()" aria-label="닫기">&times;</button>
+        <div style="font-size:1.4rem;font-weight:900;color:var(--bg-dark);margin-bottom:8px;">이메일을 알려주세요</div>
+        <p style="color:var(--text-secondary);font-size:0.92rem;margin:0 0 20px;line-height:1.6;">
+            비회원으로 결제하시면 소견서가 완성되는 대로 이 이메일로 링크를 보내드립니다.<br>
+            기기가 바뀌어도 메일로 다시 찾아보실 수 있어요.
+        </p>
+        <input type="email" id="guest-email-input" placeholder="example@email.com"
+            style="width:100%;box-sizing:border-box;border:1.5px solid var(--border-light);border-radius: var(--radius-md);padding:14px 18px;font-size:1rem;outline:none;margin-bottom:14px;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='var(--gold-premium)'" onblur="this.style.borderColor='var(--border-light)'">
+        <button class="btn btn-gold" onclick="confirmGuestEmail()">계속하기</button>
+    </div>
+</div>
+
 <div id="complaint-modal" class="modal-overlay" style="z-index:var(--z-modal);">
     <div class="modal-content" style="max-width:440px;padding:44px 40px;text-align:left;">
         <button class="close-modal" onclick="closeComplaintModal()" aria-label="문의 창 닫기">&times;</button>
@@ -5173,6 +5189,13 @@
             return;
         }
 
+        // 비회원인데 이메일이 없으면 결제 전에 먼저 받는다(소견서 링크 발송·재열람용)
+        if (_dnNeedsGuestEmail()) {
+            _pendingAction = requestPremiumReport;
+            openGuestEmailModal();
+            return;
+        }
+
         // 어드민이 부여한 무료 생성권이 있으면 결제 없이 바로 진행(1건 소진)
         const hasCredit = await _dnTryConsumeCredit();
         if (hasCredit) return;
@@ -5261,9 +5284,17 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     function _getUserKey() {
-        // 비로그인 상태에서 임시 키 생성
+        // 비로그인 상태에서 임시 키 생성. Date.now()만 쓰면 같은 밀리초에 방문한
+        // 두 사람이 같은 키를 받아 서로의 주문·보고서를 보게 될 수 있어 반드시 무작위값을 섞는다.
         let key = localStorage.getItem('dn_user_key');
-        if (!key) { key = 'guest_' + Date.now(); localStorage.setItem('dn_user_key', key); }
+        if (!key) {
+            const rand = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+                : Array.from(crypto?.getRandomValues?.(new Uint8Array(16)) || [])
+                    .map(b => b.toString(16).padStart(2, '0')).join('')
+                  || (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2));
+            key = 'guest_' + rand;
+            localStorage.setItem('dn_user_key', key);
+        }
         return key;
     }
 
@@ -5393,7 +5424,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         } catch (e) { /* 무시 */ }
     })();
 
-    async function _dnRecordOrder({ product, amount, tossOrderId, tossPaymentKey }) {
+    async function _dnRecordOrder({ product, amount, tossOrderId, tossPaymentKey }, _attempt = 1) {
         try {
             const resp = await fetch('/proxy/toss/verify', {
                 method: 'POST',
@@ -5409,10 +5440,18 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 })
             });
             const data = await resp.json().catch(() => ({}));
-            return { ok: resp.ok, orderId: data.orderId || null };
+            if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+            return { ok: true, orderId: data.orderId || null };
         } catch (e) {
-            console.warn('[DearName] 주문 기록 실패(진행에는 영향 없음):', e);
-            return { ok: true, orderId: null };
+            console.warn(`[DearName] 주문 기록 실패(시도 ${_attempt}/3):`, e);
+            if (_attempt < 3) {
+                await new Promise(r => setTimeout(r, _attempt * 1000));
+                return _dnRecordOrder({ product, amount, tossOrderId, tossPaymentKey }, _attempt + 1);
+            }
+            // 재시도까지 실패하면 더 이상 성공으로 위장하지 않는다 — order_id 없이 저장된
+            // 보고서는 uid만으로는 다시 찾을 방법이 없어 사실상 영구 소실되기 때문이다.
+            _showToast('⚠️ 주문 기록에 문제가 있었어요. 소견서는 정상 생성되지만, 마이페이지에서 안 보이면 고객센터로 문의해 주세요.');
+            return { ok: false, orderId: null };
         }
     }
 
@@ -6724,6 +6763,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                     if (!serverId) return;
                     _currentServerReportId = serverId;
                     if (_localId) _linkServerId(_localId, serverId);
+                    _dnAutoEmailReport(serverId);
                 });
             _lastOrderId = null;
 
@@ -9743,6 +9783,53 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     function closeEmailModal() {
         document.getElementById('email-modal').style.display = 'none';
     }
+
+    // ================================================================
+    // 비회원 결제 전 이메일 수집 팝업
+    // ================================================================
+    function _dnNeedsGuestEmail() {
+        return !!(_dnUser && _dnUser.provider === 'guest' && !_dnUser.email);
+    }
+    function openGuestEmailModal() {
+        const input = document.getElementById('guest-email-input');
+        if (input) input.value = '';
+        document.getElementById('guest-email-modal').style.display = 'flex';
+    }
+    function closeGuestEmailModal() {
+        document.getElementById('guest-email-modal').style.display = 'none';
+        _pendingAction = null; // 이메일 입력을 취소하면 이어서 하려던 결제도 취소
+    }
+    function confirmGuestEmail() {
+        const input = document.getElementById('guest-email-input');
+        const email = (input?.value || '').trim();
+        if (!email || !email.includes('@')) { _showToast('올바른 이메일을 입력해주세요.'); return; }
+        _dnUser.email = email;
+        localStorage.setItem('dn_user', JSON.stringify(_dnUser));
+        document.getElementById('guest-email-modal').style.display = 'none';
+        if (_pendingAction) {
+            const fn = _pendingAction;
+            _pendingAction = null;
+            setTimeout(fn, 200);
+        }
+    }
+
+    // 보고서가 서버에 저장되는 즉시 이메일로도 보내둔다 — 마이페이지 접속을
+    // 기다리지 않고 "메일로 보내드린다"는 안내를 실제로 지킨다. 실패해도 화면에는
+    // 이미 보고서가 표시되어 있고, 마이페이지의 "이메일로 받기"로 재시도할 수 있다.
+    async function _dnAutoEmailReport(serverId) {
+        if (!_dnUser?.email || !serverId) return;
+        try {
+            const res = await fetch('/proxy/report/email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: _dnUser.uid, reportId: serverId, email: _dnUser.email })
+            });
+            if (res.ok) _showToast(`📧 소견서 링크를 ${_dnUser.email}로 보내드렸어요.`);
+        } catch (e) {
+            console.warn('[DearName] 자동 이메일 발송 실패(마이페이지에서 재시도 가능):', e);
+        }
+    }
+
     // ================================================================
     // 고객센터(문의·컴플레인) 팝업
     // ================================================================
@@ -10464,16 +10551,52 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     // ── 사용자 저장 및 UI 업데이트 ───────────────────────────────────
-    function _saveUser(user) {
+    async function _saveUser(user) {
+        const prevUser = _dnUser;
         _dnUser = user;
         localStorage.setItem('dn_user', JSON.stringify(user));
         _updateAuthUI();
+
+        // 게스트로 구매한 뒤 소셜 로그인으로 전환하면 uid가 바뀌어 마이페이지에서
+        // 방금 산 보고서가 사라진다 — 서버의 주문·문의 소유권과 이 기기의 로컬 기록을
+        // 새 계정으로 옮겨 잃지 않게 한다.
+        if (prevUser?.provider === 'guest' && user.provider !== 'guest' && prevUser.uid !== user.uid) {
+            await _dnMergeGuestAccount(prevUser.uid, user);
+        }
+
         // 로그인 전 하려던 동작 자동 재개
         if (_pendingAction) {
             const fn = _pendingAction;
             _pendingAction = null;
             setTimeout(fn, 300);
         }
+    }
+
+    async function _dnMergeGuestAccount(guestUid, newUser) {
+        try {
+            await fetch('/proxy/account/merge-guest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    guestUid,
+                    socialUid: newUser.uid,
+                    name:      newUser.name  || '',
+                    email:     newUser.email || '',
+                    provider:  newUser.provider,
+                })
+            });
+        } catch (e) {
+            console.warn('[DearName] 게스트 기록 서버 이전 실패(로컬 기록은 아래에서 별도로 옮김):', e);
+        }
+        // 서버 이전 성공 여부와 무관하게, 이 기기의 로컬 기록은 항상 새 uid로 다시 태깅한다
+        // (로컬 저장은 이 기기 안에서만 의미가 있으므로 실패해도 잃을 게 없다).
+        try {
+            const raw  = localStorage.getItem(_REPORTS_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            let changed = false;
+            list.forEach(r => { if (r.uid === guestUid) { r.uid = newUser.uid; changed = true; } });
+            if (changed) localStorage.setItem(_REPORTS_KEY, JSON.stringify(list));
+        } catch (e) { /* 무시 — 재태깅 실패해도 마이페이지가 깨지지는 않음 */ }
     }
 
     function _signOut() {

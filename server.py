@@ -576,6 +576,27 @@ def orders_mine():
     return _no_cache(jsonify({'orders': db.get_orders_by_member(member['id'])}))
 
 
+@app.route('/proxy/account/merge-guest', methods=['POST'])
+def account_merge_guest():
+    """게스트로 결제한 뒤 소셜 로그인으로 전환할 때, 게스트 계정의 주문·문의를 새
+    계정으로 옮긴다. 옮기지 않으면 방금 산 보고서가 마이페이지에서 사라진다."""
+    try:
+        body = request.get_json(force=True)
+        guest_uid = (body.get('guestUid') or '').strip()
+        social_uid = (body.get('socialUid') or '').strip()
+        if not guest_uid or not social_uid:
+            return jsonify({'error': 'guestUid와 socialUid가 필요합니다.'}), 400
+        merged = db.merge_guest_into_member(
+            guest_uid, social_uid,
+            name=body.get('name', ''),
+            contact=body.get('email', ''),
+            login_provider=body.get('provider', 'guest'),
+        )
+        return jsonify({'status': 'ok', 'merged': merged})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/proxy/reports/mine')
 def reports_mine():
     """로그인한 고객 본인의 AI 보고서 목록 조회 (마이페이지 재열람용).
