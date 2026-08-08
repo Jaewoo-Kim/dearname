@@ -857,6 +857,15 @@ def _render_legal(doc_type):
     return html[:start + len(_LEGAL_START)] + '\n' + row['content'] + '\n  ' + html[end:]
 
 
+def _legal_version_date(row):
+    """해당 개정본의 시행 시작일(YYYY-MM-DD). effective_date 미설정 시 저장일로 대체."""
+    d = row.get('effective_date')
+    if d:
+        return d
+    ts = row.get('created_at') or ''
+    return ts[:10] if ts else ''
+
+
 @app.route('/terms.html')
 def terms_page():
     return _no_cache(Response(_render_legal('terms'), mimetype='text/html'))
@@ -883,6 +892,55 @@ def legal_content(doc_type):
             'updatedAt': row.get('created_at'),
         }))
     return _no_cache(jsonify({'content': _legal_default_content(doc_type), 'source': 'file'}))
+
+
+@app.route('/proxy/legal/<doc_type>/versions')
+def legal_versions(doc_type):
+    """공개 페이지 하단 '이전 버전 보기' 목록. 어드민에서 저장한 적이 없으면(과거본이 없으면) 빈 목록."""
+    if doc_type not in _LEGAL_FILES:
+        return jsonify({'error': '알 수 없는 문서 종류입니다.'}), 404
+    rows = db.list_legal_documents(doc_type)
+    versions = []
+    for i, row in enumerate(rows):
+        versions.append({
+            'id': row['id'],
+            'periodStart': _legal_version_date(row),
+            'periodEnd': _legal_version_date(rows[i - 1]) if i > 0 else None,
+            'isCurrent': i == 0,
+        })
+    return _no_cache(jsonify({'versions': versions}))
+
+
+@app.route('/legal-archive/<doc_type>/<version_id>')
+def legal_archive_page(doc_type, version_id):
+    """과거 시행본 원문을 그대로 보여준다(분쟁 시 '가입 당시 약관'을 제시할 수 있도록)."""
+    if doc_type not in _LEGAL_FILES:
+        return _no_cache(Response('알 수 없는 문서 종류입니다.', status=404))
+    row = db.get_legal_document_by_id(doc_type, version_id)
+    if not row or not row.get('content'):
+        return _no_cache(Response('해당 버전을 찾을 수 없습니다.', status=404))
+
+    html = _legal_static_html(doc_type)
+    start = html.find(_LEGAL_START)
+    end = html.find(_LEGAL_END)
+    if start == -1 or end == -1:
+        return _no_cache(Response(html, mimetype='text/html'))
+
+    rows = db.list_legal_documents(doc_type)
+    ids = [r['id'] for r in rows]
+    idx = ids.index(row['id']) if row['id'] in ids else None
+    period_start = _legal_version_date(row)
+    period_end = _legal_version_date(rows[idx - 1]) if idx is not None and idx > 0 else None
+    period_label = f'{period_start} ~ {period_end}' if period_end else f'{period_start} ~ (다음 개정 전까지)'
+    banner = (
+        '<div class="notice" style="margin-top:0;">'
+        f'📜 이 문서는 <b>{period_label} 시행</b>된 과거 버전입니다. '
+        f'<a href="/{_LEGAL_FILES[doc_type]}">현재 시행 중인 버전 보기 →</a>'
+        '</div>'
+    )
+    body = banner + '\n' + row['content']
+    out = html[:start + len(_LEGAL_START)] + '\n' + body + '\n  ' + html[end:]
+    return _no_cache(Response(out, mimetype='text/html'))
 
 
 if __name__ == '__main__':
