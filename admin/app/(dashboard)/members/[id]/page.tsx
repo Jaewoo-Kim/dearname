@@ -33,9 +33,11 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
 
   const typedOrders = (orders as unknown as Order[]) || [];
 
+  const isWithdrawn = !!typedMember.withdrawn_at;
+
   const FIELDS: Array<[string, string]> = [
-    ['이름', maskName(typedMember.name)],
-    ['연락처', maskContact(typedMember.contact)],
+    ['이름', isWithdrawn ? '(삭제됨)' : maskName(typedMember.name)],
+    ['연락처', isWithdrawn ? '(삭제됨)' : maskContact(typedMember.contact)],
     ['가입 경로', typedMember.login_provider || '-'],
     ['가입일', formatDate(typedMember.created_at)],
     ['누적 구매', `${typedMember.order_count}건`],
@@ -47,6 +49,14 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
     <div className="max-w-4xl">
       <BackLink href="/members" label="회원 목록으로" />
       <h1 className="text-2xl font-semibold tracking-tight text-slate-900">회원 상세</h1>
+
+      {isWithdrawn && (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          <b className="text-slate-800">탈퇴한 회원입니다</b> ({formatDate(typedMember.withdrawn_at)} 탈퇴)<br />
+          이름·연락처 등 회원을 식별할 수 있는 정보는 삭제되었습니다. 아래 주문 기록은
+          전자상거래법상 보존의무에 따라 남아 있으며, 환불 등 처리는 그대로 가능합니다.
+        </div>
+      )}
 
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">

@@ -53,8 +53,12 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           </h2>
           {typedOrder.members ? (
             <div className="mt-3 space-y-1 text-sm">
-              <p className="text-base font-medium text-slate-900">{maskName(typedOrder.members.name)}</p>
-              <p className="text-slate-500">{maskContact(typedOrder.members.contact)}</p>
+              <p className="text-base font-medium text-slate-900">
+                {typedOrder.members.withdrawn_at ? '(탈퇴한 회원)' : maskName(typedOrder.members.name)}
+              </p>
+              <p className="text-slate-500">
+                {typedOrder.members.withdrawn_at ? '탈퇴로 개인정보가 삭제되었습니다' : maskContact(typedOrder.members.contact)}
+              </p>
               <p className="text-slate-500">가입: {formatDate(typedOrder.members.created_at)}</p>
               <p className="text-slate-500">
                 누적 구매 {typedOrder.members.order_count}건 · {formatKRW(typedOrder.members.total_spent)}

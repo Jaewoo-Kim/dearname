@@ -17,7 +17,7 @@ export default async function InquiryDetailPage({ params }: { params: { id: stri
 
   const { data } = await supabase
     .from('inquiries')
-    .select('*, members(name, contact)')
+    .select('*, members(name, contact, withdrawn_at)')
     .eq('id', params.id)
     .single();
 
@@ -46,7 +46,7 @@ export default async function InquiryDetailPage({ params }: { params: { id: stri
         </div>
       </div>
       <p className="mt-1 text-sm text-slate-500">
-        {formatDate(inquiry.created_at)} · {maskName(inquiry.members?.name)} · {maskContact(inquiry.members?.contact)}
+        {formatDate(inquiry.created_at)} · {inquiry.members?.withdrawn_at ? '(탈퇴한 회원)' : `${maskName(inquiry.members?.name)} · ${maskContact(inquiry.members?.contact)}`}
       </p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {inquiry.type === 'complaint' ? (

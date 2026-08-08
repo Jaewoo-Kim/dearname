@@ -11,6 +11,9 @@ export interface Member {
   order_count: number;
   total_spent: number;
   last_order_at: string | null;
+  // 회원탈퇴 시각. 탈퇴하면 name/contact/external_uid는 비워지고 이 값만 남는다
+  // (주문·보고서 등 전자상거래법상 보존 대상 기록과의 연결은 유지).
+  withdrawn_at: string | null;
 }
 
 export interface Order {
@@ -126,7 +129,7 @@ export interface InquiryRow {
   type: 'general' | 'complaint';
   category: string | null;
   priority: 'low' | 'normal' | 'urgent';
-  members?: { name: string | null; contact: string | null } | null;
+  members?: { name: string | null; contact: string | null; withdrawn_at: string | null } | null;
 }
 
 export const INQUIRY_CATEGORY_LABELS: Record<string, string> = {

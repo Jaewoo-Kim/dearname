@@ -66,10 +66,17 @@ export default async function MembersPage({ searchParams }: { searchParams: { pe
                   <td className="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(m.created_at)}</td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <Link href={`/members/${m.id}`} className="text-brand-700 hover:underline">
-                      {maskName(m.name)}
+                      {m.withdrawn_at ? '(탈퇴한 회원)' : maskName(m.name)}
                     </Link>
+                    {m.withdrawn_at && (
+                      <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                        탈퇴
+                      </span>
+                    )}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">{maskContact(m.contact)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">
+                    {m.withdrawn_at ? '-' : maskContact(m.contact)}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-600">{m.order_count}건</td>
                   <td className="whitespace-nowrap px-4 py-3 font-medium tabular-nums text-slate-900">{formatKRW(m.total_spent)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">
