@@ -258,6 +258,39 @@ def get_latest_legal_document(doc_type):
     return _first(rows)
 
 
+def list_legal_documents(doc_type):
+    """해당 문서 종류의 전체 개정이력을 최신순으로 가져온다(공개 페이지의 이전 버전 목록용)."""
+    if doc_type not in ('terms', 'privacy'):
+        return []
+    rows = _request(
+        'GET', 'legal_documents',
+        params={
+            'doc_type': f'eq.{doc_type}',
+            'select': 'id,created_at,effective_date,updated_by',
+            'order': 'created_at.desc',
+        },
+        prefer=None,
+    )
+    return rows or []
+
+
+def get_legal_document_by_id(doc_type, doc_id):
+    """특정 개정본의 전체 본문을 id로 조회한다. doc_type이 일치하는 행만 반환(다른 문서로의 조회 차단)."""
+    if doc_type not in ('terms', 'privacy') or not doc_id:
+        return None
+    rows = _request(
+        'GET', 'legal_documents',
+        params={
+            'id': f'eq.{doc_id}',
+            'doc_type': f'eq.{doc_type}',
+            'select': '*',
+            'limit': '1',
+        },
+        prefer=None,
+    )
+    return _first(rows)
+
+
 def insert_report_email_log(report_id, member_id, to_email, status, error=None, sent_by=None):
     """보고서 링크 메일 발송 이력 기록. 실패도 남겨야 분쟁 시 원인을 구분할 수 있다."""
     if not report_id or not to_email:

@@ -368,6 +368,30 @@
     <p><b>부칙</b><br>이 개인정보처리방침은 2026년 8월 7일부터 적용됩니다.</p>
   </div>
 
+  <div class="card" id="legal-versions-card" style="display:none;">
+    <p style="font-size:12.5px;color:var(--sub);margin:0 0 6px;font-weight:600;">이전 버전</p>
+    <ul id="legal-versions-list" style="margin:0;padding-left:18px;font-size:13px;"></ul>
+  </div>
+  <script>
+  (function() {
+    fetch('/proxy/legal/privacy/versions').then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+      if (!data || !data.versions) return;
+      var past = data.versions.filter(function(v) { return !v.isCurrent; });
+      if (!past.length) return;
+      var list = document.getElementById('legal-versions-list');
+      past.forEach(function(v) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = '/legal-archive/privacy/' + v.id;
+        a.textContent = '이전 버전 보기 (' + v.periodStart + ' ~ ' + (v.periodEnd || '') + ' 시행)';
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+      document.getElementById('legal-versions-card').style.display = '';
+    }).catch(function() {});
+  })();
+  </script>
+
   <!-- LEGAL:CONTENT:END -->
   <p class="footer-note">© 2026 Crazystudio Co. · <a href="/terms.html">이용약관</a></p>
 </div>
