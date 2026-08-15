@@ -89,6 +89,24 @@ alter table members add column if not exists suspended_at timestamptz;
 alter table members add column if not exists suspended_reason text;
 alter table members add column if not exists suspended_by text;
 
+-- ── 8. 소견서 6개월 경과 자동 파기 + 비식별화 통계 뷰 ───────────────
+-- 결제일로부터 6개월 경과 시 개인정보성 필드를 지운 시각(이용약관 제8조·개인정보처리방침 제5조).
+-- 행 자체는 report_email_logs가 참조하고 있어 지우지 않고, 내용만 비운다.
+alter table reports add column if not exists purged_at timestamptz;
+
+-- 아동정보 비식별화 통계 뷰(개인정보처리방침 제3조5·8호, 제4조②) — 성명·생년월일·특별요청 등
+-- 식별정보는 전혀 노출하지 않고, 월별·성별·평균 점수만 집계해서 내려준다. gender·score는 그 자체로는
+-- 특정 개인을 알아볼 수 없어 파기 대상에서 제외했으므로, 6개월 지난 소견서의 통계도 계속 반영된다.
+create or replace view report_stats_monthly as
+select
+  date_trunc('month', created_at)::date as month,
+  gender,
+  count(*) as report_count,
+  round(avg(score)) as avg_score
+from reports
+group by 1, 2
+order by 1 desc;
+
 -- ── 확인용 (실행 후 아래 쿼리로 컬럼이 생겼는지 볼 수 있습니다) ────
 -- select column_name, data_type, column_default
 --   from information_schema.columns

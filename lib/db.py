@@ -14,7 +14,7 @@ import sys
 import json
 import urllib.request
 import urllib.error
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
 SUPABASE_SERVICE_ROLE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
@@ -119,6 +119,28 @@ def get_report(report_id):
         return None
     rows = _request('GET', 'reports', params={'id': f'eq.{report_id}', 'select': '*'}, prefer=None)
     return _first(rows)
+
+
+def purge_expired_reports(months=6):
+    """결제일로부터 months개월 지난 소견서의 개인정보성 필드를 지운다(이용약관 제8조,
+    개인정보처리방침 제5조). gender·score는 그 자체로 개인을 특정할 수 없어 비식별 통계
+    (report_stats_monthly)에 계속 쓰기 위해 남겨두고, 성명·생년월일·전체 리포트 내용·특별요청만
+    지운다. 행 자체는 report_email_logs가 참조하고 있어 삭제하지 않고 내용만 비운다.
+    반환값은 이번에 처리한 건수."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=30 * months)).isoformat()
+    rows = _request(
+        'PATCH', 'reports',
+        body={
+            'report_json': None,
+            'baby_name_kr': None,
+            'baby_name_hanja': None,
+            'birth_dt': None,
+            'special_request': None,
+            'purged_at': datetime.now(timezone.utc).isoformat(),
+        },
+        params={'created_at': f'lt.{cutoff}', 'purged_at': 'is.null'},
+    )
+    return len(rows or [])
 
 
 def insert_event(name, session_id=None):

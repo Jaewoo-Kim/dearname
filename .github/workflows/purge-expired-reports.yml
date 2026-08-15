@@ -1,0 +1,35 @@
+name: 만료 소견서 자동 파기
+
+# 이용약관 제8조 / 개인정보처리방침 제5조 — 결제일로부터 6개월 지난 소견서의
+# 개인정보성 필드를 매일 지운다. 실제 삭제 로직은 server.py의
+# POST /proxy/admin/purge-expired-reports 가 수행하고, 이 워크플로는 그 엔드포인트를
+# 매일 한 번 호출하는 트리거 역할만 한다.
+#
+# 필요한 저장소 시크릿(Settings > Secrets and variables > Actions):
+#   SITE_URL          - 본 서비스(Render) 주소, 예: https://dearname-project.onrender.com
+#   ADMIN_API_SECRET  - 본 서비스와 동일한 값(Render 환경변수와 일치해야 함)
+
+on:
+  schedule:
+    - cron: '0 18 * * *'  # 매일 UTC 18:00 = KST 03:00
+  workflow_dispatch: {}   # 필요할 때 수동으로도 실행 가능(Actions 탭에서 "Run workflow")
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 파기 엔드포인트 호출
+        run: |
+          if [ -z "${{ secrets.SITE_URL }}" ] || [ -z "${{ secrets.ADMIN_API_SECRET }}" ]; then
+            echo "SITE_URL 또는 ADMIN_API_SECRET 시크릿이 설정되지 않아 건너뜁니다."
+            exit 0
+          fi
+          http_code=$(curl -s -o response.json -w "%{http_code}" -X POST \
+            "${{ secrets.SITE_URL }}/proxy/admin/purge-expired-reports" \
+            -H "X-Admin-Secret: ${{ secrets.ADMIN_API_SECRET }}")
+          echo "응답 코드: $http_code"
+          cat response.json
+          if [ "$http_code" -ge 400 ]; then
+            echo "파기 요청 실패"
+            exit 1
+          fi

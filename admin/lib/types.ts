@@ -46,6 +46,17 @@ export interface Report {
   report_json: unknown;
   special_request: string | null;
   last_viewed_at: string | null;
+  // 결제일로부터 6개월 지나 개인정보성 필드(성명·생년월일·리포트 본문 등)를 지운 시각.
+  // gender·score는 비식별 통계(report_stats_monthly)에 계속 쓰이므로 파기 후에도 남아있다.
+  purged_at: string | null;
+}
+
+// 비식별화 통계(개인정보처리방침 제3조5·8호) — report_stats_monthly 뷰
+export interface ReportStatsMonthlyRow {
+  month: string;
+  gender: string | null;
+  report_count: number;
+  avg_score: number | null;
 }
 
 // 보고서 링크 메일 발송 이력 — report_email_logs 테이블

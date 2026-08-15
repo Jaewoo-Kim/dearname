@@ -67,8 +67,13 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
                   <td className="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(r.created_at)}</td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <Link href={`/reports/${r.id}`} className="text-brand-700 hover:underline">
-                      {r.baby_name_kr || '-'}
+                      {r.purged_at ? '(파기됨)' : r.baby_name_kr || '-'}
                     </Link>
+                    {r.purged_at && (
+                      <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                        파기
+                      </span>
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-500">{r.baby_name_hanja || '-'}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-600">{r.gender || '-'}</td>

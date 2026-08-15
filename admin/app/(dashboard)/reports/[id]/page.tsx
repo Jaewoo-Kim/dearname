@@ -68,7 +68,9 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          {report.baby_name_kr} <span className="text-slate-400">{report.baby_name_hanja}</span>
+          {report.purged_at
+            ? '(파기된 소견서)'
+            : <>{report.baby_name_kr} <span className="text-slate-400">{report.baby_name_hanja}</span></>}
         </h1>
         {report.order_id && (
           <Link href={`/orders/${report.order_id}`} className="text-sm text-brand-700 hover:underline">
@@ -83,6 +85,13 @@ export default async function ReportDetailPage({ params }: { params: { id: strin
           ? `최근 열람 ${formatDate(report.last_viewed_at)}`
           : '링크 열람 기록 없음'}
       </p>
+
+      {report.purged_at && (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          <b className="text-slate-800">보관 기간(결제일로부터 6개월)이 지나 파기되었습니다</b> ({formatDate(report.purged_at)} 파기)<br />
+          성명·생년월일·소견서 본문 등 개인정보성 내용은 삭제되었습니다. 성별·점수는 비식별 통계 목적으로 남아 있습니다.
+        </div>
+      )}
 
       <div className="mt-4 flex flex-wrap items-start gap-2">
         {viewUrl ? (

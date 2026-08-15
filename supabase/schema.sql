@@ -79,6 +79,24 @@ create index if not exists idx_reports_member_id on reports(member_id);
 -- 기존 행 보정: order_id로 연결된 주문의 소유자를 member_id에 채워 넣는다.
 update reports r set member_id = o.member_id
   from orders o where r.order_id = o.id and r.member_id is null;
+-- 결제일로부터 6개월 경과 시 개인정보성 필드를 지운 시각(이용약관 제8조·개인정보처리방침 제5조).
+-- 행 자체는 report_email_logs가 참조하고 있어 지우지 않고, 내용만 비운다.
+alter table reports add column if not exists purged_at timestamptz;
+
+-- 아동정보 비식별화 통계 뷰(개인정보처리방침 제3조5·8호, 제4조②) — 성명·생년월일·특별요청 등
+-- 식별정보는 전혀 노출하지 않고, 월별·성별·평균 점수만 집계해서 내려준다. gender·score는 그 자체로는
+-- 특정 개인을 알아볼 수 없어 파기 대상(위 purged_at)에서 제외했으므로, 6개월 지난 소견서의 통계도
+-- 계속 이 뷰에 반영된다. 어드민 통계 화면은 이 뷰만 조회하게 해서 "비식별 가공된 정보만 통계
+-- 목적으로 활용한다"는 방침을 실제로 지키게 한다.
+create or replace view report_stats_monthly as
+select
+  date_trunc('month', created_at)::date as month,
+  gender,
+  count(*) as report_count,
+  round(avg(score)) as avg_score
+from reports
+group by 1, 2
+order by 1 desc;
 
 -- ── report_email_logs — 보고서 링크 메일 발송 이력 ───────────────────
 -- 고객이 마이페이지에서 직접 보낸 건(sent_by=null)과 운영자가 어드민에서 재발송한 건을

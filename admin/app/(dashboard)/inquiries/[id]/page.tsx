@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { fetchRole } from '@/lib/adminUser';
-import { formatDate, maskContact, maskName } from '@/lib/format';
+import { formatDate, isPaymentSlaOverdue, maskContact, maskName } from '@/lib/format';
 import BackLink from '@/components/BackLink';
 import InquiryReplyForm from '@/components/InquiryReplyForm';
 import type { InquiryRow } from '@/lib/types';
@@ -64,6 +64,12 @@ export default async function InquiryDetailPage({ params }: { params: { id: stri
           </span>
         )}
       </div>
+
+      {isPaymentSlaOverdue(inquiry) && (
+        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          ⏰ <b>환불 처리 기한(3영업일)을 넘긴 결제·환불 문의입니다.</b> 빠른 확인이 필요합니다.
+        </div>
+      )}
 
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <h2 className="text-sm font-semibold text-slate-500">문의 내용</h2>

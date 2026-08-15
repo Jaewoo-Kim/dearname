@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import { buildQueryHref, formatDate, maskContact, maskName, sanitizeSearchTerm } from '@/lib/format';
+import { buildQueryHref, formatDate, isPaymentSlaOverdue, maskContact, maskName, sanitizeSearchTerm } from '@/lib/format';
 import PageHeader from '@/components/PageHeader';
 import PeriodFilterBar from '@/components/PeriodFilterBar';
 import SearchBar from '@/components/SearchBar';
@@ -151,6 +151,14 @@ export default async function InquiriesPage({
                       <span className={`h-1.5 w-1.5 rounded-full ${iq.status === 'answered' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                       {iq.status === 'answered' ? '답변완료' : '대기중'}
                     </span>
+                    {isPaymentSlaOverdue(iq) && (
+                      <span
+                        className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700"
+                        title="환불 처리 기한(3영업일)을 넘긴 결제·환불 문의입니다"
+                      >
+                        ⏰ 지연
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/inquiries/${iq.id}`}>

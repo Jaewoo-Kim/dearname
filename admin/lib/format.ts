@@ -74,6 +74,14 @@ export function buildQueryHref(basePath: string, params: Record<string, string>)
   return qs ? `${basePath}?${qs}` : basePath;
 }
 
+// 환불 처리 SLA(이용약관 제19조 3영업일 이내 환급) 경과 여부 — 영업일 계산 대신
+// 달력일 3일 경과로 단순화한 근사치. 결제·환불 컴플레인이 대기중 상태로 이 기간을
+// 넘기면 어드민 목록/상세에 지연 배지를 띄워 응대 누락을 막는다.
+export function isPaymentSlaOverdue(iq: { status: string; type: string; category: string | null; created_at: string }): boolean {
+  if (iq.status !== 'pending' || iq.type !== 'complaint' || iq.category !== 'payment') return false;
+  return Date.now() - new Date(iq.created_at).getTime() > 3 * 24 * 60 * 60 * 1000;
+}
+
 // 기간 필터(주문 목록 등)의 KST 기준 시작 시각 계산
 export function getPeriodStartUTC(period: string): Date | null {
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;

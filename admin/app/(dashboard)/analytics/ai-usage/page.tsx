@@ -70,6 +70,7 @@ export default async function AiUsagePage() {
         tabs={[
           { href: '/analytics', label: '전환율 퍼널' },
           { href: '/analytics/ai-usage', label: 'AI 비용' },
+          { href: '/analytics/naming-stats', label: '작명 통계' },
         ]}
       />
 

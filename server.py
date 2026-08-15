@@ -765,6 +765,23 @@ def account_suspend_notify():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/proxy/admin/purge-expired-reports', methods=['POST'])
+def admin_purge_expired_reports():
+    """결제일로부터 6개월 지난 소견서의 개인정보성 필드를 지운다(이용약관 제8조).
+    매일 실행되는 스케줄(예: GitHub Actions cron)이 이 엔드포인트를 호출한다."""
+    secret = os.environ.get('ADMIN_API_SECRET', '')
+    if not secret:
+        return jsonify({'error': 'ADMIN_API_SECRET이 설정되지 않아 파기 배치가 비활성화되어 있습니다.'}), 503
+    if not hmac.compare_digest(request.headers.get('X-Admin-Secret', ''), secret):
+        return jsonify({'error': '인증되지 않은 요청입니다.'}), 401
+
+    try:
+        purged = db.purge_expired_reports(months=6)
+        return jsonify({'status': 'ok', 'purged': purged})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/proxy/account/delete', methods=['POST'])
 def account_delete():
     """회원탈퇴. 이름·연락처·로그인 식별자를 지우고 계정을 비활성화한다.
@@ -962,6 +979,8 @@ def report_get(report_id):
     report_row = db.get_report(report_id)
     if not report_row:
         return jsonify({'error': '보고서를 찾을 수 없습니다.'}), 404
+    if report_row.get('purged_at'):
+        return jsonify({'error': '보관 기간(결제일로부터 6개월)이 지나 소견서 내용이 삭제되었습니다.'}), 410
     # 링크로 실제 열람했다는 근거를 남긴다(마지막 열람 시각). 실패해도 열람은 막지 않는다.
     db.touch_report_viewed(report_id)
     return jsonify({'status': 'ok', 'report': report_row})
