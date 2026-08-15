@@ -979,6 +979,16 @@
             color: var(--text-secondary); background: none; border: none; padding: 0; line-height: 1;
         }
         .close-modal:hover { color: var(--bg-dark); }
+
+        .mp-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .mp-toggle input { opacity: 0; width: 0; height: 0; }
+        .mp-toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; transition: .2s; border-radius: 24px; }
+        .mp-toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; transition: .2s; border-radius: 50%; }
+        .mp-toggle input:checked + .mp-toggle-slider { background: var(--gold-premium, #a8792a); }
+        .mp-toggle input:checked + .mp-toggle-slider:before { transform: translateX(20px); }
+        .consent-row { display: flex; align-items: flex-start; gap: 10px; text-align: left; font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5; }
+        .consent-row input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
+        .consent-row a { color: var(--gold-premium); text-decoration: underline; }
         
         .social-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 16px; border-radius: var(--radius-md); font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-bottom: 15px; transition: all 0.3s ease; }
         .google-btn { background: white; border: 1px solid var(--border-light); color: var(--text-primary); }
@@ -4057,6 +4067,16 @@
                     </div>
                     <button onclick="_signOut()" class="mp-btn mp-btn-outline" style="padding:9px 20px;font-size:0.85rem;">로그아웃</button>
                 </div>
+                <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                    <div>
+                        <div style="font-size:0.88rem;font-weight:700;color:var(--bg-dark);">마케팅 정보 수신 동의</div>
+                        <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:2px;">이벤트·혜택 안내 메일을 받아보실 수 있어요.</div>
+                    </div>
+                    <label class="mp-toggle">
+                        <input type="checkbox" id="mypage-marketing-toggle" onchange="_dnToggleMarketing(this.checked)">
+                        <span class="mp-toggle-slider"></span>
+                    </label>
+                </div>
                 <div style="margin-top:14px;text-align:right;">
                     <a onclick="_confirmWithdraw()" style="font-size:0.78rem;color:var(--text-secondary);text-decoration:underline;cursor:pointer;">회원탈퇴</a>
                 </div>
@@ -4876,6 +4896,27 @@
     </div>
 </div>
 
+<!-- ── 서비스 이용 전 필수 동의 팝업 ── -->
+<div id="consent-modal" class="modal-overlay" style="z-index:var(--z-modal);">
+    <div class="modal-content" style="max-width:420px;padding:44px 40px;">
+        <button class="close-modal" onclick="closeConsentModal()" aria-label="닫기">&times;</button>
+        <div style="font-size:1.4rem;font-weight:900;color:var(--bg-dark);margin-bottom:8px;">서비스 이용을 위한 동의</div>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin:0 0 20px;line-height:1.6;">
+            DearName을 이용하시려면 아래 필수 항목에 동의해 주세요.
+        </p>
+        <label class="consent-row">
+            <input type="checkbox" id="consent-required" onchange="_dnUpdateConsentBtn()">
+            <span>[필수] <a href="/terms.html" target="_blank">이용약관</a> 및 <a href="/privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.</span>
+        </label>
+        <label class="consent-row">
+            <input type="checkbox" id="consent-marketing">
+            <span>[선택] 마케팅 정보(이벤트·혜택 안내) 수신에 동의합니다. 동의하지 않으셔도 서비스 이용에는
+            제한이 없으며, 마이페이지에서 언제든지 변경할 수 있습니다.</span>
+        </label>
+        <button id="consent-confirm-btn" class="btn btn-gold" style="width:100%;margin-top:6px;" disabled onclick="confirmConsent()">동의하고 계속하기</button>
+    </div>
+</div>
+
 <!-- ── 비회원 결제 전 이메일 수집 팝업 ── -->
 <div id="guest-email-modal" class="modal-overlay" style="z-index:var(--z-modal);">
     <div class="modal-content" style="max-width:400px;padding:44px 40px;">
@@ -5208,6 +5249,9 @@
             openLoginModal();
             return;
         }
+
+        // 이용약관·개인정보처리방침 필수 동의를 아직 안 했으면 먼저 받는다
+        if (!(await _dnRequireConsent(requestPremiumReport))) return;
 
         // 비회원인데 이메일이 없으면 결제 전에 먼저 받는다(소견서 링크 발송·재열람용)
         if (_dnNeedsGuestEmail()) {
@@ -9949,7 +9993,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // ================================================================
     // 마이페이지
     // ================================================================
-    function showMypageView() {
+    async function showMypageView() {
         document.getElementById('main-view').style.display         = 'none';
         document.getElementById('report-view').style.display       = 'none';
         document.getElementById('self-report-view').style.display  = 'none';
@@ -9970,6 +10014,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             if (content)   content.style.display   = 'none';
             return;
         }
+
+        // 이용약관·개인정보처리방침 필수 동의를 아직 안 했으면 먼저 받는다
+        if (!(await _dnRequireConsent(showMypageView))) return;
 
         // 로그인 상태: 콘텐츠 표시
         if (guestWall) guestWall.style.display = 'none';
@@ -9997,6 +10044,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const label = labels[u.provider] || u.provider || '';
             badgeEl.innerHTML = `<span class="mp-provider-badge">${icon ? `<b>${icon}</b>` : ''}${label}</span>`;
         }
+        const marketingToggle = document.getElementById('mypage-marketing-toggle');
+        if (marketingToggle) marketingToggle.checked = !!u.marketingAgreed;
     }
 
     function _renderMypageSelfReports() {
@@ -10318,6 +10367,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
 
     async function _submitInquiry() {
         if (!_dnUser) { openLoginModal(); return; }
+        if (!(await _dnRequireConsent(_submitInquiry))) return;
         const typeEl = document.getElementById('inquiry-type');
         const categoryEl = document.getElementById('inquiry-category');
         const orderEl = document.getElementById('inquiry-order');
@@ -10624,6 +10674,9 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             await _dnMergeGuestAccount(prevUser.uid, user);
         }
 
+        // 이용약관·개인정보처리방침 필수 동의를 아직 안 했으면, 하려던 동작을 동의 팝업 뒤로 미룬다.
+        if (!(await _dnRequireConsent(_pendingAction))) return;
+
         // 로그인 전 하려던 동작 자동 재개
         if (_pendingAction) {
             const fn = _pendingAction;
@@ -10663,6 +10716,100 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         // 이전이 끝난 게스트 키는 폐기한다. 남겨두면 로그아웃 후 "비회원으로 계속하기"를
         // 눌렀을 때 이미 비워진 옛 게스트로 되돌아가 보고서가 0건으로 보인다.
         try { localStorage.removeItem('dn_user_key'); } catch (e) {}
+    }
+
+    // ================================================================
+    // 서비스 이용 전 필수 동의 (이용약관·개인정보처리방침) + 마케팅 선택 동의
+    // ================================================================
+    async function _dnHasConsented() {
+        if (!_dnUser) return false;
+        if (_dnUser.termsAgreed) return true; // 로컬 캐시 — 매번 서버에 물어보지 않는다
+        try {
+            const res = await fetch(`/proxy/consent/status?uid=${encodeURIComponent(_dnUser.uid)}`);
+            if (res.ok) {
+                const data = await res.json();
+                _dnUser.termsAgreed     = !!data.termsAgreed;
+                _dnUser.marketingAgreed = !!data.marketingAgreed;
+                if (_dnUser.termsAgreed) localStorage.setItem('dn_user', JSON.stringify(_dnUser));
+                return _dnUser.termsAgreed;
+            }
+        } catch (e) {
+            console.warn('[DearName] 동의 상태 확인 실패:', e);
+        }
+        return false;
+    }
+
+    // 반환값 true면 이미 동의를 마쳤으니 즉시 진행. false면 동의 팝업을 띄우고
+    // resumeFn을 예약했으니, 호출부는 여기서 진행을 멈추고 return해야 한다.
+    async function _dnRequireConsent(resumeFn) {
+        if (await _dnHasConsented()) return true;
+        _pendingAction = resumeFn || null;
+        openConsentModal();
+        return false;
+    }
+
+    function openConsentModal() {
+        const req = document.getElementById('consent-required');
+        const mkt = document.getElementById('consent-marketing');
+        if (req) req.checked = false;
+        if (mkt) mkt.checked = !!_dnUser?.marketingAgreed;
+        _dnUpdateConsentBtn();
+        document.getElementById('consent-modal').style.display = 'flex';
+    }
+    function closeConsentModal() {
+        document.getElementById('consent-modal').style.display = 'none';
+        _pendingAction = null; // 필수 동의를 거부하면 이어서 하려던 동작도 취소
+    }
+    function _dnUpdateConsentBtn() {
+        const req = document.getElementById('consent-required');
+        const btn = document.getElementById('consent-confirm-btn');
+        if (btn) btn.disabled = !(req && req.checked);
+    }
+
+    async function confirmConsent() {
+        const req = document.getElementById('consent-required');
+        if (!req?.checked || !_dnUser) return;
+        const marketing = !!document.getElementById('consent-marketing')?.checked;
+        try {
+            await fetch('/proxy/consent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    uid: _dnUser.uid, name: _dnUser.name || '', email: _dnUser.email || '',
+                    provider: _dnUser.provider, marketingAgreed: marketing,
+                })
+            });
+        } catch (e) {
+            console.warn('[DearName] 동의 기록 저장 실패(다음 접속 시 다시 물어볼 수 있음):', e);
+        }
+        _dnUser.termsAgreed     = true;
+        _dnUser.marketingAgreed = marketing;
+        localStorage.setItem('dn_user', JSON.stringify(_dnUser));
+        document.getElementById('consent-modal').style.display = 'none';
+        if (_pendingAction) {
+            const fn = _pendingAction;
+            _pendingAction = null;
+            setTimeout(fn, 200);
+        }
+    }
+
+    async function _dnToggleMarketing(checked) {
+        if (!_dnUser) return;
+        try {
+            const res = await fetch('/proxy/consent/marketing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: _dnUser.uid, marketingAgreed: checked })
+            });
+            if (!res.ok) throw new Error('저장 실패');
+            _dnUser.marketingAgreed = checked;
+            localStorage.setItem('dn_user', JSON.stringify(_dnUser));
+            _showToast(checked ? '마케팅 정보 수신에 동의하셨습니다.' : '마케팅 정보 수신을 거부하셨습니다.');
+        } catch (e) {
+            _showToast('설정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+            const el = document.getElementById('mypage-marketing-toggle');
+            if (el) el.checked = !checked; // 실패 시 토글을 원래 상태로 되돌림
+        }
     }
 
     function _signOut() {

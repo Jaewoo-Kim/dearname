@@ -751,6 +751,55 @@ def account_delete():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/proxy/consent/status')
+def consent_status():
+    """서비스 이용 전 필수 동의(이용약관·개인정보처리방침) 여부를 프론트가 확인한다.
+    DB 미설정 시에도 서비스가 막히지 않도록 termsAgreed:true로 응답한다(개발/데모 모드)."""
+    uid = request.args.get('uid', '')
+    if not db.ENABLED:
+        return _no_cache(jsonify({'termsAgreed': True, 'marketingAgreed': False}))
+    if not uid:
+        return _no_cache(jsonify({'termsAgreed': False, 'marketingAgreed': False}))
+    return _no_cache(jsonify(db.get_consent_status(uid)))
+
+
+@app.route('/proxy/consent', methods=['POST'])
+def consent_save():
+    """서비스 이용 전 필수 동의(이용약관·개인정보처리방침)를 기록하고, 함께 제출된
+    마케팅 선택 동의도 저장한다."""
+    try:
+        body = request.get_json(force=True)
+        uid = (body.get('uid') or '').strip()
+        if not uid:
+            return jsonify({'error': '로그인 정보가 없습니다.'}), 400
+        db.save_consent(
+            uid,
+            marketing_agreed=bool(body.get('marketingAgreed')),
+            name=body.get('name', ''),
+            contact=body.get('email', ''),
+            login_provider=body.get('provider', 'guest'),
+        )
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/proxy/consent/marketing', methods=['POST'])
+def consent_marketing():
+    """마이페이지에서 마케팅 수신 동의를 켜고 끈다."""
+    try:
+        body = request.get_json(force=True)
+        uid = (body.get('uid') or '').strip()
+        if not uid:
+            return jsonify({'error': '로그인 정보가 없습니다.'}), 400
+        member_row = db.set_marketing_consent(uid, bool(body.get('marketingAgreed')))
+        if not member_row and db.ENABLED:
+            return jsonify({'error': '회원 정보를 찾을 수 없습니다.'}), 404
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # ── 운영자 설정 조회 (Phase 3 — 가격/점검모드) ──────────────
 @app.route('/api/settings')
 def public_settings():

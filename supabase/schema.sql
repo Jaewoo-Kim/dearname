@@ -24,6 +24,12 @@ alter table members add column if not exists bonus_credits int not null default 
 -- 회원탈퇴(계정삭제) 시각. 탈퇴 처리 시 name/contact/external_uid는 비우고 이 값만 남겨
 -- 주문·보고서 등 전자상거래법상 보존이 필요한 거래기록과의 FK 연결은 유지한다.
 alter table members add column if not exists withdrawn_at timestamptz;
+-- 서비스 이용 전 필수 동의(이용약관·개인정보처리방침) 및 마케팅 선택 동의 기록.
+-- terms_agreed_at이 없으면 아직 필수 동의를 하지 않은 회원이라 서비스 이용을 막는다.
+alter table members add column if not exists terms_agreed_at timestamptz;
+alter table members add column if not exists privacy_agreed_at timestamptz;
+alter table members add column if not exists marketing_agreed boolean not null default false;
+alter table members add column if not exists marketing_agreed_at timestamptz;
 
 -- ── orders — 주문·결제 ──────────────────────────────────────────────
 create table if not exists orders (

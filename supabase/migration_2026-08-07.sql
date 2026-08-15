@@ -76,6 +76,13 @@ create index if not exists idx_reports_member_id on reports(member_id);
 update reports r set member_id = o.member_id
   from orders o where r.order_id = o.id and r.member_id is null;
 
+-- ── 6. 필수 동의(이용약관·개인정보처리방침) 및 마케팅 선택 동의 ──────
+-- terms_agreed_at이 없으면 아직 필수 동의를 하지 않은 회원이라 서비스 이용을 막는다.
+alter table members add column if not exists terms_agreed_at timestamptz;
+alter table members add column if not exists privacy_agreed_at timestamptz;
+alter table members add column if not exists marketing_agreed boolean not null default false;
+alter table members add column if not exists marketing_agreed_at timestamptz;
+
 -- ── 확인용 (실행 후 아래 쿼리로 컬럼이 생겼는지 볼 수 있습니다) ────
 -- select column_name, data_type, column_default
 --   from information_schema.columns
