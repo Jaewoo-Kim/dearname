@@ -158,6 +158,53 @@ def get_member_by_uid(uid):
     return _first(rows)
 
 
+def get_consent_status(uid):
+    """이용약관·개인정보처리방침 필수 동의 및 마케팅 선택 동의 상태를 조회한다."""
+    member = get_member_by_uid(uid)
+    if not member:
+        return {'termsAgreed': False, 'marketingAgreed': False}
+    return {
+        'termsAgreed': bool(member.get('terms_agreed_at')),
+        'marketingAgreed': bool(member.get('marketing_agreed')),
+    }
+
+
+def save_consent(uid, marketing_agreed, name='', contact='', login_provider='guest'):
+    """서비스 이용 전 필수 동의(이용약관·개인정보처리방침)를 기록한다.
+    회원이 없으면 새로 만든다(게스트가 로그인 직후 첫 동의를 하는 경우)."""
+    if not uid:
+        return None
+    upsert_member(uid, name=name, contact=contact, login_provider=login_provider)
+    now = datetime.now(timezone.utc).isoformat()
+    rows = _request(
+        'PATCH', 'members',
+        body={
+            'terms_agreed_at': now,
+            'privacy_agreed_at': now,
+            'marketing_agreed': bool(marketing_agreed),
+            'marketing_agreed_at': now if marketing_agreed else None,
+        },
+        params={'external_uid': f'eq.{uid}'},
+    )
+    return _first(rows)
+
+
+def set_marketing_consent(uid, marketing_agreed):
+    """마이페이지에서 마케팅 수신 동의를 켜고 끈다. 필수 동의를 마친 회원만 대상."""
+    member = get_member_by_uid(uid)
+    if not member:
+        return None
+    rows = _request(
+        'PATCH', 'members',
+        body={
+            'marketing_agreed': bool(marketing_agreed),
+            'marketing_agreed_at': datetime.now(timezone.utc).isoformat() if marketing_agreed else None,
+        },
+        params={'id': f'eq.{member["id"]}'},
+    )
+    return _first(rows)
+
+
 def withdraw_member(uid):
     """
     회원탈퇴. name/contact/external_uid를 비우고 잔여 무료 생성권을 0으로 만든 뒤
