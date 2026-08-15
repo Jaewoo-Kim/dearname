@@ -49,7 +49,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
         ) : reports.length === 0 ? (
           <EmptyState title="생성된 보고서가 없습니다" />
         ) : (
-          <table className="w-full min-w-[760px] text-left text-sm">
+          <table className="w-full min-w-[860px] text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500">
               <tr>
                 <th className="whitespace-nowrap px-4 py-3 font-medium">생성일시</th>
@@ -58,6 +58,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
                 <th className="whitespace-nowrap px-4 py-3 font-medium">성별</th>
                 <th className="whitespace-nowrap px-4 py-3 font-medium">점수</th>
                 <th className="whitespace-nowrap px-4 py-3 font-medium">요청사항</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">열람</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -87,6 +88,17 @@ export default async function ReportsPage({ searchParams }: { searchParams: { pe
                       </span>
                     ) : (
                       <span className="text-slate-300">-</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {r.last_viewed_at ? (
+                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700" title={formatDate(r.last_viewed_at)}>
+                        열람함
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                        미열람
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
