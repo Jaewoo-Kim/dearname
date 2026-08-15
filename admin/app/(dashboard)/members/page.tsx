@@ -73,6 +73,11 @@ export default async function MembersPage({ searchParams }: { searchParams: { pe
                         탈퇴
                       </span>
                     )}
+                    {!m.withdrawn_at && m.suspended_at && (
+                      <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                        이용제한
+                      </span>
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-600">
                     {m.withdrawn_at ? '-' : maskContact(m.contact)}

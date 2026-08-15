@@ -734,6 +734,37 @@ def report_email_admin():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/proxy/account/suspend/notify', methods=['POST'])
+def account_suspend_notify():
+    """어드민이 회원을 이용제한(정지)/해제했을 때 안내 메일을 보낸다.
+    회원 상태(members.suspended_at 등)는 어드민이 자체 Supabase 연결로 직접 기록하고,
+    SMTP는 본 서비스에만 있으므로 발송만 여기서 대신 처리한다."""
+    secret = os.environ.get('ADMIN_API_SECRET', '')
+    if not secret:
+        return jsonify({'error': 'ADMIN_API_SECRET이 설정되지 않아 알림 발송이 비활성화되어 있습니다.'}), 503
+    if not hmac.compare_digest(request.headers.get('X-Admin-Secret', ''), secret):
+        return jsonify({'error': '인증되지 않은 요청입니다.'}), 401
+
+    try:
+        body = request.get_json(force=True)
+        email = (body.get('email') or '').strip()
+        action = body.get('action')
+        reason = (body.get('reason') or '').strip()
+        if action not in ('suspend', 'unsuspend'):
+            return jsonify({'error': "action은 'suspend' 또는 'unsuspend'여야 합니다."}), 400
+        if '@' not in email:
+            # 탈퇴 회원 등 연락처가 없는 경우 — 처리 자체는 이미 어드민에서 끝났으므로 에러가 아니다.
+            return jsonify({'status': 'skipped', 'reason': '연락처 없음'})
+
+        ok = (notify.send_suspension_notice(email, reason) if action == 'suspend'
+              else notify.send_unsuspension_notice(email))
+        if not ok:
+            return jsonify({'error': '메일 발송에 실패했습니다. SMTP 설정을 확인해 주세요.'}), 502
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/proxy/account/delete', methods=['POST'])
 def account_delete():
     """회원탈퇴. 이름·연락처·로그인 식별자를 지우고 계정을 비활성화한다.
@@ -757,9 +788,9 @@ def consent_status():
     DB 미설정 시에도 서비스가 막히지 않도록 termsAgreed:true로 응답한다(개발/데모 모드)."""
     uid = request.args.get('uid', '')
     if not db.ENABLED:
-        return _no_cache(jsonify({'termsAgreed': True, 'marketingAgreed': False}))
+        return _no_cache(jsonify({'termsAgreed': True, 'marketingAgreed': False, 'suspended': False, 'suspendedReason': None}))
     if not uid:
-        return _no_cache(jsonify({'termsAgreed': False, 'marketingAgreed': False}))
+        return _no_cache(jsonify({'termsAgreed': False, 'marketingAgreed': False, 'suspended': False, 'suspendedReason': None}))
     return _no_cache(jsonify(db.get_consent_status(uid)))
 
 

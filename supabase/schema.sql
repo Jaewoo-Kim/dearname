@@ -30,6 +30,10 @@ alter table members add column if not exists terms_agreed_at timestamptz;
 alter table members add column if not exists privacy_agreed_at timestamptz;
 alter table members add column if not exists marketing_agreed boolean not null default false;
 alter table members add column if not exists marketing_agreed_at timestamptz;
+-- 이용제한(정지). 탈퇴와 달리 개인정보는 지우지 않고 상태만 바꿔, 해제하면 그대로 다시 쓸 수 있다.
+alter table members add column if not exists suspended_at timestamptz;
+alter table members add column if not exists suspended_reason text;
+alter table members add column if not exists suspended_by text;
 
 -- ── orders — 주문·결제 ──────────────────────────────────────────────
 create table if not exists orders (

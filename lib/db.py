@@ -159,13 +159,16 @@ def get_member_by_uid(uid):
 
 
 def get_consent_status(uid):
-    """이용약관·개인정보처리방침 필수 동의 및 마케팅 선택 동의 상태를 조회한다."""
+    """이용약관·개인정보처리방침 필수 동의, 마케팅 선택 동의, 이용제한(정지) 상태를 조회한다.
+    프론트가 로그인 직후 및 로그인이 필요한 기능을 쓸 때마다 이 응답 하나로 세 가지를 확인한다."""
     member = get_member_by_uid(uid)
     if not member:
-        return {'termsAgreed': False, 'marketingAgreed': False}
+        return {'termsAgreed': False, 'marketingAgreed': False, 'suspended': False, 'suspendedReason': None}
     return {
         'termsAgreed': bool(member.get('terms_agreed_at')),
         'marketingAgreed': bool(member.get('marketing_agreed')),
+        'suspended': bool(member.get('suspended_at')),
+        'suspendedReason': member.get('suspended_reason'),
     }
 
 

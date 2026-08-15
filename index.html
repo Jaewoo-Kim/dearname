@@ -4917,6 +4917,17 @@
     </div>
 </div>
 
+<!-- ── 이용제한(정지) 안내 팝업 ── -->
+<div id="suspended-modal" class="modal-overlay" style="z-index:var(--z-modal);">
+    <div class="modal-content" style="max-width:400px;padding:44px 40px;">
+        <div style="font-size:2.2rem;margin-bottom:10px;">🚫</div>
+        <div style="font-size:1.3rem;font-weight:900;color:var(--bg-dark);margin-bottom:10px;">이용이 제한된 계정입니다</div>
+        <p id="suspended-reason-text" style="color:var(--text-secondary);font-size:0.92rem;line-height:1.6;margin:0 0 16px;"></p>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin:0;">문의사항은 <a href="mailto:cs.crazystudio@gmail.com">cs.crazystudio@gmail.com</a>로 연락해 주세요.</p>
+        <button class="btn btn-navy" style="width:100%;margin-top:18px;" onclick="closeSuspendedModal()">확인</button>
+    </div>
+</div>
+
 <!-- ── 비회원 결제 전 이메일 수집 팝업 ── -->
 <div id="guest-email-modal" class="modal-overlay" style="z-index:var(--z-modal);">
     <div class="modal-content" style="max-width:400px;padding:44px 40px;">
@@ -10721,9 +10732,10 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     // ================================================================
     // 서비스 이용 전 필수 동의 (이용약관·개인정보처리방침) + 마케팅 선택 동의
     // ================================================================
-    async function _dnHasConsented() {
-        if (!_dnUser) return false;
-        if (_dnUser.termsAgreed) return true; // 로컬 캐시 — 매번 서버에 물어보지 않는다
+    // 이용제한(정지) 여부는 운영자가 언제든 걸 수 있어 캐시하지 않고 매번 서버에 확인한다.
+    // 동의 상태는 이 응답에 같이 실려 오니 그대로 캐시를 갱신한다(별도 요청 안 함).
+    async function _dnCheckAccountStatus() {
+        if (!_dnUser) return null;
         try {
             const res = await fetch(`/proxy/consent/status?uid=${encodeURIComponent(_dnUser.uid)}`);
             if (res.ok) {
@@ -10731,18 +10743,27 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 _dnUser.termsAgreed     = !!data.termsAgreed;
                 _dnUser.marketingAgreed = !!data.marketingAgreed;
                 if (_dnUser.termsAgreed) localStorage.setItem('dn_user', JSON.stringify(_dnUser));
-                return _dnUser.termsAgreed;
+                return data;
             }
         } catch (e) {
-            console.warn('[DearName] 동의 상태 확인 실패:', e);
+            console.warn('[DearName] 계정 상태 확인 실패:', e);
         }
-        return false;
+        return null;
     }
 
-    // 반환값 true면 이미 동의를 마쳤으니 즉시 진행. false면 동의 팝업을 띄우고
-    // resumeFn을 예약했으니, 호출부는 여기서 진행을 멈추고 return해야 한다.
+    // 반환값 true면 이용 가능(정지 아님 + 필수 동의 완료)하니 즉시 진행. false면 정지 안내 또는
+    // 동의 팝업을 띄우고 resumeFn을 예약했으니(정지 시엔 예약하지 않음), 호출부는 여기서 진행을 멈추고 return해야 한다.
     async function _dnRequireConsent(resumeFn) {
-        if (await _dnHasConsented()) return true;
+        if (!_dnUser) return false;
+        const data = await _dnCheckAccountStatus();
+
+        if (data?.suspended) {
+            _dnShowSuspendedNotice(data.suspendedReason);
+            _pendingAction = null;
+            return false;
+        }
+        if (_dnUser.termsAgreed) return true; // 서버 응답이 왔으면 최신값, 실패했으면 캐시된 이전 값
+
         _pendingAction = resumeFn || null;
         openConsentModal();
         return false;
@@ -10764,6 +10785,19 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const req = document.getElementById('consent-required');
         const btn = document.getElementById('consent-confirm-btn');
         if (btn) btn.disabled = !(req && req.checked);
+    }
+
+    function _dnShowSuspendedNotice(reason) {
+        const textEl = document.getElementById('suspended-reason-text');
+        if (textEl) {
+            textEl.textContent = reason
+                ? `사유: ${reason}`
+                : '이용약관 위반 등의 사유로 서비스 이용이 제한되었습니다.';
+        }
+        document.getElementById('suspended-modal').style.display = 'flex';
+    }
+    function closeSuspendedModal() {
+        document.getElementById('suspended-modal').style.display = 'none';
     }
 
     async function confirmConsent() {

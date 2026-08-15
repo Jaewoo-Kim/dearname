@@ -14,6 +14,10 @@ export interface Member {
   // 회원탈퇴 시각. 탈퇴하면 name/contact/external_uid는 비워지고 이 값만 남는다
   // (주문·보고서 등 전자상거래법상 보존 대상 기록과의 연결은 유지).
   withdrawn_at: string | null;
+  // 이용제한(정지) — 탈퇴와 달리 개인정보는 지우지 않고 상태만 바꿔, 해제하면 그대로 다시 쓸 수 있다.
+  suspended_at: string | null;
+  suspended_reason: string | null;
+  suspended_by: string | null;
 }
 
 export interface Order {

@@ -5,6 +5,7 @@ import { fetchRole } from '@/lib/adminUser';
 import { formatDate, formatKRW, maskContact, maskName, PRODUCT_LABEL } from '@/lib/format';
 import StatusBadge from '@/components/StatusBadge';
 import RefundButton from '@/components/RefundButton';
+import SuspendButton from '@/components/SuspendButton';
 import BackLink from '@/components/BackLink';
 import EmptyState from '@/components/EmptyState';
 import type { Member, Order } from '@/lib/types';
@@ -34,6 +35,7 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
   const typedOrders = (orders as unknown as Order[]) || [];
 
   const isWithdrawn = !!typedMember.withdrawn_at;
+  const isSuspended = !!typedMember.suspended_at;
 
   const FIELDS: Array<[string, string]> = [
     ['이름', isWithdrawn ? '(삭제됨)' : maskName(typedMember.name)],
@@ -48,13 +50,30 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
   return (
     <div className="max-w-4xl">
       <BackLink href="/members" label="회원 목록으로" />
-      <h1 className="text-2xl font-semibold tracking-tight text-slate-900">회원 상세</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">회원 상세</h1>
+        {!isWithdrawn && (
+          <SuspendButton
+            memberId={params.id}
+            suspended={isSuspended}
+            disabled={isViewer}
+            disabledReason={isViewer ? '조회 권한만 있어 이용제한을 처리할 수 없습니다' : undefined}
+          />
+        )}
+      </div>
 
       {isWithdrawn && (
         <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
           <b className="text-slate-800">탈퇴한 회원입니다</b> ({formatDate(typedMember.withdrawn_at)} 탈퇴)<br />
           이름·연락처 등 회원을 식별할 수 있는 정보는 삭제되었습니다. 아래 주문 기록은
           전자상거래법상 보존의무에 따라 남아 있으며, 환불 등 처리는 그대로 가능합니다.
+        </div>
+      )}
+
+      {isSuspended && (
+        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <b>이용이 제한된 회원입니다</b> ({formatDate(typedMember.suspended_at)} 제한, {typedMember.suspended_by} 처리)<br />
+          사유: {typedMember.suspended_reason || '(사유 미기재)'}
         </div>
       )}
 
