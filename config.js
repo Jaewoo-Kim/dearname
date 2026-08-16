@@ -32,7 +32,7 @@
 
     // ── 서비스 설정 ──────────────────────────────────────────────────
     window.DN_CONFIG = {
-        serviceName:  'DearName',
+        serviceName:  '디어네임',
         companyName:  'Crazystudio Co.',
         supportEmail: 'cs.crazystudio@gmail.com',
         version:      'v2.0.0',
