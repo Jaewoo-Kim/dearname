@@ -317,6 +317,21 @@ function buildUserPrompt(candidate, state) {
         return `${who}: 지배오행 ${dom} / 결핍오행 ${weak}`;
       }).filter(Boolean).join(' | ')
     : '';
+
+  const siblings = state.siblings || [];
+  const _siblingShareLabel = { share: '이름 글자를 형제자매와 공유하고 싶어함', different: '형제자매와 완전히 다른 이름을 원함', any: '' }[state.siblingSharePref] || '';
+  const siblingInfoStr = siblings.length
+    ? siblings.map((sib) => {
+        const who = `${sib.relation || '형제자매'} ${sib.kr || ''}${sib.hanja ? '(' + sib.hanja + ')' : ''}`.trim();
+        if (sib.oheng?.dominant) {
+          const dom = _ohengKr2[sib.oheng.dominant] || sib.oheng.dominant;
+          const weak = _ohengKr2[sib.oheng.weakest] || sib.oheng.weakest || '미상';
+          return `${who}: 지배오행 ${dom} / 결핍오행 ${weak}`;
+        }
+        return who;
+      }).filter(Boolean).join(' | ') + (_siblingShareLabel ? ` (부모 희망: ${_siblingShareLabel})` : '')
+    : '';
+
   const specialRequest = state.specialRequest || '';
 
   // ── 사용자 프롬프트 (6개 서술 필드만 요청 (hanjaDetails는 요청하지 않음 — _genHanjaDetails로 별도 조립)) ───────────────────────
@@ -354,6 +369,7 @@ ${_ysStr}
 사격수리: 원격 ${getSuriInfo(g1)} / 형격 ${getSuriInfo(g2)} / 이격 ${getSuriInfo(g3)} / 정격 ${getSuriInfo(g4)}
 종합 점수: ${score}/100점
 ${parentOhengStr ? `\n[부모 오행 분석]\n${parentOhengStr}` : ''}
+${siblingInfoStr ? `\n[형제자매 정보]\n${siblingInfoStr}` : ''}
 ${specialRequest ? `\n[부모 특별 요청사항]\n${specialRequest}` : ''}
 
 [부모 희망 성향]

@@ -3567,6 +3567,126 @@
                                 </div>
                             </div>
                             <div class="full-width-form">
+                                <label class="input-label">형제자매 정보<span class="badge-opt">선택</span></label>
+                                <div style="display:flex;flex-direction:column;gap:16px;">
+                                    <!-- 형제자매 1 -->
+                                    <div>
+                                        <div style="display:flex;gap:10px;margin-bottom:8px;">
+                                            <select id="sibling-1-relation" style="max-width:110px;margin-bottom:0;">
+                                                <option value="">관계</option>
+                                                <option value="형">형</option>
+                                                <option value="누나">누나</option>
+                                                <option value="오빠">오빠</option>
+                                                <option value="언니">언니</option>
+                                                <option value="남동생">남동생</option>
+                                                <option value="여동생">여동생</option>
+                                            </select>
+                                            <input type="text" id="sibling-1-kr" placeholder="한글 이름 (예: 서준)" style="flex:1;margin-bottom:0;">
+                                            <input type="text" id="sibling-1-hanja" placeholder="한자 (예: 瑞俊)" style="flex:1;margin-bottom:0;">
+                                        </div>
+                                        <div class="birth-form-area">
+                                            <div class="bf-row bf-row--date">
+                                            <select class="bf-select" id="sibling-1-year" style="min-width:100px;"><option value="">연도</option></select>
+                                            <select class="bf-select" id="sibling-1-month">
+                                                <option value="">월</option>
+                                                <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option><option value="04">4월</option><option value="05">5월</option><option value="06">6월</option><option value="07">7월</option><option value="08">8월</option><option value="09">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                                            </select>
+                                            <select class="bf-select" id="sibling-1-day">
+                                                <option value="">일</option>
+                                                <option value="01">1일</option><option value="02">2일</option><option value="03">3일</option><option value="04">4일</option><option value="05">5일</option><option value="06">6일</option><option value="07">7일</option><option value="08">8일</option><option value="09">9일</option><option value="10">10일</option><option value="11">11일</option><option value="12">12일</option><option value="13">13일</option><option value="14">14일</option><option value="15">15일</option><option value="16">16일</option><option value="17">17일</option><option value="18">18일</option><option value="19">19일</option><option value="20">20일</option><option value="21">21일</option><option value="22">22일</option><option value="23">23일</option><option value="24">24일</option><option value="25">25일</option><option value="26">26일</option><option value="27">27일</option><option value="28">28일</option><option value="29">29일</option><option value="30">30일</option><option value="31">31일</option>
+                                            </select>
+                                            <div class="cal-pill-group">
+                                                <label class="cal-pill"><input type="radio" name="sibling_1_cal" value="solar" checked><span class="cal-label">양력</span></label>
+                                                <label class="cal-pill"><input type="radio" name="sibling_1_cal" value="lunar"><span class="cal-label">음력</span></label>
+                                            </div>
+                                            </div><!-- /bf-row--date -->
+                                            <div class="bf-row bf-row--time">
+                                            <div class="bf-ampm-chip">
+                                                <label class="ampm-pill"><input type="radio" name="sibling_1_ampm" value="am" checked><span>오전</span></label>
+                                                <label class="ampm-pill"><input type="radio" name="sibling_1_ampm" value="pm"><span>오후</span></label>
+                                            </div>
+                                            <select class="bf-select" id="sibling-1-time-hour" style="min-width:70px;">
+                                                <option value="">시</option>
+                                                <option value="1">1시</option><option value="2">2시</option><option value="3">3시</option><option value="4">4시</option><option value="5">5시</option><option value="6">6시</option><option value="7">7시</option><option value="8">8시</option><option value="9">9시</option><option value="10">10시</option><option value="11">11시</option><option value="12">12시</option>
+                                            </select>
+                                            <select class="bf-select" id="sibling-1-time-min" style="min-width:74px;">
+                                                <option value="">분</option>
+                                                <option value="00">0분</option><option value="05">5분</option><option value="10">10분</option><option value="15">15분</option><option value="20">20분</option><option value="25">25분</option><option value="30">30분</option><option value="35">35분</option><option value="40">40분</option><option value="45">45분</option><option value="50">50분</option><option value="55">55분</option>
+                                            </select>
+                                            </div><!-- /bf-row--time -->
+                                        </div>
+                                    </div>
+                                    <!-- 형제자매 2 -->
+                                    <div>
+                                        <div style="display:flex;gap:10px;margin-bottom:8px;">
+                                            <select id="sibling-2-relation" style="max-width:110px;margin-bottom:0;">
+                                                <option value="">관계</option>
+                                                <option value="형">형</option>
+                                                <option value="누나">누나</option>
+                                                <option value="오빠">오빠</option>
+                                                <option value="언니">언니</option>
+                                                <option value="남동생">남동생</option>
+                                                <option value="여동생">여동생</option>
+                                            </select>
+                                            <input type="text" id="sibling-2-kr" placeholder="한글 이름" style="flex:1;margin-bottom:0;">
+                                            <input type="text" id="sibling-2-hanja" placeholder="한자" style="flex:1;margin-bottom:0;">
+                                        </div>
+                                        <div class="birth-form-area">
+                                            <div class="bf-row bf-row--date">
+                                            <select class="bf-select" id="sibling-2-year" style="min-width:100px;"><option value="">연도</option></select>
+                                            <select class="bf-select" id="sibling-2-month">
+                                                <option value="">월</option>
+                                                <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option><option value="04">4월</option><option value="05">5월</option><option value="06">6월</option><option value="07">7월</option><option value="08">8월</option><option value="09">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                                            </select>
+                                            <select class="bf-select" id="sibling-2-day">
+                                                <option value="">일</option>
+                                                <option value="01">1일</option><option value="02">2일</option><option value="03">3일</option><option value="04">4일</option><option value="05">5일</option><option value="06">6일</option><option value="07">7일</option><option value="08">8일</option><option value="09">9일</option><option value="10">10일</option><option value="11">11일</option><option value="12">12일</option><option value="13">13일</option><option value="14">14일</option><option value="15">15일</option><option value="16">16일</option><option value="17">17일</option><option value="18">18일</option><option value="19">19일</option><option value="20">20일</option><option value="21">21일</option><option value="22">22일</option><option value="23">23일</option><option value="24">24일</option><option value="25">25일</option><option value="26">26일</option><option value="27">27일</option><option value="28">28일</option><option value="29">29일</option><option value="30">30일</option><option value="31">31일</option>
+                                            </select>
+                                            <div class="cal-pill-group">
+                                                <label class="cal-pill"><input type="radio" name="sibling_2_cal" value="solar" checked><span class="cal-label">양력</span></label>
+                                                <label class="cal-pill"><input type="radio" name="sibling_2_cal" value="lunar"><span class="cal-label">음력</span></label>
+                                            </div>
+                                            </div><!-- /bf-row--date -->
+                                            <div class="bf-row bf-row--time">
+                                            <div class="bf-ampm-chip">
+                                                <label class="ampm-pill"><input type="radio" name="sibling_2_ampm" value="am" checked><span>오전</span></label>
+                                                <label class="ampm-pill"><input type="radio" name="sibling_2_ampm" value="pm"><span>오후</span></label>
+                                            </div>
+                                            <select class="bf-select" id="sibling-2-time-hour" style="min-width:70px;">
+                                                <option value="">시</option>
+                                                <option value="1">1시</option><option value="2">2시</option><option value="3">3시</option><option value="4">4시</option><option value="5">5시</option><option value="6">6시</option><option value="7">7시</option><option value="8">8시</option><option value="9">9시</option><option value="10">10시</option><option value="11">11시</option><option value="12">12시</option>
+                                            </select>
+                                            <select class="bf-select" id="sibling-2-time-min" style="min-width:74px;">
+                                                <option value="">분</option>
+                                                <option value="00">0분</option><option value="05">5분</option><option value="10">10분</option><option value="15">15분</option><option value="20">20분</option><option value="25">25분</option><option value="30">30분</option><option value="35">35분</option><option value="40">40분</option><option value="45">45분</option><option value="50">50분</option><option value="55">55분</option>
+                                            </select>
+                                            </div><!-- /bf-row--time -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <p style="font-size:0.78rem;color:var(--text-secondary);margin:10px 0 0;">이미 있는 형제자매가 있다면 사주와 이름을 알려주세요. 이름의 조화를 함께 고려해드립니다.</p>
+                            </div>
+                            <div class="full-width-form">
+                                <label class="input-label">형제자매와 이름 글자를 공유하고 싶으신가요?<span class="badge-opt">선택</span></label>
+                                <div class="cal-pill-group" style="flex-wrap:wrap;gap:8px;">
+                                    <label class="cal-pill"><input type="radio" name="sibling_share_pref" value="share" onchange="toggleSiblingShareDetail()"><span class="cal-label">네, 같은 글자를 쓰고 싶어요</span></label>
+                                    <label class="cal-pill"><input type="radio" name="sibling_share_pref" value="any" checked onchange="toggleSiblingShareDetail()"><span class="cal-label">상관없어요 (자동으로 판단)</span></label>
+                                    <label class="cal-pill"><input type="radio" name="sibling_share_pref" value="different" onchange="toggleSiblingShareDetail()"><span class="cal-label">아니요, 완전히 다른 이름이 좋아요</span></label>
+                                </div>
+                                <div id="sibling-share-detail" style="display:none;margin-top:12px;">
+                                    <label class="input-label" style="font-size:0.85rem;">공유하고 싶은 글자<span class="badge-opt">선택</span></label>
+                                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                                        <input type="text" id="sibling-share-kr" placeholder="한글 (예: 준)" style="flex:1;min-width:100px;margin-bottom:0;" onkeyup="updateHanjaSelect('sibling-share-kr','sibling-share-hanja')">
+                                        <select id="sibling-share-hanja" style="flex:1.5;min-width:120px;margin-bottom:0;"><option value="">한자 선택</option></select>
+                                        <div class="cal-pill-group" style="flex-shrink:0;">
+                                            <label class="cal-pill"><input type="radio" name="sibling_share_pos" value="2" checked><span class="cal-label">2번째 (가운데)</span></label>
+                                            <label class="cal-pill"><input type="radio" name="sibling_share_pos" value="3"><span class="cal-label">3번째 (끝)</span></label>
+                                        </div>
+                                    </div>
+                                    <p style="font-size:0.78rem;color:var(--text-secondary);margin:6px 0 0;">위 형제자매 이름에 이미 있는 글자를 적어주시면, 그 글자를 포함한 이름으로 찾아드립니다.</p>
+                                </div>
+                            </div>
+                            <div class="full-width-form">
                                 <label class="input-label">기타 특별 요청사항<span class="badge-opt">선택</span></label>
                                 <textarea rows="4" id="prem-request" style="resize:vertical;" placeholder="특별히 원하시는 사항이 있으면 자유롭게 적어주세요."></textarea>
                             </div>
@@ -5668,6 +5788,13 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         selectEl.innerHTML = optionsHTML;
     }
 
+    // 형제자매와 이름 글자를 공유하고 싶다고 답한 경우에만 "공유할 글자" 입력란을 보여준다
+    function toggleSiblingShareDetail() {
+        const pref = document.querySelector('[name="sibling_share_pref"]:checked')?.value || 'any';
+        const detail = document.getElementById('sibling-share-detail');
+        if (detail) detail.style.display = (pref === 'share') ? 'block' : 'none';
+    }
+
     // 성씨별 표준 한자 우선순위 (1순위 한자가 맨 앞)
     const SURNAME_PRIORITY = {
         '김':['金'],'이':['李'],'박':['朴'],'최':['崔'],'정':['鄭','丁','程'],
@@ -6731,9 +6858,16 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         const luckFocus = document.querySelector('[name="luck_focus"]:checked')?.value || 'balanced';
 
         // ── 친인척 이름 → 한글 음절 Set 추출 ────────────
+        // 형제자매와 "완전히 다른 이름"을 원하면, 형제자매 이름의 음절도 자동으로 제외 대상에 포함한다
+        const siblingSharePref = document.querySelector('[name="sibling_share_pref"]:checked')?.value || 'any';
+        const _sibling1KrEarly = document.getElementById('sibling-1-kr')?.value || '';
+        const _sibling2KrEarly = document.getElementById('sibling-2-kr')?.value || '';
         const avoidRaw = document.getElementById('prem-avoid')?.value || '';
+        const avoidRawCombined = (siblingSharePref === 'different')
+            ? `${avoidRaw} ${_sibling1KrEarly} ${_sibling2KrEarly}`
+            : avoidRaw;
         const avoidKrSyllables = [...new Set(
-            avoidRaw.replace(/[,\s·\/]+/g, ' ').trim().split(/\s+/)
+            avoidRawCombined.replace(/[,\s·\/]+/g, ' ').trim().split(/\s+/)
                 .flatMap(name => [...name])                // 각 글자로 분리
                 .filter(ch => ch >= '가' && ch <= '힣') // 한글 완성형만
         )];
@@ -6774,6 +6908,51 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             mother: _calcParentOheng('mother')
         };
 
+        // ── 형제자매 사주 계산 + 정보 수집 (부모와 동일한 방식) ─────────
+        const _calcSiblingOheng = (idx) => {
+            const y = document.getElementById(`sibling-${idx}-year`)?.value;
+            const m = document.getElementById(`sibling-${idx}-month`)?.value;
+            const d = document.getElementById(`sibling-${idx}-day`)?.value;
+            if (!y || !m || !d) return null;
+            const ampm   = document.querySelector(`[name="sibling_${idx}_ampm"]:checked`)?.value || 'am';
+            const hRaw   = parseInt(document.getElementById(`sibling-${idx}-time-hour`)?.value || '0');
+            const minRaw = document.getElementById(`sibling-${idx}-time-min`)?.value || '00';
+            let h24 = hRaw;
+            if (ampm === 'am' && hRaw === 12) h24 = 0;
+            else if (ampm === 'pm' && hRaw !== 12) h24 = hRaw + 12;
+            const isLunar = document.querySelector(`[name="sibling_${idx}_cal"]:checked`)?.value === 'lunar';
+            let dateStr = `${y}-${m}-${d}`;
+            if (isLunar && typeof lunarToSolar === 'function') {
+                try {
+                    const sol = lunarToSolar(parseInt(y), parseInt(m), parseInt(d));
+                    if (sol) dateStr = `${sol.year}-${String(sol.month).padStart(2,'0')}-${String(sol.day).padStart(2,'0')}`;
+                } catch(e) {}
+            }
+            const timeStr = hRaw ? `${String(h24).padStart(2,'0')}:${String(minRaw).padStart(2,'0')}` : '12:00';
+            try {
+                const sSaju   = (typeof calcSaju === 'function') ? calcSaju(dateStr, timeStr, {}) : null;
+                const sScores = (sSaju && typeof calcOhengScores === 'function') ? calcOhengScores(sSaju) : null;
+                if (!sScores) return null;
+                const sorted = Object.entries(sScores).sort((a,b) => b[1]-a[1]);
+                return { scores: sScores, dominant: sorted[0]?.[0], weakest: sorted[4]?.[0], dateStr, isLunar };
+            } catch(e) { return null; }
+        };
+        const siblings = [1, 2].map((idx) => {
+            const relation = document.getElementById(`sibling-${idx}-relation`)?.value || '';
+            const kr       = document.getElementById(`sibling-${idx}-kr`)?.value?.trim() || '';
+            const hanja    = document.getElementById(`sibling-${idx}-hanja`)?.value?.trim() || '';
+            const oheng    = _calcSiblingOheng(idx);
+            if (!relation && !kr && !hanja && !oheng) return null;
+            return { relation, kr, hanja, oheng };
+        }).filter(Boolean);
+
+        // 형제자매와 이름 글자를 공유하고 싶은데 돌림자를 따로 지정하지 않았다면,
+        // "공유하고 싶은 글자"를 돌림자로 그대로 사용한다
+        const siblingShareKr    = document.getElementById('sibling-share-kr')?.value?.trim() || '';
+        const siblingShareHanja = document.getElementById('sibling-share-hanja')?.value || '';
+        const siblingSharePos   = parseInt(document.querySelector('[name="sibling_share_pos"]:checked')?.value || '2');
+        const useSiblingShareAsDolrim = (siblingSharePref === 'share' && !dolrimHanja && !!siblingShareHanja);
+
         // ── 특별 요청사항 ─────────────────────────────────
         const specialRequest = document.getElementById('prem-request')?.value?.trim() || '';
 
@@ -6797,7 +6976,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             },
             constraints: {
                 gender,
-                dolrim:   dolrimHanja ? { kr: document.getElementById('prem-dolrim')?.value||'', hanja:dolrimHanja, strokes:getHanjaStrokes(dolrimHanja), pos:dolrimPos } : null,
+                dolrim:   dolrimHanja ? { kr: document.getElementById('prem-dolrim')?.value||'', hanja:dolrimHanja, strokes:getHanjaStrokes(dolrimHanja), pos:dolrimPos }
+                          : (useSiblingShareAsDolrim ? { kr: siblingShareKr, hanja: siblingShareHanja, strokes: getHanjaStrokes(siblingShareHanja), pos: siblingSharePos } : null),
                 hangryul: hangryulHanja ? { kr: document.getElementById('prem-hangryul')?.value||'', hanja:hangryulHanja, strokes:getHanjaStrokes(hangryulHanja), pos:hangryulPos } : null,
                 traits,
                 nameType:  parseInt(document.querySelector('[name="self_name_type"]:checked')?.value || '2'),
@@ -6810,6 +6990,8 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             daeun,
             gender,
             parentOheng,
+            siblings,
+            siblingSharePref,
             specialRequest
         };
     }
@@ -11438,6 +11620,18 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
             const sel = document.getElementById(id);
             if (!sel) return;
             for (let y = 2005; y >= 1940; y--) {
+                const opt = document.createElement('option');
+                opt.value = String(y);
+                opt.textContent = y + '년';
+                sel.appendChild(opt);
+            }
+        });
+        // 형제자매 연도 선택기 동적 생성 (올해 ~ 30년 전 — 갓난아기부터 성인 형제자매까지)
+        const _thisYear = new Date().getFullYear();
+        ['sibling-1-year','sibling-2-year'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            for (let y = _thisYear; y >= _thisYear - 30; y--) {
                 const opt = document.createElement('option');
                 opt.value = String(y);
                 opt.textContent = y + '년';
