@@ -181,34 +181,44 @@ def get_member_by_uid(uid):
 
 
 def get_consent_status(uid):
-    """이용약관·개인정보처리방침 필수 동의, 마케팅 선택 동의, 이용제한(정지) 상태를 조회한다.
-    프론트가 로그인 직후 및 로그인이 필요한 기능을 쓸 때마다 이 응답 하나로 세 가지를 확인한다."""
+    """이용약관·개인정보 수집·이용·만 14세 이상 확인(필수), 마케팅 선택 동의, 이용제한(정지)
+    상태를 조회한다. 프론트가 로그인 직후 및 로그인이 필요한 기능을 쓸 때마다 이 응답
+    하나로 확인한다."""
     member = get_member_by_uid(uid)
     if not member:
-        return {'termsAgreed': False, 'marketingAgreed': False, 'suspended': False, 'suspendedReason': None}
+        return {'termsAgreed': False, 'marketingAgreed': False, 'ageVerified': False, 'suspended': False, 'suspendedReason': None}
     return {
         'termsAgreed': bool(member.get('terms_agreed_at')),
         'marketingAgreed': bool(member.get('marketing_agreed')),
+        'ageVerified': bool(member.get('age_verified_at')),
         'suspended': bool(member.get('suspended_at')),
         'suspendedReason': member.get('suspended_reason'),
     }
 
 
-def save_consent(uid, marketing_agreed, name='', contact='', login_provider='guest'):
-    """서비스 이용 전 필수 동의(이용약관·개인정보처리방침)를 기록한다.
-    회원이 없으면 새로 만든다(게스트가 로그인 직후 첫 동의를 하는 경우)."""
+def save_consent(uid, marketing_agreed, name='', contact='', login_provider='guest',
+                  age_verified=False, terms_version=''):
+    """서비스 이용 전 필수 동의(이용약관·개인정보 수집·이용·만 14세 이상 확인)를 기록한다.
+    회원이 없으면 새로 만든다(게스트가 로그인 직후 첫 동의를 하는 경우).
+    age_verified는 화면상 체크박스 3개(이용약관·개인정보·연령확인)가 모두 체크되어야만
+    호출되므로, 여기서는 그 사실을 그대로 타임스탬프로 남긴다."""
     if not uid:
         return None
     upsert_member(uid, name=name, contact=contact, login_provider=login_provider)
     now = datetime.now(timezone.utc).isoformat()
+    body = {
+        'terms_agreed_at': now,
+        'privacy_agreed_at': now,
+        'marketing_agreed': bool(marketing_agreed),
+        'marketing_agreed_at': now if marketing_agreed else None,
+    }
+    if age_verified:
+        body['age_verified_at'] = now
+    if terms_version:
+        body['terms_version'] = terms_version
     rows = _request(
         'PATCH', 'members',
-        body={
-            'terms_agreed_at': now,
-            'privacy_agreed_at': now,
-            'marketing_agreed': bool(marketing_agreed),
-            'marketing_agreed_at': now if marketing_agreed else None,
-        },
+        body=body,
         params={'external_uid': f'eq.{uid}'},
     )
     return _first(rows)

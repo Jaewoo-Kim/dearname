@@ -107,6 +107,13 @@ from reports
 group by 1, 2
 order by 1 desc;
 
+-- ── 9. 만 14세 이상 확인 + 동의 시점 약관 버전 ──────────────────────
+-- 개인정보 보호법 제22조의2(만 14세 미만은 법정대리인 동의 필요) — 이용자 본인 확인이며
+-- 작명 대상인 아동의 나이와는 무관하다. terms_version은 동의 시점의 약관 시행일을 남겨,
+-- 약관 개정 시 재동의가 필요한 회원을 가려내는 데 쓴다.
+alter table members add column if not exists age_verified_at timestamptz;
+alter table members add column if not exists terms_version text;
+
 -- ── 확인용 (실행 후 아래 쿼리로 컬럼이 생겼는지 볼 수 있습니다) ────
 -- select column_name, data_type, column_default
 --   from information_schema.columns

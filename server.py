@@ -801,20 +801,20 @@ def account_delete():
 
 @app.route('/proxy/consent/status')
 def consent_status():
-    """서비스 이용 전 필수 동의(이용약관·개인정보처리방침) 여부를 프론트가 확인한다.
+    """서비스 이용 전 필수 동의(이용약관·개인정보·만 14세 이상 확인) 여부를 프론트가 확인한다.
     DB 미설정 시에도 서비스가 막히지 않도록 termsAgreed:true로 응답한다(개발/데모 모드)."""
     uid = request.args.get('uid', '')
     if not db.ENABLED:
-        return _no_cache(jsonify({'termsAgreed': True, 'marketingAgreed': False, 'suspended': False, 'suspendedReason': None}))
+        return _no_cache(jsonify({'termsAgreed': True, 'marketingAgreed': False, 'ageVerified': True, 'suspended': False, 'suspendedReason': None}))
     if not uid:
-        return _no_cache(jsonify({'termsAgreed': False, 'marketingAgreed': False, 'suspended': False, 'suspendedReason': None}))
+        return _no_cache(jsonify({'termsAgreed': False, 'marketingAgreed': False, 'ageVerified': False, 'suspended': False, 'suspendedReason': None}))
     return _no_cache(jsonify(db.get_consent_status(uid)))
 
 
 @app.route('/proxy/consent', methods=['POST'])
 def consent_save():
-    """서비스 이용 전 필수 동의(이용약관·개인정보처리방침)를 기록하고, 함께 제출된
-    마케팅 선택 동의도 저장한다."""
+    """서비스 이용 전 필수 동의(이용약관·개인정보 수집·이용·만 14세 이상 확인)를 기록하고,
+    함께 제출된 마케팅 선택 동의도 저장한다."""
     try:
         body = request.get_json(force=True)
         uid = (body.get('uid') or '').strip()
@@ -826,6 +826,8 @@ def consent_save():
             name=body.get('name', ''),
             contact=body.get('email', ''),
             login_provider=body.get('provider', 'guest'),
+            age_verified=bool(body.get('ageVerified')),
+            terms_version=body.get('termsVersion', ''),
         )
         return jsonify({'status': 'ok'})
     except Exception as e:

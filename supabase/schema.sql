@@ -30,6 +30,12 @@ alter table members add column if not exists terms_agreed_at timestamptz;
 alter table members add column if not exists privacy_agreed_at timestamptz;
 alter table members add column if not exists marketing_agreed boolean not null default false;
 alter table members add column if not exists marketing_agreed_at timestamptz;
+-- 만 14세 이상 확인(개인정보 보호법 제22조의2 — 만 14세 미만은 법정대리인 동의 필요).
+-- 이용자 본인 확인이며, 작명 대상인 아동의 나이와는 무관하다.
+alter table members add column if not exists age_verified_at timestamptz;
+-- 동의 시점의 이용약관 시행일(terms.html 상단 "시행일" 표기와 동일한 값).
+-- 약관 개정 시 이 값을 비교해 재동의가 필요한 회원을 가려낼 수 있다.
+alter table members add column if not exists terms_version text;
 -- 이용제한(정지). 탈퇴와 달리 개인정보는 지우지 않고 상태만 바꿔, 해제하면 그대로 다시 쓸 수 있다.
 alter table members add column if not exists suspended_at timestamptz;
 alter table members add column if not exists suspended_reason text;

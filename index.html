@@ -5059,18 +5059,43 @@
         <button class="close-modal" onclick="closeConsentModal()" aria-label="닫기">&times;</button>
         <div style="font-size:1.4rem;font-weight:900;color:var(--bg-dark);margin-bottom:8px;">서비스 이용을 위한 동의</div>
         <p style="color:var(--text-secondary);font-size:0.9rem;margin:0 0 20px;line-height:1.6;">
-            디어네임을 이용하시려면 아래 필수 항목에 동의해 주세요.
+            디어네임을 이용하시려면 아래 항목에 동의해 주세요.
         </p>
-        <label class="consent-row">
-            <input type="checkbox" id="consent-required" onchange="_dnUpdateConsentBtn()">
-            <span>[필수] <a href="/terms.html" target="_blank">이용약관</a> 및 <a href="/privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.</span>
+        <label class="consent-row" style="padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--border-light);">
+            <input type="checkbox" id="consent-all" onchange="_dnToggleAllConsent(this.checked)">
+            <span style="font-weight:800;color:var(--bg-dark);">전체 동의하기</span>
         </label>
         <label class="consent-row">
-            <input type="checkbox" id="consent-marketing">
+            <input type="checkbox" id="consent-terms" onchange="_dnUpdateConsentBtn()">
+            <span>[필수] <a href="/terms.html" target="_blank">이용약관</a>에 동의합니다.</span>
+        </label>
+        <label class="consent-row">
+            <input type="checkbox" id="consent-privacy" onchange="_dnUpdateConsentBtn()">
+            <span>[필수] <a href="/privacy.html" target="_blank">개인정보 수집·이용</a>에 동의합니다.</span>
+        </label>
+        <label class="consent-row">
+            <input type="checkbox" id="consent-age" onchange="_dnUpdateConsentBtn()">
+            <span>[필수] 본인은 <b>만 14세 이상</b>입니다. <a href="javascript:void(0)" onclick="event.preventDefault();openMinorNotice();">만 14세 미만이신가요?</a></span>
+        </label>
+        <label class="consent-row">
+            <input type="checkbox" id="consent-marketing" onchange="_dnUpdateConsentBtn()">
             <span>[선택] 마케팅 정보(이벤트·혜택 안내) 수신에 동의합니다. 동의하지 않으셔도 서비스 이용에는
             제한이 없으며, 마이페이지에서 언제든지 변경할 수 있습니다.</span>
         </label>
         <button id="consent-confirm-btn" class="btn btn-gold" style="width:100%;margin-top:6px;" disabled onclick="confirmConsent()">동의하고 계속하기</button>
+    </div>
+</div>
+
+<!-- ── 만 14세 미만 안내 팝업 ── -->
+<div id="minor-notice-modal" class="modal-overlay" style="z-index:calc(var(--z-modal) + 1);">
+    <div class="modal-content" style="max-width:380px;padding:36px 32px;text-align:left;">
+        <button class="close-modal" onclick="closeMinorNotice()" aria-label="닫기">&times;</button>
+        <div style="font-size:1.15rem;font-weight:900;color:var(--bg-dark);margin-bottom:10px;">만 14세 미만은 직접 가입하실 수 없습니다</div>
+        <p style="color:var(--text-secondary);font-size:0.88rem;line-height:1.7;margin:0 0 18px;">
+            보호자(법정대리인) 명의의 계정으로 이용해 주세요. 아이의 이름을 짓기 위한 서비스이므로,
+            보호자께서 가입하신 뒤 아이 정보를 입력하시면 됩니다.
+        </p>
+        <button class="btn btn-navy" style="width:100%;" onclick="closeMinorNotice()">확인</button>
     </div>
 </div>
 
@@ -10989,9 +11014,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
     }
 
     function openConsentModal() {
-        const req = document.getElementById('consent-required');
+        const terms = document.getElementById('consent-terms');
+        const privacy = document.getElementById('consent-privacy');
+        const age = document.getElementById('consent-age');
+        const all = document.getElementById('consent-all');
         const mkt = document.getElementById('consent-marketing');
-        if (req) req.checked = false;
+        if (terms) terms.checked = false;
+        if (privacy) privacy.checked = false;
+        if (age) age.checked = false;
+        if (all) all.checked = false;
         if (mkt) mkt.checked = !!_dnUser?.marketingAgreed;
         _dnUpdateConsentBtn();
         document.getElementById('consent-modal').style.display = 'flex';
@@ -11000,10 +11031,31 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         document.getElementById('consent-modal').style.display = 'none';
         _pendingAction = null; // 필수 동의를 거부하면 이어서 하려던 동작도 취소
     }
+    // 필수 3개(이용약관·개인정보·연령확인)를 모두 체크해야 버튼이 활성화된다.
+    // "전체 동의하기"는 4개를 한 번에 켜고 끄는 보조 토글이며, 그 자체가 마케팅 선택 동의까지
+    // 강제하지는 않는다 — 개별 체크 상태에 맞춰 동기화될 뿐이다.
     function _dnUpdateConsentBtn() {
-        const req = document.getElementById('consent-required');
+        const terms = document.getElementById('consent-terms')?.checked;
+        const privacy = document.getElementById('consent-privacy')?.checked;
+        const age = document.getElementById('consent-age')?.checked;
+        const mkt = document.getElementById('consent-marketing')?.checked;
+        const all = document.getElementById('consent-all');
+        if (all) all.checked = !!(terms && privacy && age && mkt);
         const btn = document.getElementById('consent-confirm-btn');
-        if (btn) btn.disabled = !(req && req.checked);
+        if (btn) btn.disabled = !(terms && privacy && age);
+    }
+    function _dnToggleAllConsent(checked) {
+        ['consent-terms', 'consent-privacy', 'consent-age', 'consent-marketing'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.checked = checked;
+        });
+        _dnUpdateConsentBtn();
+    }
+    function openMinorNotice() {
+        document.getElementById('minor-notice-modal').style.display = 'flex';
+    }
+    function closeMinorNotice() {
+        document.getElementById('minor-notice-modal').style.display = 'none';
     }
 
     function _dnShowSuspendedNotice(reason) {
@@ -11019,9 +11071,15 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
         document.getElementById('suspended-modal').style.display = 'none';
     }
 
+    // 이용약관·개인정보처리방침의 현재 시행일. 두 문서 상단 "시행일" 표기와 맞춰 두고,
+    // 약관을 개정할 때 이 값도 함께 갱신한다 — 회원이 어느 버전에 동의했는지 추적하기 위함.
+    const TERMS_VERSION = '2026-08-07';
+
     async function confirmConsent() {
-        const req = document.getElementById('consent-required');
-        if (!req?.checked || !_dnUser) return;
+        const terms = document.getElementById('consent-terms')?.checked;
+        const privacy = document.getElementById('consent-privacy')?.checked;
+        const age = document.getElementById('consent-age')?.checked;
+        if (!terms || !privacy || !age || !_dnUser) return;
         const marketing = !!document.getElementById('consent-marketing')?.checked;
         try {
             await fetch('/proxy/consent', {
@@ -11030,6 +11088,7 @@ function cancelPayment() { document.getElementById('payment-modal').style.displa
                 body: JSON.stringify({
                     uid: _dnUser.uid, name: _dnUser.name || '', email: _dnUser.email || '',
                     provider: _dnUser.provider, marketingAgreed: marketing,
+                    ageVerified: true, termsVersion: TERMS_VERSION,
                 })
             });
         } catch (e) {
