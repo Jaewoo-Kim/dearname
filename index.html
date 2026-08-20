@@ -572,7 +572,7 @@
         .bf-chip input::placeholder { color:#c8c8c8; font-weight:500; }
         .bf-unit { font-size:0.88rem; color:var(--text-secondary); flex-shrink:0; }
         /* 월·일 선택 (select 칩) */
-        .bf-select { appearance:none; -webkit-appearance:none; background-color:var(--bg-light); border:1.5px solid var(--border-light); border-radius: var(--radius-sm); padding:10px 30px 10px 14px; font-size:1rem; font-weight:700; color:var(--bg-dark); font-family:'Pretendard',sans-serif; cursor:pointer; flex:1; min-width:60px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 11px center; transition:border-color 0.2s,box-shadow 0.2s; }
+        .bf-select { appearance:none; -webkit-appearance:none; background-color:var(--bg-light); border:1.5px solid var(--border-light); border-radius: var(--radius-sm); padding:10px 30px 10px 14px; font-size:1rem; font-weight:700; color:var(--bg-dark); font-family:'Pretendard',sans-serif; cursor:pointer; flex:1; min-width:60px; max-width:118px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 11px center; transition:border-color 0.2s,box-shadow 0.2s; }
         .bf-select:focus { outline:none; border-color:var(--gold-premium); box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
         .bf-select option[value=""] { color:#c8c8c8; }
         /* 오전/오후 토글 칩 */
@@ -655,7 +655,7 @@
         .cal-pill-group { display:flex; gap:6px; }
         .cal-pill { position:relative; cursor:pointer; }
         .cal-pill input { position:absolute; opacity:0; cursor:pointer; height:0; width:0; }
-        .cal-pill .cal-label { display:inline-flex; align-items:center; padding:6px 14px; background:var(--bg-subtle); border:1px solid var(--border-light); border-radius: var(--radius-lg); color:var(--text-secondary); font-size:0.82rem; font-weight:700; transition:all 0.2s; user-select:none; }
+        .cal-pill .cal-label { display:inline-flex; align-items:center; padding:11px 16px; background:var(--bg-subtle); border:1px solid var(--border-light); border-radius: var(--radius-lg); color:var(--text-secondary); font-size:0.85rem; font-weight:700; transition:all 0.2s; user-select:none; }
         .cal-pill:hover .cal-label { background:var(--border-light); }
         .cal-pill input:checked ~ .cal-label { background:#fff8e6; border-color:var(--gold-dark); color:var(--gold-dark); }
 
@@ -3230,8 +3230,8 @@
                     <div class="psp-chip">📅 소견서 <strong>6개월</strong> 열람 가능</div>
                 </div>
                 <p style="color:rgba(255,255,255,0.55);font-size:0.88rem;margin:18px auto 0;max-width:640px;line-height:1.7;">
-                    결제하시면 <strong style="color:rgba(255,255,255,0.75);">약 20~40초 안</strong>에 소견서가 만들어집니다.
-                    만들어진 소견서는 결제일부터 <strong style="color:rgba(255,255,255,0.75);">6개월간</strong> 마이페이지에서 다시 보실 수 있습니다.
+                    결제하시면 <strong style="color:rgba(255,255,255,0.75);">약 20~40초 안</strong>에 소견서가 만들어집니다.<br>
+                    완성된 소견서는 입력하신 이메일로도 보내드리고, 결제일부터 <strong style="color:rgba(255,255,255,0.75);">6개월간</strong> 마이페이지에서 다시 보실 수 있습니다.
                 </p>
             </div>
 
