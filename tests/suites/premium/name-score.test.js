@@ -33,9 +33,10 @@ suite('[LOGIC] NameScore.scoreCombo — baseline 정확 산출 (두 글자)');
   // [C] 火→金 상극(-10) + 金→土 상생(+10) = 0
   // [D] strokes[9,8,9] → 양·음·양 혼재 +10
   // [E] 남(ㅏ양)·서(ㅓ음)·연(ㅕ음) 혼재 +5
-  // 합계 = 80+65+0+10+5 = 160
+  // [L] 수리오행 g=[17,17,18,26] → 金·金·金·土 인접 전부 상생 → +15
+  // 합계 = 80+65+0+10+5+15 = 175
   const score = NameScore.scoreCombo(combo, nameSpec, family, state, _deps('길'));
-  assertEq(score, 160, '두 글자 baseline = 160 (A80+B65+C0+D10+E5)');
+  assertEq(score, 175, '두 글자 baseline = 175 (A80+B65+C0+D10+E5+L15)');
 }
 
 suite('[LOGIC] NameScore.scoreCombo — [A] 자원오행 prefer delta');
@@ -170,8 +171,9 @@ suite('[LOGIC] NameScore.scoreCombo — 외자(1글자) 경로');
   // [B] 외자 격: g1=s1+1=9, g2=s0+s1=19, g3=s0+1=12, g4=s0+s1=19 → 전부 '길' = 65
   // [C] 강(木)→나(火) 상생 +10
   // [D] strokes[11,8] 양·음 혼재 +10
-  // [E] 강(ㅏ양)·나(ㅏ양) 동일 → 0
-  // 합계 = 80+65+10+10+0 = 165
+  // [E] 강(ㅏ양)·나(ㅏ양) 모두 양 → 음양 쏠림 -30
+  // [L] 수리오행 g=[9,19,12,19] → 水·水·木·水 인접 전부 상생 → +15
+  // 합계 = 80+65+10+10-30+15 = 150
   const score = NameScore.scoreCombo(combo, spec, family, state, _deps('길'));
-  assertEq(score, 165, '외자 baseline = 165 (A80+B65+C10+D10+E0)');
+  assertEq(score, 150, '외자 baseline = 150 (A80+B65+C10+D10+E-30+L15)');
 }
